@@ -1,0 +1,28 @@
+.DS_Store
+node_modules
+/build
+/.svelte-kit
+/package
+.env
+.env.*
+!.env.example
+vite.config.js.timestamp-*
+vite.config.ts.timestamp-*
+.vercel
+.output
+.vscode
+
+# Output
+.output
+.vercel
+.netlify
+.wrangler
+
+# OS
+Thumbs.db
+
+# Env
+.env
+.env.*
+!.env.example
+!.env.test
