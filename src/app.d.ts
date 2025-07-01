@@ -10,4 +10,9 @@ declare global {
 	}
 }
 
+declare module 'animejs' {
+	const anime: any;
+	export default anime;
+}
+
 export {};

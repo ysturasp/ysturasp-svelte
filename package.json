@@ -1,5 +1,5 @@
 {
-	"name": "ystuRASP",
+	"name": "ysturasp-svelte",
 	"private": true,
 	"version": "0.0.1",
 	"type": "module",
@@ -26,6 +26,7 @@
 	},
 	"dependencies": {
 		"@types/animejs": "^3.1.13",
-		"animejs": "^4.0.2"
+		"animejs": "^3.2.2",
+		"svelte-inview": "^4.0.1"
 	}
 }

@@ -1,6 +1,11 @@
 <script>
   import Header from '$lib/components/Header.svelte';
-  import PageLayout from '$lib/components/PageLayout.svelte';
+  import HeroSection from '$lib/components/HeroSection.svelte';
+  import SupportSection from '$lib/components/SupportSection.svelte';
+  import Footer from '$lib/components/Footer.svelte';
+  import CookieNotification from '$lib/components/CookieNotification.svelte';
+  import StatsSection from '$lib/components/StatsSection.svelte';
+  import FeaturesSection from '$lib/components/FeatureSection.svelte';
 </script>
 
 <svelte:head>
@@ -9,9 +14,16 @@
   <link rel="icon" href="images/cat.png" type="image/png">
 </svelte:head>
 
-<PageLayout>
-  <Header />
-  <main class="container mx-auto mt-5 md:mt-7 px-3 md:px-0">
-    <h1>Главная</h1>
-  </main>
-</PageLayout>
+<div class="fixed inset-0 bg-gradient-to-br from-blue-900/20 to-purple-900/20 pointer-events-none"></div>
+
+<Header />
+
+<main class="container mx-auto px-4 mt-8 relative">
+  <HeroSection />
+  <SupportSection />
+  <StatsSection />
+  <FeaturesSection />
+</main>
+
+<Footer />
+<CookieNotification />

@@ -1,12 +1,27 @@
 <script>
-  let mobileMenuOpen = $state(false);
+  let isMobileMenuOpen = false;
+  let isClosing = false;
 
   function toggleMobileMenu() {
-    mobileMenuOpen = !mobileMenuOpen;
+    if (!isMobileMenuOpen && !isClosing) {
+      isMobileMenuOpen = true;
+      isClosing = false;
+    } else if (!isClosing) {
+      isClosing = true;
+    }
+  }
+
+  function handleAnimationEnd() {
+    if (isClosing) {
+      isMobileMenuOpen = false;
+      isClosing = false;
+    }
   }
 
   function closeMobileMenu() {
-    mobileMenuOpen = false;
+    if (!isClosing) {
+      isClosing = true;
+    }
   }
 </script>
 
@@ -15,20 +30,21 @@
     class="rounded-lg px-3 py-2 md:px-5 md:py-3 ring-1 ring-slate-900/5 shadow-xl flex justify-between items-center transition-all">
     <nav class="hidden lg:flex gap-x-2">
       <a href="/" class="text-blue-500 font-semibold text-sm md:text-base hover:text-blue-400 transition-all flex items-center">
-        <img src="images/cat.png" class="w-10 h-10 mr-2" alt="logo" />
+        <img src="images/cat.png" alt="Logo" class="w-10 h-10 mr-2" />
         <span class="text-sm md:text-base">ystuRASP</span>
       </a>
-      <a href="/stat" class="text-sm md:text-base hover:text-blue-400 transition-all flex items-center">Статистика</a>
-      <a href="/rasp" class="text-sm md:text-base hover:text-blue-400 transition-all flex items-center">Расписание</a>
-      <a href="/campus" class="text-sm md:text-base hover:text-blue-400 transition-all flex items-center">Кампус</a>
-      <a href="/data" class="text-sm md:text-base hover:text-blue-400 transition-all flex items-center">Данные</a>
-      <a href="/about" class="text-sm md:text-base hover:text-blue-400 transition-all flex items-center">О нас</a>
+      <a href="/stat" class="nav-link text-sm text-gray-300 md:text-base hover:text-blue-400 transition-all flex items-center">Статистика</a>
+      <a href="/rasp" class="nav-link text-sm text-gray-300 md:text-base hover:text-blue-400 transition-all flex items-center">Расписание</a>
+      <a href="/campus" class="nav-link text-sm text-gray-300 md:text-base hover:text-blue-400 transition-all flex items-center">Кампус</a>
+      <a href="/data" class="nav-link text-sm text-gray-300 md:text-base hover:text-blue-400 transition-all flex items-center">Данные</a>
+      <a href="/about" class="nav-link text-sm text-gray-300 md:text-base hover:text-blue-400 transition-all flex items-center">О нас</a>
     </nav>
 
     <div class="relative lg:hidden">
       <button 
-        class="p-2 rounded-lg bg-slate-700 hover:bg-slate-600 transition-all"
         on:click={toggleMobileMenu}
+        class="p-2 rounded-lg bg-slate-700/50 hover:bg-slate-600/50 transition-all backdrop-blur-sm"
+        aria-label="Открыть мобильное меню"
       >
         <svg class="w-6 h-6 text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
@@ -36,28 +52,28 @@
       </button>
     </div>
 
-    <div class="flex gap-x-2">
-      <a href="https://boosty.to/ysturasp.me/donate" class="p-1 md:p-2 bg-blue-700 text-white rounded-lg text-sm md:text-sm hover:bg-blue-600 transition-all border-2 border-blue-700 hover:border-blue-600">
+    <div class="flex gap-x-3">
+      <a href="https://boosty.to/ysturasp.me/donate"
+        class="hero-button p-1 md:p-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg text-sm md:text-sm transition-all border-2 border-blue-700 hover:border-blue-400">
         Поддержать проект <span class="text-xl align-middle">💸</span>
       </a>
-      <a href="https://ystu.expo.app" target="_blank" class="p-1 md:p-2 bg-slate-900 text-white rounded-lg text-sm md:text-sm transition-all flex items-center justify-center border-2 border-blue-500 hover:border-blue-400">
+      <a href="https://ystu.expo.app" target="_blank"
+        class="p-1 md:p-2 bg-slate-900 text-white rounded-lg text-sm md:text-sm transition-all flex items-center justify-center border-2 border-blue-500 hover:border-blue-400"
+        aria-label="Открыть профиль">
         <span class="text-xl">👤</span>
       </a>
     </div>
   </div>
 
   <div 
-    class="md:hidden bg-slate-800 rounded-lg mt-4 px-3 py-2 md:px-6 md:py-3 ring-1 ring-slate-900/5 shadow-xl absolute top-full left-3 right-3"
-    class:hidden={!mobileMenuOpen}
-    class:show={mobileMenuOpen}
-    class:hide={!mobileMenuOpen}
-  >
+    class="md:hidden bg-slate-800 rounded-lg mt-4 px-3 py-2 md:px-6 md:py-3 ring-1 ring-slate-900/5 shadow-xl absolute top-full left-3 right-3 {!isMobileMenuOpen ? 'hidden' : ''} {isClosing ? 'hide' : 'show'}"
+    on:animationend={handleAnimationEnd}>
     <a href="/" class="block py-2 text-blue-500 font-semibold text-sm md:text-base" on:click={closeMobileMenu}>ystuRASP Главная</a>
-    <a href="/stat" class="block py-2 hover:text-blue-400 text-sm md:text-base" on:click={closeMobileMenu}>Статистика</a>
-    <a href="/rasp" class="block py-2 hover:text-blue-400 text-sm md:text-base" on:click={closeMobileMenu}>Расписание</a>
-    <a href="/campus" class="block py-2 hover:text-blue-400 text-sm md:text-base" on:click={closeMobileMenu}>Кампус</a>
-    <a href="/data" class="block py-2 hover:text-blue-400 text-sm md:text-base" on:click={closeMobileMenu}>Данные</a>
-    <a href="/about" class="block py-2 hover:text-blue-400 text-sm md:text-base" on:click={closeMobileMenu}>О нас</a>
+    <a href="/stat" class="block py-2 text-gray-300 hover:text-blue-400 text-sm md:text-base" on:click={closeMobileMenu}>Статистика</a>
+    <a href="/rasp" class="block py-2 text-gray-300 hover:text-blue-400 text-sm md:text-base" on:click={closeMobileMenu}>Расписание</a>
+    <a href="/campus" class="block py-2 text-gray-300 hover:text-blue-400 text-sm md:text-base" on:click={closeMobileMenu}>Кампус</a>
+    <a href="/data" class="block py-2 text-gray-300 hover:text-blue-400 text-sm md:text-base" on:click={closeMobileMenu}>Данные</a>
+    <a href="/about" class="block py-2 text-gray-300 hover:text-blue-400 text-sm md:text-base" on:click={closeMobileMenu}>О нас</a>
   </div>
 </header>
 
