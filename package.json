@@ -26,7 +26,9 @@
 	},
 	"dependencies": {
 		"@types/animejs": "^3.1.13",
+		"@types/mapbox-gl": "^3.4.1",
 		"animejs": "^3.2.2",
+		"mapbox-gl": "^3.13.0",
 		"svelte-inview": "^4.0.1"
 	}
 }
