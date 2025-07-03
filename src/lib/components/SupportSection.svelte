@@ -40,11 +40,11 @@
                 </div>
 
                 <div class="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
-                    <div class="floating-particle absolute w-2 h-2 bg-yellow-500 rounded-full"
+                    <div class="floating-particle absolute w-2 h-2 bg-amber-500 rounded-full"
                         style="top: 20%; left: 10%; animation: float 8s infinite"></div>
-                    <div class="floating-particle absolute w-3 h-3 bg-yellow-400 rounded-full"
+                    <div class="floating-particle absolute w-3 h-3 bg-amber-400 rounded-full"
                         style="top: 60%; left: 80%; animation: float 12s infinite"></div>
-                    <div class="floating-particle absolute w-2 h-2 bg-yellow-300 rounded-full"
+                    <div class="floating-particle absolute w-2 h-2 bg-amber-300 rounded-full"
                         style="top: 80%; left: 30%; animation: float 10s infinite"></div>
                 </div>
             </div>
