@@ -12,6 +12,8 @@
   import { validateSettingsName } from '$lib/utils/validation';
   import { generateToken } from '$lib/utils/token';
   import { collectHiddenSubjects, collectSubgroupSettings } from '$lib/utils/storage';
+  import { downloadCache, importCache, getCacheItems, clearSelectedCache, type CacheItem } from '$lib/utils/cache';
+  import DeleteDataModal from '$lib/components/DeleteDataModal.svelte';
 
   const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby_96MwIj8oq9qdVcjFz6lRL9XM3EAV_XV8I25ZykDh4FEWqaum6ev_GmDjort26MkbsQ/exec';
 
@@ -30,6 +32,9 @@
   let settingsName = '';
 
   let isProcessing = false;
+
+  let showDeleteDataModal = false;
+  let cacheItems: CacheItem[] = [];
 
   onMount(async () => {
     await loadSharedSettings();
@@ -310,6 +315,43 @@
   function handleEditSettingsError(event: CustomEvent<string>) {
     showNotification(event.detail, 'error');
   }
+
+  function handleDownload() {
+    if (downloadCache()) {
+      showNotification('Данные успешно скачаны', 'success');
+    } else {
+      showNotification('Ошибка при скачивании данных', 'error');
+    }
+  }
+
+  async function handleImport(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+
+    try {
+      await importCache(file);
+      showNotification('Данные успешно импортированы', 'success');
+      setTimeout(() => location.reload(), 1500);
+    } catch (error) {
+      console.error('Ошибка при импорте:', error);
+      showNotification('Ошибка при импорте данных', 'error');
+    }
+    input.value = '';
+  }
+
+  function handleDeleteDataClick() {
+    cacheItems = getCacheItems();
+    showDeleteDataModal = true;
+  }
+
+  function handleDeleteData(event: CustomEvent<CacheItem[]>) {
+    const items = event.detail;
+    clearSelectedCache(items);
+    showDeleteDataModal = false;
+    showNotification('Выбранные данные успешно удалены', 'success');
+    setTimeout(() => location.reload(), 1500);
+  }
 </script>
 
 <svelte:head>
@@ -329,19 +371,29 @@
         <div class="flex flex-col md:flex-row gap-4">
           <button
             class="p-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-all"
-            on:click={() => showNotification('Функция в разработке', 'info')}
+            on:click={handleDownload}
           >
             Скачать мои данные (JSON)
           </button>
+          <input
+            type="file"
+            id="importFile"
+            class="hidden"
+            accept=".json"
+            on:change={handleImport}
+            autocomplete="off"
+            autocorrect="off"
+            autocapitalize="off"
+          >
           <button
             class="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all"
-            on:click={() => showNotification('Функция в разработке', 'info')}
+            on:click={() => document.getElementById('importFile')?.click()}
           >
             Импортировать данные
           </button>
           <button
             class="p-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all"
-            on:click={() => showConfirmModal = true}
+            on:click={handleDeleteDataClick}
           >
             Удалить данные
           </button>
@@ -565,6 +617,13 @@
   on:edit={handleEditSettings}
   on:delete={handleDeleteSettings}
   on:error={handleEditSettingsError}
+/>
+
+<DeleteDataModal
+  isOpen={showDeleteDataModal}
+  items={cacheItems}
+  on:close={() => showDeleteDataModal = false}
+  on:delete={handleDeleteData}
 />
 
 {#if notification.show}
