@@ -14,6 +14,7 @@
   import { collectHiddenSubjects, collectSubgroupSettings } from '$lib/utils/storage';
   import { downloadCache, importCache, getCacheItems, clearSelectedCache, type CacheItem } from '$lib/utils/cache';
   import DeleteDataModal from '$lib/components/DeleteDataModal.svelte';
+  import ApplySettingsModal from '$lib/components/ApplySettingsModal.svelte';
 
   const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby_96MwIj8oq9qdVcjFz6lRL9XM3EAV_XV8I25ZykDh4FEWqaum6ev_GmDjort26MkbsQ/exec';
 
@@ -35,6 +36,9 @@
 
   let showDeleteDataModal = false;
   let cacheItems: CacheItem[] = [];
+
+  let showApplySettingsModal = false;
+  let selectedSetting: Setting | null = null;
 
   onMount(async () => {
     await loadSharedSettings();
@@ -120,7 +124,49 @@
 
   async function handleSettingsApply(event: CustomEvent<string>) {
     const settingId = event.detail;
-    showNotification('Функция в разработке', 'info');
+    try {
+      showNotification('Загрузка настроек...', 'info');
+      
+      const response = await fetch(`${SCRIPT_URL}?action=get&id=${settingId}`);
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+
+      const text = await response.text();
+      const setting = JSON.parse(text);
+      selectedSetting = setting;
+      showApplySettingsModal = true;
+    } catch (error) {
+      console.error('Ошибка при загрузке настроек:', error);
+      showNotification('Ошибка при загрузке настроек', 'error');
+    }
+  }
+
+  async function handleApplySettingsConfirm() {
+    if (!selectedSetting) return;
+
+    try {
+      if (selectedSetting.hiddenSubjects) {
+        const hiddenSubjects = JSON.parse(selectedSetting.hiddenSubjects);
+        Object.entries(hiddenSubjects).forEach(([key, value]) => {
+          localStorage.setItem(key, JSON.stringify(value));
+        });
+      }
+
+      if (selectedSetting.subgroupSettings) {
+        const subgroupSettings = JSON.parse(selectedSetting.subgroupSettings);
+        if (subgroupSettings.subgroupSettings) {
+          localStorage.setItem('subgroupSettings', subgroupSettings.subgroupSettings);
+        }
+      }
+
+      showNotification('Настройки успешно применены!', 'success');
+      showApplySettingsModal = false;
+      setTimeout(() => location.reload(), 1500);
+    } catch (error) {
+      console.error('Ошибка при применении настроек:', error);
+      showNotification('Ошибка при применении настроек', 'error');
+    }
   }
 
   function handleFilterChange(event: CustomEvent) {
@@ -624,6 +670,13 @@
   items={cacheItems}
   on:close={() => showDeleteDataModal = false}
   on:delete={handleDeleteData}
+/>
+
+<ApplySettingsModal
+  isOpen={showApplySettingsModal}
+  setting={selectedSetting}
+  on:close={() => showApplySettingsModal = false}
+  on:confirm={handleApplySettingsConfirm}
 />
 
 {#if notification.show}

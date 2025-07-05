@@ -3,7 +3,7 @@
   
   export let title: string;
   export let isOpen: boolean = false;
-  export let maxWidth: string = 'max-w-lg';
+  export let maxWidth: string = 'max-w-2xl';
 
   const dispatch = createEventDispatcher();
 
