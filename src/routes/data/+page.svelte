@@ -4,17 +4,18 @@
   import Footer from '$lib/components/Footer.svelte';
   import PageLayout from '$lib/components/PageLayout.svelte';
   import Modal from '$lib/components/Modal.svelte';
-  import Notification from '$lib/components/Notification.svelte';
+  import NotificationsContainer from '$lib/components/NotificationsContainer.svelte';
   import SettingsCard from '$lib/components/SettingsCard.svelte';
   import SettingsFilters from '$lib/components/SettingsFilters.svelte';
   import EditSettingsModal from '$lib/components/EditSettingsModal.svelte';
-  import type { Setting, FilterOptions, NotificationType, Notification as NotificationState } from '$lib/types';
+  import type { Setting, FilterOptions, NotificationType } from '$lib/types';
   import { validateSettingsName } from '$lib/utils/validation';
   import { generateToken } from '$lib/utils/token';
   import { collectHiddenSubjects, collectSubgroupSettings } from '$lib/utils/storage';
   import { downloadCache, importCache, getCacheItems, clearSelectedCache, type CacheItem } from '$lib/utils/cache';
   import DeleteDataModal from '$lib/components/DeleteDataModal.svelte';
   import ApplySettingsModal from '$lib/components/ApplySettingsModal.svelte';
+  import { notifications } from '$lib/stores/notifications';
 
   const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby_96MwIj8oq9qdVcjFz6lRL9XM3EAV_XV8I25ZykDh4FEWqaum6ev_GmDjort26MkbsQ/exec';
 
@@ -22,7 +23,6 @@
   let groups: string[] = [];
   let filteredSettings: Setting[] = [];
   let isLoading = true;
-  let notification: NotificationState = { show: false, message: '', type: 'info' };
 
   let showConfirmModal = false;
   let showTokenModal = false;
@@ -70,7 +70,7 @@
       isLoading = false;
     } catch (error) {
       console.error('Ошибка при загрузке настроек:', error);
-      showNotification('Ошибка при загрузке настроек', 'error');
+      notifications.add('Ошибка при загрузке настроек', 'error');
       isLoading = false;
     }
   }
@@ -97,14 +97,6 @@
     return match ? match[1] : '';
   }
 
-  function showNotification(message: string, type: NotificationType = 'info') {
-    notification = {
-      show: true,
-      message,
-      type
-    };
-  }
-
   function generateRandomName() {
     const adjectives = [
       'Cosmic', 'Mystic', 'Silent', 'Hidden', 'Ancient', 'Brave', 'Clever',
@@ -125,7 +117,7 @@
   async function handleSettingsApply(event: CustomEvent<string>) {
     const settingId = event.detail;
     try {
-      showNotification('Загрузка настроек...', 'info');
+      notifications.add('Загрузка настроек...', 'info');
       
       const response = await fetch(`${SCRIPT_URL}?action=get&id=${settingId}`);
       if (!response.ok) {
@@ -138,7 +130,7 @@
       showApplySettingsModal = true;
     } catch (error) {
       console.error('Ошибка при загрузке настроек:', error);
-      showNotification('Ошибка при загрузке настроек', 'error');
+      notifications.add('Ошибка при загрузке настроек', 'error');
     }
   }
 
@@ -160,12 +152,12 @@
         }
       }
 
-      showNotification('Настройки успешно применены!', 'success');
+      notifications.add('Настройки успешно применены!', 'success');
       showApplySettingsModal = false;
       setTimeout(() => location.reload(), 1500);
     } catch (error) {
       console.error('Ошибка при применении настроек:', error);
-      showNotification('Ошибка при применении настроек', 'error');
+      notifications.add('Ошибка при применении настроек', 'error');
     }
   }
 
@@ -175,7 +167,7 @@
 
   async function handleShareSettings() {
     if (isProcessing) {
-      showNotification('Пожалуйста, подождите...', 'warning');
+      notifications.add('Пожалуйста, подождите...', 'warning');
       return;
     }
     isProcessing = true;
@@ -185,12 +177,12 @@
       
       const validation = validateSettingsName(name);
       if (!validation.isValid) {
-        showNotification(validation.reason || 'Некорректное название', 'error');
+        notifications.add(validation.reason || 'Некорректное название', 'error');
         return;
       }
 
       if (!shareHiddenSubjects && !shareSubgroupSettings) {
-        showNotification('Пожалуйста, выберите хотя бы один тип настроек для публикации', 'warning');
+        notifications.add('Пожалуйста, выберите хотя бы один тип настроек для публикации', 'warning');
         return;
       }
 
@@ -224,7 +216,7 @@
         }
       });
 
-      showNotification('Публикация настроек...', 'info');
+      notifications.add('Публикация настроек...', 'info');
       
       const shareResponse = await fetch(SCRIPT_URL, {
         method: 'POST',
@@ -251,12 +243,12 @@
       }
 
       showTokenDialog(humanToken);
-      showNotification('Настройки успешно опубликованы!', 'success');
+      notifications.add('Настройки успешно опубликованы!', 'success');
       setTimeout(() => loadSharedSettings(), 1500);
 
     } catch (error) {
       console.error('Ошибка при публикации настроек:', error);
-      showNotification(error instanceof Error ? error.message : 'Ошибка при публикации настроек', 'error');
+      notifications.add(error instanceof Error ? error.message : 'Ошибка при публикации настроек', 'error');
     } finally {
       setTimeout(() => {
         isProcessing = false;
@@ -274,9 +266,9 @@
   async function copyToClipboard(text: string) {
     try {
       await navigator.clipboard.writeText(text);
-      showNotification('Токен скопирован в буфер обмена', 'success');
+      notifications.add('Токен скопирован в буфер обмена', 'success');
     } catch {
-      showNotification('Не удалось скопировать токен', 'error');
+      notifications.add('Не удалось скопировать токен', 'error');
     }
   }
 
@@ -285,7 +277,7 @@
     showEditSettingsModal = false;
 
     try {
-      showNotification('Проверка токена...', 'info');
+      notifications.add('Проверка токена...', 'info');
 
       const response = await fetch(SCRIPT_URL, {
         method: 'POST',
@@ -311,11 +303,11 @@
         throw new Error('Неверный токен');
       }
 
-      showNotification('Настройки успешно обновлены', 'success');
+      notifications.add('Настройки успешно обновлены', 'success');
       setTimeout(() => loadSharedSettings(), 1500);
     } catch (error) {
       console.error('Ошибка при редактировании настроек:', error);
-      showNotification(error instanceof Error ? error.message : 'Ошибка при редактировании настроек', 'error');
+      notifications.add(error instanceof Error ? error.message : 'Ошибка при редактировании настроек', 'error');
     }
   }
 
@@ -324,7 +316,7 @@
     showEditSettingsModal = false;
 
     try {
-      showNotification('Проверка токена...', 'info');
+      notifications.add('Проверка токена...', 'info');
 
       const response = await fetch(SCRIPT_URL, {
         method: 'POST',
@@ -350,23 +342,23 @@
         throw new Error('Неверный токен');
       }
 
-      showNotification('Настройки успешно удалены', 'success');
+      notifications.add('Настройки успешно удалены', 'success');
       setTimeout(() => loadSharedSettings(), 1500);
     } catch (error) {
       console.error('Ошибка при удалении настроек:', error);
-      showNotification(error instanceof Error ? error.message : 'Ошибка при удалении настроек', 'error');
+      notifications.add(error instanceof Error ? error.message : 'Ошибка при удалении настроек', 'error');
     }
   }
 
   function handleEditSettingsError(event: CustomEvent<string>) {
-    showNotification(event.detail, 'error');
+    notifications.add(event.detail, 'error');
   }
 
   function handleDownload() {
     if (downloadCache()) {
-      showNotification('Данные успешно скачаны', 'success');
+      notifications.add('Данные успешно скачаны', 'success');
     } else {
-      showNotification('Ошибка при скачивании данных', 'error');
+      notifications.add('Ошибка при скачивании данных', 'error');
     }
   }
 
@@ -377,11 +369,11 @@
 
     try {
       await importCache(file);
-      showNotification('Данные успешно импортированы', 'success');
+      notifications.add('Данные успешно импортированы', 'success');
       setTimeout(() => location.reload(), 1500);
     } catch (error) {
       console.error('Ошибка при импорте:', error);
-      showNotification('Ошибка при импорте данных', 'error');
+      notifications.add('Ошибка при импорте данных', 'error');
     }
     input.value = '';
   }
@@ -395,7 +387,7 @@
     const items = event.detail;
     clearSelectedCache(items);
     showDeleteDataModal = false;
-    showNotification('Выбранные данные успешно удалены', 'success');
+    notifications.add('Выбранные данные успешно удалены', 'success');
     setTimeout(() => location.reload(), 1500);
   }
 </script>
@@ -620,7 +612,7 @@
   <div class="flex justify-center gap-4">
     <button
       class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all"
-      on:click={() => showNotification('Функция в разработке', 'info')}
+      on:click={() => notifications.add('Функция в разработке', 'info')}
     >
       Удалить
     </button>
@@ -679,13 +671,7 @@
   on:confirm={handleApplySettingsConfirm}
 />
 
-{#if notification.show}
-  <Notification
-    message={notification.message}
-    type={notification.type}
-    on:hide={() => notification.show = false}
-  />
-{/if}
+<NotificationsContainer />
 
 <style>
   @media (max-width: 435px) {
