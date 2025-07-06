@@ -1,20 +1,20 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import Header from '$lib/components/Header.svelte';
-  import Footer from '$lib/components/Footer.svelte';
-  import PageLayout from '$lib/components/PageLayout.svelte';
-  import Modal from '$lib/components/Modal.svelte';
-  import NotificationsContainer from '$lib/components/NotificationsContainer.svelte';
-  import SettingsCard from '$lib/components/SettingsCard.svelte';
-  import SettingsFilters from '$lib/components/SettingsFilters.svelte';
-  import EditSettingsModal from '$lib/components/EditSettingsModal.svelte';
+  import Header from '$lib/components/layout/Header.svelte';
+  import Footer from '$lib/components/layout/Footer.svelte';
+  import PageLayout from '$lib/components/layout/PageLayout.svelte';
+  import Modal from '$lib/components/modals/Modal.svelte';
+  import NotificationsContainer from '$lib/components/notifications/NotificationsContainer.svelte';
+  import SettingsCard from '$lib/components/settings/SettingsCard.svelte';
+  import SettingsFilters from '$lib/components/settings/SettingsFilters.svelte';
+  import EditSettingsModal from '$lib/components/modals/EditSettingsModal.svelte';
   import type { Setting, FilterOptions, NotificationType } from '$lib/types';
   import { validateSettingsName } from '$lib/utils/validation';
   import { generateToken } from '$lib/utils/token';
   import { collectHiddenSubjects, collectSubgroupSettings } from '$lib/utils/storage';
   import { downloadCache, importCache, getCacheItems, clearSelectedCache, type CacheItem } from '$lib/utils/cache';
-  import DeleteDataModal from '$lib/components/DeleteDataModal.svelte';
-  import ApplySettingsModal from '$lib/components/ApplySettingsModal.svelte';
+  import DeleteDataModal from '$lib/components/modals/DeleteDataModal.svelte';
+  import ApplySettingsModal from '$lib/components/modals/ApplySettingsModal.svelte';
   import { notifications } from '$lib/stores/notifications';
 
   const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby_96MwIj8oq9qdVcjFz6lRL9XM3EAV_XV8I25ZykDh4FEWqaum6ev_GmDjort26MkbsQ/exec';

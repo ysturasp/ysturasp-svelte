@@ -1,6 +1,6 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
-  import Modal from './Modal.svelte';
+  import Modal from '$lib/components/modals/Modal.svelte';
   import type { Setting, SubjectType } from '$lib/types';
 
   export let isOpen = false;

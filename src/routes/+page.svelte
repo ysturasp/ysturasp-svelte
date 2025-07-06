@@ -1,11 +1,11 @@
 <script>
-  import Header from '$lib/components/Header.svelte';
-  import HeroSection from '$lib/components/HeroSection.svelte';
-  import SupportSection from '$lib/components/SupportSection.svelte';
-  import Footer from '$lib/components/Footer.svelte';
-  import CookieNotification from '$lib/components/CookieNotification.svelte';
-  import StatsSection from '$lib/components/StatsSection.svelte';
-  import FeaturesSection from '$lib/components/FeatureSection.svelte';
+  import Header from '$lib/components/layout/Header.svelte';
+  import HeroSection from '$lib/components/sections/HeroSection.svelte';
+  import SupportSection from '$lib/components/sections/SupportSection.svelte';
+  import Footer from '$lib/components/layout/Footer.svelte';
+  import CookieNotification from '$lib/components/notifications/CookieNotification.svelte';
+  import StatsSection from '$lib/components/sections/StatsSection.svelte';
+  import FeaturesSection from '$lib/components/sections/FeatureSection.svelte';
 </script>
 
 <svelte:head>

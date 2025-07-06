@@ -1,7 +1,7 @@
 <script lang="ts">
   import { notifications } from '$lib/stores/notifications';
   import type { NotificationType } from '$lib/types';
-  import NotificationsContainer from './notifications/NotificationsContainer.svelte';
+  import NotificationsContainer from './NotificationsContainer.svelte';
 
   export let message: string = '';
   export let type: NotificationType = 'info';

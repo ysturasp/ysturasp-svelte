@@ -1,8 +1,8 @@
 <script>
   import { page } from '$app/stores';
-  import Header from '$lib/components/Header.svelte';
-  import ErrorContent from '$lib/components/ErrorContent.svelte';
-  import PageLayout from '$lib/components/PageLayout.svelte';
+  import Header from '$lib/components/layout/Header.svelte';
+  import ErrorContent from '$lib/components/common/ErrorContent.svelte';
+  import PageLayout from '$lib/components/layout/PageLayout.svelte';
 </script>
 
 <svelte:head>
