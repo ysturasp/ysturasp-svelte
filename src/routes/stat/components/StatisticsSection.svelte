@@ -2,7 +2,7 @@
   import { onMount, createEventDispatcher } from 'svelte';
   import { disciplinesDigitalSystems, disciplinesAiD, disciplinesCivilTransport } from '../data/disciplines';
   import type { Stats, Instructors, InstituteId, NotificationOptions } from '../types';
-  import { getSubjectStats, getInstructors } from '../utils/api';
+  import { getSubjectStats, getInstructors, checkViewLimit } from '../utils/api';
   
   const dispatch = createEventDispatcher<{
     showNotification: NotificationOptions;
@@ -101,6 +101,16 @@
     dispatch('loading', { value: true });
     
     try {
+      const limitCheck = await checkViewLimit(false);
+      if (!limitCheck.success) {
+        dispatch('showNotification', {
+          message: 'Достигнут дневной лимит просмотров. Пригласите друзей, чтобы увеличить лимит!',
+          type: 'warning'
+        });
+        dispatch('showReferral');
+        return;
+      }
+
       const statsPromise = getSubjectStats(selectedInstitute, selectedDiscipline);
       const instructorsPromise = getInstructors(selectedInstitute, selectedDiscipline);
 
@@ -133,6 +143,11 @@
       
       localStorage.setItem('recentlyViewed', JSON.stringify(updatedRecentlyViewed));
 
+      const viewsCheck = await checkViewLimit(true);
+      if (viewsCheck.success) {
+        remainingViews = viewsCheck.remaining.toString();
+      }
+
     } catch (error) {
       console.error('Error in getStatistics:', error);
       dispatch('showNotification', {
@@ -160,6 +175,17 @@
     document.body.appendChild(overlay);
 
     document.addEventListener('click', handleClickOutside);
+
+    checkViewLimit(true).then(response => {
+      if (response.success) {
+        remainingViews = response.remaining.toString();
+      } else {
+        remainingViews = '0';
+      }
+    }).catch(error => {
+      console.error('Error updating remaining views:', error);
+      remainingViews = '0';
+    });
 
     return () => {
       document.removeEventListener('click', handleClickOutside);

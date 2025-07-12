@@ -18,6 +18,8 @@ const TOP_ANTITOP_URLS: Record<InstituteId, string> = {
   'btn-civil-transport': 'https://script.google.com/macros/s/AKfycbz_5IGSgCYpiJ8zCx7qkwCTj2IE_IN51TlPwi5HlqYUCpnTcQegAuC3vFACV1dUnFxp/exec'
 };
 
+const REFERRAL_API_URL = 'https://script.google.com/macros/s/AKfycbxbAl--AM5WqHdw49XNpGSNSxL4jHDEHhLD6YAgwgZQAnB4-Id0fKfyxQ--85Mljco1/exec';
+
 export async function getSubjectStats(institute: InstituteId, discipline: string): Promise<Stats> {
   const url = `${STATS_URLS[institute]}?discipline=${encodeURIComponent(discipline)}`;
   const response = await fetch(url);
@@ -53,28 +55,74 @@ export async function getTopAntiTop(institute: InstituteId) {
   return data;
 }
 
-export async function getReferralStats() {
-  // TODO: реализовать получение статистики рефералов
-  return {
-    referralCount: 0,
-    statsLimit: 10
-  };
+export async function getIP() {
+  try {
+    const response = await fetch('https://api.ipify.org?format=json');
+    const data = await response.json();
+    return data.ip;
+  } catch (error) {
+    console.error('Error getting IP:', error);
+    return 'unknown';
+  }
 }
 
-export async function updateReferralStats() {
-  // TODO: реализовать обновление статистики рефералов
+export async function makeReferralRequest(action: string, params: any) {
+  const queryParams = new URLSearchParams({
+    action,
+    ...params
+  });
+
+  try {
+    const response = await fetch(`${REFERRAL_API_URL}?${queryParams}`);
+    return await response.json();
+  } catch (error) {
+    console.error('API request failed:', error);
+    throw error;
+  }
 }
 
-export function getUserId(): string {
+export function getUserId() {
   let userId = localStorage.getItem('userId');
   if (!userId) {
-    userId = generateUserId();
+    userId = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
     localStorage.setItem('userId', userId);
   }
   return userId;
 }
 
-function generateUserId(): string {
-  return Math.random().toString(36).substring(2, 15) + 
-         Math.random().toString(36).substring(2, 15);
+export async function checkViewLimit(isCheckOnly = true) {
+  try {
+    const response = await makeReferralRequest('checkLimit', {
+      userId: getUserId(),
+      ip: await getIP(),
+      isCheckOnly: isCheckOnly.toString()
+    });
+    return response;
+  } catch (error) {
+    console.error('Error checking view limit:', error);
+    return { success: false, remaining: 0 };
+  }
+}
+
+export async function getReferralStats() {
+  try {
+    const response = await makeReferralRequest('getReferrals', {
+      userId: getUserId()
+    });
+    return {
+      referralCount: response.count,
+      statsLimit: response.dailyLimit
+    };
+  } catch (error) {
+    console.error('Error getting referral stats:', error);
+    return {
+      referralCount: 0,
+      statsLimit: 10
+    };
+  }
+}
+
+export async function updateReferralStats() {
+  const stats = await getReferralStats();
+  return stats;
 } 
