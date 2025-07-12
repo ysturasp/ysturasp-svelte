@@ -37,7 +37,7 @@
   <h2 class="text-2xl font-semibold text-white mb-4">📊 Рейтинг предметов</h2>
   <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
     <div>
-      <h3 class="text-xl font-bold text-green-400 mb-2">🏆 Лучшие предметы</h3>
+      <h3 class="text-xl font-bold text-emerald-400 mb-2">🏆 Лучшие предметы</h3>
       <ul class="space-y-4">
         {#if isLoading}
           <li class="skeleton-item">
@@ -51,7 +51,7 @@
         {:else}
           {#each top10 as item}
             <li class="list-item">
-              <div class="text-green-500 font-semibold cursor-pointer" on:click={() => dispatch('viewAgain', { subject: item.subject })}>
+              <div class="text-emerald-500 font-semibold cursor-pointer" on:click={() => dispatch('viewAgain', { subject: item.subject })}>
                 {item.position}. {item.subject}
               </div>
               <div class="text-slate-400">Средний балл: {item.average.toFixed(2)}</div>

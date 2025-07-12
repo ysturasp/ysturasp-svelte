@@ -15,11 +15,13 @@
   let currentDisciplines: string[] = disciplinesDigitalSystems;
   let filteredDisciplines: string[] = [];
   let selectedDiscipline = '';
+  let displayedDiscipline = '';
   let searchQuery = '';
   let showOptions = false;
   let statistics: Stats | null = null;
   let instructors: Instructors | null = null;
   let remainingViews = '...';
+  let overlay: HTMLDivElement;
 
   $: {
     filteredDisciplines = currentDisciplines.filter(discipline =>
@@ -52,12 +54,39 @@
 
   function selectDiscipline(discipline: string) {
     selectedDiscipline = discipline;
+    searchQuery = discipline;
     showOptions = false;
+    overlay.classList.add('hidden');
   }
 
   function clearSelection() {
     selectedDiscipline = '';
     searchQuery = '';
+  }
+
+  function handleFocus() {
+    showOptions = true;
+    overlay.classList.remove('hidden');
+    setTimeout(() => {
+      const inputField = document.getElementById('combobox-input');
+      if (inputField) {
+        window.scrollTo({
+          top: inputField.getBoundingClientRect().top + window.pageYOffset - 115,
+          behavior: 'smooth'
+        });
+      }
+    }, 300);
+  }
+
+  function handleClickOutside(event: MouseEvent) {
+    const target = event.target as HTMLElement;
+    const input = document.getElementById('combobox-input');
+    const options = document.getElementById('combobox-options');
+    
+    if (input && options && !input.contains(target) && !options.contains(target)) {
+      showOptions = false;
+      overlay.classList.add('hidden');
+    }
   }
 
   async function getStatistics() {
@@ -72,13 +101,27 @@
     dispatch('loading', { value: true });
     
     try {
+      const statsPromise = getSubjectStats(selectedInstitute, selectedDiscipline);
+      const instructorsPromise = getInstructors(selectedInstitute, selectedDiscipline);
+
       const [statsData, instructorsData] = await Promise.all([
-        getSubjectStats(selectedInstitute, selectedDiscipline),
-        getInstructors(selectedInstitute, selectedDiscipline)
+        statsPromise.catch(error => {
+          console.error('Error fetching stats:', error);
+          throw error;
+        }),
+        instructorsPromise.catch(error => {
+          console.error('Error fetching instructors:', error);
+          throw error;
+        })
       ]);
+
+      if (!statsData || !instructorsData) {
+        throw new Error('Failed to fetch data');
+      }
 
       statistics = statsData;
       instructors = instructorsData;
+      displayedDiscipline = selectedDiscipline;
 
       const recentlyViewed = JSON.parse(localStorage.getItem('recentlyViewed') || '[]');
       const newItem = { discipline: selectedDiscipline, stats: statsData };
@@ -91,13 +134,17 @@
       localStorage.setItem('recentlyViewed', JSON.stringify(updatedRecentlyViewed));
 
     } catch (error) {
+      console.error('Error in getStatistics:', error);
       dispatch('showNotification', {
         message: 'Ошибка при получении данных',
         type: 'error'
       });
-      console.error('Error:', error);
+      statistics = null;
+      instructors = null;
     } finally {
-      dispatch('loading', { value: false });
+      setTimeout(() => {
+        dispatch('loading', { value: false });
+      }, 0);
     }
   }
 
@@ -108,7 +155,18 @@
   }
 
   onMount(() => {
-    handleInstituteChange('btn-digital-systems');
+    overlay = document.createElement('div');
+    overlay.classList.add('ambient-overlay', 'hidden');
+    document.body.appendChild(overlay);
+
+    document.addEventListener('click', handleClickOutside);
+
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+      if (overlay && overlay.parentNode) {
+        overlay.parentNode.removeChild(overlay);
+      }
+    };
   });
 </script>
 
@@ -176,12 +234,13 @@
     </label>
     <div class="relative">
       <input
-        id="discipline-input"
+        id="combobox-input"
         type="text"
         class="block w-full p-2.5 bg-slate-900 border border-gray-600 rounded-lg text-gray-300 focus:ring-blue-500 focus:border-blue-500"
+        class:ambient-focuss={showOptions}
         placeholder="Выберите дисциплину..."
         bind:value={searchQuery}
-        on:focus={() => showOptions = true}
+        on:focus={handleFocus}
         autocomplete="off"
         autocorrect="off"
         autocapitalize="off"
@@ -189,8 +248,8 @@
 
       {#if selectedDiscipline}
         <button
-          class="clear-button absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-200"
-          on:click={clearSelection}
+          class="clear-button"
+          on:click|stopPropagation={clearSelection}
         >
           ×
         </button>
@@ -198,12 +257,15 @@
 
       {#if showOptions}
         <ul
-          class="absolute w-full bg-slate-900 border border-gray-600 rounded-lg mt-1 max-h-60 overflow-y-auto z-50"
+          id="combobox-options"
+          class="absolute w-full bg-slate-900 border border-gray-600 rounded-lg mt-1 overflow-hidden combobox-options"
+          class:active={showOptions}
+          class:ambient-focus={showOptions}
         >
           {#each filteredDisciplines as discipline}
             <li
               class="p-2 cursor-pointer hover:bg-gray-700 rounded"
-              on:click={() => selectDiscipline(discipline)}
+              on:mousedown={() => selectDiscipline(discipline)}
             >
               {discipline}
             </li>
@@ -224,7 +286,7 @@
     <div class="result mt-4">
       <div style="text-align: center;">
         <h3 class="text-2xl md:text-3xl font-bold mb-4">
-          Статистика по предмету "{selectedDiscipline}"
+          Статистика по предмету "{displayedDiscipline}"
         </h3>
       </div>
       
@@ -312,7 +374,92 @@
   }
 
   .clear-button {
-    font-size: 1.5rem;
-    padding: 0 0.5rem;
+    display: none;
+    position: absolute;
+    padding-left: 7px;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    border: none;
+    color: gray;
+    font-size: 2rem;
+    cursor: pointer;
+    z-index: 9999;
+  }
+
+  .relative input:not(:placeholder-shown) + .clear-button {
+    display: block;
+  }
+
+  .ambient-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(30, 30, 30, 0.7);
+    z-index: 9998;
+    backdrop-filter: blur(1px);
+    -webkit-backdrop-filter: blur(1px);
+    pointer-events: none;
+    transition: backdrop-filter 0.6s ease-in-out, background 0.6s ease-in-out;
+  }
+
+  .ambient-focuss {
+    position: relative;
+    padding: 20px;
+    border-radius: 10px;
+    background: rgba(1, 21, 51, 0.931);
+    box-shadow: 0 0 200px rgb(0, 57, 117);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    z-index: 9999;
+  }
+
+  .ambient-focus {
+    padding: 20px;
+    border-radius: 10px;
+    background: rgba(1, 21, 51, 0.931);
+    box-shadow: 0 0 200px rgb(0, 57, 117);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    z-index: 9999;
+    transition: box-shadow 0.6s ease-in-out, backdrop-filter 0.6s ease-in-out;
+  }
+
+  input {
+    transition: all 0.4s ease-in-out;
+  }
+
+  input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 8px rgba(59, 130, 246, 0.8);
+  }
+
+  .combobox-options {
+    max-height: 300px;
+    overflow-y: auto;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+    max-height: 0;
+    overflow: scroll;
+  }
+
+  .combobox-options.active {
+    opacity: 1;
+    transform: translateY(0);
+    max-height: 300px;
+  }
+
+  .combobox-options li {
+    border-radius: 10px;
+    transition: background-color 0.3s ease-in-out;
+  }
+
+  .combobox-options li:hover {
+    border-radius: 10px;
+    background-color: #0072e461;
   }
 </style> 
