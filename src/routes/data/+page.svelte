@@ -400,11 +400,11 @@
 <PageLayout>
   <Header />
   
-  <main class="container mx-auto px-3">
-    <section>
-      <h2 class="text-4xl font-semibold text-white mt-16 mb-4">🔐 Ваши данные принадлежат только Вам!</h2>
+  <main class="container mx-auto mt-5 md:mt-7 px-3 md:px-0">
+    <section class="bg-slate-800 rounded-lg p-4 md:p-6 mt-8">
+      <h2 class="text-4xl font-semibold text-white mb-4">🔐 Ваши данные принадлежат только Вам!</h2>
       
-      <section class="bg-slate-800 rounded-lg p-6 mt-8">
+      <section class="bg-slate-900 rounded-lg p-4 md:p-6 mt-8">
         <h2 class="md:text-3xl text-xl font-semibold text-white mb-4">Экспорт и импорт Ваших данных</h2>
         <div class="flex flex-col md:flex-row gap-4">
           <button
@@ -438,10 +438,10 @@
         </div>
       </section>
 
-      <section class="bg-slate-800 rounded-lg p-6 mt-8">
+      <section class="bg-slate-900 rounded-lg p-4 md:p-6 mt-8">
         <h2 class="md:text-3xl text-xl font-semibold text-white mb-4">Поделиться настройками</h2>
         <div class="flex flex-col gap-4">
-          <div class="bg-slate-900 p-4 rounded-lg">
+          <div class="bg-slate-800 p-4 rounded-lg">
             <h3 class="text-lg font-semibold text-white mb-2">Мои настройки</h3>
             <div class="flex flex-wrap gap-4 mb-4">
               <div class="flex items-center">
@@ -499,14 +499,14 @@
                   type="text"
                   bind:value={settingsName}
                   placeholder="Название настроек"
-                  class="p-2 bg-slate-800 text-white rounded-lg focus:outline-none border border-blue-500 flex-1 transition-colors"
+                  class="p-2 bg-slate-900 text-white rounded-lg focus:outline-none border border-blue-500 flex-1 transition-colors"
                   autocomplete="off"
                   autocorrect="off"
                   autocapitalize="off"
                 >
                 <button
                   on:click={generateRandomName}
-                  class="p-2 bg-slate-800 text-white rounded-lg hover:bg-slate-700 transition-all"
+                  class="p-2 bg-slate-900 text-white rounded-lg hover:bg-slate-700 transition-all"
                 >
                   🎲
                 </button>
@@ -523,39 +523,37 @@
 
           <SettingsFilters {groups} on:filter={handleFilterChange} />
 
-          <div class="bg-slate-900 p-4 rounded-lg">
-            <div class="flex justify-between items-center mb-4">
-              <h3 class="text-lg font-semibold text-white">Доступные настройки</h3>
-              <button
-                class="p-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-all"
-                on:click={() => showEditSettingsModal = true}
-              >
-                Редактировать/Удалить настройки
-              </button>
-            </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {#if isLoading}
-                <div class="col-span-full flex justify-center items-center p-8">
-                  <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500" />
-                </div>
-              {:else if filteredSettings.length === 0}
-                <div class="bg-slate-800 p-4 rounded-lg col-span-full">
-                  <p class="text-slate-400 text-center">Настройки не найдены</p>
-                </div>
-              {:else}
-                {#each filteredSettings as setting (setting.id)}
-                  <SettingsCard {setting} on:apply={handleSettingsApply} />
-                {/each}
-              {/if}
-            </div>
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-semibold text-white">Доступные настройки</h3>
+            <button
+              class="p-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-all"
+              on:click={() => showEditSettingsModal = true}
+            >
+              Редактировать/Удалить настройки
+            </button>
+          </div>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {#if isLoading}
+              <div class="col-span-full flex justify-center items-center p-8">
+                <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500" />
+              </div>
+            {:else if filteredSettings.length === 0}
+              <div class="bg-slate-900 p-4 rounded-lg col-span-full">
+                <p class="text-slate-400 text-center">Настройки не найдены</p>
+              </div>
+            {:else}
+              {#each filteredSettings as setting (setting.id)}
+                <SettingsCard {setting} on:apply={handleSettingsApply} />
+              {/each}
+            {/if}
           </div>
         </div>
       </section>
 
       <h2 class="text-2xl font-semibold text-white mt-4">Зачем это нужно:</h2>
       <div class="flex flex-wrap justify-center gap-6 p-0 mt-4">
-        <div class="card bg-slate-800 p-6 rounded-lg text-center max-w-md w-full">
+        <div class="card bg-slate-900 p-4 md:p-6 rounded-lg text-center max-w-md w-full">
           <div class="h-27 w-54 mx-auto mb-4 rounded-full">
             <p class="transportation" style="font-size: 100px;">📱👉 🖥️</p>
           </div>
@@ -569,7 +567,7 @@
           </div>
         </div>
 
-        <div class="card bg-slate-800 p-6 rounded-lg text-center max-w-md w-full">
+        <div class="card bg-slate-900 p-3 md:p-6 rounded-lg text-center max-w-md w-full">
           <div class="h-27 w-54 mx-auto mb-4 rounded-full">
             <p class="transportation" style="font-size: 100px;">🗑️</p>
           </div>
@@ -583,7 +581,7 @@
           </div>
         </div>
 
-        <div class="card bg-slate-800 p-6 rounded-lg text-center max-w-md w-full">
+        <div class="card bg-slate-900 p-4 md:p-6 rounded-lg text-center max-w-md w-full">
           <div class="h-27 w-54 mx-auto mb-4 rounded-full">
             <p class="transportation" style="font-size: 100px;">🥴</p>
           </div>
@@ -633,7 +631,7 @@
   <p class="text-slate-300 mb-4">
     Это ваш уникальный токен для управления настройками. Сохраните его - он будет показан только один раз!
   </p>
-  <div class="bg-slate-900 p-3 rounded-lg mb-4 break-all">
+  <div class="bg-slate-800 p-3 rounded-lg mb-4 break-all">
     <p class="text-blue-400 font-mono text-sm">{tokenValue}</p>
   </div>
   <div class="flex gap-2 mb-4">

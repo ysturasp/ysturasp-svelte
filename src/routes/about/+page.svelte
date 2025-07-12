@@ -70,8 +70,8 @@
 
 <PageLayout>
   <Header />
-  <main class="container mx-auto px-4 mt-8">
-    <section id="boosty-news" class="bg-slate-800 rounded-lg p-6">
+  <main class="container mx-auto mt-5 md:mt-7 px-3 md:px-0">
+    <section id="boosty-news" class="bg-slate-800 rounded-lg p-6 mt-8">
       <h2 class="text-2xl sm:text-left lg:text-left md:text-left text-center font-semibold text-white mb-4">
         😜Наша история (дубляж постов с Boosty)
       </h2>

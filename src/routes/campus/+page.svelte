@@ -128,10 +128,10 @@
 
 <PageLayout>
   <Header />
-  <main class="container mx-auto mt-10 px-3">
-    <section class="bg-slate-800 rounded-lg p-6">
+  <main class="container mx-auto mt-5 md:mt-7 px-3 md:px-0">
+    <section class="bg-slate-800 rounded-lg p-4 md:p-6 mt-8">
       <div class="flex items-center mb-4">
-        <h2 id="calendarIcon" class="text-4xl font-semibold text-white">📍</h2>
+        <h2 id="calendarIcon" class="text-4xl font-semibold text-white -ml-2">📍</h2>
         <h2 class="text-3xl font-semibold text-white">Карта кампуса ЯГТУ</h2>
       </div>
       <div class="w-full overflow-hidden rounded-lg">
