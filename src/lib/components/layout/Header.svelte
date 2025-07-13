@@ -27,7 +27,7 @@
 
 <header class="container mx-auto sticky top-4 px-3 md:px-0 z-50">
   <div style="background-color: #1e293bad; backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);"
-    class="rounded-lg px-3 py-2 md:px-5 md:py-3 ring-1 ring-slate-900/5 shadow-xl flex justify-between items-center transition-all">
+    class="rounded-2xl px-3 py-2 md:px-5 md:py-3 ring-1 shadow-xl flex justify-between items-center transition-all">
     <nav class="hidden lg:flex gap-x-2">
       <a href="/" class="text-blue-500 font-semibold text-sm md:text-base hover:text-blue-400 transition-all flex items-center">
         <img src="images/cat.png" alt="Logo" class="w-10 h-10 mr-2" />
@@ -43,7 +43,7 @@
     <div class="relative lg:hidden">
       <button 
         on:click={toggleMobileMenu}
-        class="p-2 rounded-lg bg-slate-700/50 hover:bg-slate-600/50 transition-all backdrop-blur-sm"
+        class="p-2 transition-all"
         aria-label="Открыть мобильное меню"
       >
         <svg class="w-6 h-6 text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -54,11 +54,11 @@
 
     <div class="flex gap-x-3">
       <a href="https://boosty.to/ysturasp.me/donate"
-        class="hero-button p-1 md:p-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg text-sm md:text-sm transition-all border-2 border-blue-700 hover:border-blue-400">
+        class="hero-button p-1 md:p-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl text-sm md:text-sm transition-all border-2 border-blue-700 hover:border-blue-400">
         Поддержать проект <span class="text-xl align-middle">💸</span>
       </a>
       <a href="https://ystu.expo.app" target="_blank"
-        class="p-1 md:p-2 bg-slate-900 text-white rounded-lg text-sm md:text-sm transition-all flex items-center justify-center border-2 border-blue-500 hover:border-blue-400"
+        class="p-1 md:p-2 bg-slate-900 text-white rounded-xl text-sm md:text-sm transition-all flex items-center justify-center border-2 border-blue-500 hover:border-blue-400"
         aria-label="Открыть профиль">
         <span class="text-xl">👤</span>
       </a>
@@ -66,7 +66,7 @@
   </div>
 
   <div 
-    class="md:hidden bg-slate-800 rounded-lg mt-4 px-3 py-2 md:px-6 md:py-3 ring-1 ring-slate-900/5 shadow-xl absolute top-full left-3 right-3 {!isMobileMenuOpen ? 'hidden' : ''} {isClosing ? 'hide' : 'show'}"
+    class="md:hidden bg-slate-800 rounded-2xl mt-4 px-3 py-2 md:px-6 md:py-3 ring-1 shadow-xl absolute top-full left-3 right-3 {!isMobileMenuOpen ? 'hidden' : ''} {isClosing ? 'hide' : 'show'}"
     on:animationend={handleAnimationEnd}>
     <a href="/" class="block py-2 text-blue-500 font-semibold text-sm md:text-base" on:click={closeMobileMenu}>ystuRASP Главная</a>
     <a href="/stat" class="block py-2 text-gray-300 hover:text-blue-400 text-sm md:text-base" on:click={closeMobileMenu}>Статистика</a>

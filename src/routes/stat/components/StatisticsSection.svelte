@@ -295,7 +295,7 @@
       {#if showOptions}
         <ul
           id="combobox-options"
-          class="absolute w-full bg-slate-900 border border-gray-600 rounded-lg mt-1 overflow-hidden combobox-options"
+          class="absolute w-full p-2 bg-slate-900 border border-gray-600 rounded-lg mt-1 overflow-hidden combobox-options"
           class:active={showOptions}
           class:ambient-focus={showOptions}
         >
@@ -444,7 +444,6 @@
 
   .ambient-focuss {
     position: relative;
-    padding: 20px;
     border-radius: 10px;
     background: rgba(1, 21, 51, 0.931);
     box-shadow: 0 0 200px rgb(0, 57, 117);
@@ -454,7 +453,6 @@
   }
 
   .ambient-focus {
-    padding: 20px;
     border-radius: 10px;
     background: rgba(1, 21, 51, 0.931);
     box-shadow: 0 0 200px rgb(0, 57, 117);
