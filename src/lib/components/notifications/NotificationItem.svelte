@@ -81,7 +81,7 @@
 
 <div
   bind:this={notificationElement}
-  class="py-2 px-4 rounded-lg notification shadow-lg {colors[type]} text-white {isVisible ? 'show' : ''} {isHiding ? 'hide' : ''}"
+  class="py-2 px-4 rounded-2xl notification shadow-lg {colors[type]} text-white {isVisible ? 'show' : ''} {isHiding ? 'hide' : ''}"
   on:touchstart={handleTouchStart}
   on:touchmove={handleTouchMove}
   on:touchend={handleTouchEnd}

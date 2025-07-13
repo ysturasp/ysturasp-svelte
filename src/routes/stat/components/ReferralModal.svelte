@@ -61,7 +61,7 @@
 
 <div class="fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity duration-300 z-[1001]">
   <div class="flex md:items-center md:justify-center h-full md:min-h-screen md:p-4" style="background-color: #0b0f15ad;">
-    <div class="w-full h-full md:h-auto md:max-w-2xl bg-slate-800 md:rounded-lg shadow-xl flex flex-col ring-1">
+    <div class="w-full h-full md:h-auto md:max-w-2xl bg-slate-800 md:rounded-2xl shadow-xl flex flex-col ring-1">
       <div class="flex justify-between items-center p-4">
         <h3 class="text-xl md:text-2xl font-bold text-white flex items-center gap-2">
           <img src="https://ysturasp.github.io/tg_emoji/Animals and Nature/Glowing Star.webp" alt="Star-Struck" class="w-8 h-8"/>
@@ -95,7 +95,7 @@
             </ul>
           </div>
 
-          <div class="bg-slate-700 p-4 md:p-0 rounded-lg">
+          <div class="bg-slate-700 p-4 md:p-0 rounded-2xl">
             <div class="flex flex-col items-center justify-center">
               <div class="w-full p-0 md:p-4">
                 <div class="flex items-center justify-between mb-2">
@@ -132,7 +132,7 @@
             </ol>
           </div>
 
-          <div class="bg-slate-700 p-4 rounded-lg">
+          <div class="bg-slate-700 p-4 rounded-2xl">
             <h4 class="text-white font-semibold mb-2">Ваша статистика:</h4>
             <div class="grid grid-cols-2 gap-4">
               <div class="text-center">
@@ -150,7 +150,7 @@
 
       <div class="p-4 bg-slate-700 md:rounded-b-lg mt-auto">
         <button 
-          class="w-full bg-blue-600 text-white rounded-lg px-4 py-3 hover:bg-blue-700 transition-all"
+          class="w-full bg-blue-600 text-white rounded-2xl px-4 py-3 hover:bg-blue-700 transition-all"
           on:click={() => dispatch('close')}
         >
           Понятно!

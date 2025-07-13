@@ -401,14 +401,14 @@
   <Header />
   
   <main class="container mx-auto mt-5 md:mt-7 px-3 md:px-0">
-    <section class="bg-slate-800 rounded-lg p-4 md:p-6 mt-8">
+    <section class="bg-slate-800 rounded-2xl p-4 md:p-6 mt-8">
       <h2 class="text-4xl font-semibold text-white mb-4">🔐 Ваши данные принадлежат только Вам!</h2>
       
-      <section class="bg-slate-900 rounded-lg p-4 md:p-6 mt-8">
+      <section class="bg-slate-900 rounded-2xl p-4 md:p-6 mt-8">
         <h2 class="md:text-3xl text-xl font-semibold text-white mb-4">Экспорт и импорт Ваших данных</h2>
         <div class="flex flex-col md:flex-row gap-4">
           <button
-            class="p-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-all"
+            class="p-2 bg-emerald-600 text-white rounded-2xl hover:bg-emerald-700 transition-all"
             on:click={handleDownload}
           >
             Скачать мои данные (JSON)
@@ -424,13 +424,13 @@
             autocapitalize="off"
           >
           <button
-            class="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all"
+            class="p-2 bg-blue-600 text-white rounded-2xl hover:bg-blue-700 transition-all"
             on:click={() => document.getElementById('importFile')?.click()}
           >
             Импортировать данные
           </button>
           <button
-            class="p-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all"
+            class="p-2 bg-red-600 text-white rounded-2xl hover:bg-red-700 transition-all"
             on:click={handleDeleteDataClick}
           >
             Удалить данные
@@ -438,10 +438,10 @@
         </div>
       </section>
 
-      <section class="bg-slate-900 rounded-lg p-4 md:p-6 mt-8">
+      <section class="bg-slate-900 rounded-2xl p-4 md:p-6 mt-8">
         <h2 class="md:text-3xl text-xl font-semibold text-white mb-4">Поделиться настройками</h2>
         <div class="flex flex-col gap-4">
-          <div class="bg-slate-800 p-4 rounded-lg">
+          <div class="bg-slate-800 p-4 rounded-2xl">
             <h3 class="text-lg font-semibold text-white mb-2">Мои настройки</h3>
             <div class="flex flex-wrap gap-4 mb-4">
               <div class="flex items-center">
@@ -451,7 +451,7 @@
                     bind:checked={shareHiddenSubjects}
                     class="hidden peer"
                   >
-                  <div class="w-5 h-5 border-2 border-slate-500 rounded flex items-center justify-center mr-2 transition-colors peer-checked:border-blue-500">
+                  <div class="w-5 h-5 border-2 border-slate-500 rounded-lg flex items-center justify-center mr-2 transition-colors peer-checked:border-blue-500">
                     <svg
                       class="w-3 h-3 text-blue-500 {shareHiddenSubjects ? '' : 'hidden'}"
                       viewBox="0 0 20 20"
@@ -475,7 +475,7 @@
                     bind:checked={shareSubgroupSettings}
                     class="hidden peer"
                   >
-                  <div class="w-5 h-5 border-2 border-slate-500 rounded flex items-center justify-center mr-2 transition-colors peer-checked:border-blue-500">
+                  <div class="w-5 h-5 border-2 border-slate-500 rounded-lg flex items-center justify-center mr-2 transition-colors peer-checked:border-blue-500">
                     <svg
                       class="w-3 h-3 text-blue-500 {shareSubgroupSettings ? '' : 'hidden'}"
                       viewBox="0 0 20 20"
@@ -499,20 +499,20 @@
                   type="text"
                   bind:value={settingsName}
                   placeholder="Название настроек"
-                  class="p-2 bg-slate-900 text-white rounded-lg focus:outline-none border border-blue-500 flex-1 transition-colors"
+                  class="p-2 bg-slate-900 text-white rounded-2xl focus:outline-none border border-blue-500 flex-1 transition-colors"
                   autocomplete="off"
                   autocorrect="off"
                   autocapitalize="off"
                 >
                 <button
                   on:click={generateRandomName}
-                  class="p-2 bg-slate-900 text-white rounded-lg hover:bg-slate-700 transition-all"
+                  class="p-2 bg-slate-900 text-white rounded-2xl hover:bg-slate-700 transition-all"
                 >
                   🎲
                 </button>
               </div>
               <button
-                class="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all {isProcessing ? 'opacity-50 cursor-not-allowed' : ''}"
+                class="p-2 bg-blue-600 text-white rounded-2xl hover:bg-blue-700 transition-all {isProcessing ? 'opacity-50 cursor-not-allowed' : ''}"
                 on:click={handleShareSettings}
                 disabled={isProcessing}
               >
@@ -526,7 +526,7 @@
           <div class="flex justify-between items-center mb-4">
             <h3 class="text-lg font-semibold text-white">Доступные настройки</h3>
             <button
-              class="p-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-all"
+              class="p-2 bg-amber-600 text-white rounded-2xl hover:bg-amber-700 transition-all"
               on:click={() => showEditSettingsModal = true}
             >
               Редактировать/Удалить настройки
@@ -539,7 +539,7 @@
                 <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500" />
               </div>
             {:else if filteredSettings.length === 0}
-              <div class="bg-slate-900 p-4 rounded-lg col-span-full">
+              <div class="bg-slate-900 p-4 rounded-2xl col-span-full">
                 <p class="text-slate-400 text-center">Настройки не найдены</p>
               </div>
             {:else}
@@ -553,7 +553,7 @@
 
       <h2 class="text-2xl font-semibold text-white mt-4">Зачем это нужно:</h2>
       <div class="flex flex-wrap justify-center gap-6 p-0 mt-4">
-        <div class="card bg-slate-900 p-4 md:p-6 rounded-lg text-center max-w-md w-full">
+        <div class="card bg-slate-900 p-4 md:p-6 rounded-2xl text-center max-w-md w-full">
           <div class="h-27 w-54 mx-auto mb-4 rounded-full">
             <p class="transportation" style="font-size: 100px;">📱👉 🖥️</p>
           </div>
@@ -567,7 +567,7 @@
           </div>
         </div>
 
-        <div class="card bg-slate-900 p-3 md:p-6 rounded-lg text-center max-w-md w-full">
+        <div class="card bg-slate-900 p-3 md:p-6 rounded-2xl text-center max-w-md w-full">
           <div class="h-27 w-54 mx-auto mb-4 rounded-full">
             <p class="transportation" style="font-size: 100px;">🗑️</p>
           </div>
@@ -581,7 +581,7 @@
           </div>
         </div>
 
-        <div class="card bg-slate-900 p-4 md:p-6 rounded-lg text-center max-w-md w-full">
+        <div class="card bg-slate-900 p-4 md:p-6 rounded-2xl text-center max-w-md w-full">
           <div class="h-27 w-54 mx-auto mb-4 rounded-full">
             <p class="transportation" style="font-size: 100px;">🥴</p>
           </div>
@@ -609,13 +609,13 @@
   <div class="text-slate-400 mb-4">Выберите данные для удаления:</div>
   <div class="flex justify-center gap-4">
     <button
-      class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all"
+      class="px-4 py-2 bg-red-600 text-white rounded-2xl hover:bg-red-700 transition-all"
       on:click={() => notifications.add('Функция в разработке', 'info')}
     >
       Удалить
     </button>
     <button
-      class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-all"
+      class="px-4 py-2 bg-gray-600 text-white rounded-2xl hover:bg-gray-700 transition-all"
       on:click={() => showConfirmModal = false}
     >
       Отмена
@@ -631,13 +631,13 @@
   <p class="text-slate-300 mb-4">
     Это ваш уникальный токен для управления настройками. Сохраните его - он будет показан только один раз!
   </p>
-  <div class="bg-slate-800 p-3 rounded-lg mb-4 break-all">
+  <div class="bg-slate-800 p-3 rounded-2xl mb-4 break-all">
     <p class="text-blue-400 font-mono text-sm">{tokenValue}</p>
   </div>
   <div class="flex gap-2 mb-4">
     <button
       on:click={() => copyToClipboard(tokenValue)}
-      class="flex-1 p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all"
+      class="flex-1 p-2 bg-blue-600 text-white rounded-2xl hover:bg-blue-700 transition-all"
     >
       Копировать токен
     </button>

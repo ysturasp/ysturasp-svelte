@@ -31,7 +31,7 @@
 
   function showNotification(message: string, type: 'success' | 'error' | 'warning') {
     const notification = document.createElement('div');
-    notification.className = `fixed bottom-5 right-5 left-5 sm:right-10 sm:left-auto p-4 rounded-lg z-50 notification ${
+    notification.className = `fixed bottom-5 right-5 left-5 sm:right-10 sm:left-auto p-4 rounded-2xl z-50 notification ${
       type === 'error' ? 'bg-red-500' : 
       type === 'warning' ? 'bg-yellow-500' : 
       'bg-green-500'
@@ -47,7 +47,7 @@
         <span>${message}</span>
       </div>
       ${type === 'warning' ? `
-      <button onclick="showReferralModal()" class="ml-4 px-3 py-1 bg-white text-yellow-500 rounded hover:bg-yellow-100 transition-colors">
+      <button onclick="showReferralModal()" class="ml-4 px-3 py-1 bg-white text-yellow-500 rounded-xl hover:bg-yellow-100 transition-colors">
         Увеличить лимит
       </button>
       ` : ''}

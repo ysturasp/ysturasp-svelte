@@ -129,12 +129,12 @@
 <PageLayout>
   <Header />
   <main class="container mx-auto mt-5 md:mt-7 px-3 md:px-0">
-    <section class="bg-slate-800 rounded-lg p-4 md:p-6 mt-8">
+    <section class="bg-slate-800 rounded-2xl p-4 md:p-6 mt-8">
       <div class="flex items-center mb-4">
         <h2 id="calendarIcon" class="text-4xl font-semibold text-white -ml-2">📍</h2>
-        <h2 class="text-3xl font-semibold text-white">Карта кампуса ЯГТУ</h2>
+        <h2 class="text-2xl md:text-4xl font-semibold text-white">Карта кампуса ЯГТУ</h2>
       </div>
-      <div class="w-full overflow-hidden rounded-lg">
+      <div class="w-full overflow-hidden rounded-2xl">
         <div class="map-container">
           <div bind:this={mapContainer} id="map"></div>
         </div>
@@ -165,6 +165,6 @@
     background: #1e293b;
     color: white;
     padding: 10px;
-    border-radius: 8px;
+    border-radius: 18px;
   }
 </style> 

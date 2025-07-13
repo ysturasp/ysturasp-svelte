@@ -446,7 +446,7 @@
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="features-grid">
       {#each features as feature, i}
         <div
-          class="feature-card rounded-lg"
+          class="feature-card rounded-2xl"
           transition:fly={{ y: 20, duration: 500, delay: i * 100 }}
           bind:this={cards[i]}
           on:mousemove={(e) => handleMouseMove(e, cards[i])}

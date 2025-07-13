@@ -33,7 +33,7 @@
   });
 </script>
 
-<section class="bg-slate-800 rounded-lg p-6 mt-8">
+<section class="bg-slate-800 rounded-2xl p-6 mt-8">
   <h2 class="text-2xl font-semibold text-white mb-4">📊 Рейтинг предметов</h2>
   <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
     <div>
@@ -94,7 +94,7 @@
     padding: 1rem;
     background-color: #111827;
     margin-bottom: 1rem;
-    border-radius: 8px;
+    border-radius: 18px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     transition: background-color 0.3s, box-shadow 0.3s;
   }

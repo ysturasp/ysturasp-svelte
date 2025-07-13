@@ -8,7 +8,7 @@
       👋🏻 {status === 404 ? 'Страница не найдена!' : 'Произошла ошибка!'}
     </h1>
     <p class="text-base md:text-lg text-slate-400">{message}</p>
-    <a href="/" class="mt-4 p-2 bg-blue-700 text-white rounded-lg hover:bg-blue-600 transition-all">
+    <a href="/" class="mt-4 p-2 bg-blue-700 text-white rounded-2xl hover:bg-blue-600 transition-all">
       Вернуться на главную
     </a>
   </div>

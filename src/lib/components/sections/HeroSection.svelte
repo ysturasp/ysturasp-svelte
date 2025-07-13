@@ -55,7 +55,7 @@
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 max-w-5xl mx-auto">
         {#each features as feature}
             <a href={feature.href}
-                class="hero-card group relative overflow-hidden rounded-xl bg-gradient-to-br {feature.gradient} border {feature.border} p-4 backdrop-blur-sm transition-all {feature.hover}">
+                class="hero-card group relative overflow-hidden rounded-xl  bg-gradient-to-br {feature.gradient} border {feature.border} p-4 backdrop-blur-sm transition-all {feature.hover}">
                 <div class="absolute inset-0 bg-gradient-to-br {feature.glowFrom} {feature.glowTo} opacity-0 transition-opacity group-hover:opacity-10">
                 </div>
                 <div class="relative z-10">

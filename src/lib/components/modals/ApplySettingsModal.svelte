@@ -55,7 +55,7 @@
     <div class="text-slate-300 mb-6">
       <p class="mb-4">Это действие перезапишет ваши текущие настройки для группы {group}.</p>
       
-      <div class="bg-slate-800 p-4 rounded-lg mb-4">
+      <div class="bg-slate-800 p-4 rounded-2xl mb-4">
         <h4 class="text-white font-semibold mb-2">Скрытые предметы:</h4>
         <div class="space-y-2">
           {#if setting.hiddenSubjects}
@@ -75,7 +75,7 @@
         </div>
       </div>
 
-      <div class="bg-slate-800 p-4 rounded-lg">
+      <div class="bg-slate-800 p-4 rounded-2xl">
         <h4 class="text-white font-semibold mb-2">Настройки подгрупп:</h4>
         <div class="space-y-2">
           {#if setting.subgroupSettings}
@@ -97,13 +97,13 @@
     </div>
     <div class="flex justify-end gap-4">
       <button
-        class="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition-all"
+        class="px-4 py-2 bg-gray-600 text-white rounded-xl hover:bg-gray-700 transition-all"
         on:click={() => dispatch('close')}
       >
         Отмена
       </button>
       <button
-        class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-all"
+        class="px-4 py-2 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-all"
         on:click={() => dispatch('confirm')}
       >
         Продолжить

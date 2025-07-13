@@ -28,9 +28,9 @@
                         </div>
                     </div>
                     <div class="relative group">
-                        <div class="glow-effect absolute -inset-1 rounded-lg blur opacity-25 group-hover:opacity-75 transition duration-1000 group-hover:duration-200">
+                        <div class="glow-effect absolute -inset-1 rounded-2xl blur opacity-25 group-hover:opacity-75 transition duration-1000 group-hover:duration-200">
                         </div>
-                        <button class="glow-button relative px-8 py-4 rounded-lg leading-none flex items-center">
+                        <button class="glow-button relative px-8 py-4 rounded-2xl leading-none flex items-center">
                             <span class="flex items-center space-x-3">
                                 <span class="text-white text-lg font-bold">Поддержать</span>
                                 <span class="text-2xl">🎁</span>

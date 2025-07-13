@@ -18,19 +18,19 @@
   onMount(loadRecentlyViewed);
 </script>
 
-<section class="bg-slate-800 rounded-lg p-6 mt-8">
+<section class="bg-slate-800 rounded-2xl p-6 mt-8">
   <h2 class="text-2xl font-semibold text-white mb-4">👀 Вы недавно смотрели</h2>
   <div class="space-y-4">
     {#each recentlyViewed as item}
-      <div class="rounded-lg bg-slate-700 text-white">
-        <div class="flex p-4 bg-gray-700 rounded-lg justify-between items-center">
+      <div class="rounded-2xl bg-slate-700 text-white">
+        <div class="flex p-4 bg-gray-700 rounded-2xl justify-between items-center">
           <div>
             <h3 class="text-sm md:text:xl font-bold">{item.discipline}</h3>
             <p>Средний балл: {item.stats.average.toFixed(2)}</p>
             <p>Оценок: {item.stats.count5 + item.stats.count4 + item.stats.count3 + item.stats.count2}</p>
           </div>
           <button 
-            class="recently-viewed-btn flex items-center gap-2 bg-blue-700 text-white px-3 py-1 rounded hover:bg-blue-600 transition-all shadow-md"
+            class="recently-viewed-btn flex items-center gap-2 bg-blue-700 text-white px-3 py-1 rounded-xl hover:bg-blue-600 transition-all shadow-md"
             on:click={() => dispatch('viewAgain', { subject: item.discipline })}
           >
             <span class="hidden sm:inline">Посмотреть снова</span>
@@ -59,7 +59,7 @@
       padding: 0;
       justify-content: center;
       align-items: center;
-      border-radius: 8px;
+      border-radius: 18px;
     }
     .recently-viewed-btn span {
       display: none;

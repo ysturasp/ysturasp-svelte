@@ -15,7 +15,7 @@
   $: nameWithoutGroup = setting.name.replace(/ \(.*?\)$/, '');
 </script>
 
-<div class="bg-slate-800 p-4 rounded-lg">
+<div class="bg-slate-800 p-4 rounded-2xl">
   <h4 class="text-white font-semibold mb-1">
     {nameWithoutGroup}
     <span class="inline-flex items-center align-text-bottom">
@@ -57,7 +57,7 @@
   
   <button
     on:click={() => dispatch('apply', setting.id)}
-    class="w-full p-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-all"
+    class="w-full p-2 bg-emerald-600 text-white rounded-2xl hover:bg-emerald-700 transition-all"
   >
     Применить настройки
   </button>

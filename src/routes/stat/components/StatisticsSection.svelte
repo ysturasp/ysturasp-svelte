@@ -196,8 +196,8 @@
   });
 </script>
 
-<section class="bg-slate-800 rounded-lg md:p-6 p-4 mt-8">
-  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+<section class="bg-slate-800 rounded-2xl md:p-6 p-4 mt-8">
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between -mt-1">
     <div class="flex items-center mb-0">
       <h2 class="text-2xl md:text-4xl font-semibold text-white">👨‍💻 Статистика оценок</h2>
       <span class="flex ml-2 mb-6 rounded-full bg-indigo-500 uppercase px-2 py-1 text-xs font-bold">Beta</span>
@@ -206,7 +206,7 @@
       <span class="text-slate-300 mr-2">Доступно запросов:</span>
       <span class="text-white font-bold text-xl">{remainingViews}</span>
       <button 
-        class="ml-2 p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all"
+        class="ml-2 p-2 bg-blue-600 text-white rounded-2xl hover:bg-blue-700 transition-all"
         on:click={() => dispatch('showReferral')}
       >
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -273,7 +273,7 @@
       <input
         id="combobox-input"
         type="text"
-        class="block w-full p-2.5 bg-slate-900 border border-gray-600 rounded-lg text-gray-300 focus:ring-blue-500 focus:border-blue-500"
+        class="block w-full p-2.5 bg-slate-900 border border-gray-600 rounded-2xl text-gray-300 focus:ring-blue-500 focus:border-blue-500"
         class:ambient-focuss={showOptions}
         placeholder="Выберите дисциплину..."
         bind:value={searchQuery}
@@ -295,7 +295,7 @@
       {#if showOptions}
         <ul
           id="combobox-options"
-          class="absolute w-full p-2 bg-slate-900 border border-gray-600 rounded-lg mt-1 overflow-hidden combobox-options"
+          class="absolute w-full p-2 bg-slate-900 border border-gray-600 rounded-2xl mt-1 overflow-hidden combobox-options"
           class:active={showOptions}
           class:ambient-focus={showOptions}
         >
@@ -312,7 +312,7 @@
     </div>
 
     <button
-      class="btn btn-primary btn-block mt-3 p-2 bg-blue-700 text-white rounded-lg hover:bg-blue-600 transition-all w-full"
+      class="btn btn-primary btn-block mt-3 p-2 bg-blue-700 text-white rounded-2xl hover:bg-blue-600 transition-all w-full"
       on:click={getStatistics}
     >
       Получить статистику
@@ -328,19 +328,19 @@
       </div>
       
       {#if (statistics.count5 + statistics.count4 + statistics.count3 + statistics.count2) < 25}
-        <div class="bg-red-500 text-white font-bold p-2 rounded-lg mb-4">
+        <div class="bg-red-500 text-white font-bold p-2 rounded-2xl mb-4">
           ⚠️⚠️⚠️ Данных недостаточно, статистика может быть неточна ⚠️⚠️⚠️
         </div>
       {/if}
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div class="rounded-lg p-4 text-center" style="border: 3px solid #f8fafc;">
+        <div class="rounded-2xl p-4 text-center" style="border: 3px solid #f8fafc;">
           <h2 class="text-2xl font-bold mb-2">
             Средний балл {statistics.average >= 4 ? "😍" : "😭"}
           </h2>
           <p class="text-slate-300 text-2xl">{statistics.average.toFixed(2)}</p>
         </div>
-        <div class="rounded-lg p-4 text-center" style="border: 3px solid #f8fafc;">
+        <div class="rounded-2xl p-4 text-center" style="border: 3px solid #f8fafc;">
           <h2 class="text-2xl font-bold mb-2">Всего оценок проанализировано</h2>
           <p class="text-slate-300 text-2xl">
             {statistics.count5 + statistics.count4 + statistics.count3 + statistics.count2}
@@ -349,19 +349,19 @@
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mt-4">
-        <div class="rounded-lg p-4 text-center grade-element cursor-pointer" style="border: 3px solid #f8fafc;">
+        <div class="rounded-2xl p-4 text-center grade-element cursor-pointer" style="border: 3px solid #f8fafc;">
           <h3 class="text-xl font-bold mb-2">Пятерок</h3>
           <p class="text-slate-300 text-2xl">{statistics.count5}</p>
         </div>
-        <div class="rounded-lg p-4 text-center grade-element cursor-pointer" style="border: 3px solid #f8fafc;">
+        <div class="rounded-2xl p-4 text-center grade-element cursor-pointer" style="border: 3px solid #f8fafc;">
           <h3 class="text-xl font-bold mb-2">Четверок</h3>
           <p class="text-slate-300 text-2xl">{statistics.count4}</p>
         </div>
-        <div class="rounded-lg p-4 text-center grade-element cursor-pointer" style="border: 3px solid #f8fafc;">
+        <div class="rounded-2xl p-4 text-center grade-element cursor-pointer" style="border: 3px solid #f8fafc;">
           <h3 class="text-xl font-bold mb-2">Троек</h3>
           <p class="text-slate-300 text-2xl">{statistics.count3}</p>
         </div>
-        <div class="rounded-lg p-4 text-center grade-element cursor-pointer" style="border: 3px solid #f8fafc;">
+        <div class="rounded-2xl p-4 text-center grade-element cursor-pointer" style="border: 3px solid #f8fafc;">
           <h3 class="text-xl font-bold mb-2">Двоек</h3>
           <p class="text-slate-300 text-2xl">{statistics.count2}</p>
         </div>
@@ -385,7 +385,7 @@
     color: #ffffff;
     padding: 6px 12px;
     margin: 5px;
-    border-radius: 8px;
+    border-radius: 15px;
     font-weight: 500;
     text-align: center;
     border: 1px solid transparent;
@@ -444,7 +444,6 @@
 
   .ambient-focuss {
     position: relative;
-    border-radius: 10px;
     background: rgba(1, 21, 51, 0.931);
     box-shadow: 0 0 200px rgb(0, 57, 117);
     backdrop-filter: blur(15px);
@@ -453,7 +452,6 @@
   }
 
   .ambient-focus {
-    border-radius: 10px;
     background: rgba(1, 21, 51, 0.931);
     box-shadow: 0 0 200px rgb(0, 57, 117);
     backdrop-filter: blur(15px);
@@ -489,12 +487,12 @@
   }
 
   .combobox-options li {
-    border-radius: 10px;
+    border-radius: 18px;
     transition: background-color 0.3s ease-in-out;
   }
 
   .combobox-options li:hover {
-    border-radius: 10px;
+    border-radius: 18px;
     background-color: #0072e461;
   }
 

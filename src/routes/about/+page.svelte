@@ -71,11 +71,11 @@
 <PageLayout>
   <Header />
   <main class="container mx-auto mt-5 md:mt-7 px-3 md:px-0">
-    <section id="boosty-news" class="bg-slate-800 rounded-lg p-6 mt-8">
-      <h2 class="text-2xl sm:text-left lg:text-left md:text-left text-center font-semibold text-white mb-4">
-        😜Наша история (дубляж постов с Boosty)
+    <section id="boosty-news" class="bg-slate-800 rounded-2xl p-6 mt-8">
+      <h2 class="text-2xl md:text-4xl font-semibold text-white sm:text-left lg:text-left md:text-left text-center font-semibold text-white mb-4">
+        😜 Наша история (дубляж постов с Boosty)
       </h2>
-      <div class="text-center mt-[-11px] mb-8 md:mt-0 md:mb-6">
+      <div class="text-center mb-8 md:mt-0 md:mb-6">
         <a href="https://boosty.to/ysturasp.me/donate" target="_blank" 
           class="bg-blue-700 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-full transition duration-300">
           Поддержать проект
@@ -96,7 +96,7 @@
         <p class="text-slate-400">Посты пока недоступны.</p>
       {:else}
         {#each posts as post}
-          <div class="bg-slate-900 rounded-lg p-6 mb-8 shadow-lg hover:shadow-2xl transition-shadow duration-300">
+          <div class="bg-slate-900 rounded-2xl p-6 mb-8 shadow-lg hover:shadow-2xl transition-shadow duration-300">
             {#if post.link}
               <a href={post.link} target="_blank" class="text-2xl text-white font-bold hover:text-blue-400 transition-colors">
                 {post.title}
@@ -135,7 +135,7 @@
                   src={imageUrl}
                   alt="Post image"
                   style="max-height: 500px"
-                  class="rounded-lg max-w-full hover:scale-105 transition-transform duration-300 cursor-pointer"
+                  class="rounded-2xl max-w-full hover:scale-105 transition-transform duration-300 cursor-pointer"
                   on:click={() => handleImageClick(imageUrl)}
                 />
               </div>
@@ -181,7 +181,7 @@
       <img
         src={selectedImage}
         alt="Enlarged Image"
-        class="rounded-lg max-w-[90vw] max-h-[90vh] object-contain"
+        class="rounded-2xl max-w-[90vw] max-h-[90vh] object-contain"
       />
       <button
         class="absolute top-2 right-2 text-white bg-red-600 rounded-full p-2 w-5 h-5 md:w-10 md:h-10 flex items-center justify-center hover:bg-red-800"
