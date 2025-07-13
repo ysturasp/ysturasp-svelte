@@ -223,13 +223,24 @@
     </p>
     
     <div class="flex items-center justify-center">
-      <div class="mt-4 p-4 bg-indigo-800 items-center text-indigo-100 leading-none rounded-3xl flex lg:inline-flex mb-4">
-        <h2 class="text-3xl font-semibold text-white mr-2">⚠️</h2>
-        <p class="text-slate-300 text-center">
-          Не полагайтесь стопроцентно на эти данные. 
-          Большая часть в получении желаемой оценки всё же зависит только от ВАС
-        </p>
-        <h2 class="text-3xl font-semibold text-white ml-2">⚠️</h2>
+      <div class="mt-4 p-4 bg-indigo-800 items-center text-indigo-100 leading-none rounded-3xl flex flex-col justify-center relative overflow-hidden mb-4 warning-block">
+        <div class="emoji-bg absolute inset-0 pointer-events-none select-none" aria-hidden="true">
+          <span class="emoji" style="top:10%;left:5%;font-size:2.5rem;opacity:0.18;">⚠️</span>
+          <span class="emoji" style="top:20%;left:60%;font-size:3.2rem;opacity:0.13;">⚠️</span>
+          <span class="emoji" style="top:60%;left:20%;font-size:2.8rem;opacity:0.15;">⚠️</span>
+          <span class="emoji" style="top:70%;left:70%;font-size:2.2rem;opacity:0.12;">⚠️</span>
+          <span class="emoji" style="top:40%;left:40%;font-size:4rem;opacity:0.09;">⚠️</span>
+          <span class="emoji" style="top:80%;left:10%;font-size:2.1rem;opacity:0.14;">⚠️</span>
+          <span class="emoji" style="top:15%;left:80%;font-size:2.7rem;opacity:0.11;">⚠️</span>
+          <span class="emoji" style="top:50%;left:80%;font-size:2.3rem;opacity:0.13;">⚠️</span>
+          <span class="emoji" style="top:85%;left:55%;font-size:2.6rem;opacity:0.10;">⚠️</span>
+        </div>
+        <div class="flex items-center justify-center z-10 relative">
+          <p class="text-slate-300 text-center font-medium z-10 relative">
+            Не полагайтесь стопроцентно на эти данные.<br>
+            Большая часть в получении желаемой оценки всё же зависит только от ВАС
+          </p>
+        </div>
       </div>
     </div>
 
@@ -487,5 +498,24 @@
   .combobox-options li:hover {
     border-radius: 10px;
     background-color: #0072e461;
+  }
+
+  .emoji-bg {
+    z-index: 1;
+  }
+  .emoji-bg .emoji {
+    position: absolute;
+    user-select: none;
+    filter: blur(0.2px);
+    transition: opacity 0.3s;
+  }
+  @media (max-width: 600px) {
+    .emoji-bg .emoji {
+      font-size: 1.2rem !important;
+      opacity: 0.13 !important;
+    }
+    .warning-block {
+      min-height: 80px;
+    }
   }
 </style> 
