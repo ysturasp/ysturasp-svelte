@@ -6,6 +6,7 @@
   import PageLayout from '$lib/components/layout/PageLayout.svelte';
   import Header from '$lib/components/layout/Header.svelte';
   import Footer from '$lib/components/layout/Footer.svelte';
+  import ScheduleTitle from './components/ScheduleTitle.svelte';
 
   let isLoading = false;
   let directions: Direction[] = [];
@@ -303,6 +304,13 @@
 
       {#if scheduleData}
         <div class="mt-4">
+          {#if scheduleData.items.length > 0}
+            <ScheduleTitle 
+              groupNumber={actualGroupNumber} 
+              startDate={scheduleData.items[0].courseInfo.startDate} 
+            />
+          {/if}
+          
           <div class="flex justify-center items-center mb-4">
             <div class="bg-slate-800 rounded-2xl p-2 flex items-center">
               <button
