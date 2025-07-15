@@ -346,9 +346,9 @@
             {#if dayLessons.length > 0}
               <div class="p-4 bg-slate-900 rounded-2xl mb-4">
                 <h3 class="text-2xl font-semibold text-white mb-2">{day}</h3>
-                {#each dayLessons as lesson}
+                {#each dayLessons as lesson, index}
                   {@const timeInfo = getTimeContainer(lesson)}
-                  <div class="bg-slate-800 p-4 rounded-2xl mb-2 flex relative {timeInfo.isMultiLesson ? 'multi-lesson' : ''}">
+                  <div class="bg-slate-800 p-4 rounded-2xl {index !== dayLessons.length - 1 ? 'mb-2' : ''} flex relative {timeInfo.isMultiLesson ? 'multi-lesson' : ''}">
                     {#if timeInfo.isMultiLesson}
                       <div class="absolute -left-2 top-1/2 transform -translate-y-1/2 w-1 h-4/5 bg-blue-400 rounded-full"></div>
                     {/if}
