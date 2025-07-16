@@ -30,7 +30,7 @@
     class="rounded-2xl px-3 py-2 md:px-5 md:py-3 ring-1 shadow-xl flex justify-between items-center transition-all">
     <nav class="hidden lg:flex gap-x-2">
       <a href="/" class="text-blue-500 font-semibold text-sm md:text-base hover:text-blue-400 transition-all flex items-center">
-        <img src="images/cat.png" alt="Logo" class="w-10 h-10 mr-2" />
+        <img src="/images/cat.png" alt="Logo" class="w-10 h-10 mr-2" />
         <span class="text-sm md:text-base">ystuRASP</span>
       </a>
       <a href="/stat" class="nav-link text-sm text-gray-300 md:text-base hover:text-blue-400 transition-all flex items-center">Статистика</a>

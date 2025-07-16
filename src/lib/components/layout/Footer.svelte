@@ -20,7 +20,7 @@
                     </a>
                     <a href="https://github.com/ysturasp" class="text-slate-400 hover:text-white transition-all">
                         <div class="w-14 h-14 bg-white rounded-xl p-1">
-                            <img src="images/github-mark.png" alt="GitHub" class="mx-auto my-1 w-10 h-10">
+                            <img src="/images/github-mark.png" alt="GitHub" class="mx-auto my-1 w-10 h-10">
                         </div>
                     </a>
                 </nav>
