@@ -52,8 +52,8 @@
                 <img src="https://ysturasp.github.io/tg_emoji/Food%20and%20Drink/Cookie.webp" alt="Cookie"
                     class="cookie-icon">
                 <div class="text">
-                    <p>Сайт собирает статистику для улучшения работы сервиса</p>
-                    <a href="/disclaimer" class="text-blue-400 hover:text-blue-300">Условия использования</a>
+                    <p>Мы используем cookie и собираем данные для аналитики и улучшения работы сервиса</p>
+                    <a href="/legal/privacy" class="text-blue-400 hover:text-blue-300">Политика конфиденциальности</a>
                 </div>
             </div>
             <button class="accept-button" on:click={acceptCookies}>
