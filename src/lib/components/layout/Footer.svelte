@@ -1,3 +1,22 @@
+<script lang="ts">
+    import Dropdown from '$lib/components/ui/Dropdown.svelte';
+
+    const legalItems = [
+        {
+            href: '/legal/terms',
+            text: 'Условия использования'
+        },
+        {
+            href: '/legal/privacy',
+            text: 'Политика конфиденциальности'
+        },
+        {
+            href: '/legal/license',
+            text: 'Лицензионное соглашение'
+        }
+    ];
+</script>
+
 <footer class="bg-slate-800 py-6 mt-12">
     <div class="container mx-auto px-4">
         <div class="flex flex-wrap justify-between items-center">
@@ -26,7 +45,12 @@
                 </nav>
             </div>
             <div class="w-full md:w-1/3 text-center md:text-right mt-4 md:mt-0">
-                <p class="text-slate-400">© 2024 Made with ❤️ by ystuRASP</p>
+                <Dropdown 
+                    title="Юридическая информация"
+                    titleHref="/legal"
+                    items={legalItems}
+                />
+                <p class="text-slate-400 mt-2">© 2024 Made with ❤️ by ystuRASP</p>
             </div>
         </div>
     </div>
