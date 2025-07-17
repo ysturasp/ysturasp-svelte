@@ -321,11 +321,11 @@
           Показать расписание
         </button>
 
-        <div class="flex justify-between items-center mt-4 w-full">
+        <div class="flex justify-between items-center w-full">
           <button
             type="button"
             on:click={copyScheduleLink}
-            class="p-2 border-2 border-blue-700 text-white rounded-lg hover:border-indigo-800 hover:text-indigo-800 transition-all flex items-center justify-center"
+            class="p-2 border-2 border-blue-700 text-white rounded-lg hover:border-blue-800 transition-all flex items-center justify-center"
           >
             <span class="text-3xl md:text-xl align-middle">🔗</span>
             <span class="ml-2 text-sm align-middle hidden md:inline">Скопировать ссылку на расписание</span>
@@ -342,7 +342,7 @@
             />
           {/if}
           
-          <div class="flex justify-center items-center mb-4">
+          <div class="flex justify-center items-center">
             <div class="bg-slate-800 rounded-2xl p-2 flex items-center">
               <button
                 class="px-4 py-2 rounded-2xl mr-2 transition-all {viewMode === 'all' ? 'bg-blue-700 text-white' : 'bg-gray-700 text-gray-400'}"
