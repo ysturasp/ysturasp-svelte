@@ -48,9 +48,10 @@
     >
         <div 
             bind:this={modalContent}
-            class="bg-slate-900 rounded-t-2xl p-6 max-w-lg w-full mx-auto shadow-xl ring-1"
+            class="bg-slate-900 rounded-t-2xl w-full max-w-lg mx-auto shadow-xl ring-1 flex flex-col"
+            style="max-height: calc(100vh - 5rem);"
         >
-            <div class="flex justify-between items-center mb-4">
+            <div class="flex justify-between items-center p-4">
                 <h3 class="text-xl font-bold text-white">{title}</h3>
                 <button 
                     on:click={onClose}
@@ -62,8 +63,13 @@
                     </svg>
                 </button>
             </div>
-            <div class="text-gray-300">
-                <slot />
+            <div class="overflow-y-auto flex-1 px-4">
+                <div class="text-gray-300">
+                    <slot />
+                </div>
+            </div>
+            <div class="p-4">
+                <slot name="footer" />
             </div>
         </div>
     </div>

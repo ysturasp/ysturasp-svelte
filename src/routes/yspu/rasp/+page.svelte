@@ -15,6 +15,7 @@
 
     let isLoading = false;
     let isBetaModalOpen = false;
+    let isViewModeModalOpen = false;
     let directions: Direction[] = [];
     let selectedDirection = '';
     let selectedGroup = '';
@@ -226,6 +227,7 @@
                     <ViewModeToggle
                         {viewMode}
                         onToggle={toggleViewMode}
+                        onInfoClick={() => isViewModeModalOpen = true}
                     />
 
                     {#each days as day, dayIndex}
@@ -274,12 +276,40 @@
         пожалуйста, сообщите об этом <a href="https://t.me/ysturasp_bot"
         class="text-blue-500 hover:text-blue-600">нам</a>
     </p>
-    <button 
-        on:click={() => isBetaModalOpen = false}
-        class="w-full bg-blue-600 text-white rounded-lg px-4 py-3 hover:bg-blue-700 transition-all"
-    >
-        ок, пон
-    </button>
+    <svelte:fragment slot="footer">
+        <button 
+            on:click={() => isBetaModalOpen = false}
+            class="w-full bg-blue-600 text-white rounded-lg px-4 py-3 hover:bg-blue-700 transition-all"
+        >
+            ок, пон
+        </button>
+    </svelte:fragment>
+</BetaModal>
+
+<BetaModal
+    isOpen={isViewModeModalOpen}
+    title="Режимы просмотра расписания"
+    onClose={() => isViewModeModalOpen = false}
+>
+    <div class="mb-4 bg-gray-800 p-4 rounded-lg">
+        <h4 class="text-lg font-semibold text-blue-400 mb-2">Общее расписание</h4>
+        <p>Показывает общее расписание с учетом всех предметов, независимо от дат их начала и окончания. Полезно для
+        общего ознакомления со структурой занятий на семестр.</p>
+    </div>
+    <div class="mb-4 bg-gray-800 p-4 rounded-lg">
+        <h4 class="text-lg font-semibold text-blue-400 mb-2">Актуальное по дате</h4>
+        <p>Показывает только те предметы, которые проводятся в текущую дату с учетом периодов и условий. Например,
+        если для предмета указан период с 10.02.2025 по 10.03.2025, он будет отображаться только в этом диапазоне
+        дат.</p>
+    </div>
+    <svelte:fragment slot="footer">
+        <button 
+            on:click={() => isViewModeModalOpen = false}
+            class="w-full bg-blue-600 text-white rounded-lg px-4 py-3 hover:bg-blue-700 transition-all"
+        >
+            ок, пон
+        </button>
+    </svelte:fragment>
 </BetaModal>
 
 {#if isLoading}
