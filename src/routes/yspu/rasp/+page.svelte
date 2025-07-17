@@ -408,10 +408,10 @@
                       <p class="font-bold text-white">{lesson.lessonName}</p>
                       <p class="text-sm {lessonTypes[lesson.type as keyof typeof lessonTypes]?.class || 'text-slate-400'}">
                         {lessonTypes[lesson.type as keyof typeof lessonTypes]?.text || 'Занятие'}
+                        {#if timeInfo.duration > 1}
+                          <span class="text-sm {lessonTypes[lesson.type as keyof typeof lessonTypes]?.class || 'text-slate-400'}"> на {timeInfo.duration} пары</span>
+                        {/if}
                       </p>
-                      {#if timeInfo.duration > 1}
-                        <p class="text-sm text-blue-400">Занятие на {timeInfo.duration} пары</p>
-                      {/if}
                       {#if lesson.teacherName}
                         <p class="text-sm text-slate-400">
                           <a href="/yspu/raspprep?teacher={encodeURIComponent(lesson.teacherName)}" 
