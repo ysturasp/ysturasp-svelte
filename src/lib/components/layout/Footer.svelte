@@ -45,11 +45,13 @@
                 </nav>
             </div>
             <div class="w-full md:w-1/3 text-center md:text-right mt-4 md:mt-0">
-                <Dropdown 
-                    title="Юридическая информация"
-                    titleHref="/legal"
-                    items={legalItems}
-                />
+                <div class="flex justify-center md:justify-end">
+                    <Dropdown 
+                        title="Юридическая информация"
+                        titleHref="/legal"
+                        items={legalItems}
+                    />
+                </div>
                 <p class="text-slate-400 mt-2">© 2024 Made with ❤️ by ystuRASP</p>
             </div>
         </div>
