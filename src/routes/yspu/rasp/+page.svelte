@@ -11,8 +11,10 @@
     import SelectScheduleForm from '$lib/components/schedule/SelectScheduleForm.svelte';
     import ViewModeToggle from '$lib/components/schedule/ViewModeToggle.svelte';
     import ScheduleDay from '$lib/components/schedule/ScheduleDay.svelte';
+    import BetaModal from '$lib/components/ui/BottomModal.svelte';
 
     let isLoading = false;
+    let isBetaModalOpen = false;
     let directions: Direction[] = [];
     let selectedDirection = '';
     let selectedGroup = '';
@@ -185,7 +187,10 @@
     <main class="container mx-auto mt-5 md:mt-7 px-3 md:px-0">
         <section class="bg-slate-800 rounded-2xl sm:p-6 p-4 mt-8">
             <div class="bg-amber-500 text-black text-center p-4 rounded-2xl mb-4 relative">
-                <span class="absolute -top-2 -right-2 transform rotate-12 flex rounded-full bg-indigo-500 uppercase px-2 py-1 text-xs font-bold text-white shadow-lg cursor-pointer hover:bg-indigo-600 transition-colors">
+                <span 
+                    class="absolute -top-2 -right-2 transform rotate-12 flex rounded-full bg-indigo-500 uppercase px-2 py-1 text-xs font-bold text-white shadow-lg cursor-pointer hover:bg-indigo-600 transition-colors"
+                    on:click={() => isBetaModalOpen = true}
+                >
                     Beta
                 </span>
                 <div class="flex items-center justify-center gap-2">
@@ -246,6 +251,36 @@
     <Footer />
     <NotificationsContainer />
 </PageLayout>
+
+<BetaModal
+    isOpen={isBetaModalOpen}
+    title="Что такое Beta?"
+    onClose={() => isBetaModalOpen = false}
+>
+    <p class="mb-4">
+        Это бета-версия расписания ЯГПУ. Мы разработали экосистему для ЯГТУ, настало время расширяться,
+        на одном из факультетов ЯГПУ <a href="https://vk.com/fsyipp"
+        class="text-blue-500 hover:text-blue-600">(Факультет Социального Управления)</a> теперь можно смотреть
+        расписание у нас в удобном виде
+    </p>
+    <p class="mb-4">
+        Больше никакой путаницы с таблицами — только чёткое и понятное расписание. А также широкий выбор
+        где можно посмотреть: браузер, <a class="font-extrabold text-gray-200" href="/installapp">web-приложение на
+        iPhone</a>, или <a class="font-extrabold text-gray-200"
+        href="https://t.me/ysturasp_yspu_bot/ysturasp_yspu">мини-приложение в телеграме</a>
+    </p>
+    <p class="mb-4">
+        На начальном этапе могут быть некоторые косяки. Если у вас есть предложения по улучшению или вы нашли ошибку,
+        пожалуйста, сообщите об этом <a href="https://t.me/ysturasp_bot"
+        class="text-blue-500 hover:text-blue-600">нам</a>
+    </p>
+    <button 
+        on:click={() => isBetaModalOpen = false}
+        class="w-full bg-blue-600 text-white rounded-lg px-4 py-3 hover:bg-blue-700 transition-all"
+    >
+        ок, пон
+    </button>
+</BetaModal>
 
 {#if isLoading}
     <LoadingOverlay />
