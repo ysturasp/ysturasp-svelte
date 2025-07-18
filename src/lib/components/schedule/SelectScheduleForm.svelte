@@ -7,6 +7,7 @@
     export let selectedGroup = '';
     export let onSubmit: () => void;
     export let onDirectionChange: () => void;
+    export let scheduleShown = false;
 
     async function copyScheduleLink() {
         if (!selectedDirection || !selectedGroup) {
@@ -68,14 +69,16 @@
         Показать расписание
     </button>
 
-    <div class="flex justify-between items-center w-full">
-        <button
-            type="button"
-            on:click={copyScheduleLink}
-            class="p-2 border-2 border-blue-700 text-white rounded-lg hover:border-blue-800 transition-all flex items-center justify-center"
-        >
-            <span class="text-3xl md:text-xl align-middle">🔗</span>
-            <span class="ml-2 text-sm align-middle hidden md:inline">Скопировать ссылку на расписание</span>
-        </button>
-    </div>
+    {#if scheduleShown && selectedDirection && selectedGroup}
+        <div class="flex justify-between items-center w-full">
+            <button
+                type="button"
+                on:click={copyScheduleLink}
+                class="p-2 border-2 border-blue-700 text-white rounded-lg hover:border-blue-800 transition-all flex items-center justify-center"
+            >
+                <span class="text-3xl md:text-xl align-middle">🔗</span>
+                <span class="ml-2 text-sm align-middle hidden md:inline">Скопировать ссылку на расписание</span>
+            </button>
+        </div>
+    {/if}
 </form> 

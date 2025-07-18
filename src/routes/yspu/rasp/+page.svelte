@@ -213,6 +213,7 @@
                 bind:selectedGroup
                 onSubmit={loadSchedule}
                 onDirectionChange={handleDirectionChange}
+                scheduleShown={!!scheduleData}
             />
 
             {#if scheduleData}
