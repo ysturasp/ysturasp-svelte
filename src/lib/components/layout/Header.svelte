@@ -52,7 +52,8 @@
       </button>
     </div>
 
-    <div class="flex gap-x-3">
+    <div class="flex gap-x-2">
+      <slot name="online-counter-desktop" />
       <a href="https://boosty.to/ysturasp.me/donate"
         class="hero-button p-1 md:p-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl  text-sm md:text-sm transition-all border-2 border-blue-700 hover:border-blue-400">
         Поддержать проект <span class="text-xl align-middle">💸</span>
@@ -64,6 +65,8 @@
       </a>
     </div>
   </div>
+
+  <slot name="online-counter-mobile" />
 
   <div 
     class="md:hidden bg-slate-800 rounded-2xl mt-4 px-3 py-2 md:px-6 md:py-3 ring-1 shadow-xl absolute top-full left-3 right-3 {!isMobileMenuOpen ? 'hidden' : ''} {isClosing ? 'hide' : 'show'}"

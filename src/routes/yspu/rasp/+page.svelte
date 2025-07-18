@@ -12,6 +12,7 @@
     import ViewModeToggle from '$lib/components/schedule/ViewModeToggle.svelte';
     import ScheduleDay from '$lib/components/schedule/ScheduleDay.svelte';
     import BetaModal from '$lib/components/ui/BottomModal.svelte';
+    import OnlineCounter from '$lib/components/ui/OnlineCounter.svelte';
 
     let isLoading = false;
     let isBetaModalOpen = false;
@@ -183,7 +184,10 @@
 </svelte:head>
 
 <PageLayout>
-    <Header />
+    <Header>
+        <OnlineCounter variant="desktop" slot="online-counter-desktop" />
+        <OnlineCounter variant="mobile" slot="online-counter-mobile" />
+    </Header>
     
     <main class="container mx-auto mt-5 md:mt-7 px-3 md:px-0">
         <section class="bg-slate-800 rounded-2xl sm:p-6 p-4 mt-8">
