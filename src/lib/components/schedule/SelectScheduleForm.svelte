@@ -18,12 +18,23 @@
         const url = new URL(window.location.href);
         url.searchParams.set('direction', selectedDirection);
         url.searchParams.set('group', selectedGroup);
+        const textToCopy = url.toString();
 
         try {
-            await navigator.clipboard.writeText(url.toString());
+            await navigator.clipboard.writeText(textToCopy);
             notifications.add('Ссылка скопирована в буфер обмена', 'success');
         } catch (error) {
-            notifications.add('Не удалось скопировать ссылку', 'error');
+            try {
+                const tempInput = document.createElement('input');
+                tempInput.value = textToCopy;
+                document.body.appendChild(tempInput);
+                tempInput.select();
+                document.execCommand('copy');
+                document.body.removeChild(tempInput);
+                notifications.add('Ссылка скопирована в буфер обмена', 'success');
+            } catch (fallbackError) {
+                notifications.add('Не удалось скопировать ссылку', 'error');
+            }
         }
     }
 </script>

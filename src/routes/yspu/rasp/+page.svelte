@@ -53,14 +53,24 @@
             directions = await getDirections();
             viewMode = storage.get('scheduleViewMode', 'all') as 'all' | 'actual';
 
-            const lastDirection = storage.get('lastYspuInstitut');
-            const lastGroup = storage.get('lastYspuGroup');
+            const urlParams = new URLSearchParams(window.location.search);
+            const urlDirection = urlParams.get('direction');
+            const urlGroup = urlParams.get('group');
 
-            if (lastDirection) {
-                selectedDirection = lastDirection;
-                if (lastGroup) {
-                    selectedGroup = lastGroup;
-                    await loadSchedule();
+            if (urlDirection && urlGroup) {
+                selectedDirection = urlDirection;
+                selectedGroup = urlGroup;
+                await loadSchedule();
+            } else {
+                const lastDirection = storage.get('lastYspuInstitut');
+                const lastGroup = storage.get('lastYspuGroup');
+
+                if (lastDirection) {
+                    selectedDirection = lastDirection;
+                    if (lastGroup) {
+                        selectedGroup = lastGroup;
+                        await loadSchedule();
+                    }
                 }
             }
         } catch (error) {
