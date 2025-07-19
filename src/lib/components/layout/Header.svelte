@@ -69,7 +69,7 @@
   <slot name="online-counter-mobile" />
 
   <div 
-    class="md:hidden bg-slate-800 rounded-2xl mt-4 px-3 py-2 md:px-6 md:py-3 ring-1 shadow-xl absolute top-full left-3 right-3 {!isMobileMenuOpen ? 'hidden' : ''} {isClosing ? 'hide' : 'show'}"
+    class="mobile-menu lg:hidden bg-slate-800 rounded-2xl mt-4 px-3 py-2 md:px-6 md:py-3 ring-1 shadow-xl absolute left-3 right-3 {!isMobileMenuOpen ? 'hidden' : ''} {isClosing ? 'hide' : 'show'}"
     on:animationend={handleAnimationEnd}>
     <a href="/" class="block py-2 text-blue-500 font-semibold text-sm md:text-base" on:click={closeMobileMenu}>ystuRASP Главная</a>
     <a href="/stat" class="block py-2 text-gray-300 hover:text-blue-400 text-sm md:text-base" on:click={closeMobileMenu}>Статистика</a>
@@ -87,5 +87,12 @@
 
   .hide {
     animation: fadeOutScale 0.2s ease-in forwards;
+  }
+  
+  @media screen and (min-width: 768px) and (max-width: 1024px) {
+    .mobile-menu {
+      left: 0 !important;
+      right: 0 !important;
+    }
   }
 </style> 

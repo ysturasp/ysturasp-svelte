@@ -236,7 +236,7 @@
 
   .online-users-counter.mobile {
     display: none;
-    margin: 10px auto;
+    margin: 8px auto;
     margin-bottom: -8px;
     width: fit-content;
   }
