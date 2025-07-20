@@ -6,11 +6,11 @@
     import PageLayout from '$lib/components/layout/PageLayout.svelte';
     import Header from '$lib/components/layout/Header.svelte';
     import Footer from '$lib/components/layout/Footer.svelte';
-    import ScheduleTitle from './components/ScheduleTitle.svelte';
     import NotificationsContainer from '$lib/components/notifications/NotificationsContainer.svelte';
     import SelectScheduleForm from '$lib/components/schedule/SelectScheduleForm.svelte';
     import ViewModeToggle from '$lib/components/schedule/ViewModeToggle.svelte';
     import ScheduleDay from '$lib/components/schedule/ScheduleDay.svelte';
+    import ScheduleTitle from '$lib/components/schedule/ScheduleTitle.svelte';
     import BetaModal from '$lib/components/ui/BottomModal.svelte';
     import OnlineCounter from '$lib/components/ui/OnlineCounter.svelte';
 
@@ -233,33 +233,34 @@
             {#if scheduleData}
                 <div class="mt-4">
                     {#if scheduleData.items.length > 0}
-                        <ScheduleTitle 
-                            groupNumber={actualGroupNumber} 
-                            startDate={scheduleData.items[0].courseInfo.startDate} 
+                        <ScheduleTitle
+                            type="group"
+                            title={actualGroupNumber}
+                            subtitle={scheduleData.items[0].courseInfo.startDate ? `Начало обучения с ${scheduleData.items[0].courseInfo.startDate}` : undefined}
                         />
-                    {/if}
-                    
-                    <ViewModeToggle
-                        {viewMode}
-                        onToggle={toggleViewMode}
-                        onInfoClick={() => isViewModeModalOpen = true}
-                    />
+                        
+                        <ViewModeToggle
+                            {viewMode}
+                            onToggle={toggleViewMode}
+                            onInfoClick={() => isViewModeModalOpen = true}
+                        />
 
-                    {#each days as day, dayIndex}
-                        {@const dayLessons = scheduleData.items
-                            .filter((item: ScheduleItem) => item.courseInfo.number === actualGroupNumber)
-                            .flatMap(item => item.days
-                                .filter(d => d.info.type === dayIndex)
-                                .flatMap(d => processLessons(d.lessons))
-                                .filter(lesson => viewMode === 'all' || isLessonInDate(lesson))
-                            )}
-                        {#if dayLessons.length > 0}
-                            <ScheduleDay
-                                dayName={day}
-                                lessons={dayLessons}
-                            />
-                        {/if}
-                    {/each}
+                        {#each days as day, dayIndex}
+                            {@const dayLessons = scheduleData.items
+                                .filter((item: ScheduleItem) => item.courseInfo.number === actualGroupNumber)
+                                .flatMap(item => item.days
+                                    .filter(d => d.info.type === dayIndex)
+                                    .flatMap(d => processLessons(d.lessons))
+                                    .filter(lesson => viewMode === 'all' || isLessonInDate(lesson))
+                                )}
+                            {#if dayLessons.length > 0}
+                                <ScheduleDay
+                                    dayName={day}
+                                    lessons={dayLessons}
+                                />
+                            {/if}
+                        {/each}
+                    {/if}
                 </div>
             {/if}
         </section>

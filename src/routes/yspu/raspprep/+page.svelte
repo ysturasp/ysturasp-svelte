@@ -7,6 +7,7 @@
   import NotificationsContainer from '$lib/components/notifications/NotificationsContainer.svelte';
   import TeacherScheduleForm from './components/TeacherScheduleForm.svelte';
   import TeacherScheduleDay from './components/TeacherScheduleDay.svelte';
+  import ScheduleTitle from '$lib/components/schedule/ScheduleTitle.svelte';
   import { notifications } from '$lib/stores/notifications';
   import { getTeachers, getTeacherSchedule } from './api';
   import type { Teacher } from './api';
@@ -16,6 +17,7 @@
       courseInfo: {
         name: string;
         number: string;
+        startDate?: string;
       };
       days: {
         info: {
@@ -139,14 +141,11 @@
       {#if scheduleData}
         <div class="mt-4">
           {#if scheduleData.items.length > 0}
-            <div class="flex justify-center md:items-center flex-col mb-4">
-              <h2 
-                class="p-4 md:pr-20 md:pl-20 md:ml-20 md:mr-20 sm:ml-0 sm:mr-0 rounded-lg text-center text-xl lg:text-3xl md:text-xl font-bold text-white shadow-lg transition"
-                style="background: radial-gradient(rgba(0, 96, 255, 0.74) 10%, rgba(255, 255, 255, 0) 100%);"
-              >
-                Расписание преподавателя {scheduleData.items[0].courseInfo.name}
-              </h2>
-            </div>
+            <ScheduleTitle
+              type="teacher"
+              title={scheduleData.items[0].courseInfo.name}
+              subtitle={scheduleData.items[0].courseInfo.startDate ? `Начало обучения с ${scheduleData.items[0].courseInfo.startDate}` : undefined}
+            />
 
             {#each days as day, dayIndex}
               {@const dayLessons = scheduleData.items[0].days
