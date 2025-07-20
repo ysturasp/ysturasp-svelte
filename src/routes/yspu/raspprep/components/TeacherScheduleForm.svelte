@@ -1,14 +1,15 @@
 <script lang="ts">
-  import { onMount, createEventDispatcher } from 'svelte';
-  import { notifications } from '$lib/stores/notifications';
+  import { onMount } from 'svelte';
+  import type { Teacher } from '../api';
+  import CopyLinkButton from '$lib/components/ui/CopyLinkButton.svelte';
 
-  export let teachers: { id: string; name: string }[] = [];
+  export let teachers: Teacher[] = [];
   export let selectedTeacher = '';
   export let onSubmit: () => void;
 
   let searchQuery = '';
   let showOptions = false;
-  let filteredTeachers: { id: string; name: string }[] = [];
+  let filteredTeachers: Teacher[] = [];
   let overlay: HTMLDivElement;
 
   $: {
@@ -17,7 +18,7 @@
     );
   }
 
-  function selectTeacher(teacher: { id: string; name: string }) {
+  function selectTeacher(teacher: Teacher) {
     selectedTeacher = teacher.name;
     searchQuery = teacher.name;
     showOptions = false;
@@ -42,34 +43,6 @@
     if (input && options && !input.contains(target) && !options.contains(target)) {
       showOptions = false;
       overlay.classList.add('hidden');
-    }
-  }
-
-  async function copyScheduleLink() {
-    if (!selectedTeacher) {
-      notifications.add('Сначала выберите преподавателя', 'error');
-      return;
-    }
-
-    const url = new URL(window.location.href);
-    url.searchParams.set('teacher', selectedTeacher);
-    const textToCopy = url.toString();
-
-    try {
-      await navigator.clipboard.writeText(textToCopy);
-      notifications.add('Ссылка скопирована в буфер обмена', 'success');
-    } catch (error) {
-      try {
-        const tempInput = document.createElement('input');
-        tempInput.value = textToCopy;
-        document.body.appendChild(tempInput);
-        tempInput.select();
-        document.execCommand('copy');
-        document.body.removeChild(tempInput);
-        notifications.add('Ссылка скопирована в буфер обмена', 'success');
-      } catch (fallbackError) {
-        notifications.add('Не удалось скопировать ссылку', 'error');
-      }
     }
   }
 
@@ -141,15 +114,13 @@
     Показать расписание
   </button>
 
-  <button
-    type="button"
-    class="p-2 border-2 border-blue-700 text-white rounded-lg hover:border-blue-800 transition-all flex items-center justify-center"
-    on:click={copyScheduleLink}
+  <CopyLinkButton
     disabled={!selectedTeacher}
+    params={{ teacher: selectedTeacher }}
+    successMessage="Ссылка на расписание преподавателя скопирована"
   >
-    <span class="text-3xl md:text-xl align-middle">🔗</span>
-    <span class="ml-2 text-sm align-middle hidden md:inline">Скопировать ссылку на расписание</span>
-  </button>
+    Скопировать ссылку на расписание
+  </CopyLinkButton>
 </form>
 
 <style>

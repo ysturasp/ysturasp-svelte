@@ -1,6 +1,6 @@
 <script lang="ts">
     import type { Direction, Course } from '$lib/types/schedule';
-    import { notifications } from '$lib/stores/notifications';
+    import CopyLinkButton from '$lib/components/ui/CopyLinkButton.svelte';
 
     export let directions: Direction[];
     export let selectedDirection = '';
@@ -8,35 +8,6 @@
     export let onSubmit: () => void;
     export let onDirectionChange: () => void;
     export let scheduleShown = false;
-
-    async function copyScheduleLink() {
-        if (!selectedDirection || !selectedGroup) {
-            notifications.add('Сначала выберите профиль и группу', 'error');
-            return;
-        }
-
-        const url = new URL(window.location.href);
-        url.searchParams.set('direction', selectedDirection);
-        url.searchParams.set('group', selectedGroup);
-        const textToCopy = url.toString();
-
-        try {
-            await navigator.clipboard.writeText(textToCopy);
-            notifications.add('Ссылка скопирована в буфер обмена', 'success');
-        } catch (error) {
-            try {
-                const tempInput = document.createElement('input');
-                tempInput.value = textToCopy;
-                document.body.appendChild(tempInput);
-                tempInput.select();
-                document.execCommand('copy');
-                document.body.removeChild(tempInput);
-                notifications.add('Ссылка скопирована в буфер обмена', 'success');
-            } catch (fallbackError) {
-                notifications.add('Не удалось скопировать ссылку', 'error');
-            }
-        }
-    }
 </script>
 
 <form class="grid grid-cols-1 gap-4" on:submit|preventDefault={onSubmit}>
@@ -82,14 +53,15 @@
 
     {#if scheduleShown && selectedDirection && selectedGroup}
         <div class="flex justify-between items-center w-full">
-            <button
-                type="button"
-                on:click={copyScheduleLink}
-                class="p-2 border-2 border-blue-700 text-white rounded-lg hover:border-blue-800 transition-all flex items-center justify-center"
+            <CopyLinkButton
+                params={{
+                    direction: selectedDirection,
+                    group: selectedGroup
+                }}
+                successMessage="Ссылка на расписание группы скопирована"
             >
-                <span class="text-3xl md:text-xl align-middle">🔗</span>
-                <span class="ml-2 text-sm align-middle hidden md:inline">Скопировать ссылку на расписание</span>
-            </button>
+                Скопировать ссылку на расписание
+            </CopyLinkButton>
         </div>
     {/if}
 </form> 
