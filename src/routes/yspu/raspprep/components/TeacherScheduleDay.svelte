@@ -93,12 +93,13 @@
           {#if lesson.isDistant}
             <p class="text-sm text-red-400">Дистанционно</p>
           {:else}
-            <a href="/yspu/raspaudience?audience={encodeURIComponent(lesson.auditoryName)}" class="text-sm text-blue-400 hover-bold">
-              {lesson.auditoryName ? `Аудитория: ${lesson.auditoryName}` : 'Аудитория не указана'}
+            <a href="/yspu/raspaudience?audience={encodeURIComponent(lesson.auditoryName)}" 
+              class="text-sm text-slate-400 hover:text-blue-400 transition-all">
+              Аудитория: {lesson.auditoryName}
             </a>
           {/if}
           {#if lesson.groups}
-            <p class="text-sm text-gray-400 mt-1">Группы: {lesson.groups}</p>
+            <p class="text-sm text-gray-400">Группы: {lesson.groups}</p>
           {/if}
           {#if lesson.direction}
             <p class="text-sm text-gray-400 flex flex-wrap items-center">
@@ -119,13 +120,3 @@
     {/if}
   {/each}
 </div>
-
-<style>
-  .hover-bold {
-    transition: all 0.4s ease-in-out;
-  }
-  .hover-bold:hover {
-    font-family: "Pixelify Sans", sans-serif;
-    font-size: 20px;
-  }
-</style> 
