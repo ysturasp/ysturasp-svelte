@@ -233,10 +233,11 @@
             {#if scheduleData}
                 <div class="mt-4">
                     {#if scheduleData.items.length > 0}
+                        {@const selectedGroupData = scheduleData.items.find(item => item.courseInfo.number === actualGroupNumber)}
                         <ScheduleTitle
                             type="group"
                             title={actualGroupNumber}
-                            subtitle={scheduleData.items[0].courseInfo.startDate ? `Начало обучения с ${scheduleData.items[0].courseInfo.startDate}` : undefined}
+                            subtitle={selectedGroupData?.courseInfo.startDate ? `Начало обучения с ${selectedGroupData.courseInfo.startDate}` : undefined}
                         />
                         
                         <ViewModeToggle
