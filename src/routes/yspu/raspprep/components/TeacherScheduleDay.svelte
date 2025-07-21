@@ -87,9 +87,6 @@
           {#if lesson.isStream}
             <p class="text-sm text-purple-400">Поток</p>
           {/if}
-          {#if lesson.isDivision}
-            <p class="text-sm text-green-400">Подгруппа</p>
-          {/if}
           {#if lesson.isDistant}
             <p class="text-sm text-red-400">Дистанционно</p>
           {:else}
