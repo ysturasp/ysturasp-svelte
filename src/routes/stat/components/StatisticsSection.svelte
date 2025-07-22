@@ -3,6 +3,7 @@
   import { disciplinesDigitalSystems, disciplinesAiD, disciplinesCivilTransport } from '../data/disciplines';
   import type { Stats, Instructors, InstituteId, NotificationOptions } from '../types';
   import { getSubjectStats, getInstructors, checkViewLimit } from '../utils/api';
+  import StatisticsChart from './StatisticsChart.svelte';
   
   const dispatch = createEventDispatcher<{
     showNotification: NotificationOptions;
@@ -22,6 +23,7 @@
   let instructors: Instructors | null = null;
   let remainingViews = '...';
   let overlay: HTMLDivElement;
+  let statisticsSection: HTMLElement;
 
   $: {
     filteredDisciplines = currentDisciplines.filter(discipline =>
@@ -101,6 +103,21 @@
     dispatch('loading', { value: true });
     
     try {
+      const cacheKey = `${selectedInstitute}_${selectedDiscipline}_stats`;
+      const cachedData = localStorage.getItem(cacheKey);
+      
+      if (cachedData) {
+        const { stats, instructorsData, timestamp } = JSON.parse(cachedData);
+        // Проверяем не устарели ли данные (24 часа)
+        if (Date.now() - timestamp < 24 * 60 * 60 * 1000) {
+          statistics = stats;
+          instructors = instructorsData;
+          displayedDiscipline = selectedDiscipline;
+          dispatch('loading', { value: false });
+          return;
+        }
+      }
+
       const limitCheck = await checkViewLimit(false);
       if (!limitCheck.success) {
         dispatch('showNotification', {
@@ -128,6 +145,13 @@
       if (!statsData || !instructorsData) {
         throw new Error('Failed to fetch data');
       }
+
+      // Сохраняем в localStorage
+      localStorage.setItem(cacheKey, JSON.stringify({
+        stats: statsData,
+        instructorsData: instructorsData,
+        timestamp: Date.now()
+      }));
 
       statistics = statsData;
       instructors = instructorsData;
@@ -163,10 +187,23 @@
     }
   }
 
+  function scrollToStats() {
+    if (statisticsSection) {
+      const offset = 100; // отступ сверху в пикселях
+      const elementPosition = statisticsSection.getBoundingClientRect().top + window.pageYOffset;
+      window.scrollTo({
+        top: elementPosition - offset,
+        behavior: 'smooth'
+      });
+    }
+  }
+
   export function viewSubject(subject: string) {
     selectedDiscipline = subject;
     searchQuery = subject;
-    getStatistics();
+    getStatistics().then(() => {
+      scrollToStats();
+    });
   }
 
   onMount(() => {
@@ -320,7 +357,7 @@
   </div>
 
   {#if statistics}
-    <div class="result mt-4">
+    <div class="result mt-4" bind:this={statisticsSection}>
       <div style="text-align: center;">
         <h3 class="text-2xl md:text-3xl font-bold mb-4">
           Статистика по предмету "{displayedDiscipline}"
@@ -334,13 +371,13 @@
       {/if}
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div class="rounded-2xl p-4 text-center" style="border: 3px solid #f8fafc;">
+        <div class="rounded-2xl p-4 text-center" style="border: 2px solid #1245e67d;">
           <h2 class="text-2xl font-bold mb-2">
             Средний балл {statistics.average >= 4 ? "😍" : "😭"}
           </h2>
           <p class="text-slate-300 text-2xl">{statistics.average.toFixed(2)}</p>
         </div>
-        <div class="rounded-2xl p-4 text-center" style="border: 3px solid #f8fafc;">
+        <div class="rounded-2xl p-4 text-center" style="border: 2px solid #1245e67d;">
           <h2 class="text-2xl font-bold mb-2">Всего оценок проанализировано</h2>
           <p class="text-slate-300 text-2xl">
             {statistics.count5 + statistics.count4 + statistics.count3 + statistics.count2}
@@ -349,22 +386,26 @@
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mt-4">
-        <div class="rounded-2xl p-4 text-center grade-element cursor-pointer" style="border: 3px solid #f8fafc;">
+        <div class="rounded-2xl p-4 text-center grade-element cursor-pointer" style="border: 2px solid #1245e67d;">
           <h3 class="text-xl font-bold mb-2">Пятерок</h3>
           <p class="text-slate-300 text-2xl">{statistics.count5}</p>
         </div>
-        <div class="rounded-2xl p-4 text-center grade-element cursor-pointer" style="border: 3px solid #f8fafc;">
+        <div class="rounded-2xl p-4 text-center grade-element cursor-pointer" style="border: 2px solid #1245e67d;">
           <h3 class="text-xl font-bold mb-2">Четверок</h3>
           <p class="text-slate-300 text-2xl">{statistics.count4}</p>
         </div>
-        <div class="rounded-2xl p-4 text-center grade-element cursor-pointer" style="border: 3px solid #f8fafc;">
+        <div class="rounded-2xl p-4 text-center grade-element cursor-pointer" style="border: 2px solid #1245e67d;">
           <h3 class="text-xl font-bold mb-2">Троек</h3>
           <p class="text-slate-300 text-2xl">{statistics.count3}</p>
         </div>
-        <div class="rounded-2xl p-4 text-center grade-element cursor-pointer" style="border: 3px solid #f8fafc;">
+        <div class="rounded-2xl p-4 text-center grade-element cursor-pointer" style="border: 2px solid #1245e67d;">
           <h3 class="text-xl font-bold mb-2">Двоек</h3>
           <p class="text-slate-300 text-2xl">{statistics.count2}</p>
         </div>
+      </div>
+
+      <div class="mt-8">
+        <StatisticsChart stats={statistics} />
       </div>
     </div>
   {/if}

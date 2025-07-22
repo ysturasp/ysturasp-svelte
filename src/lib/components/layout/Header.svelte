@@ -27,7 +27,7 @@
 
 <header class="container mx-auto sticky top-4 px-3 md:px-0 z-50">
   <div style="background-color: #1e293bad; backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);"
-    class="rounded-2xl px-3 py-2 md:px-5 md:py-3 ring-1 shadow-xl flex justify-between items-center transition-all">
+    class="rounded-2xl px-3 py-2 md:px-5 md:py-3 ring-1 ring-blue-500/50 ring-blue-500/50 shadow-xl flex justify-between items-center transition-all">
     <nav class="hidden lg:flex gap-x-2">
       <a href="/" class="text-blue-500 font-semibold text-sm md:text-base hover:text-blue-400 transition-all flex items-center">
         <img src="/images/cat.png" alt="Logo" class="w-10 h-10 mr-2" />
@@ -69,7 +69,7 @@
   <slot name="online-counter-mobile" />
 
   <div 
-    class="mobile-menu lg:hidden bg-slate-800 rounded-2xl mt-4 px-3 py-2 md:px-6 md:py-3 ring-1 shadow-xl absolute left-3 right-3 {!isMobileMenuOpen ? 'hidden' : ''} {isClosing ? 'hide' : 'show'}"
+    class="mobile-menu lg:hidden bg-slate-800 rounded-2xl mt-4 px-3 py-2 md:px-6 md:py-3 ring-1 ring-blue-500/50 shadow-xl absolute left-3 right-3 {!isMobileMenuOpen ? 'hidden' : ''} {isClosing ? 'hide' : 'show'}"
     on:animationend={handleAnimationEnd}>
     <a href="/" class="block py-2 text-blue-500 font-semibold text-sm md:text-base" on:click={closeMobileMenu}>ystuRASP Главная</a>
     <a href="/stat" class="block py-2 text-gray-300 hover:text-blue-400 text-sm md:text-base" on:click={closeMobileMenu}>Статистика</a>

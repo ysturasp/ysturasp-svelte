@@ -48,7 +48,7 @@
     >
         <div 
             bind:this={modalContent}
-            class="bg-slate-900 rounded-t-2xl w-full max-w-lg mx-auto shadow-xl ring-1 flex flex-col"
+            class="bg-slate-900 rounded-t-2xl w-full max-w-lg mx-auto shadow-xl ring-1 ring-blue-500/50 flex flex-col"
             style="max-height: calc(100vh - 5rem);"
         >
             <div class="flex justify-between items-center p-4">

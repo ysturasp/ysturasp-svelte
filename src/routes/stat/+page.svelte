@@ -6,7 +6,7 @@
   import TopAntiTopSection from './components/TopAntiTopSection.svelte';
   import RecentlyViewedSection from './components/RecentlyViewedSection.svelte';
   import ReferralModal from './components/ReferralModal.svelte';
-  import LoadingOverlay from './components/LoadingOverlay.svelte';
+  import LoadingOverlay from '$lib/components/loading/LoadingOverlay.svelte';
   import { onMount } from 'svelte';
   import type { InstituteId } from './types';
 
