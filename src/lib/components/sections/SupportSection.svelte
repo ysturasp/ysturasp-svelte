@@ -3,7 +3,7 @@
         <a href="https://boosty.to/ysturasp.me/donate" class="block">
             <div class="support-card rounded-2xl p-8 relative overflow-hidden transform transition-all duration-500 hover:scale-[1.02]">
                 <div class="bg-overlay absolute inset-0"></div>
-                <div class="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
+                <div class="relative flex flex-col md:flex-row items-center justify-between gap-6">
                     <div class="flex-1 text-center md:text-left">
                         <h2 class="text-2xl md:text-3xl font-bold mb-4 bg-gradient-to-r from-yellow-200 to-yellow-500 bg-clip-text text-transparent">
                             Поддержите развитие проекта! 🚀

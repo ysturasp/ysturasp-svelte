@@ -42,7 +42,7 @@
 </script>
 
 <div class="fixed ml-4 bottom-4 right-4">
-    <div class="cookie-notification {isVisible ? 'show' : 'hidden'}"
+    <div class="cookie-notification z-10 {isVisible ? 'show' : 'hidden'}"
         on:touchstart={handleTouchStart}
         on:touchmove={handleTouchMove}
         on:touchend={handleTouchEnd}
@@ -72,7 +72,6 @@
         border: 1px solid rgba(59, 130, 246, 0.2);
         padding: 0.75rem;
         border-radius: 0.75rem;
-        z-index: 50;
         transform: translateY(0);
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         width: auto;
