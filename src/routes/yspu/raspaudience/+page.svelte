@@ -12,6 +12,7 @@
     import AudienceScheduleDay from './components/AudienceScheduleDay.svelte';
     import ScheduleTitle from '$lib/components/schedule/ScheduleTitle.svelte';
     import { notifications } from '$lib/stores/notifications';
+    import GithubParserInfo from '../rasp/components/GithubParserInfo.svelte';
 
     let isLoading = false;
     let audiences: Audience[] = [];
@@ -137,6 +138,8 @@
                 </div>
             {/if}
         </section>
+
+        <GithubParserInfo />
     </main>
 
     <Footer />

@@ -11,6 +11,7 @@
   import { notifications } from '$lib/stores/notifications';
   import { getTeachers, getTeacherSchedule } from './api';
   import type { Teacher } from './api';
+  import GithubParserInfo from '../rasp/components/GithubParserInfo.svelte';
 
   interface TeacherScheduleData {
     items: {
@@ -166,6 +167,8 @@
         </div>
       {/if}
     </section>
+    
+    <GithubParserInfo />
   </main>
 
   <Footer />

@@ -13,6 +13,7 @@
     import ScheduleTitle from '$lib/components/schedule/ScheduleTitle.svelte';
     import BetaModal from '$lib/components/ui/BottomModal.svelte';
     import OnlineCounter from '$lib/components/ui/OnlineCounter.svelte';
+    import GithubParserInfo from './components/GithubParserInfo.svelte';
 
     let isLoading = false;
     let isBetaModalOpen = false;
@@ -265,10 +266,13 @@
                 </div>
             {/if}
         </section>
+
+        <GithubParserInfo />
     </main>
 
     <Footer />
     <NotificationsContainer />
+
 </PageLayout>
 
 <BetaModal
