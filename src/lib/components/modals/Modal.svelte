@@ -24,7 +24,7 @@
 
 {#if isOpen}
   <div
-    class="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50 p-4 overflow-y-auto"
+    class="fixed inset-0 bg-gray-800/50 flex items-center justify-center z-50 p-4 overflow-y-auto"
     on:click={handleBackdropClick}
   >
     <div class="bg-slate-900 rounded-2xl p-5 ml-3 mr-3 text-center {maxWidth} w-full mx-auto relative">

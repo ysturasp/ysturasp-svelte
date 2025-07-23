@@ -451,7 +451,7 @@
                     bind:checked={shareHiddenSubjects}
                     class="hidden peer"
                   >
-                  <div class="w-5 h-5 border-2 border-slate-500 rounded-lg flex items-center justify-center mr-2 transition-colors peer-checked:border-blue-500">
+                  <div class="w-5 h-5 border-2 border-slate-500 rounded-md flex items-center justify-center mr-2 transition-colors peer-checked:border-blue-500">
                     <svg
                       class="w-3 h-3 text-blue-500 {shareHiddenSubjects ? '' : 'hidden'}"
                       viewBox="0 0 20 20"
@@ -475,7 +475,7 @@
                     bind:checked={shareSubgroupSettings}
                     class="hidden peer"
                   >
-                  <div class="w-5 h-5 border-2 border-slate-500 rounded-lg flex items-center justify-center mr-2 transition-colors peer-checked:border-blue-500">
+                  <div class="w-5 h-5 border-2 border-slate-500 rounded-md flex items-center justify-center mr-2 transition-colors peer-checked:border-blue-500">
                     <svg
                       class="w-3 h-3 text-blue-500 {shareSubgroupSettings ? '' : 'hidden'}"
                       viewBox="0 0 20 20"
