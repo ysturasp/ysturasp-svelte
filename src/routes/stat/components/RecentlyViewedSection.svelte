@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount, createEventDispatcher } from 'svelte';
-  import type { RecentlyViewedItem } from '../types';
+  import type { RecentlyViewedItem, InstituteId } from '../types';
+  import { recentlyViewedStore } from '../stores/recentlyViewedStore';
 
   const dispatch = createEventDispatcher<{
     viewAgain: { subject: string };
@@ -9,13 +10,27 @@
   let recentlyViewed: RecentlyViewedItem[] = [];
 
   function loadRecentlyViewed() {
-    const stored = localStorage.getItem('recentlyViewed');
-    if (stored) {
-      recentlyViewed = JSON.parse(stored);
+    recentlyViewedStore.loadFromStorage();
+  }
+
+  function getInstituteName(instituteId: InstituteId): string {
+    switch (instituteId) {
+      case 'btn-digital-systems':
+        return 'Институт Цифровых Систем';
+      case 'btn-architecture-design':
+        return 'Институт Архитектуры и Дизайна';
+      case 'btn-civil-transport':
+        return 'Институт Инженеров Строительства и Транспорта';
+      default:
+        return '';
     }
   }
 
   onMount(loadRecentlyViewed);
+
+  recentlyViewedStore.subscribe(value => {
+    recentlyViewed = value;
+  });
 </script>
 
 <section class="bg-slate-800 rounded-2xl p-6 mt-8">
@@ -26,6 +41,7 @@
         <div class="flex p-4 bg-gray-700 rounded-2xl justify-between items-center">
           <div>
             <h3 class="text-sm md:text:xl font-bold">{item.discipline}</h3>
+            <p class="text-sm text-slate-400">{getInstituteName(item.institute)}</p>
             <p>Средний балл: {item.stats.average.toFixed(2)}</p>
             <p>Оценок: {item.stats.count5 + item.stats.count4 + item.stats.count3 + item.stats.count2}</p>
           </div>

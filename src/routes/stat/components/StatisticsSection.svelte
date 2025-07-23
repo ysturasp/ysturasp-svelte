@@ -4,6 +4,7 @@
   import type { Stats, Instructors, InstituteId, NotificationOptions } from '../types';
   import { getSubjectStats, getInstructors, checkViewLimit } from '../utils/api';
   import StatisticsChart from './StatisticsChart.svelte';
+  import { recentlyViewedStore } from '../stores/recentlyViewedStore';
   
   const dispatch = createEventDispatcher<{
     showNotification: NotificationOptions;
@@ -108,7 +109,6 @@
       
       if (cachedData) {
         const { stats, instructorsData, timestamp } = JSON.parse(cachedData);
-        // Проверяем не устарели ли данные (24 часа)
         if (Date.now() - timestamp < 24 * 60 * 60 * 1000) {
           statistics = stats;
           instructors = instructorsData;
@@ -146,7 +146,6 @@
         throw new Error('Failed to fetch data');
       }
 
-      // Сохраняем в localStorage
       localStorage.setItem(cacheKey, JSON.stringify({
         stats: statsData,
         instructorsData: instructorsData,
@@ -157,15 +156,13 @@
       instructors = instructorsData;
       displayedDiscipline = selectedDiscipline;
 
-      const recentlyViewed = JSON.parse(localStorage.getItem('recentlyViewed') || '[]');
-      const newItem = { discipline: selectedDiscipline, stats: statsData };
+      const newItem = { 
+        discipline: selectedDiscipline, 
+        institute: selectedInstitute,
+        stats: statsData 
+      };
       
-      const updatedRecentlyViewed = [
-        newItem,
-        ...recentlyViewed.filter((item: { discipline: string }) => item.discipline !== selectedDiscipline)
-      ].slice(0, 5);
-      
-      localStorage.setItem('recentlyViewed', JSON.stringify(updatedRecentlyViewed));
+      recentlyViewedStore.addItem(newItem);
 
       const viewsCheck = await checkViewLimit(true);
       if (viewsCheck.success) {
@@ -189,7 +186,7 @@
 
   function scrollToStats() {
     if (statisticsSection) {
-      const offset = 100; // отступ сверху в пикселях
+      const offset = 100;
       const elementPosition = statisticsSection.getBoundingClientRect().top + window.pageYOffset;
       window.scrollTo({
         top: elementPosition - offset,

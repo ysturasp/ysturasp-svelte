@@ -15,6 +15,7 @@ export interface SubjectStats {
 
 export interface RecentlyViewedItem {
   discipline: string;
+  institute: InstituteId;
   stats: Stats;
 }
 
