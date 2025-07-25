@@ -196,8 +196,18 @@
 
 <PageLayout>
     <Header>
-        <OnlineCounter variant="desktop" slot="online-counter-desktop" />
-        <OnlineCounter variant="mobile" slot="online-counter-mobile" />
+        <OnlineCounter 
+            variant="desktop" 
+            slot="online-counter-desktop" 
+            selectedDirectionLabel={selectedDirection ? directions.find(d => d.id === selectedDirection)?.name || '' : ''}
+            selectedGroupLabel={selectedGroup ? Object.entries(directions.find(d => d.id === selectedDirection)?.courses || {}).find(([key]) => key === selectedGroup)?.[1].name || '' : ''}
+        />
+        <OnlineCounter 
+            variant="mobile" 
+            slot="online-counter-mobile" 
+            selectedDirectionLabel={selectedDirection ? directions.find(d => d.id === selectedDirection)?.name || '' : ''}
+            selectedGroupLabel={selectedGroup ? Object.entries(directions.find(d => d.id === selectedDirection)?.courses || {}).find(([key]) => key === selectedGroup)?.[1].name || '' : ''}
+        />
     </Header>
     
     <main class="container mx-auto mt-5 md:mt-7 px-3 md:px-0">

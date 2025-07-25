@@ -5,6 +5,8 @@
   import { database as defaultDatabase } from '$lib/config/firebase';
 
   export let variant: 'desktop' | 'mobile' = 'desktop';
+  export let selectedDirectionLabel = '';
+  export let selectedGroupLabel = '';
   
   let count = 1;
   let groupStats: Record<string, number> = {};
@@ -13,59 +15,65 @@
   let unsubscribeConnected: (() => void) | null = null;
   let unsubscribeOnline: (() => void) | null = null;
   let initialized = false;
+  let lastActivityTimestamp = Date.now();
+  let activityCheckInterval: ReturnType<typeof setInterval>;
 
   if (browser && !sessionStorage.getItem('onlineUserId')) {
     sessionStorage.setItem('onlineUserId', userId);
   }
 
-  const waitForElements = async () => {
-    let attempts = 0;
-    const maxAttempts = 50;
-    
-    while (attempts < maxAttempts) {
-      const instituteSelect = document.getElementById('institute-select') as HTMLSelectElement;
-      const groupSelect = document.getElementById('group-select') as HTMLSelectElement;
-      
-      if (instituteSelect && groupSelect && 
-          instituteSelect.options.length > 0 && 
-          groupSelect.options.length > 0 &&
-          groupSelect.selectedIndex > 0) {
-        return true;
-      }
-      
-      await new Promise(resolve => setTimeout(resolve, 100));
-      attempts++;
-    }
-    
-    return false;
-  };
-
   const getGroupFromSelect = () => {
     if (!browser) return 'Гость';
     
-    const instituteSelect = document.getElementById('institute-select') as HTMLSelectElement;
-    const groupSelect = document.getElementById('group-select') as HTMLSelectElement;
-    
-    if (!instituteSelect || !groupSelect) return 'Гость';
-
-    const selectedInstitute = instituteSelect?.options[instituteSelect?.selectedIndex]?.text || '';
-    const selectedGroup = groupSelect?.options[groupSelect?.selectedIndex]?.text || '';
-    
-    const defaultValues = [
-      'Выберите направление',
-      'Выберите профиль',
-      'Выберите группу',
-      'Сначала выберите профиль'
-    ];
-    
-    if (!selectedInstitute || 
-        !selectedGroup || 
-        defaultValues.includes(selectedInstitute) || 
-        defaultValues.includes(selectedGroup)) {
+    if (!selectedDirectionLabel || !selectedGroupLabel) {
       return 'Гость';
     }
 
-    return `ЯГПУ ${selectedInstitute} - ${selectedGroup}`;
+    return `ЯГПУ ${selectedDirectionLabel} - ${selectedGroupLabel}`;
+  };
+
+  const updateLastActivity = () => {
+    lastActivityTimestamp = Date.now();
+  };
+
+  const setupActivityListeners = () => {
+    if (!browser) return;
+
+    const events = ['mousemove', 'keydown', 'touchstart', 'scroll'];
+    events.forEach(event => {
+      window.addEventListener(event, updateLastActivity);
+    });
+
+    activityCheckInterval = setInterval(() => {
+      const now = Date.now();
+      if (now - lastActivityTimestamp > 2 * 60 * 1000) {
+        cleanupUser();
+      }
+    }, 30 * 1000);
+  };
+
+  const removeActivityListeners = () => {
+    if (!browser) return;
+
+    const events = ['mousemove', 'keydown', 'touchstart', 'scroll'];
+    events.forEach(event => {
+      window.removeEventListener(event, updateLastActivity);
+    });
+
+    if (activityCheckInterval) {
+      clearInterval(activityCheckInterval);
+    }
+  };
+
+  const cleanupUser = async () => {
+    if (!browser || !database || !userId) return;
+    
+    try {
+      const userStatusRef = ref(database, '/online/' + userId);
+      await remove(userStatusRef);
+    } catch (error) {
+      console.error('Ошибка удаления пользователя:', error);
+    }
   };
 
   const updateUserStatus = async (online: boolean, forceUpdate = false) => {
@@ -81,7 +89,8 @@
           await set(userStatusRef, {
             online: true,
             group,
-            timestamp: serverTimestamp()
+            timestamp: serverTimestamp(),
+            lastActivity: Date.now()
           });
           
           if (!initialized) {
@@ -89,6 +98,12 @@
               const cleanupRef = ref(database, '/online/' + userId);
               remove(cleanupRef).catch(console.error);
             });
+
+            window.addEventListener('pagehide', () => {
+              const cleanupRef = ref(database, '/online/' + userId);
+              remove(cleanupRef).catch(console.error);
+            });
+
             initialized = true;
           }
         }
@@ -113,7 +128,8 @@
     set(userStatusRef, {
       online: true,
       group,
-      timestamp: serverTimestamp()
+      timestamp: serverTimestamp(),
+      lastActivity: Date.now()
     }).catch(error => console.error('Ошибка обновления группы:', error));
   };
 
@@ -121,41 +137,34 @@
     if (!browser) return;
 
     try {
-      const elementsReady = await waitForElements();
-      
       const connectedRef = ref(database, '.info/connected');
       unsubscribeConnected = onValue(connectedRef, (snap) => {
         if (snap.val() === true) {
-          updateUserStatus(true, elementsReady);
+          updateUserStatus(true, true);
         }
       });
 
       const onlineRef = ref(database, '/online');
       unsubscribeOnline = onValue(onlineRef, (snapshot) => {
         const users = snapshot.val() || {};
-        count = Object.keys(users).length;
+        
+        const activeUsers = Object.entries(users).filter(([_, userData]: [string, any]) => {
+          const lastActivity = userData.lastActivity || 0;
+          return Date.now() - lastActivity < 5 * 60 * 1000;
+        });
+
+        count = activeUsers.length;
 
         groupStats = {};
-        Object.values(users).forEach((user: any) => {
-          if (user.group) {
-            groupStats[user.group] = (groupStats[user.group] || 0) + 1;
+        activeUsers.forEach(([_, userData]: [string, any]) => {
+          if (userData.group) {
+            groupStats[userData.group] = (groupStats[userData.group] || 0) + 1;
           }
         });
       });
 
-      const groupSelect = document.getElementById('group-select');
-      const instituteSelect = document.getElementById('institute-select');
-      
-      if (groupSelect) {
-        groupSelect.addEventListener('change', handleGroupChange);
-      }
-      if (instituteSelect) {
-        instituteSelect.addEventListener('change', handleGroupChange);
-      }
-
-      if (elementsReady) {
-        await updateUserStatus(true, true);
-      }
+      await updateUserStatus(true, true);
+      setupActivityListeners();
 
     } catch (error) {
       console.error('Ошибка инициализации Firebase:', error);
@@ -166,20 +175,16 @@
     if (browser) {
       unsubscribeConnected?.();
       unsubscribeOnline?.();
-      
-      updateUserStatus(false);
-      
-      const groupSelect = document.getElementById('group-select');
-      const instituteSelect = document.getElementById('institute-select');
-      
-      if (groupSelect) {
-        groupSelect.removeEventListener('change', handleGroupChange);
-      }
-      if (instituteSelect) {
-        instituteSelect.removeEventListener('change', handleGroupChange);
-      }
+      removeActivityListeners();
+      cleanupUser();
     }
   });
+
+  $: {
+    if (selectedDirectionLabel || selectedGroupLabel) {
+      handleGroupChange();
+    }
+  }
 
   $: groupInfo = `Количество пользователей на сайте прямо сейчас\n${Object.entries(groupStats)
     .map(([group, count]) => `${group}: ${count} чел.`)

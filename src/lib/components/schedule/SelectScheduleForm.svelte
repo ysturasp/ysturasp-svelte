@@ -10,6 +10,9 @@
     export let onDirectionChange: () => void;
     export let scheduleShown = false;
 
+    export let selectedDirectionLabel = '';
+    export let selectedGroupLabel = '';
+
     $: directionItems = directions.map(direction => ({
         id: direction.id,
         label: direction.name
@@ -25,12 +28,15 @@
 
     function handleDirectionSelect(event: CustomEvent) {
         selectedDirection = event.detail.id;
+        selectedDirectionLabel = event.detail.label;
         selectedGroup = '';
+        selectedGroupLabel = '';
         onDirectionChange();
     }
 
     function handleGroupSelect(event: CustomEvent) {
         selectedGroup = event.detail.id;
+        selectedGroupLabel = event.detail.label;
     }
 </script>
 
