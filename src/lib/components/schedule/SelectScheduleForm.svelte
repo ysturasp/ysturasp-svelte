@@ -13,6 +13,8 @@
     export let selectedDirectionLabel = '';
     export let selectedGroupLabel = '';
 
+    let showErrors = false;
+
     $: directionItems = directions.map(direction => ({
         id: direction.id,
         label: direction.name
@@ -32,15 +34,25 @@
         selectedGroup = '';
         selectedGroupLabel = '';
         onDirectionChange();
+        showErrors = false;
     }
 
     function handleGroupSelect(event: CustomEvent) {
         selectedGroup = event.detail.id;
         selectedGroupLabel = event.detail.label;
+        showErrors = false;
+    }
+
+    function handleSubmit() {
+        if (!selectedDirection || !selectedGroup) {
+            showErrors = true;
+            return;
+        }
+        onSubmit();
     }
 </script>
 
-<form class="grid grid-cols-1 gap-4" on:submit|preventDefault={onSubmit}>
+<form class="grid grid-cols-1 gap-4" on:submit|preventDefault={handleSubmit}>
     <div>
         <label class="block text-white mb-2">Выберите профиль:</label>
         <CustomSelect
@@ -50,6 +62,7 @@
             on:select={handleDirectionSelect}
             width="100%"
             searchPlaceholder="Поиск профиля..."
+            error={showErrors && !selectedDirection}
         />
     </div>
 
@@ -63,13 +76,13 @@
             disabled={!selectedDirection}
             width="100%"
             searchPlaceholder="Поиск группы..."
+            error={showErrors && !selectedGroup}
         />
     </div>
 
     <button
         type="submit"
         class="p-2 bg-blue-700 text-white rounded-xl hover:bg-blue-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-        disabled={!selectedDirection || !selectedGroup}
     >
         Показать расписание
     </button>

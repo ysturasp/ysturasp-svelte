@@ -18,6 +18,7 @@
     export let disabled = false;
     export let searchable = true;
     export let searchPlaceholder = 'Поиск...';
+    export let error = false;
     
     const dispatch = createEventDispatcher();
     
@@ -291,6 +292,7 @@
         aria-haspopup="listbox"
         aria-expanded={isOpen}
         class:active={isOpen}
+        class:error={error}
     >
         <div class="select-value">
             {#if selectedItem}
@@ -403,6 +405,14 @@
 </div>
 
 <style lang="postcss">
+    @keyframes shake {
+        0% { transform: translateX(0); }
+        25% { transform: translateX(-4px); }
+        50% { transform: translateX(4px); }
+        75% { transform: translateX(-4px); }
+        100% { transform: translateX(0); }
+    }
+
     .custom-select {
         position: relative;
         font-size: 14px;
@@ -425,6 +435,11 @@
         cursor: pointer;
         user-select: none;
         transition: all 0.2s ease;
+    }
+
+    .select-trigger.error {
+        border-color: #EF4444;
+        animation: shake 0.4s ease-in-out;
     }
     
     .select-trigger:hover {
