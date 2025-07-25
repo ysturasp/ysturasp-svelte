@@ -62,7 +62,7 @@
   });
 </script>
 
-<form class="grid grid-cols-1 gap-4" on:submit|preventDefault={onSubmit}>
+<form class="grid grid-cols-1 gap-2" on:submit|preventDefault={onSubmit}>
   <div class="relative">
     <input
       id="combobox-input"

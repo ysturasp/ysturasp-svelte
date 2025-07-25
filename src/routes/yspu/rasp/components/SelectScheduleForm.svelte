@@ -70,7 +70,7 @@
     }
 </script>
 
-<form class="grid grid-cols-1 gap-4" on:submit|preventDefault={handleSubmit}>
+<form class="grid grid-cols-1 gap-2" on:submit|preventDefault={handleSubmit}>
     <div>
         <label class="block text-white mb-2">Выберите профиль:</label>
         <CustomSelect

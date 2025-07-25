@@ -112,7 +112,7 @@
             />
 
             {#if scheduleData}
-                <div class="mt-4">
+                <div class="mt-2">
                     {#if scheduleData.items.length > 0}
                         <ScheduleTitle
                             type="audience"

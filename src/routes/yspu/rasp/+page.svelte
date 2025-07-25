@@ -7,8 +7,8 @@
     import Header from '$lib/components/layout/Header.svelte';
     import Footer from '$lib/components/layout/Footer.svelte';
     import NotificationsContainer from '$lib/components/notifications/NotificationsContainer.svelte';
-    import SelectScheduleForm from '$lib/components/schedule/SelectScheduleForm.svelte';
-    import ViewModeToggle from '$lib/components/schedule/ViewModeToggle.svelte';
+    import SelectScheduleForm from './components/SelectScheduleForm.svelte';
+    import ViewModeToggle from './components/ViewModeToggle.svelte';
     import ScheduleDay from '$lib/components/schedule/ScheduleDay.svelte';
     import ScheduleTitle from '$lib/components/schedule/ScheduleTitle.svelte';
     import BetaModal from '$lib/components/ui/BottomModal.svelte';
@@ -216,7 +216,7 @@
     
     <main class="container mx-auto mt-5 md:mt-7 px-3 md:px-0">
         <section class="bg-slate-800 rounded-2xl sm:p-6 p-4 mt-8">
-            <div class="bg-amber-500 text-black text-center p-4 rounded-2xl mb-4 relative">
+            <div class="bg-amber-500 text-black text-center p-4 rounded-2xl mb-2 relative">
                 <span 
                     class="absolute -top-2 -right-2 transform rotate-12 flex rounded-full bg-indigo-500 uppercase px-2 py-1 text-xs font-bold text-white shadow-lg cursor-pointer hover:bg-indigo-600 transition-colors"
                     on:click={() => isBetaModalOpen = true}
@@ -247,7 +247,7 @@
             />
 
             {#if scheduleData}
-                <div class="mt-4">
+                <div class="mt-2">
                     {#if scheduleData.items.length > 0}
                         {@const selectedGroupData = scheduleData.items.find(item => item.courseInfo.number === actualGroupNumber)}
                         <ScheduleTitle

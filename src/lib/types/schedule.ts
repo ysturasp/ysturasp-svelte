@@ -51,6 +51,10 @@ export interface Lesson {
         endAt: string;
     }[];
     originalTimeTitle?: string;
+    timeInfo?: {
+        customStartTime?: string;
+        customEndTime?: string;
+    };
 }
 
 export interface TeacherScheduleData {
