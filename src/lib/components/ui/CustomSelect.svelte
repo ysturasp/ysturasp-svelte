@@ -19,6 +19,8 @@
     export let searchable = true;
     export let searchPlaceholder = 'Поиск...';
     export let error = false;
+    export let isLoading = false;
+    export let highlight = false;
     
     const dispatch = createEventDispatcher();
     
@@ -293,6 +295,7 @@
         aria-expanded={isOpen}
         class:active={isOpen}
         class:error={error}
+        class:highlight={highlight}
     >
         <div class="select-value">
             {#if selectedItem}
@@ -303,16 +306,29 @@
                     <span class="item-label">{selectedItem.label}</span>
                 </div>
             {:else}
-                <span class="placeholder">{placeholder}</span>
+                <span class="placeholder">
+                    {#if isLoading}
+                        <span class="loading-dots">{placeholder}</span>
+                    {:else}
+                        {placeholder}
+                    {/if}
+                </span>
             {/if}
         </div>
         <div class="select-arrow" class:open={isOpen}>
-            <svg width="8" height="6" viewBox="0 0 8 6" fill="none">
-                <path
-                    d="M0.706206 1.70621C0.315681 1.31569 0.552908 0.684211 1.09464 0.684211H6.90535C7.44708 0.684211 7.68431 1.31569 7.29378 1.70621L4.38842 4.61157C4.17375 4.82624 3.82624 4.82624 3.61157 4.61157L0.706206 1.70621Z"
-                    fill="currentColor"
-                />
-            </svg>
+            {#if isLoading}
+                <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+            {:else}
+                <svg width="8" height="6" viewBox="0 0 8 6" fill="none">
+                    <path
+                        d="M0.706206 1.70621C0.315681 1.31569 0.552908 0.684211 1.09464 0.684211H6.90535C7.44708 0.684211 7.68431 1.31569 7.29378 1.70621L4.38842 4.61157C4.17375 4.82624 3.82624 4.82624 3.61157 4.61157L0.706206 1.70621Z"
+                        fill="currentColor"
+                    />
+                </svg>
+            {/if}
         </div>
     </div>
     
@@ -413,6 +429,18 @@
         100% { transform: translateX(0); }
     }
 
+    @keyframes pulse-loading {
+        0% { border-color: #334155; }
+        50% { border-color: #3B82F6; box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.1); }
+        100% { border-color: #334155; }
+    }
+
+    @keyframes pulse-highlight {
+        0% { border-color: #334155; }
+        50% { border-color: #3B82F6; box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2); }
+        100% { border-color: #334155; }
+    }
+
     .custom-select {
         position: relative;
         font-size: 14px;
@@ -440,6 +468,17 @@
     .select-trigger.error {
         border-color: #EF4444;
         animation: shake 0.4s ease-in-out;
+    }
+
+    .select-trigger:not(.error):has(.loading-dots) {
+        animation: pulse-loading 2s ease-in-out infinite;
+        background: linear-gradient(45deg, #1E293B, #1f2937);
+    }
+
+    .select-trigger.highlight {
+        animation: pulse-highlight 1s ease-in-out;
+        border-color: #3B82F6;
+        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
     }
     
     .select-trigger:hover {
@@ -615,5 +654,24 @@
         text-align: center;
         color: #64748B;
         font-size: 14px;
+    }
+
+    .loading-dots {
+        position: relative;
+        color: #64748B;
+    }
+
+    .loading-dots::after {
+        content: "...";
+        animation: dots 1.5s steps(4, end) infinite;
+        position: absolute;
+        color: #3B82F6;
+    }
+
+    @keyframes dots {
+        0%, 20% { content: ""; }
+        40% { content: "."; }
+        60% { content: ".."; }
+        80%, 100% { content: "..."; }
     }
 </style> 

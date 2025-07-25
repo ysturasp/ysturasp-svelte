@@ -9,11 +9,14 @@
     export let onSubmit: () => void;
     export let onDirectionChange: () => void;
     export let scheduleShown = false;
+    export let isLoading = false;
 
     export let selectedDirectionLabel = '';
     export let selectedGroupLabel = '';
 
     let showErrors = false;
+    let showGroupError = false;
+    let highlightDirection = false;
 
     $: directionItems = directions.map(direction => ({
         id: direction.id,
@@ -35,12 +38,27 @@
         selectedGroupLabel = '';
         onDirectionChange();
         showErrors = false;
+        showGroupError = false;
+        highlightDirection = false;
     }
 
     function handleGroupSelect(event: CustomEvent) {
         selectedGroup = event.detail.id;
         selectedGroupLabel = event.detail.label;
         showErrors = false;
+        showGroupError = false;
+        highlightDirection = false;
+    }
+
+    function handleGroupClick() {
+        if (!selectedDirection && !isLoading) {
+            showGroupError = true;
+            highlightDirection = true;
+            setTimeout(() => {
+                showGroupError = false;
+                highlightDirection = false;
+            }, 1000);
+        }
     }
 
     function handleSubmit() {
@@ -58,33 +76,40 @@
         <CustomSelect
             items={directionItems}
             bind:selectedId={selectedDirection}
-            placeholder="Выберите профиль"
+            placeholder={isLoading ? "Загрузка профилей..." : "Выберите профиль"}
             on:select={handleDirectionSelect}
             width="100%"
             searchPlaceholder="Поиск профиля..."
             error={showErrors && !selectedDirection}
+            highlight={highlightDirection}
+            {isLoading}
+            disabled={isLoading}
         />
     </div>
 
     <div>
         <label class="block text-white mb-2">Выберите группу:</label>
-        <CustomSelect
-            items={groupItems}
-            bind:selectedId={selectedGroup}
-            placeholder={selectedDirection ? "Выберите группу" : "Сначала выберите профиль"}
-            on:select={handleGroupSelect}
-            disabled={!selectedDirection}
-            width="100%"
-            searchPlaceholder="Поиск группы..."
-            error={showErrors && !selectedGroup}
-        />
+        <div on:click={handleGroupClick}>
+            <CustomSelect
+                items={groupItems}
+                bind:selectedId={selectedGroup}
+                placeholder={isLoading ? "Загрузка групп..." : selectedDirection ? "Выберите группу" : "Сначала выберите профиль"}
+                on:select={handleGroupSelect}
+                disabled={!selectedDirection || isLoading}
+                width="100%"
+                searchPlaceholder="Поиск группы..."
+                error={showGroupError || (showErrors && !selectedGroup)}
+                {isLoading}
+            />
+        </div>
     </div>
 
     <button
         type="submit"
         class="p-2 bg-blue-700 text-white rounded-xl hover:bg-blue-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+        disabled={isLoading}
     >
-        Показать расписание
+        {isLoading ? 'Загрузка...' : 'Показать расписание'}
     </button>
 
     {#if scheduleShown && selectedDirection && selectedGroup}

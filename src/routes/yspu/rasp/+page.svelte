@@ -16,6 +16,7 @@
     import GithubParserInfo from './components/GithubParserInfo.svelte';
 
     let isLoading = false;
+    let isScheduleLoading = false;
     let isBetaModalOpen = false;
     let isViewModeModalOpen = false;
     let directions: Direction[] = [];
@@ -51,6 +52,7 @@
 
     onMount(async () => {
         try {
+            isLoading = true;
             directions = await getDirections();
             viewMode = storage.get('scheduleViewMode', 'all') as 'all' | 'actual';
 
@@ -76,6 +78,8 @@
             }
         } catch (error) {
             console.error('Error loading initial data:', error);
+        } finally {
+            isLoading = false;
         }
     });
 
@@ -83,7 +87,7 @@
         if (!selectedDirection || !selectedGroup) return;
 
         try {
-            isLoading = true;
+            isScheduleLoading = true;
             scheduleData = await getSchedule(selectedDirection);
 
             const courses = Object.entries(directions.find(d => d.id === selectedDirection)?.courses || {});
@@ -102,7 +106,7 @@
         } catch (error) {
             console.error('Error loading schedule:', error);
         } finally {
-            isLoading = false;
+            isScheduleLoading = false;
         }
     }
 
@@ -239,6 +243,7 @@
                 onSubmit={loadSchedule}
                 onDirectionChange={handleDirectionChange}
                 scheduleShown={!!scheduleData}
+                {isLoading}
             />
 
             {#if scheduleData}
@@ -343,6 +348,6 @@
     </svelte:fragment>
 </BetaModal>
 
-{#if isLoading}
+{#if isScheduleLoading}
     <LoadingOverlay />
 {/if} 
