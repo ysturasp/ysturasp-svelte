@@ -1,59 +1,79 @@
 <script lang="ts">
-    import Dropdown from '$lib/components/ui/Dropdown.svelte';
+	import Dropdown from '$lib/components/ui/Dropdown.svelte';
 
-    const legalItems = [
-        {
-            href: '/legal/terms',
-            text: 'Условия использования'
-        },
-        {
-            href: '/legal/privacy',
-            text: 'Политика конфиденциальности'
-        },
-        {
-            href: '/legal/license',
-            text: 'Лицензионное соглашение'
-        }
-    ];
+	const legalItems = [
+		{
+			href: '/legal/terms',
+			text: 'Условия использования'
+		},
+		{
+			href: '/legal/privacy',
+			text: 'Политика конфиденциальности'
+		},
+		{
+			href: '/legal/license',
+			text: 'Лицензионное соглашение'
+		}
+	];
 </script>
 
-<footer class="bg-slate-800 py-6 mt-12">
-    <div class="container mx-auto px-4">
-        <div class="flex flex-wrap justify-between items-center">
-            <div class="w-full md:w-1/3 text-center md:text-left">
-                <h2 class="text-white text-lg font-bold">ystuRASP</h2>
-                <p class="text-slate-400 mt-2">Экосистема для студентов</p>
-            </div>
-            <div class="w-full md:w-1/3 text-center mt-4 md:mt-0">
-                <nav class="flex justify-center gap-4">
-                    <a href="https://t.me/ysturasp" class="text-slate-400 hover:text-white transition-all">
-                        <div class="w-14 h-14 bg-white rounded-xl p-1">
-                            <img src="https://cdn-icons-png.flaticon.com/512/2111/2111646.png" alt="Telegram"
-                                class="mx-auto my-1 w-10 h-10">
-                        </div>
-                    </a>
-                    <a href="https://boosty.to/ysturasp.me" class="text-slate-400 hover:text-white transition-all">
-                        <div class="w-14 h-14 bg-white rounded-xl p-1">
-                            <img src="https://boosty.to/favicon.ico" alt="Boosty" class="mx-auto my-1 w-10 h-10">
-                        </div>
-                    </a>
-                    <a href="https://github.com/ysturasp" class="text-slate-400 hover:text-white transition-all">
-                        <div class="w-14 h-14 bg-white rounded-xl p-1">
-                            <img src="/images/github-mark.png" alt="GitHub" class="mx-auto my-1 w-10 h-10">
-                        </div>
-                    </a>
-                </nav>
-            </div>
-            <div class="w-full md:w-1/3 text-center md:text-right mt-4 md:mt-0">
-                <div class="flex justify-center md:justify-end">
-                    <Dropdown 
-                        title="Юридическая информация"
-                        titleHref="/legal"
-                        items={legalItems}
-                    />
-                </div>
-                <p class="text-slate-400 mt-2">© 2024 Made with ❤️ by ystuRASP</p>
-            </div>
-        </div>
-    </div>
-</footer> 
+<footer class="mt-12 bg-slate-800 py-6">
+	<div class="container mx-auto px-4">
+		<div class="flex flex-wrap items-center justify-between">
+			<div class="w-full text-center md:w-1/3 md:text-left">
+				<h2 class="text-lg font-bold text-white">ystuRASP</h2>
+				<p class="mt-2 text-slate-400">Экосистема для студентов</p>
+			</div>
+			<div class="mt-4 w-full text-center md:mt-0 md:w-1/3">
+				<nav class="flex justify-center gap-4">
+					<a
+						href="https://t.me/ysturasp"
+						class="text-slate-400 transition-all hover:text-white"
+					>
+						<div class="h-14 w-14 rounded-xl bg-white p-1">
+							<img
+								src="https://cdn-icons-png.flaticon.com/512/2111/2111646.png"
+								alt="Telegram"
+								class="mx-auto my-1 h-10 w-10"
+							/>
+						</div>
+					</a>
+					<a
+						href="https://boosty.to/ysturasp.me"
+						class="text-slate-400 transition-all hover:text-white"
+					>
+						<div class="h-14 w-14 rounded-xl bg-white p-1">
+							<img
+								src="https://boosty.to/favicon.ico"
+								alt="Boosty"
+								class="mx-auto my-1 h-10 w-10"
+							/>
+						</div>
+					</a>
+					<a
+						href="https://github.com/ysturasp"
+						class="text-slate-400 transition-all hover:text-white"
+					>
+						<div class="h-14 w-14 rounded-xl bg-white p-1">
+							<img
+								src="/images/github-mark.png"
+								alt="GitHub"
+								class="mx-auto my-1 h-10 w-10"
+							/>
+						</div>
+					</a>
+				</nav>
+			</div>
+			<div class="mt-4 w-full text-center md:mt-0 md:w-1/3 md:text-right">
+				<div class="flex justify-center md:justify-end">
+					<Dropdown
+						title="Юридическая информация"
+						titleHref="/legal"
+						items={legalItems}
+					/>
+				</div>
+				<p class="mt-2 text-slate-400">© 2024 Made with ❤️ by ystuRASP</p>
+			</div>
+		</div>
+	</div>
+</footer>

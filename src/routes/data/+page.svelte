@@ -1,680 +1,769 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
-  import Header from '$lib/components/layout/Header.svelte';
-  import Footer from '$lib/components/layout/Footer.svelte';
-  import PageLayout from '$lib/components/layout/PageLayout.svelte';
-  import Modal from '$lib/components/modals/Modal.svelte';
-  import NotificationsContainer from '$lib/components/notifications/NotificationsContainer.svelte';
-  import SettingsCard from '$lib/components/settings/SettingsCard.svelte';
-  import SettingsFilters from '$lib/components/settings/SettingsFilters.svelte';
-  import EditSettingsModal from '$lib/components/modals/EditSettingsModal.svelte';
-  import type { Setting, FilterOptions, NotificationType } from '$lib/types';
-  import { validateSettingsName } from '$lib/utils/validation';
-  import { generateToken } from '$lib/utils/token';
-  import { collectHiddenSubjects, collectSubgroupSettings } from '$lib/utils/storage';
-  import { downloadCache, importCache, getCacheItems, clearSelectedCache, type CacheItem } from '$lib/utils/cache';
-  import DeleteDataModal from '$lib/components/modals/DeleteDataModal.svelte';
-  import ApplySettingsModal from '$lib/components/modals/ApplySettingsModal.svelte';
-  import { notifications } from '$lib/stores/notifications';
+	import { onMount } from 'svelte';
+	import Header from '$lib/components/layout/Header.svelte';
+	import Footer from '$lib/components/layout/Footer.svelte';
+	import PageLayout from '$lib/components/layout/PageLayout.svelte';
+	import Modal from '$lib/components/modals/Modal.svelte';
+	import NotificationsContainer from '$lib/components/notifications/NotificationsContainer.svelte';
+	import SettingsCard from '$lib/components/settings/SettingsCard.svelte';
+	import SettingsFilters from '$lib/components/settings/SettingsFilters.svelte';
+	import EditSettingsModal from '$lib/components/modals/EditSettingsModal.svelte';
+	import type { Setting, FilterOptions, NotificationType } from '$lib/types';
+	import { validateSettingsName } from '$lib/utils/validation';
+	import { generateToken } from '$lib/utils/token';
+	import { collectHiddenSubjects, collectSubgroupSettings } from '$lib/utils/storage';
+	import {
+		downloadCache,
+		importCache,
+		getCacheItems,
+		clearSelectedCache,
+		type CacheItem
+	} from '$lib/utils/cache';
+	import DeleteDataModal from '$lib/components/modals/DeleteDataModal.svelte';
+	import ApplySettingsModal from '$lib/components/modals/ApplySettingsModal.svelte';
+	import { notifications } from '$lib/stores/notifications';
 
-  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby_96MwIj8oq9qdVcjFz6lRL9XM3EAV_XV8I25ZykDh4FEWqaum6ev_GmDjort26MkbsQ/exec';
+	const SCRIPT_URL =
+		'https://script.google.com/macros/s/AKfycby_96MwIj8oq9qdVcjFz6lRL9XM3EAV_XV8I25ZykDh4FEWqaum6ev_GmDjort26MkbsQ/exec';
 
-  let settings: Setting[] = [];
-  let groups: string[] = [];
-  let filteredSettings: Setting[] = [];
-  let isLoading = true;
+	let settings: Setting[] = [];
+	let groups: string[] = [];
+	let filteredSettings: Setting[] = [];
+	let isLoading = true;
 
-  let showConfirmModal = false;
-  let showTokenModal = false;
-  let showEditSettingsModal = false;
+	let showConfirmModal = false;
+	let showTokenModal = false;
+	let showEditSettingsModal = false;
 
-  let shareHiddenSubjects = false;
-  let shareSubgroupSettings = false;
-  let settingsName = '';
+	let shareHiddenSubjects = false;
+	let shareSubgroupSettings = false;
+	let settingsName = '';
 
-  let isProcessing = false;
+	let isProcessing = false;
 
-  let showDeleteDataModal = false;
-  let cacheItems: CacheItem[] = [];
+	let showDeleteDataModal = false;
+	let cacheItems: CacheItem[] = [];
 
-  let showApplySettingsModal = false;
-  let selectedSetting: Setting | null = null;
+	let showApplySettingsModal = false;
+	let selectedSetting: Setting | null = null;
 
-  onMount(async () => {
-    await loadSharedSettings();
-    generateRandomName();
-  });
+	onMount(async () => {
+		await loadSharedSettings();
+		generateRandomName();
+	});
 
-  async function loadSharedSettings() {
-    try {
-      isLoading = true;
-      const response = await fetch(`${SCRIPT_URL}?action=get`);
-      const data = await response.json() as Setting[];
-      settings = data;
-      
-      const groupSet = new Set<string>(
-        data.map((setting: Setting) => {
-          const match = setting.name.match(/\((.*?)\)$/);
-          return match ? match[1] : '';
-        }).filter(Boolean)
-      );
-      groups = Array.from(groupSet);
-      
-      filterSettings({
-        searchText: '',
-        selectedGroup: '',
-        selectedType: '',
-        verifiedOnly: false
-      });
-      
-      isLoading = false;
-    } catch (error) {
-      console.error('Ошибка при загрузке настроек:', error);
-      notifications.add('Ошибка при загрузке настроек', 'error');
-      isLoading = false;
-    }
-  }
+	async function loadSharedSettings() {
+		try {
+			isLoading = true;
+			const response = await fetch(`${SCRIPT_URL}?action=get`);
+			const data = (await response.json()) as Setting[];
+			settings = data;
 
-  function filterSettings(filters: FilterOptions) {
-    filteredSettings = settings.filter(setting => {
-      const matchesSearch = setting.name.toLowerCase().includes(filters.searchText.toLowerCase());
-      const settingGroup = extractGroupFromName(setting.name);
-      const matchesGroup = !filters.selectedGroup || settingGroup === filters.selectedGroup;
-      
-      const matchesType = !filters.selectedType || 
-        (filters.selectedType === 'hidden' && setting.hasHiddenSubjects && !setting.hasSubgroupSettings) ||
-        (filters.selectedType === 'subgroups' && !setting.hasHiddenSubjects && setting.hasSubgroupSettings) ||
-        (filters.selectedType === 'both' && setting.hasHiddenSubjects && setting.hasSubgroupSettings);
+			const groupSet = new Set<string>(
+				data
+					.map((setting: Setting) => {
+						const match = setting.name.match(/\((.*?)\)$/);
+						return match ? match[1] : '';
+					})
+					.filter(Boolean)
+			);
+			groups = Array.from(groupSet);
 
-      const matchesVerified = !filters.verifiedOnly || setting.verified;
+			filterSettings({
+				searchText: '',
+				selectedGroup: '',
+				selectedType: '',
+				verifiedOnly: false
+			});
 
-      return matchesSearch && matchesGroup && matchesType && matchesVerified;
-    });
-  }
+			isLoading = false;
+		} catch (error) {
+			console.error('Ошибка при загрузке настроек:', error);
+			notifications.add('Ошибка при загрузке настроек', 'error');
+			isLoading = false;
+		}
+	}
 
-  function extractGroupFromName(name: string): string {
-    const match = name.match(/\((.*?)\)$/);
-    return match ? match[1] : '';
-  }
+	function filterSettings(filters: FilterOptions) {
+		filteredSettings = settings.filter((setting) => {
+			const matchesSearch = setting.name
+				.toLowerCase()
+				.includes(filters.searchText.toLowerCase());
+			const settingGroup = extractGroupFromName(setting.name);
+			const matchesGroup = !filters.selectedGroup || settingGroup === filters.selectedGroup;
 
-  function generateRandomName() {
-    const adjectives = [
-      'Cosmic', 'Mystic', 'Silent', 'Hidden', 'Ancient', 'Brave', 'Clever',
-      'Dancing', 'Electric', 'Fierce', 'Golden', 'Happy', 'Icy', 'Jolly'
-    ];
-    
-    const nouns = [
-      'Phoenix', 'Dragon', 'Spirit', 'Shadow', 'Crystal', 'River', 'Thunder',
-      'Forest', 'Mountain', 'Ocean', 'Star', 'Moon', 'Sun', 'Wind'
-    ];
-    
-    const randomAdjective = adjectives[Math.floor(Math.random() * adjectives.length)];
-    const randomNoun = nouns[Math.floor(Math.random() * nouns.length)];
-    
-    settingsName = `${randomAdjective} ${randomNoun}`;
-  }
+			const matchesType =
+				!filters.selectedType ||
+				(filters.selectedType === 'hidden' &&
+					setting.hasHiddenSubjects &&
+					!setting.hasSubgroupSettings) ||
+				(filters.selectedType === 'subgroups' &&
+					!setting.hasHiddenSubjects &&
+					setting.hasSubgroupSettings) ||
+				(filters.selectedType === 'both' &&
+					setting.hasHiddenSubjects &&
+					setting.hasSubgroupSettings);
 
-  async function handleSettingsApply(event: CustomEvent<string>) {
-    const settingId = event.detail;
-    try {
-      notifications.add('Загрузка настроек...', 'info');
-      
-      const response = await fetch(`${SCRIPT_URL}?action=get&id=${settingId}`);
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
+			const matchesVerified = !filters.verifiedOnly || setting.verified;
 
-      const text = await response.text();
-      const setting = JSON.parse(text);
-      selectedSetting = setting;
-      showApplySettingsModal = true;
-    } catch (error) {
-      console.error('Ошибка при загрузке настроек:', error);
-      notifications.add('Ошибка при загрузке настроек', 'error');
-    }
-  }
+			return matchesSearch && matchesGroup && matchesType && matchesVerified;
+		});
+	}
 
-  async function handleApplySettingsConfirm() {
-    if (!selectedSetting) return;
+	function extractGroupFromName(name: string): string {
+		const match = name.match(/\((.*?)\)$/);
+		return match ? match[1] : '';
+	}
 
-    try {
-      if (selectedSetting.hiddenSubjects) {
-        const hiddenSubjects = JSON.parse(selectedSetting.hiddenSubjects);
-        Object.entries(hiddenSubjects).forEach(([key, value]) => {
-          localStorage.setItem(key, JSON.stringify(value));
-        });
-      }
+	function generateRandomName() {
+		const adjectives = [
+			'Cosmic',
+			'Mystic',
+			'Silent',
+			'Hidden',
+			'Ancient',
+			'Brave',
+			'Clever',
+			'Dancing',
+			'Electric',
+			'Fierce',
+			'Golden',
+			'Happy',
+			'Icy',
+			'Jolly'
+		];
 
-      if (selectedSetting.subgroupSettings) {
-        const subgroupSettings = JSON.parse(selectedSetting.subgroupSettings);
-        if (subgroupSettings.subgroupSettings) {
-          localStorage.setItem('subgroupSettings', subgroupSettings.subgroupSettings);
-        }
-      }
+		const nouns = [
+			'Phoenix',
+			'Dragon',
+			'Spirit',
+			'Shadow',
+			'Crystal',
+			'River',
+			'Thunder',
+			'Forest',
+			'Mountain',
+			'Ocean',
+			'Star',
+			'Moon',
+			'Sun',
+			'Wind'
+		];
 
-      notifications.add('Настройки успешно применены!', 'success');
-      showApplySettingsModal = false;
-      setTimeout(() => location.reload(), 1500);
-    } catch (error) {
-      console.error('Ошибка при применении настроек:', error);
-      notifications.add('Ошибка при применении настроек', 'error');
-    }
-  }
+		const randomAdjective = adjectives[Math.floor(Math.random() * adjectives.length)];
+		const randomNoun = nouns[Math.floor(Math.random() * nouns.length)];
 
-  function handleFilterChange(event: CustomEvent) {
-    filterSettings(event.detail);
-  }
+		settingsName = `${randomAdjective} ${randomNoun}`;
+	}
 
-  async function handleShareSettings() {
-    if (isProcessing) {
-      notifications.add('Пожалуйста, подождите...', 'warning');
-      return;
-    }
-    isProcessing = true;
+	async function handleSettingsApply(event: CustomEvent<string>) {
+		const settingId = event.detail;
+		try {
+			notifications.add('Загрузка настроек...', 'info');
 
-    try {
-      const name = settingsName.trim();
-      
-      const validation = validateSettingsName(name);
-      if (!validation.isValid) {
-        notifications.add(validation.reason || 'Некорректное название', 'error');
-        return;
-      }
+			const response = await fetch(`${SCRIPT_URL}?action=get&id=${settingId}`);
+			if (!response.ok) {
+				throw new Error('Network response was not ok');
+			}
 
-      if (!shareHiddenSubjects && !shareSubgroupSettings) {
-        notifications.add('Пожалуйста, выберите хотя бы один тип настроек для публикации', 'warning');
-        return;
-      }
+			const text = await response.text();
+			const setting = JSON.parse(text);
+			selectedSetting = setting;
+			showApplySettingsModal = true;
+		} catch (error) {
+			console.error('Ошибка при загрузке настроек:', error);
+			notifications.add('Ошибка при загрузке настроек', 'error');
+		}
+	}
 
-      const userGroup = localStorage.getItem('lastGroup') || '';
-      const displayName = userGroup ? `${name} (${userGroup})` : name;
+	async function handleApplySettingsConfirm() {
+		if (!selectedSetting) return;
 
-      const response = await fetch(`${SCRIPT_URL}?action=get`);
-      const existingSettings = await response.json();
-      
-      const isDuplicate = existingSettings.some((setting: Setting) => 
-        setting.name.toLowerCase() === displayName.toLowerCase()
-      );
+		try {
+			if (selectedSetting.hiddenSubjects) {
+				const hiddenSubjects = JSON.parse(selectedSetting.hiddenSubjects);
+				Object.entries(hiddenSubjects).forEach(([key, value]) => {
+					localStorage.setItem(key, JSON.stringify(value));
+				});
+			}
 
-      if (isDuplicate) {
-        throw new Error('Настройки с таким названием уже существуют. Пожалуйста, выберите другое название.');
-      }
+			if (selectedSetting.subgroupSettings) {
+				const subgroupSettings = JSON.parse(selectedSetting.subgroupSettings);
+				if (subgroupSettings.subgroupSettings) {
+					localStorage.setItem('subgroupSettings', subgroupSettings.subgroupSettings);
+				}
+			}
 
-      const humanToken = await generateToken();
+			notifications.add('Настройки успешно применены!', 'success');
+			showApplySettingsModal = false;
+			setTimeout(() => location.reload(), 1500);
+		} catch (error) {
+			console.error('Ошибка при применении настроек:', error);
+			notifications.add('Ошибка при применении настроек', 'error');
+		}
+	}
 
-      const settings = {
-        name: displayName,
-        date: new Date().toISOString(),
-        hiddenSubjects: shareHiddenSubjects ? JSON.stringify(collectHiddenSubjects()) : undefined,
-        subgroupSettings: shareSubgroupSettings ? JSON.stringify(collectSubgroupSettings()) : undefined,
-        token: humanToken
-      };
+	function handleFilterChange(event: CustomEvent) {
+		filterSettings(event.detail);
+	}
 
-      Object.keys(settings).forEach(key => {
-        if (settings[key as keyof typeof settings] === undefined) {
-          delete settings[key as keyof typeof settings];
-        }
-      });
+	async function handleShareSettings() {
+		if (isProcessing) {
+			notifications.add('Пожалуйста, подождите...', 'warning');
+			return;
+		}
+		isProcessing = true;
 
-      notifications.add('Публикация настроек...', 'info');
-      
-      const shareResponse = await fetch(SCRIPT_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'text/plain;charset=utf-8',
-        },
-        body: JSON.stringify({
-          action: 'share',
-          settings: settings
-        })
-      });
+		try {
+			const name = settingsName.trim();
 
-      if (!shareResponse.ok) {
-        throw new Error('Network response was not ok');
-      }
+			const validation = validateSettingsName(name);
+			if (!validation.isValid) {
+				notifications.add(validation.reason || 'Некорректное название', 'error');
+				return;
+			}
 
-      const result = await shareResponse.json();
-      if (result.error) {
-        throw new Error(result.error);
-      }
+			if (!shareHiddenSubjects && !shareSubgroupSettings) {
+				notifications.add(
+					'Пожалуйста, выберите хотя бы один тип настроек для публикации',
+					'warning'
+				);
+				return;
+			}
 
-      if (!result.success) {
-        throw new Error('Неизвестная ошибка при публикации настроек');
-      }
+			const userGroup = localStorage.getItem('lastGroup') || '';
+			const displayName = userGroup ? `${name} (${userGroup})` : name;
 
-      showTokenDialog(humanToken);
-      notifications.add('Настройки успешно опубликованы!', 'success');
-      setTimeout(() => loadSharedSettings(), 1500);
+			const response = await fetch(`${SCRIPT_URL}?action=get`);
+			const existingSettings = await response.json();
 
-    } catch (error) {
-      console.error('Ошибка при публикации настроек:', error);
-      notifications.add(error instanceof Error ? error.message : 'Ошибка при публикации настроек', 'error');
-    } finally {
-      setTimeout(() => {
-        isProcessing = false;
-      }, 2000);
-    }
-  }
+			const isDuplicate = existingSettings.some(
+				(setting: Setting) => setting.name.toLowerCase() === displayName.toLowerCase()
+			);
 
-  function showTokenDialog(token: string) {
-    showTokenModal = true;
-    tokenValue = token;
-  }
+			if (isDuplicate) {
+				throw new Error(
+					'Настройки с таким названием уже существуют. Пожалуйста, выберите другое название.'
+				);
+			}
 
-  let tokenValue = '';
+			const humanToken = await generateToken();
 
-  async function copyToClipboard(text: string) {
-    try {
-      await navigator.clipboard.writeText(text);
-      notifications.add('Токен скопирован в буфер обмена', 'success');
-    } catch {
-      notifications.add('Не удалось скопировать токен', 'error');
-    }
-  }
+			const settings = {
+				name: displayName,
+				date: new Date().toISOString(),
+				hiddenSubjects: shareHiddenSubjects
+					? JSON.stringify(collectHiddenSubjects())
+					: undefined,
+				subgroupSettings: shareSubgroupSettings
+					? JSON.stringify(collectSubgroupSettings())
+					: undefined,
+				token: humanToken
+			};
 
-  async function handleEditSettings(event: CustomEvent<string>) {
-    const token = event.detail;
-    showEditSettingsModal = false;
+			Object.keys(settings).forEach((key) => {
+				if (settings[key as keyof typeof settings] === undefined) {
+					delete settings[key as keyof typeof settings];
+				}
+			});
 
-    try {
-      notifications.add('Проверка токена...', 'info');
+			notifications.add('Публикация настроек...', 'info');
 
-      const response = await fetch(SCRIPT_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'text/plain;charset=utf-8',
-        },
-        body: JSON.stringify({
-          action: 'edit',
-          token: token
-        })
-      });
+			const shareResponse = await fetch(SCRIPT_URL, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'text/plain;charset=utf-8'
+				},
+				body: JSON.stringify({
+					action: 'share',
+					settings: settings
+				})
+			});
 
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
+			if (!shareResponse.ok) {
+				throw new Error('Network response was not ok');
+			}
 
-      const result = await response.json();
-      if (result.error) {
-        throw new Error(result.error);
-      }
+			const result = await shareResponse.json();
+			if (result.error) {
+				throw new Error(result.error);
+			}
 
-      if (!result.success) {
-        throw new Error('Неверный токен');
-      }
+			if (!result.success) {
+				throw new Error('Неизвестная ошибка при публикации настроек');
+			}
 
-      notifications.add('Настройки успешно обновлены', 'success');
-      setTimeout(() => loadSharedSettings(), 1500);
-    } catch (error) {
-      console.error('Ошибка при редактировании настроек:', error);
-      notifications.add(error instanceof Error ? error.message : 'Ошибка при редактировании настроек', 'error');
-    }
-  }
+			showTokenDialog(humanToken);
+			notifications.add('Настройки успешно опубликованы!', 'success');
+			setTimeout(() => loadSharedSettings(), 1500);
+		} catch (error) {
+			console.error('Ошибка при публикации настроек:', error);
+			notifications.add(
+				error instanceof Error ? error.message : 'Ошибка при публикации настроек',
+				'error'
+			);
+		} finally {
+			setTimeout(() => {
+				isProcessing = false;
+			}, 2000);
+		}
+	}
 
-  async function handleDeleteSettings(event: CustomEvent<string>) {
-    const token = event.detail;
-    showEditSettingsModal = false;
+	function showTokenDialog(token: string) {
+		showTokenModal = true;
+		tokenValue = token;
+	}
 
-    try {
-      notifications.add('Проверка токена...', 'info');
+	let tokenValue = '';
 
-      const response = await fetch(SCRIPT_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'text/plain;charset=utf-8',
-        },
-        body: JSON.stringify({
-          action: 'delete',
-          token: token
-        })
-      });
+	async function copyToClipboard(text: string) {
+		try {
+			await navigator.clipboard.writeText(text);
+			notifications.add('Токен скопирован в буфер обмена', 'success');
+		} catch {
+			notifications.add('Не удалось скопировать токен', 'error');
+		}
+	}
 
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
+	async function handleEditSettings(event: CustomEvent<string>) {
+		const token = event.detail;
+		showEditSettingsModal = false;
 
-      const result = await response.json();
-      if (result.error) {
-        throw new Error(result.error);
-      }
+		try {
+			notifications.add('Проверка токена...', 'info');
 
-      if (!result.success) {
-        throw new Error('Неверный токен');
-      }
+			const response = await fetch(SCRIPT_URL, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'text/plain;charset=utf-8'
+				},
+				body: JSON.stringify({
+					action: 'edit',
+					token: token
+				})
+			});
 
-      notifications.add('Настройки успешно удалены', 'success');
-      setTimeout(() => loadSharedSettings(), 1500);
-    } catch (error) {
-      console.error('Ошибка при удалении настроек:', error);
-      notifications.add(error instanceof Error ? error.message : 'Ошибка при удалении настроек', 'error');
-    }
-  }
+			if (!response.ok) {
+				throw new Error('Network response was not ok');
+			}
 
-  function handleEditSettingsError(event: CustomEvent<string>) {
-    notifications.add(event.detail, 'error');
-  }
+			const result = await response.json();
+			if (result.error) {
+				throw new Error(result.error);
+			}
 
-  function handleDownload() {
-    if (downloadCache()) {
-      notifications.add('Данные успешно скачаны', 'success');
-    } else {
-      notifications.add('Ошибка при скачивании данных', 'error');
-    }
-  }
+			if (!result.success) {
+				throw new Error('Неверный токен');
+			}
 
-  async function handleImport(event: Event) {
-    const input = event.target as HTMLInputElement;
-    const file = input.files?.[0];
-    if (!file) return;
+			notifications.add('Настройки успешно обновлены', 'success');
+			setTimeout(() => loadSharedSettings(), 1500);
+		} catch (error) {
+			console.error('Ошибка при редактировании настроек:', error);
+			notifications.add(
+				error instanceof Error ? error.message : 'Ошибка при редактировании настроек',
+				'error'
+			);
+		}
+	}
 
-    try {
-      await importCache(file);
-      notifications.add('Данные успешно импортированы', 'success');
-      setTimeout(() => location.reload(), 1500);
-    } catch (error) {
-      console.error('Ошибка при импорте:', error);
-      notifications.add('Ошибка при импорте данных', 'error');
-    }
-    input.value = '';
-  }
+	async function handleDeleteSettings(event: CustomEvent<string>) {
+		const token = event.detail;
+		showEditSettingsModal = false;
 
-  function handleDeleteDataClick() {
-    cacheItems = getCacheItems();
-    showDeleteDataModal = true;
-  }
+		try {
+			notifications.add('Проверка токена...', 'info');
 
-  function handleDeleteData(event: CustomEvent<CacheItem[]>) {
-    const items = event.detail;
-    clearSelectedCache(items);
-    showDeleteDataModal = false;
-    notifications.add('Выбранные данные успешно удалены', 'success');
-    setTimeout(() => location.reload(), 1500);
-  }
+			const response = await fetch(SCRIPT_URL, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'text/plain;charset=utf-8'
+				},
+				body: JSON.stringify({
+					action: 'delete',
+					token: token
+				})
+			});
+
+			if (!response.ok) {
+				throw new Error('Network response was not ok');
+			}
+
+			const result = await response.json();
+			if (result.error) {
+				throw new Error(result.error);
+			}
+
+			if (!result.success) {
+				throw new Error('Неверный токен');
+			}
+
+			notifications.add('Настройки успешно удалены', 'success');
+			setTimeout(() => loadSharedSettings(), 1500);
+		} catch (error) {
+			console.error('Ошибка при удалении настроек:', error);
+			notifications.add(
+				error instanceof Error ? error.message : 'Ошибка при удалении настроек',
+				'error'
+			);
+		}
+	}
+
+	function handleEditSettingsError(event: CustomEvent<string>) {
+		notifications.add(event.detail, 'error');
+	}
+
+	function handleDownload() {
+		if (downloadCache()) {
+			notifications.add('Данные успешно скачаны', 'success');
+		} else {
+			notifications.add('Ошибка при скачивании данных', 'error');
+		}
+	}
+
+	async function handleImport(event: Event) {
+		const input = event.target as HTMLInputElement;
+		const file = input.files?.[0];
+		if (!file) return;
+
+		try {
+			await importCache(file);
+			notifications.add('Данные успешно импортированы', 'success');
+			setTimeout(() => location.reload(), 1500);
+		} catch (error) {
+			console.error('Ошибка при импорте:', error);
+			notifications.add('Ошибка при импорте данных', 'error');
+		}
+		input.value = '';
+	}
+
+	function handleDeleteDataClick() {
+		cacheItems = getCacheItems();
+		showDeleteDataModal = true;
+	}
+
+	function handleDeleteData(event: CustomEvent<CacheItem[]>) {
+		const items = event.detail;
+		clearSelectedCache(items);
+		showDeleteDataModal = false;
+		notifications.add('Выбранные данные успешно удалены', 'success');
+		setTimeout(() => location.reload(), 1500);
+	}
 </script>
 
 <svelte:head>
-  <title>Экспорт и импорт данных | ystuRASP</title>
-  <meta name="description" content="Экспорт и импорт кэша">
+	<title>Экспорт и импорт данных | ystuRASP</title>
+	<meta name="description" content="Экспорт и импорт кэша" />
 </svelte:head>
 
 <PageLayout>
-  <Header />
-  
-  <main class="container mx-auto mt-5 md:mt-7 px-3 md:px-0">
-    <section class="bg-slate-800 rounded-2xl p-4 md:p-6 mt-8">
-      <h2 class="text-4xl font-semibold text-white mb-4">🔐 Ваши данные принадлежат только Вам!</h2>
-      
-      <section class="bg-slate-900 rounded-2xl p-4 md:p-6 mt-8">
-        <h2 class="md:text-3xl text-xl font-semibold text-white mb-4">Экспорт и импорт Ваших данных</h2>
-        <div class="flex flex-col md:flex-row gap-4">
-          <button
-            class="p-2 bg-emerald-600 text-white rounded-2xl hover:bg-emerald-700 transition-all"
-            on:click={handleDownload}
-          >
-            Скачать мои данные (JSON)
-          </button>
-          <input
-            type="file"
-            id="importFile"
-            class="hidden"
-            accept=".json"
-            on:change={handleImport}
-            autocomplete="off"
-            autocorrect="off"
-            autocapitalize="off"
-          >
-          <button
-            class="p-2 bg-blue-600 text-white rounded-2xl hover:bg-blue-700 transition-all"
-            on:click={() => document.getElementById('importFile')?.click()}
-          >
-            Импортировать данные
-          </button>
-          <button
-            class="p-2 bg-red-600 text-white rounded-2xl hover:bg-red-700 transition-all"
-            on:click={handleDeleteDataClick}
-          >
-            Удалить данные
-          </button>
-        </div>
-      </section>
+	<Header />
 
-      <section class="bg-slate-900 rounded-2xl p-4 md:p-6 mt-8">
-        <h2 class="md:text-3xl text-xl font-semibold text-white mb-4">Поделиться настройками</h2>
-        <div class="flex flex-col gap-4">
-          <div class="bg-slate-800 p-4 rounded-2xl">
-            <h3 class="text-lg font-semibold text-white mb-2">Мои настройки</h3>
-            <div class="flex flex-wrap gap-4 mb-4">
-              <div class="flex items-center">
-                <label class="inline-flex items-center cursor-pointer">
-                  <input
-                    type="checkbox"
-                    bind:checked={shareHiddenSubjects}
-                    class="hidden peer"
-                  >
-                  <div class="w-5 h-5 border-2 border-slate-500 rounded-md flex items-center justify-center mr-2 transition-colors peer-checked:border-blue-500">
-                    <svg
-                      class="w-3 h-3 text-blue-500 {shareHiddenSubjects ? '' : 'hidden'}"
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                    >
-                      <path
-                        fill-rule="evenodd"
-                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                        clip-rule="evenodd"
-                      />
-                    </svg>
-                  </div>
-                  <span class="text-slate-400">Скрытые предметы</span>
-                </label>
-              </div>
-              
-              <div class="flex items-center">
-                <label class="inline-flex items-center cursor-pointer">
-                  <input
-                    type="checkbox"
-                    bind:checked={shareSubgroupSettings}
-                    class="hidden peer"
-                  >
-                  <div class="w-5 h-5 border-2 border-slate-500 rounded-md flex items-center justify-center mr-2 transition-colors peer-checked:border-blue-500">
-                    <svg
-                      class="w-3 h-3 text-blue-500 {shareSubgroupSettings ? '' : 'hidden'}"
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                    >
-                      <path
-                        fill-rule="evenodd"
-                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                        clip-rule="evenodd"
-                      />
-                    </svg>
-                  </div>
-                  <span class="text-slate-400">Настройки подгрупп</span>
-                </label>
-              </div>
-            </div>
-            
-            <div class="flex flex-col md:flex-row gap-4">
-              <div class="flex gap-2 flex-1">
-                <input
-                  type="text"
-                  bind:value={settingsName}
-                  placeholder="Название настроек"
-                  class="p-2 bg-slate-900 text-white rounded-2xl focus:outline-none border border-blue-500 flex-1 transition-colors"
-                  autocomplete="off"
-                  autocorrect="off"
-                  autocapitalize="off"
-                >
-                <button
-                  on:click={generateRandomName}
-                  class="p-2 bg-slate-900 text-white rounded-2xl hover:bg-slate-700 transition-all"
-                >
-                  🎲
-                </button>
-              </div>
-              <button
-                class="p-2 bg-blue-600 text-white rounded-2xl hover:bg-blue-700 transition-all {isProcessing ? 'opacity-50 cursor-not-allowed' : ''}"
-                on:click={handleShareSettings}
-                disabled={isProcessing}
-              >
-                Поделиться настройками
-              </button>
-            </div>
-          </div>
+	<main class="container mx-auto mt-5 px-3 md:mt-7 md:px-0">
+		<section class="mt-8 rounded-2xl bg-slate-800 p-4 md:p-6">
+			<h2 class="mb-4 text-4xl font-semibold text-white">
+				🔐 Ваши данные принадлежат только Вам!
+			</h2>
 
-          <SettingsFilters {groups} on:filter={handleFilterChange} />
+			<section class="mt-8 rounded-2xl bg-slate-900 p-4 md:p-6">
+				<h2 class="mb-4 text-xl font-semibold text-white md:text-3xl">
+					Экспорт и импорт Ваших данных
+				</h2>
+				<div class="flex flex-col gap-4 md:flex-row">
+					<button
+						class="rounded-2xl bg-emerald-600 p-2 text-white transition-all hover:bg-emerald-700"
+						on:click={handleDownload}
+					>
+						Скачать мои данные (JSON)
+					</button>
+					<input
+						type="file"
+						id="importFile"
+						class="hidden"
+						accept=".json"
+						on:change={handleImport}
+						autocomplete="off"
+						autocorrect="off"
+						autocapitalize="off"
+					/>
+					<button
+						class="rounded-2xl bg-blue-600 p-2 text-white transition-all hover:bg-blue-700"
+						on:click={() => document.getElementById('importFile')?.click()}
+					>
+						Импортировать данные
+					</button>
+					<button
+						class="rounded-2xl bg-red-600 p-2 text-white transition-all hover:bg-red-700"
+						on:click={handleDeleteDataClick}
+					>
+						Удалить данные
+					</button>
+				</div>
+			</section>
 
-          <div class="flex justify-between items-center mb-4">
-            <h3 class="text-lg font-semibold text-white">Доступные настройки</h3>
-            <button
-              class="p-2 bg-amber-600 text-white rounded-2xl hover:bg-amber-700 transition-all"
-              on:click={() => showEditSettingsModal = true}
-            >
-              Редактировать/Удалить настройки
-            </button>
-          </div>
-          
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {#if isLoading}
-              <div class="col-span-full flex justify-center items-center p-8">
-                <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500" />
-              </div>
-            {:else if filteredSettings.length === 0}
-              <div class="bg-slate-900 p-4 rounded-2xl col-span-full">
-                <p class="text-slate-400 text-center">Настройки не найдены</p>
-              </div>
-            {:else}
-              {#each filteredSettings as setting (setting.id)}
-                <SettingsCard {setting} on:apply={handleSettingsApply} />
-              {/each}
-            {/if}
-          </div>
-        </div>
-      </section>
+			<section class="mt-8 rounded-2xl bg-slate-900 p-4 md:p-6">
+				<h2 class="mb-4 text-xl font-semibold text-white md:text-3xl">
+					Поделиться настройками
+				</h2>
+				<div class="flex flex-col gap-4">
+					<div class="rounded-2xl bg-slate-800 p-4">
+						<h3 class="mb-2 text-lg font-semibold text-white">Мои настройки</h3>
+						<div class="mb-4 flex flex-wrap gap-4">
+							<div class="flex items-center">
+								<label class="inline-flex cursor-pointer items-center">
+									<input
+										type="checkbox"
+										bind:checked={shareHiddenSubjects}
+										class="peer hidden"
+									/>
+									<div
+										class="mr-2 flex h-5 w-5 items-center justify-center rounded-md border-2 border-slate-500 transition-colors peer-checked:border-blue-500"
+									>
+										<svg
+											class="h-3 w-3 text-blue-500 {shareHiddenSubjects
+												? ''
+												: 'hidden'}"
+											viewBox="0 0 20 20"
+											fill="currentColor"
+										>
+											<path
+												fill-rule="evenodd"
+												d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+												clip-rule="evenodd"
+											/>
+										</svg>
+									</div>
+									<span class="text-slate-400">Скрытые предметы</span>
+								</label>
+							</div>
 
-      <h2 class="text-2xl font-semibold text-white mt-4">Зачем это нужно:</h2>
-      <div class="flex flex-wrap justify-center gap-6 p-0 mt-4">
-        <div class="card bg-slate-900 p-4 md:p-6 rounded-2xl text-center max-w-md w-full">
-          <div class="h-27 w-54 mx-auto mb-4 rounded-full">
-            <p class="transportation" style="font-size: 100px;">📱👉 🖥️</p>
-          </div>
-          <h3 class="text-xl font-bold text-white mb-2">При переносе на другое устройство</h3>
-          <p class="text-slate-400 mb-4">
-            Перенесите заметки, скрытые предметы и другую информацию, сохраните данные на старом и импортируйте их на новом
-          </p>
-          <div class="flex flex-wrap justify-center gap-2 mb-4">
-            <span class="bg-gray-700 text-xs text-white py-1 px-2 rounded">Информация</span>
-            <span class="bg-gray-700 text-xs text-white py-1 px-2 rounded">New</span>
-          </div>
-        </div>
+							<div class="flex items-center">
+								<label class="inline-flex cursor-pointer items-center">
+									<input
+										type="checkbox"
+										bind:checked={shareSubgroupSettings}
+										class="peer hidden"
+									/>
+									<div
+										class="mr-2 flex h-5 w-5 items-center justify-center rounded-md border-2 border-slate-500 transition-colors peer-checked:border-blue-500"
+									>
+										<svg
+											class="h-3 w-3 text-blue-500 {shareSubgroupSettings
+												? ''
+												: 'hidden'}"
+											viewBox="0 0 20 20"
+											fill="currentColor"
+										>
+											<path
+												fill-rule="evenodd"
+												d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+												clip-rule="evenodd"
+											/>
+										</svg>
+									</div>
+									<span class="text-slate-400">Настройки подгрупп</span>
+								</label>
+							</div>
+						</div>
 
-        <div class="card bg-slate-900 p-3 md:p-6 rounded-2xl text-center max-w-md w-full">
-          <div class="h-27 w-54 mx-auto mb-4 rounded-full">
-            <p class="transportation" style="font-size: 100px;">🗑️</p>
-          </div>
-          <h3 class="text-xl font-bold text-white mb-2">При очистке истории браузера</h3>
-          <p class="text-slate-400 mb-4">
-            Очистка браузера неизбежно приведет к потере данных скрытых предметов и заметок, сделайте резервную копию Ваших данных перед очисткой
-          </p>
-          <div class="flex flex-wrap justify-center gap-2 mb-4">
-            <span class="bg-gray-700 text-xs text-white py-1 px-2 rounded">Информация</span>
-            <span class="bg-gray-700 text-xs text-white py-1 px-2 rounded">New</span>
-          </div>
-        </div>
+						<div class="flex flex-col gap-4 md:flex-row">
+							<div class="flex flex-1 gap-2">
+								<input
+									type="text"
+									bind:value={settingsName}
+									placeholder="Название настроек"
+									class="flex-1 rounded-2xl border border-blue-500 bg-slate-900 p-2 text-white transition-colors focus:outline-none"
+									autocomplete="off"
+									autocorrect="off"
+									autocapitalize="off"
+								/>
+								<button
+									on:click={generateRandomName}
+									class="rounded-2xl bg-slate-900 p-2 text-white transition-all hover:bg-slate-700"
+								>
+									🎲
+								</button>
+							</div>
+							<button
+								class="rounded-2xl bg-blue-600 p-2 text-white transition-all hover:bg-blue-700 {isProcessing
+									? 'cursor-not-allowed opacity-50'
+									: ''}"
+								on:click={handleShareSettings}
+								disabled={isProcessing}
+							>
+								Поделиться настройками
+							</button>
+						</div>
+					</div>
 
-        <div class="card bg-slate-900 p-4 md:p-6 rounded-2xl text-center max-w-md w-full">
-          <div class="h-27 w-54 mx-auto mb-4 rounded-full">
-            <p class="transportation" style="font-size: 100px;">🥴</p>
-          </div>
-          <h3 class="text-xl font-bold text-white mb-2">При проблемах на сайте</h3>
-          <p class="text-slate-400 mb-4">
-            Если сайт работает некорректно или запрашиваемая информация неактуальна попробуйте очистить данные, это удалит все ваши пользовательские данные
-          </p>
-          <div class="flex flex-wrap justify-center gap-2 mb-4">
-            <span class="bg-gray-700 text-xs text-white py-1 px-2 rounded">Информация</span>
-            <span class="bg-gray-700 text-xs text-white py-1 px-2 rounded">New</span>
-          </div>
-        </div>
-      </div>
-    </section>
-  </main>
+					<SettingsFilters {groups} on:filter={handleFilterChange} />
 
-  <Footer />
+					<div class="mb-4 flex items-center justify-between">
+						<h3 class="text-lg font-semibold text-white">Доступные настройки</h3>
+						<button
+							class="rounded-2xl bg-amber-600 p-2 text-white transition-all hover:bg-amber-700"
+							on:click={() => (showEditSettingsModal = true)}
+						>
+							Редактировать/Удалить настройки
+						</button>
+					</div>
+
+					<div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+						{#if isLoading}
+							<div class="col-span-full flex items-center justify-center p-8">
+								<div
+									class="h-12 w-12 animate-spin rounded-full border-t-2 border-b-2 border-blue-500"
+								/>
+							</div>
+						{:else if filteredSettings.length === 0}
+							<div class="col-span-full rounded-2xl bg-slate-900 p-4">
+								<p class="text-center text-slate-400">Настройки не найдены</p>
+							</div>
+						{:else}
+							{#each filteredSettings as setting (setting.id)}
+								<SettingsCard {setting} on:apply={handleSettingsApply} />
+							{/each}
+						{/if}
+					</div>
+				</div>
+			</section>
+
+			<h2 class="mt-4 text-2xl font-semibold text-white">Зачем это нужно:</h2>
+			<div class="mt-4 flex flex-wrap justify-center gap-6 p-0">
+				<div class="card w-full max-w-md rounded-2xl bg-slate-900 p-4 text-center md:p-6">
+					<div class="mx-auto mb-4 h-27 w-54 rounded-full">
+						<p class="transportation" style="font-size: 100px;">📱👉 🖥️</p>
+					</div>
+					<h3 class="mb-2 text-xl font-bold text-white">
+						При переносе на другое устройство
+					</h3>
+					<p class="mb-4 text-slate-400">
+						Перенесите заметки, скрытые предметы и другую информацию, сохраните данные
+						на старом и импортируйте их на новом
+					</p>
+					<div class="mb-4 flex flex-wrap justify-center gap-2">
+						<span class="rounded bg-gray-700 px-2 py-1 text-xs text-white"
+							>Информация</span
+						>
+						<span class="rounded bg-gray-700 px-2 py-1 text-xs text-white">New</span>
+					</div>
+				</div>
+
+				<div class="card w-full max-w-md rounded-2xl bg-slate-900 p-3 text-center md:p-6">
+					<div class="mx-auto mb-4 h-27 w-54 rounded-full">
+						<p class="transportation" style="font-size: 100px;">🗑️</p>
+					</div>
+					<h3 class="mb-2 text-xl font-bold text-white">При очистке истории браузера</h3>
+					<p class="mb-4 text-slate-400">
+						Очистка браузера неизбежно приведет к потере данных скрытых предметов и
+						заметок, сделайте резервную копию Ваших данных перед очисткой
+					</p>
+					<div class="mb-4 flex flex-wrap justify-center gap-2">
+						<span class="rounded bg-gray-700 px-2 py-1 text-xs text-white"
+							>Информация</span
+						>
+						<span class="rounded bg-gray-700 px-2 py-1 text-xs text-white">New</span>
+					</div>
+				</div>
+
+				<div class="card w-full max-w-md rounded-2xl bg-slate-900 p-4 text-center md:p-6">
+					<div class="mx-auto mb-4 h-27 w-54 rounded-full">
+						<p class="transportation" style="font-size: 100px;">🥴</p>
+					</div>
+					<h3 class="mb-2 text-xl font-bold text-white">При проблемах на сайте</h3>
+					<p class="mb-4 text-slate-400">
+						Если сайт работает некорректно или запрашиваемая информация неактуальна
+						попробуйте очистить данные, это удалит все ваши пользовательские данные
+					</p>
+					<div class="mb-4 flex flex-wrap justify-center gap-2">
+						<span class="rounded bg-gray-700 px-2 py-1 text-xs text-white"
+							>Информация</span
+						>
+						<span class="rounded bg-gray-700 px-2 py-1 text-xs text-white">New</span>
+					</div>
+				</div>
+			</div>
+		</section>
+	</main>
+
+	<Footer />
 </PageLayout>
 
 <Modal
-  title="Удаление данных"
-  isOpen={showConfirmModal}
-  on:close={() => showConfirmModal = false}
+	title="Удаление данных"
+	isOpen={showConfirmModal}
+	on:close={() => (showConfirmModal = false)}
 >
-  <div class="text-slate-400 mb-4">Выберите данные для удаления:</div>
-  <div class="flex justify-center gap-4">
-    <button
-      class="px-4 py-2 bg-red-600 text-white rounded-2xl hover:bg-red-700 transition-all"
-      on:click={() => notifications.add('Функция в разработке', 'info')}
-    >
-      Удалить
-    </button>
-    <button
-      class="px-4 py-2 bg-gray-600 text-white rounded-2xl hover:bg-gray-700 transition-all"
-      on:click={() => showConfirmModal = false}
-    >
-      Отмена
-    </button>
-  </div>
+	<div class="mb-4 text-slate-400">Выберите данные для удаления:</div>
+	<div class="flex justify-center gap-4">
+		<button
+			class="rounded-2xl bg-red-600 px-4 py-2 text-white transition-all hover:bg-red-700"
+			on:click={() => notifications.add('Функция в разработке', 'info')}
+		>
+			Удалить
+		</button>
+		<button
+			class="rounded-2xl bg-gray-600 px-4 py-2 text-white transition-all hover:bg-gray-700"
+			on:click={() => (showConfirmModal = false)}
+		>
+			Отмена
+		</button>
+	</div>
 </Modal>
 
 <Modal
-  title="⚠️ Важное сообщение"
-  isOpen={showTokenModal}
-  on:close={() => showTokenModal = false}
+	title="⚠️ Важное сообщение"
+	isOpen={showTokenModal}
+	on:close={() => (showTokenModal = false)}
 >
-  <p class="text-slate-300 mb-4">
-    Это ваш уникальный токен для управления настройками. Сохраните его - он будет показан только один раз!
-  </p>
-  <div class="bg-slate-800 p-3 rounded-2xl mb-4 break-all">
-    <p class="text-blue-400 font-mono text-sm">{tokenValue}</p>
-  </div>
-  <div class="flex gap-2 mb-4">
-    <button
-      on:click={() => copyToClipboard(tokenValue)}
-      class="flex-1 p-2 bg-blue-600 text-white rounded-2xl hover:bg-blue-700 transition-all"
-    >
-      Копировать токен
-    </button>
-  </div>
-  <p class="text-slate-400 text-sm">
-    С помощью этого токена вы сможете управлять или удалить свои настройки в будущем.
-  </p>
+	<p class="mb-4 text-slate-300">
+		Это ваш уникальный токен для управления настройками. Сохраните его - он будет показан только
+		один раз!
+	</p>
+	<div class="mb-4 rounded-2xl bg-slate-800 p-3 break-all">
+		<p class="font-mono text-sm text-blue-400">{tokenValue}</p>
+	</div>
+	<div class="mb-4 flex gap-2">
+		<button
+			on:click={() => copyToClipboard(tokenValue)}
+			class="flex-1 rounded-2xl bg-blue-600 p-2 text-white transition-all hover:bg-blue-700"
+		>
+			Копировать токен
+		</button>
+	</div>
+	<p class="text-sm text-slate-400">
+		С помощью этого токена вы сможете управлять или удалить свои настройки в будущем.
+	</p>
 </Modal>
 
 <EditSettingsModal
-  isOpen={showEditSettingsModal}
-  on:close={() => showEditSettingsModal = false}
-  on:edit={handleEditSettings}
-  on:delete={handleDeleteSettings}
-  on:error={handleEditSettingsError}
+	isOpen={showEditSettingsModal}
+	on:close={() => (showEditSettingsModal = false)}
+	on:edit={handleEditSettings}
+	on:delete={handleDeleteSettings}
+	on:error={handleEditSettingsError}
 />
 
 <DeleteDataModal
-  isOpen={showDeleteDataModal}
-  items={cacheItems}
-  on:close={() => showDeleteDataModal = false}
-  on:delete={handleDeleteData}
+	isOpen={showDeleteDataModal}
+	items={cacheItems}
+	on:close={() => (showDeleteDataModal = false)}
+	on:delete={handleDeleteData}
 />
 
 <ApplySettingsModal
-  isOpen={showApplySettingsModal}
-  setting={selectedSetting}
-  on:close={() => showApplySettingsModal = false}
-  on:confirm={handleApplySettingsConfirm}
+	isOpen={showApplySettingsModal}
+	setting={selectedSetting}
+	on:close={() => (showApplySettingsModal = false)}
+	on:confirm={handleApplySettingsConfirm}
 />
 
 <NotificationsContainer />
 
 <style>
-  @media (max-width: 435px) {
-    .transportation {
-      font-size: 70px;
-    }
-  }
-</style> 
+	@media (max-width: 435px) {
+		.transportation {
+			font-size: 70px;
+		}
+	}
+</style>

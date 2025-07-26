@@ -1,128 +1,133 @@
 <script lang="ts">
-    import type { Direction, Course } from '$lib/types/schedule';
-    import CopyLinkButton from '$lib/components/ui/CopyLinkButton.svelte';
-    import CustomSelect from '$lib/components/ui/CustomSelect.svelte';
+	import type { Direction, Course } from '$lib/types/schedule';
+	import CopyLinkButton from '$lib/components/ui/CopyLinkButton.svelte';
+	import CustomSelect from '$lib/components/ui/CustomSelect.svelte';
 
-    export let directions: Direction[];
-    export let selectedDirection = '';
-    export let selectedGroup = '';
-    export let onSubmit: () => void;
-    export let onDirectionChange: () => void;
-    export let scheduleShown = false;
-    export let isLoading = false;
+	export let directions: Direction[];
+	export let selectedDirection = '';
+	export let selectedGroup = '';
+	export let onSubmit: () => void;
+	export let onDirectionChange: () => void;
+	export let scheduleShown = false;
+	export let isLoading = false;
 
-    export let selectedDirectionLabel = '';
-    export let selectedGroupLabel = '';
+	export let selectedDirectionLabel = '';
+	export let selectedGroupLabel = '';
 
-    let showErrors = false;
-    let showGroupError = false;
-    let highlightDirection = false;
+	let showErrors = false;
+	let showGroupError = false;
+	let highlightDirection = false;
 
-    $: directionItems = directions.map(direction => ({
-        id: direction.id,
-        label: direction.name
-    }));
+	$: directionItems = directions.map((direction) => ({
+		id: direction.id,
+		label: direction.name
+	}));
 
-    $: groupItems = selectedDirection ? 
-        Object.entries(directions.find(d => d.id === selectedDirection)?.courses || {})
-            .map(([key, course]) => ({
-                id: key,
-                label: (course as Course).name
-            }))
-        : [];
+	$: groupItems = selectedDirection
+		? Object.entries(directions.find((d) => d.id === selectedDirection)?.courses || {}).map(
+				([key, course]) => ({
+					id: key,
+					label: (course as Course).name
+				})
+			)
+		: [];
 
-    function handleDirectionSelect(event: CustomEvent) {
-        selectedDirection = event.detail.id;
-        selectedDirectionLabel = event.detail.label;
-        selectedGroup = '';
-        selectedGroupLabel = '';
-        onDirectionChange();
-        showErrors = false;
-        showGroupError = false;
-        highlightDirection = false;
-    }
+	function handleDirectionSelect(event: CustomEvent) {
+		selectedDirection = event.detail.id;
+		selectedDirectionLabel = event.detail.label;
+		selectedGroup = '';
+		selectedGroupLabel = '';
+		onDirectionChange();
+		showErrors = false;
+		showGroupError = false;
+		highlightDirection = false;
+	}
 
-    function handleGroupSelect(event: CustomEvent) {
-        selectedGroup = event.detail.id;
-        selectedGroupLabel = event.detail.label;
-        showErrors = false;
-        showGroupError = false;
-        highlightDirection = false;
-    }
+	function handleGroupSelect(event: CustomEvent) {
+		selectedGroup = event.detail.id;
+		selectedGroupLabel = event.detail.label;
+		showErrors = false;
+		showGroupError = false;
+		highlightDirection = false;
+	}
 
-    function handleGroupClick() {
-        if (!selectedDirection && !isLoading) {
-            showGroupError = true;
-            highlightDirection = true;
-            setTimeout(() => {
-                showGroupError = false;
-                highlightDirection = false;
-            }, 1000);
-        }
-    }
+	function handleGroupClick() {
+		if (!selectedDirection && !isLoading) {
+			showGroupError = true;
+			highlightDirection = true;
+			setTimeout(() => {
+				showGroupError = false;
+				highlightDirection = false;
+			}, 1000);
+		}
+	}
 
-    function handleSubmit() {
-        if (!selectedDirection || !selectedGroup) {
-            showErrors = true;
-            return;
-        }
-        onSubmit();
-    }
+	function handleSubmit() {
+		if (!selectedDirection || !selectedGroup) {
+			showErrors = true;
+			return;
+		}
+		onSubmit();
+	}
 </script>
 
 <form class="grid grid-cols-1 gap-2" on:submit|preventDefault={handleSubmit}>
-    <div>
-        <label class="block text-white mb-2">Выберите профиль:</label>
-        <CustomSelect
-            items={directionItems}
-            bind:selectedId={selectedDirection}
-            placeholder={isLoading ? "Загрузка профилей..." : "Выберите профиль"}
-            on:select={handleDirectionSelect}
-            width="100%"
-            searchPlaceholder="Поиск профиля..."
-            error={showErrors && !selectedDirection}
-            highlight={highlightDirection}
-            {isLoading}
-            disabled={isLoading}
-        />
-    </div>
+	<div>
+		<label class="mb-2 block text-white">Выберите профиль:</label>
+		<CustomSelect
+			items={directionItems}
+			bind:selectedId={selectedDirection}
+			placeholder={isLoading ? 'Загрузка профилей...' : 'Выберите профиль'}
+			on:select={handleDirectionSelect}
+			width="100%"
+			searchPlaceholder="Поиск профиля..."
+			error={showErrors && !selectedDirection}
+			highlight={highlightDirection}
+			{isLoading}
+			disabled={isLoading}
+		/>
+	</div>
 
-    <div>
-        <label class="block text-white mb-2">Выберите группу:</label>
-        <div on:click={handleGroupClick}>
-            <CustomSelect
-                items={groupItems}
-                bind:selectedId={selectedGroup}
-                placeholder={isLoading ? "Загрузка групп..." : selectedDirection ? "Выберите группу" : "Сначала выберите профиль"}
-                on:select={handleGroupSelect}
-                disabled={!selectedDirection || isLoading}
-                width="100%"
-                searchPlaceholder="Поиск группы..."
-                error={showGroupError || (showErrors && !selectedGroup)}
-                {isLoading}
-            />
-        </div>
-    </div>
+	<div>
+		<label class="mb-2 block text-white">Выберите группу:</label>
+		<div on:click={handleGroupClick}>
+			<CustomSelect
+				items={groupItems}
+				bind:selectedId={selectedGroup}
+				placeholder={isLoading
+					? 'Загрузка групп...'
+					: selectedDirection
+						? 'Выберите группу'
+						: 'Сначала выберите профиль'}
+				on:select={handleGroupSelect}
+				disabled={!selectedDirection || isLoading}
+				width="100%"
+				searchPlaceholder="Поиск группы..."
+				error={showGroupError || (showErrors && !selectedGroup)}
+				{isLoading}
+			/>
+		</div>
+	</div>
 
-    <button
-        type="submit"
-        class="p-2 bg-blue-700 text-white rounded-xl hover:bg-blue-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-        disabled={isLoading}
-    >
-        {isLoading ? 'Загрузка...' : 'Показать расписание'}
-    </button>
+	<button
+		type="submit"
+		class="rounded-xl bg-blue-700 p-2 text-white transition-all hover:bg-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
+		disabled={isLoading}
+	>
+		{isLoading ? 'Загрузка...' : 'Показать расписание'}
+	</button>
 
-    {#if scheduleShown && selectedDirection && selectedGroup}
-        <div class="flex justify-between items-center w-full">
-            <CopyLinkButton
-                params={{
-                    direction: selectedDirection,
-                    group: selectedGroup
-                }}
-                successMessage="Ссылка на расписание группы скопирована"
-            >
-                Скопировать ссылку на расписание
-            </CopyLinkButton>
-        </div>
-    {/if}
-</form> 
+	{#if scheduleShown && selectedDirection && selectedGroup}
+		<div class="flex w-full items-center justify-between">
+			<CopyLinkButton
+				params={{
+					direction: selectedDirection,
+					group: selectedGroup
+				}}
+				successMessage="Ссылка на расписание группы скопирована"
+			>
+				Скопировать ссылку на расписание
+			</CopyLinkButton>
+		</div>
+	{/if}
+</form>

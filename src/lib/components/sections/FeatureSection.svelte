@@ -1,18 +1,19 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
-  import { fade, fly } from 'svelte/transition';
-  import { quintOut } from 'svelte/easing';
+	import { onMount } from 'svelte';
+	import { fade, fly } from 'svelte/transition';
+	import { quintOut } from 'svelte/easing';
 
-  let mounted = false;
-  let cards: HTMLElement[] = [];
+	let mounted = false;
+	let cards: HTMLElement[] = [];
 
-  const features = [
-    {
-      title: 'Расписание занятий',
-      description: 'Актуальное расписание с удобным интерфейсом и автоматическим распределением подгрупп на лабораторные занятия',
-      link: '/rasp',
-      linkText: 'Открыть расписание',
-      svg: `<svg class="vector-graphic" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+	const features = [
+		{
+			title: 'Расписание занятий',
+			description:
+				'Актуальное расписание с удобным интерфейсом и автоматическим распределением подгрупп на лабораторные занятия',
+			link: '/rasp',
+			linkText: 'Открыть расписание',
+			svg: `<svg class="vector-graphic" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
         <defs>
             <filter id="calendar-shadow">
                 <feDropShadow dx="0" dy="4" stdDeviation="4" flood-opacity="0.25" />
@@ -67,13 +68,13 @@
             <animate attributeName="r" values="4;6;4" dur="2s" repeatCount="indefinite" />
         </circle>
     </svg>`
-    },
-    {
-      title: 'Статистика оценок',
-      description: 'Анализ успеваемости, средние баллы и рейтинги предметов по институтам',
-      link: '/stat',
-      linkText: 'Посмотреть статистику',
-      svg: `<svg class="vector-graphic" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+		},
+		{
+			title: 'Статистика оценок',
+			description: 'Анализ успеваемости, средние баллы и рейтинги предметов по институтам',
+			link: '/stat',
+			linkText: 'Посмотреть статистику',
+			svg: `<svg class="vector-graphic" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
         <defs>
             <linearGradient id="stat-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
                 <stop offset="0%" style="stop-color:rgba(59, 130, 246, 0.1)" />
@@ -228,13 +229,13 @@
             </g>
         </g>
     </svg>`
-    },
-    {
-      title: 'Кампус ЯГТУ',
-      description: 'Информация о корпусах, общежитиях и инфраструктуре университета',
-      link: '/campus',
-      linkText: 'Изучить кампус',
-      svg: `<svg class="vector-graphic" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+		},
+		{
+			title: 'Кампус ЯГТУ',
+			description: 'Информация о корпусах, общежитиях и инфраструктуре университета',
+			link: '/campus',
+			linkText: 'Изучить кампус',
+			svg: `<svg class="vector-graphic" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
         <defs>
             <filter id="building-shadow">
                 <feDropShadow dx="0" dy="4" stdDeviation="3" flood-opacity="0.2" />
@@ -299,13 +300,13 @@
             </path>
         </g>
     </svg>`
-    },
-    {
-      title: 'Управление данными',
-      description: 'Экспорт и импорт ваших персональных настроек и данных',
-      link: '/data',
-      linkText: 'Управление данными',
-      svg: `<svg class="vector-graphic" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+		},
+		{
+			title: 'Управление данными',
+			description: 'Экспорт и импорт ваших персональных настроек и данных',
+			link: '/data',
+			linkText: 'Управление данными',
+			svg: `<svg class="vector-graphic" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
         <defs>
             <filter id="data-glow">
                 <feGaussianBlur stdDeviation="2" result="blur" />
@@ -360,13 +361,13 @@
             </circle>
         </g>
     </svg>`
-    },
-    {
-      title: 'Мобильное приложение',
-      description: 'Установите ystuRASP как приложение на ваш телефон для быстрого доступа',
-      link: '/installapp',
-      linkText: 'Установить приложение',
-      svg: `<svg class="vector-graphic" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+		},
+		{
+			title: 'Мобильное приложение',
+			description: 'Установите ystuRASP как приложение на ваш телефон для быстрого доступа',
+			link: '/installapp',
+			linkText: 'Установить приложение',
+			svg: `<svg class="vector-graphic" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
         <defs>
           <filter id="phone-shadow">
             <feDropShadow dx="0" dy="4" stdDeviation="3" flood-opacity="0.2" />
@@ -390,13 +391,13 @@
           </g>
         </g>
       </svg>`
-    },
-    {
-      title: 'О проекте',
-      description: 'История развития проекта, новости и обновления',
-      link: '/about',
-      linkText: 'Узнать больше',
-      svg: `<svg class="vector-graphic" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+		},
+		{
+			title: 'О проекте',
+			description: 'История развития проекта, новости и обновления',
+			link: '/about',
+			linkText: 'Узнать больше',
+			svg: `<svg class="vector-graphic" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
         <defs>
           <filter id="timeline-glow">
             <feGaussianBlur stdDeviation="2" result="blur" />
@@ -426,159 +427,163 @@
           </g>
         </g>
       </svg>`
-    }
-  ];
+		}
+	];
 
-  function handleMouseMove(e: MouseEvent, card: HTMLElement) {
-    const rect = card.getBoundingClientRect();
-    card.style.setProperty('--mouse-x', `${e.clientX - rect.left}px`);
-    card.style.setProperty('--mouse-y', `${e.clientY - rect.top}px`);
-  }
+	function handleMouseMove(e: MouseEvent, card: HTMLElement) {
+		const rect = card.getBoundingClientRect();
+		card.style.setProperty('--mouse-x', `${e.clientX - rect.left}px`);
+		card.style.setProperty('--mouse-y', `${e.clientY - rect.top}px`);
+	}
 
-  onMount(() => {
-    mounted = true;
-  });
+	onMount(() => {
+		mounted = true;
+	});
 </script>
 
 <section class="py-6 md:py-12">
-  <h2 class="text-3xl font-bold text-center mb-12 hero-title">Основные возможности</h2>
-  {#if mounted}
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="features-grid">
-      {#each features as feature, i}
-        <div
-          class="feature-card rounded-2xl"
-          transition:fly={{ y: 20, duration: 500, delay: i * 100 }}
-          bind:this={cards[i]}
-          on:mousemove={(e) => handleMouseMove(e, cards[i])}
-          role="button"
-          tabindex="0"
-        >
-          <div class="card-content">
-            <div class="vector-container">
-              {@html feature.svg}
-              <div class="vector-overlay"></div>
-            </div>
-            <div class="card-body">
-              <h3 class="card-title">{feature.title}</h3>
-              <p class="card-description">{feature.description}</p>
-              <a href={feature.link} class="feature-link">{feature.linkText}</a>
-            </div>
-          </div>
-        </div>
-      {/each}
-    </div>
-  {/if}
+	<h2 class="hero-title mb-12 text-center text-3xl font-bold">Основные возможности</h2>
+	{#if mounted}
+		<div class="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3" id="features-grid">
+			{#each features as feature, i}
+				<div
+					class="feature-card rounded-2xl"
+					transition:fly={{ y: 20, duration: 500, delay: i * 100 }}
+					bind:this={cards[i]}
+					on:mousemove={(e) => handleMouseMove(e, cards[i])}
+					role="button"
+					tabindex="0"
+				>
+					<div class="card-content">
+						<div class="vector-container">
+							{@html feature.svg}
+							<div class="vector-overlay"></div>
+						</div>
+						<div class="card-body">
+							<h3 class="card-title">{feature.title}</h3>
+							<p class="card-description">{feature.description}</p>
+							<a href={feature.link} class="feature-link">{feature.linkText}</a>
+						</div>
+					</div>
+				</div>
+			{/each}
+		</div>
+	{/if}
 </section>
 
 <style>
-  .feature-card {
-    background: rgba(30, 41, 59, 0.8);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    position: relative;
-    overflow: hidden;
-    min-height: 400px;
-    border-radius: 20px;
-    opacity: 1;
-  }
+	.feature-card {
+		background: rgba(30, 41, 59, 0.8);
+		backdrop-filter: blur(10px);
+		-webkit-backdrop-filter: blur(10px);
+		border: 1px solid rgba(255, 255, 255, 0.1);
+		position: relative;
+		overflow: hidden;
+		min-height: 400px;
+		border-radius: 20px;
+		opacity: 1;
+	}
 
-  .feature-card .card-content {
-    position: relative;
-    z-index: 3;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-  }
+	.feature-card .card-content {
+		position: relative;
+		z-index: 3;
+		height: 100%;
+		display: flex;
+		flex-direction: column;
+	}
 
-  .feature-card .vector-container {
-    height: 300px;
-    width: 100%;
-    position: relative;
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(147, 197, 253, 0.1));
-    border-radius: 1rem 1rem 0 0;
-  }
+	.feature-card .vector-container {
+		height: 300px;
+		width: 100%;
+		position: relative;
+		overflow: hidden;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(147, 197, 253, 0.1));
+		border-radius: 1rem 1rem 0 0;
+	}
 
-  :global(.feature-card .vector-graphic) {
-    width: 90%;
-    height: 90%;
-  }
+	:global(.feature-card .vector-graphic) {
+		width: 90%;
+		height: 90%;
+	}
 
-  :global(.feature-card .vector-graphic path),
-  :global(.feature-card .vector-graphic circle),
-  :global(.feature-card .vector-graphic rect) {
-    stroke-dasharray: 1000;
-    stroke-dashoffset: 1000;
-    animation: draw 2s ease forwards;
-  }
+	:global(.feature-card .vector-graphic path),
+	:global(.feature-card .vector-graphic circle),
+	:global(.feature-card .vector-graphic rect) {
+		stroke-dasharray: 1000;
+		stroke-dashoffset: 1000;
+		animation: draw 2s ease forwards;
+	}
 
-  :global(.feature-card .vector-graphic .calendar-grid) {
-    stroke-dasharray: 4;
-    animation: dash 30s linear infinite;
-  }
+	:global(.feature-card .vector-graphic .calendar-grid) {
+		stroke-dasharray: 4;
+		animation: dash 30s linear infinite;
+	}
 
-  .card-body {
-    padding: 1.5rem;
-  }
+	.card-body {
+		padding: 1.5rem;
+	}
 
-  .card-title {
-    font-size: 1.5rem;
-    font-weight: 600;
-    margin-bottom: 0.75rem;
-    color: #fff;
-  }
+	.card-title {
+		font-size: 1.5rem;
+		font-weight: 600;
+		margin-bottom: 0.75rem;
+		color: #fff;
+	}
 
-  .card-description {
-    color: #94a3b8;
-    margin-bottom: 1rem;
-    line-height: 1.5;
-  }
+	.card-description {
+		color: #94a3b8;
+		margin-bottom: 1rem;
+		line-height: 1.5;
+	}
 
-  .feature-link {
-    color: #3b82f6;
-    text-decoration: none;
-    font-weight: 500;
-    transition: color 0.2s;
-  }
+	.feature-link {
+		color: #3b82f6;
+		text-decoration: none;
+		font-weight: 500;
+		transition: color 0.2s;
+	}
 
-  .feature-link:hover {
-    color: #60a5fa;
-  }
+	.feature-link:hover {
+		color: #60a5fa;
+	}
 
-  @keyframes draw {
-    to {
-      stroke-dashoffset: 0;
-    }
-  }
+	@keyframes draw {
+		to {
+			stroke-dashoffset: 0;
+		}
+	}
 
-  @keyframes dash {
-    to {
-      stroke-dashoffset: 1000;
-    }
-  }
+	@keyframes dash {
+		to {
+			stroke-dashoffset: 1000;
+		}
+	}
 
-  :global(.building-window) {
-    fill: rgba(59, 130, 246, 0.2);
-    stroke: #3B82F6;
-  }
+	:global(.building-window) {
+		fill: rgba(59, 130, 246, 0.2);
+		stroke: #3b82f6;
+	}
 
-  .vector-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(59, 130, 246, 0.1) 0%, transparent 100%);
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity 0.3s;
-  }
+	.vector-overlay {
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		background: radial-gradient(
+			circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+			rgba(59, 130, 246, 0.1) 0%,
+			transparent 100%
+		);
+		pointer-events: none;
+		opacity: 0;
+		transition: opacity 0.3s;
+	}
 
-  .feature-card:hover .vector-overlay {
-    opacity: 1;
-  }
-</style> 
+	.feature-card:hover .vector-overlay {
+		opacity: 1;
+	}
+</style>
