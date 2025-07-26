@@ -9,6 +9,8 @@
 	import LoadingOverlay from '$lib/components/loading/LoadingOverlay.svelte';
 	import { onMount } from 'svelte';
 	import type { InstituteId } from './types';
+	import NotificationsContainer from '$lib/components/notifications/NotificationsContainer.svelte';
+	import { notifications } from '$lib/stores/notifications';
 
 	let showReferralModal = false;
 	let isLoading = false;
@@ -27,45 +29,6 @@
 		if (statisticsComponent) {
 			statisticsComponent.viewSubject(subject);
 		}
-	}
-
-	function showNotification(message: string, type: 'success' | 'error' | 'warning') {
-		const notification = document.createElement('div');
-		notification.className = `fixed bottom-5 right-5 left-5 sm:right-10 sm:left-auto p-4 rounded-2xl z-50 notification ${
-			type === 'error' ? 'bg-red-500' : type === 'warning' ? 'bg-yellow-500' : 'bg-green-500'
-		} text-white shadow-lg flex items-center justify-between`;
-
-		const icon = type === 'error' ? '❌' : type === 'warning' ? '⚠️' : '✅';
-
-		notification.innerHTML = `
-      <div class="flex items-center">
-        <span class="text-2xl mr-2">${icon}</span>
-        <span>${message}</span>
-      </div>
-      ${
-			type === 'warning'
-				? `
-      <button onclick="showReferralModal()" class="ml-4 px-3 py-1 bg-white text-yellow-500 rounded-xl hover:bg-yellow-100 transition-colors">
-        Увеличить лимит
-      </button>
-      `
-				: ''
-		}
-    `;
-
-		document.body.appendChild(notification);
-
-		setTimeout(() => {
-			notification.classList.add('show');
-		}, 10);
-
-		setTimeout(() => {
-			notification.classList.remove('show');
-			notification.classList.add('hide');
-			setTimeout(() => {
-				notification.remove();
-			}, 500);
-		}, 5000);
 	}
 
 	onMount(() => {
@@ -99,7 +62,7 @@
 	<main class="container mx-auto mt-5 px-3 md:mt-7 md:px-0">
 		<StatisticsSection
 			bind:this={statisticsComponent}
-			on:showNotification={({ detail }) => showNotification(detail.message, detail.type)}
+			on:showNotification={({ detail }) => notifications.add(detail.message, detail.type)}
 			on:loading={({ detail }) => (isLoading = detail.value)}
 			on:showReferral={() => (showReferralModal = true)}
 			on:instituteChange={({ detail }) => handleInstituteChange(detail)}
@@ -118,7 +81,7 @@
 	{#if showReferralModal}
 		<ReferralModal
 			on:close={() => (showReferralModal = false)}
-			on:showNotification={({ detail }) => showNotification(detail.message, detail.type)}
+			on:showNotification={({ detail }) => notifications.add(detail.message, detail.type)}
 		/>
 	{/if}
 
@@ -126,6 +89,8 @@
 		<LoadingOverlay />
 	{/if}
 </PageLayout>
+
+<NotificationsContainer />
 
 <style>
 	:global(body) {

@@ -2,6 +2,8 @@
 	import { createEventDispatcher, onMount } from 'svelte';
 	import type { NotificationOptions } from '../types';
 	import { getUserId, getReferralStats, updateReferralStats } from '../utils/api';
+	import NotificationsContainer from '$lib/components/notifications/NotificationsContainer.svelte';
+	import { notifications } from '$lib/stores/notifications';
 
 	const dispatch = createEventDispatcher<{
 		close: void;
@@ -23,10 +25,7 @@
 			navigator.clipboard
 				.writeText(referralLink)
 				.then(() => {
-					dispatch('showNotification', {
-						message: 'Ссылка скопирована!',
-						type: 'success'
-					});
+					notifications.add('Ссылка скопирована!', 'success');
 				})
 				.catch(() => {
 					fallbackCopy();
@@ -41,15 +40,9 @@
 		referralLinkElement.select();
 		try {
 			document.execCommand('copy');
-			dispatch('showNotification', {
-				message: 'Ссылка скопирована!',
-				type: 'success'
-			});
+			notifications.add('Ссылка скопирована!', 'success');
 		} catch (err) {
-			dispatch('showNotification', {
-				message: 'Не удалось скопировать ссылку',
-				type: 'error'
-			});
+			notifications.add('Не удалось скопировать ссылку', 'error');
 		}
 	}
 
@@ -193,6 +186,8 @@
 		</div>
 	</div>
 </div>
+
+<NotificationsContainer />
 
 <style>
 	input[readonly] {

@@ -10,6 +10,8 @@
 	import StatisticsChart from './StatisticsChart.svelte';
 	import { recentlyViewedStore } from '../stores/recentlyViewedStore';
 	import ScheduleCombobox from '$lib/components/schedule/ScheduleCombobox.svelte';
+	import NotificationsContainer from '$lib/components/notifications/NotificationsContainer.svelte';
+	import { notifications } from '$lib/stores/notifications';
 
 	const dispatch = createEventDispatcher<{
 		showNotification: NotificationOptions;
@@ -52,10 +54,7 @@
 	async function handleGetStatistics() {
 		if (!selectedDiscipline) {
 			error = true;
-			dispatch('showNotification', {
-				message: 'Пожалуйста, выберите дисциплину',
-				type: 'error'
-			});
+			notifications.add('Пожалуйста, выберите дисциплину', 'error');
 			return;
 		}
 		error = false;
@@ -64,10 +63,7 @@
 
 	async function getStatistics() {
 		if (!selectedDiscipline) {
-			dispatch('showNotification', {
-				message: 'Пожалуйста, выберите дисциплину',
-				type: 'error'
-			});
+			notifications.add('Пожалуйста, выберите дисциплину', 'error');
 			return;
 		}
 
@@ -313,7 +309,7 @@
 			onSubmit={handleGetStatistics}
 			placeholder="Выберите дисциплину..."
 			paramName="discipline"
-			copyLinkMessage="Ссылка на статистику дисциплины скопирована"
+			copyLinkMessage="Ссылка на статистику скопирована"
 			{error}
 		/>
 	</div>
@@ -396,6 +392,8 @@
 		</div>
 	{/if}
 </section>
+
+<NotificationsContainer />
 
 <style>
 	.institute-button {
