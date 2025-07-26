@@ -157,6 +157,12 @@
 					<li
 						class="cursor-pointer rounded-lg p-2 hover:bg-gray-700"
 						on:mousedown={() => selectItem(item)}
+						role="option"
+						aria-selected={item.id === selectedId}
+						tabindex="0"
+						on:keydown={(e) => {
+							if (e.key === 'Enter' || e.key === ' ') selectItem(item);
+						}}
 					>
 						{item.displayValue}
 					</li>
@@ -249,15 +255,6 @@
 		100% {
 			transform: translateX(0);
 		}
-	}
-
-	.combobox-error {
-		color: #ef4444;
-		font-size: 0.95em;
-		margin-top: 4px;
-		margin-left: 8px;
-		font-weight: 500;
-		animation: shake 0.4s ease-in-out;
 	}
 
 	.clear-button {

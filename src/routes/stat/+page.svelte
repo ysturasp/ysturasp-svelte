@@ -116,19 +116,6 @@
 		color: inherit;
 	}
 
-	.notification {
-		animation: slideIn 0.5s ease-out forwards;
-		transform: translateY(100%);
-	}
-
-	.notification.show {
-		animation: slideIn 0.5s ease-out forwards;
-	}
-
-	.notification.hide {
-		animation: slideOut 0.5s ease-in forwards;
-	}
-
 	@keyframes slideIn {
 		from {
 			transform: translateY(100%);

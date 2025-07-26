@@ -25,7 +25,10 @@
 {#if isOpen}
 	<div
 		class="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-gray-800/50 p-4"
+		on:keydown={handleEscapeKey}
 		on:click={handleBackdropClick}
+		role="dialog"
+		tabindex="0"
 	>
 		<div
 			class="mr-3 ml-3 rounded-2xl bg-slate-900 p-5 text-center {maxWidth} relative mx-auto w-full"

@@ -203,6 +203,7 @@
 			<button
 				class="ml-2 rounded-2xl bg-blue-600 p-2 text-white transition-all hover:bg-blue-700"
 				on:click={() => dispatch('showReferral')}
+				aria-label="Открыть модальное окно с реферальной программой"
 			>
 				<svg
 					xmlns="http://www.w3.org/2000/svg"
@@ -271,7 +272,7 @@
 			</div>
 		</div>
 
-		<label class="mb-2 block text-sm font-medium text-slate-400">Выберите институт:</label>
+		<span class="mb-2 block text-sm font-medium text-slate-400">Выберите институт:</span>
 		<div class="institute-buttons mb-3">
 			<button
 				class="institute-button {selectedInstitute === 'btn-digital-systems'

@@ -243,6 +243,14 @@
 				<span
 					class="absolute -top-2 -right-2 flex rotate-12 transform cursor-pointer rounded-full bg-indigo-500 px-2 py-1 text-xs font-bold text-white uppercase shadow-lg transition-colors hover:bg-indigo-600"
 					on:click={() => (isBetaModalOpen = true)}
+					aria-label="Открыть модальное окно с информацией о бета-версии"
+					role="button"
+					tabindex="0"
+					on:keydown={(e) => {
+						if (e.key === 'Enter' || e.key === ' ') {
+							isBetaModalOpen = true;
+						}
+					}}
 				>
 					Beta
 				</span>

@@ -149,13 +149,26 @@
 						{#if post.image}
 							{@const imageUrl = `https://lnk.su/api/image.get?url=${post.image.split('?')[0]}`}
 							<div class="mt-5 flex justify-center">
-								<img
-									src={imageUrl}
-									alt="Post image"
-									style="max-height: 500px"
-									class="max-w-full cursor-pointer rounded-2xl transition-transform duration-300 hover:scale-105"
+								<button
+									type="button"
+									class="max-w-full cursor-pointer rounded-2xl transition-transform duration-300 hover:scale-105 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+									style="padding:0;border:none;background:none;"
 									on:click={() => handleImageClick(imageUrl)}
-								/>
+									on:keydown={(e) => {
+										if (e.key === 'Enter' || e.key === ' ') {
+											handleImageClick(imageUrl);
+										}
+									}}
+									aria-label="Открыть изображение поста в модальном окне"
+								>
+									<img
+										src={imageUrl}
+										alt=""
+										role="presentation"
+										style="max-height: 500px"
+										class="max-w-full rounded-2xl object-cover"
+									/>
+								</button>
 							</div>
 						{/if}
 						{#if post.reactions}
@@ -196,16 +209,22 @@
 			? 'modal-closing'
 			: 'modal-opening'}"
 		on:click={handleModalClick}
+		on:keydown={handleKeydown}
+		role="dialog"
+		aria-modal="true"
+		tabindex="-1"
 	>
 		<div class="relative">
 			<img
 				src={selectedImage}
-				alt="Enlarged Image"
+				alt="Увеличенное изображение поста"
 				class="max-h-[90vh] max-w-[90vw] rounded-2xl object-contain"
 			/>
 			<button
+				type="button"
 				class="absolute top-2 right-2 flex h-5 w-5 items-center justify-center rounded-full bg-red-600 p-2 text-white hover:bg-red-800 md:h-10 md:w-10"
 				on:click={closeModal}
+				aria-label="Закрыть модальное окно"
 			>
 				&times;
 			</button>

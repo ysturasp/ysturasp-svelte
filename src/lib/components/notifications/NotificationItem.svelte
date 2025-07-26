@@ -88,10 +88,16 @@
 	on:touchmove={handleTouchMove}
 	on:touchend={handleTouchEnd}
 	on:click={handleClick}
-	role="alert"
+	on:keydown={(e) => {
+		if (e.key === 'Enter' || e.key === ' ') handleClick();
+	}}
+	tabindex="0"
+	role="button"
 >
-	<div class="flex items-center justify-between">
-		<p>{message}</p>
+	<div role="alert">
+		<div class="flex items-center justify-between">
+			<p>{message}</p>
+		</div>
 	</div>
 </div>
 

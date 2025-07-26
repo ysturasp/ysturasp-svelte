@@ -53,7 +53,15 @@
 						<li class="list-item">
 							<div
 								class="cursor-pointer font-semibold text-emerald-500"
+								aria-label="Открыть модальное окно с предметом"
+								role="button"
+								tabindex="0"
 								on:click={() => dispatch('viewAgain', { subject: item.subject })}
+								on:keydown={(e) => {
+									if (e.key === 'Enter' || e.key === ' ') {
+										dispatch('viewAgain', { subject: item.subject });
+									}
+								}}
 							>
 								{item.position}. {item.subject}
 							</div>
@@ -83,7 +91,15 @@
 						<li class="list-item">
 							<div
 								class="cursor-pointer font-semibold text-red-500"
+								aria-label="Открыть модальное окно с предметом"
+								role="button"
+								tabindex="0"
 								on:click={() => dispatch('viewAgain', { subject: item.subject })}
+								on:keydown={(e) => {
+									if (e.key === 'Enter' || e.key === ' ') {
+										dispatch('viewAgain', { subject: item.subject });
+									}
+								}}
 							>
 								{item.position}. {item.subject}
 							</div>

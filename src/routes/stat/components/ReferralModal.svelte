@@ -73,6 +73,7 @@
 				<button
 					class="p-2 text-slate-400 hover:text-white"
 					on:click={() => dispatch('close')}
+					aria-label="Закрыть модальное окно"
 				>
 					<svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path

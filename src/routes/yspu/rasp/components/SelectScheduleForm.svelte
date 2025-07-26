@@ -73,7 +73,7 @@
 
 <form class="grid grid-cols-1 gap-2" on:submit|preventDefault={handleSubmit}>
 	<div>
-		<label class="mb-2 block text-white">Выберите профиль:</label>
+		<span class="mb-2 block text-white">Выберите профиль:</span>
 		<CustomSelect
 			items={directionItems}
 			bind:selectedId={selectedDirection}
@@ -89,8 +89,17 @@
 	</div>
 
 	<div>
-		<label class="mb-2 block text-white">Выберите группу:</label>
-		<div on:click={handleGroupClick}>
+		<span class="mb-2 block text-white">Выберите группу:</span>
+		<div
+			role="button"
+			tabindex="-1"
+			on:click={handleGroupClick}
+			on:keydown={(e) => {
+				if (e.key === 'Enter' || e.key === ' ') {
+					handleGroupClick();
+				}
+			}}
+		>
 			<CustomSelect
 				items={groupItems}
 				bind:selectedId={selectedGroup}

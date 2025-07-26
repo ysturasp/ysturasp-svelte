@@ -613,7 +613,7 @@
 							<div class="col-span-full flex items-center justify-center p-8">
 								<div
 									class="h-12 w-12 animate-spin rounded-full border-t-2 border-b-2 border-blue-500"
-								/>
+								></div>
 							</div>
 						{:else if filteredSettings.length === 0}
 							<div class="col-span-full rounded-2xl bg-slate-900 p-4">

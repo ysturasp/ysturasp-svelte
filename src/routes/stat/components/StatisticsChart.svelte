@@ -48,13 +48,11 @@
 			},
 			xAxis: {
 				label: 'Оценка',
-				format: (v: string) => v.toString(),
-				domain: ['2', '3', '4', '5']
+				format: (v: string) => v.toString()
 			},
 			yAxis: {
 				label: 'Количество студентов',
-				format: (v: number) => v.toString(),
-				domain: [0, Math.max(...chartData.map((d) => d.count), 1)]
+				format: (v: number) => v.toString()
 			}
 		}}
 	>

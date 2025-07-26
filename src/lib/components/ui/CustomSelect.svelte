@@ -389,6 +389,7 @@
 						{#if searchQuery}
 							<button
 								class="clear-search"
+								aria-label="Очистить поиск"
 								on:click|stopPropagation={() => {
 									searchQuery = '';
 									searchInput.focus();
@@ -422,9 +423,11 @@
 							class:selected={item.id === selectedId}
 							class:highlighted={index === highlightedIndex}
 							on:click={() => handleSelect(item)}
+							on:keydown={handleKeydown}
 							on:mouseenter={() => (highlightedIndex = index)}
 							role="option"
 							aria-selected={item.id === selectedId}
+							tabindex="0"
 						>
 							{#if item.icon}
 								<span class="item-icon">{@html item.icon}</span>
