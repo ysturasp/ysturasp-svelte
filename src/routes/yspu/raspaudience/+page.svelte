@@ -15,6 +15,7 @@
     import GithubParserInfo from '../rasp/components/GithubParserInfo.svelte';
 
     let isLoading = false;
+    let isScheduleLoading = false;
     let audiences: Audience[] = [];
     let selectedAudience = '';
     let scheduleData: AudienceScheduleData | null = null;
@@ -55,10 +56,8 @@
     });
 
     async function loadSchedule() {
-        if (!selectedAudience) return;
-
         try {
-            isLoading = true;
+            isScheduleLoading = true;
             scheduleData = await getSchedule(selectedAudience);
             localStorage.setItem('lastAudience', selectedAudience);
         } catch (error) {
@@ -69,7 +68,7 @@
             console.error('Error loading schedule:', error);
             notifications.add('Ошибка при загрузке расписания', 'error');
         } finally {
-            isLoading = false;
+            isScheduleLoading = false;
         }
     }
 
@@ -109,6 +108,7 @@
                 {audiences}
                 bind:selectedAudience
                 onSubmit={loadSchedule}
+                {isLoading}
             />
 
             {#if scheduleData}
@@ -146,23 +146,6 @@
     <NotificationsContainer />
 </PageLayout>
 
-<div class="fixed bottom-0 left-0 right-0 bg-slate-800 shadow-lg z-50">
-    <div class="flex justify-around p-1 md:p-2 mb-4 md:mb-0">
-        <a href="/yspu/rasp" class="flex flex-col items-center text-white hover:text-blue-400 transition">
-            <span class="text-2xl">👨‍💻</span>
-            <span class="text-sm">Студенты</span>
-        </a>
-        <a href="/yspu/raspprep" class="flex flex-col items-center text-white hover:text-blue-400 transition">
-            <span class="text-2xl">👨‍🏫</span>
-            <span class="text-sm">Преподаватели</span>
-        </a>
-        <a href="/yspu/raspaudience" class="flex flex-col items-center text-white hover:text-blue-400 transition" style="background: radial-gradient(circle, rgb(17, 51, 107) 5%, rgb(7, 24, 39, 0) 50%);">
-            <span class="text-2xl">🏛️</span>
-            <span class="text-sm">Аудитории</span>
-        </a>
-    </div>
-</div>
-
-{#if isLoading}
+{#if isScheduleLoading}
     <LoadingOverlay />
 {/if} 

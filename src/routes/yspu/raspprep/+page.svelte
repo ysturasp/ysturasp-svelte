@@ -48,6 +48,7 @@
   }
 
   let isLoading = false;
+  let isScheduleLoading = false;
   let teachers: Teacher[] = [];
   let selectedTeacher = '';
   let scheduleData: TeacherScheduleData | null = null;
@@ -64,6 +65,7 @@
 
   onMount(async () => {
     try {
+      isLoading = true;
       teachers = await getTeachers();
 
       const urlParams = new URLSearchParams(window.location.search);
@@ -81,17 +83,17 @@
     } catch (error) {
       console.error('Error loading teachers:', error);
       notifications.add('Ошибка при загрузке списка преподавателей', 'error');
+    } finally {
+      isLoading = false;
     }
   });
 
   async function loadSchedule() {
-    if (!selectedTeacher) return;
-
     const teacher = teachers.find(t => t.name === selectedTeacher);
     if (!teacher) return;
 
     try {
-      isLoading = true;
+      isScheduleLoading = true;
       scheduleData = await getTeacherSchedule(teacher.id);
       localStorage.setItem('lastTeacher', selectedTeacher);
     } catch (error) {
@@ -102,7 +104,7 @@
       console.error('Error loading schedule:', error);
       notifications.add('Ошибка при загрузке расписания', 'error');
     } finally {
-      isLoading = false;
+      isScheduleLoading = false;
     }
   }
 </script>
@@ -117,7 +119,7 @@
   <Header />
   
   <main class="container mx-auto mt-5 md:mt-7 px-3 md:px-0">
-    <section class="bg-slate-800 rounded-2xl sm:p-6 p-4 mt-8">
+    <section class="bg-slate-800 rounded-2xl sаm:p-6 p-4 mt-8">
       <div class="bg-amber-500 text-black text-center p-4 rounded-lg mb-4">
         <div class="flex items-center justify-center gap-2">
           <div class="h-3 w-3 mr-1 rounded-full ring-8 animate-pulse" 
@@ -137,6 +139,7 @@
         {teachers}
         bind:selectedTeacher
         onSubmit={loadSchedule}
+        {isLoading}
       />
 
       {#if scheduleData}
@@ -175,9 +178,9 @@
   <NotificationsContainer />
 </PageLayout>
 
-{#if isLoading}
-  <LoadingOverlay />
-{/if}
+{#if isScheduleLoading}
+    <LoadingOverlay />
+{/if} 
 
 <style>
   :global(.ambient-overlay) {

@@ -74,7 +74,7 @@
                     {/if}
                     <a href="/yspu/raspprep?teacher={encodeURIComponent(lesson.teacherName)}" 
                         class="text-sm text-blue-400 hover:text-blue-300 transition-all">
-                        Преподаватель: {lesson.teacherName}
+                        {lesson.teacherName}
                     </a>
                     {#if lesson.groups}
                         <p class="text-sm text-gray-400">Группы: {lesson.groups}</p>
