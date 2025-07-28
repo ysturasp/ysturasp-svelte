@@ -13,6 +13,7 @@
 	export let placeholder = 'Выберите значение';
 	export let isLoading = false;
 	export let error = false;
+	export let id = '';
 
 	let searchQuery = '';
 	let showOptions = false;
@@ -152,6 +153,7 @@
 	<input
 		bind:this={inputElement}
 		type="text"
+		{id}
 		class={isLoading
 			? 'pulse-loading block w-full rounded-2xl border border-gray-600 bg-slate-900 p-2.5 text-gray-300 focus:border-blue-500 focus:ring-blue-500'
 			: 'block w-full rounded-2xl border border-gray-600 bg-slate-900 p-2.5 text-gray-300 focus:border-blue-500 focus:ring-blue-500'}

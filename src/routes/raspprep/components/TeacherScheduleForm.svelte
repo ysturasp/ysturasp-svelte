@@ -111,8 +111,9 @@
 
 <div class="grid grid-cols-1 gap-4">
 	<div>
-		<label class="mb-2 block text-white">Преподаватель:</label>
+		<label for="teacher-select" class="mb-2 block text-white">Преподаватель:</label>
 		<SimpleCombobox
+			id="teacher-select"
 			items={teacherItems}
 			bind:selectedId={selectedTeacher}
 			placeholder={isLoading ? 'Загрузка преподавателей...' : 'Выберите преподавателя'}
@@ -122,8 +123,9 @@
 	</div>
 
 	<div>
-		<label class="mb-2 block text-white">Неделя:</label>
+		<label for="week-select" class="mb-2 block text-white">Неделя:</label>
 		<SimpleCombobox
+			id="week-select"
 			items={weekItems}
 			bind:selectedId={selectedWeekString}
 			placeholder="Выберите неделю"
