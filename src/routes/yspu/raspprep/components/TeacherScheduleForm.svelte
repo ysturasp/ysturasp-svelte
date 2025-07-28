@@ -30,6 +30,8 @@
 	placeholder={isLoading ? 'Загрузка преподавателей...' : 'Выберите преподавателя'}
 	paramName="teacher"
 	copyLinkMessage="Ссылка на расписание преподавателя скопирована"
+	submitButtonText="Показать расписание преподавателя"
+	copyButtonText="Скопировать ссылку на расписание преподавателя"
 	{error}
 	{isLoading}
 />

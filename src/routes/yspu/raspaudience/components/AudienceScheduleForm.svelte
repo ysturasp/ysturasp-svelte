@@ -30,6 +30,8 @@
 	placeholder={isLoading ? 'Загрузка аудиторий...' : 'Выберите аудиторию'}
 	paramName="audience"
 	copyLinkMessage="Ссылка на расписание аудитории скопирована"
+	submitButtonText="Показать расписание аудитории"
+	copyButtonText="Скопировать ссылку на расписание аудитории"
 	{error}
 	{isLoading}
 />

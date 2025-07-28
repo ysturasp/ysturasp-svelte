@@ -123,7 +123,7 @@
 		class="rounded-xl bg-blue-700 p-2 text-white transition-all hover:bg-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
 		disabled={isLoading}
 	>
-		{isLoading ? 'Загрузка...' : 'Показать расписание'}
+		{isLoading ? 'Загрузка...' : 'Показать расписание группы'}
 	</button>
 
 	{#if scheduleShown && selectedDirection && selectedGroup}

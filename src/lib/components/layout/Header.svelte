@@ -25,7 +25,7 @@
 	}
 </script>
 
-<header class="sticky top-4 z-50 container mx-auto px-3 md:px-0">
+<header class="sticky top-4 z-100 container mx-auto px-3 md:px-0">
 	<div
 		style="background-color: #1e293bad; backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);"
 		class="flex items-center justify-between rounded-2xl px-3 py-2 shadow-xl ring-1 ring-blue-500/50 transition-all md:px-5 md:py-3"

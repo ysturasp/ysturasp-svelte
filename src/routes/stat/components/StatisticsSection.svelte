@@ -311,6 +311,8 @@
 			placeholder="Выберите дисциплину..."
 			paramName="discipline"
 			copyLinkMessage="Ссылка на статистику скопирована"
+			submitButtonText="Показать статистику"
+			copyButtonText="Скопировать ссылку на статистику"
 			{error}
 		/>
 	</div>

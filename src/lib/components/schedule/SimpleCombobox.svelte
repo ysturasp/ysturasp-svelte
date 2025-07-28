@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import CopyLinkButton from '$lib/components/ui/CopyLinkButton.svelte';
 	import { scale } from 'svelte/transition';
 	import { quintOut } from 'svelte/easing';
 
@@ -11,20 +10,17 @@
 
 	export let items: Item[] = [];
 	export let selectedId = '';
-	export let onSubmit: () => void;
 	export let placeholder = 'Выберите значение';
 	export let isLoading = false;
-	export let paramName = '';
-	export let copyLinkMessage = '';
 	export let error = false;
-	export let submitButtonText = 'Показать расписание';
-	export let copyButtonText = 'Скопировать ссылку на расписание';
 
 	let searchQuery = '';
 	let showOptions = false;
 	let filteredItems: Item[] = [];
 	let overlay: HTMLDivElement;
 	let inputElement: HTMLInputElement;
+	let isUpdatingFromSelection = false;
+	let isUpdatingFromInput = false;
 	let showErrorAnimation = false;
 
 	$: if (error) {
@@ -36,59 +32,65 @@
 		showErrorAnimation = false;
 	}
 
-	function getCurrentWeek(): number {
-		const today = new Date();
-		const currentMonth = today.getMonth();
-
-		if (currentMonth >= 1 && currentMonth <= 5) {
-			const weeksSinceFebruary = Math.floor(
-				(today.getTime() - new Date(today.getFullYear(), 1, 3).getTime()) /
-					(7 * 24 * 60 * 60 * 1000)
-			);
-			return Math.max(1, Math.min(18, weeksSinceFebruary + 1));
-		} else if (currentMonth >= 8 || currentMonth === 0) {
-			const startDate =
-				currentMonth >= 8
-					? new Date(today.getFullYear(), 8, 1)
-					: new Date(today.getFullYear() - 1, 8, 1);
-			const weeksSinceStart = Math.floor(
-				(today.getTime() - startDate.getTime()) / (7 * 24 * 60 * 60 * 1000)
-			);
-			return Math.max(1, Math.min(18, weeksSinceStart + 1));
-		}
-		return 1;
-	}
-
-	$: copyParams = selectedId
-		? { [paramName]: selectedId, week: getCurrentWeek().toString() }
-		: { week: getCurrentWeek().toString() };
-
 	$: {
 		filteredItems = items.filter((item) =>
 			item.displayValue.toLowerCase().includes(searchQuery.toLowerCase())
 		);
 	}
 
+	$: if (selectedId && items.length > 0 && !isUpdatingFromInput) {
+		const selectedItem = items.find((item) => item.id === selectedId);
+		if (selectedItem && searchQuery !== selectedItem.displayValue) {
+			isUpdatingFromSelection = true;
+			searchQuery = selectedItem.displayValue;
+			isUpdatingFromSelection = false;
+		}
+	}
+
+	function handleInput(event: Event) {
+		const target = event.target as HTMLInputElement;
+		const value = target.value;
+
+		isUpdatingFromInput = true;
+		searchQuery = value;
+
+		if (!value && selectedId) {
+			selectedId = '';
+		}
+
+		isUpdatingFromInput = false;
+	}
+
 	function closeDropdown() {
 		showOptions = false;
-		overlay.classList.add('hidden');
+		overlay?.classList.add('hidden');
 		inputElement?.blur();
 	}
 
 	function selectItem(item: Item) {
+		isUpdatingFromSelection = true;
 		selectedId = item.id;
 		searchQuery = item.displayValue;
 		closeDropdown();
+		isUpdatingFromSelection = false;
 	}
 
 	function clearSelection() {
+		isUpdatingFromSelection = true;
 		selectedId = '';
 		searchQuery = '';
+
+		if (inputElement) {
+			inputElement.value = '';
+			inputElement.focus();
+		}
+
+		isUpdatingFromSelection = false;
 	}
 
 	function handleFocus() {
 		showOptions = true;
-		overlay.classList.remove('hidden');
+		overlay?.classList.remove('hidden');
 		setTimeout(() => {
 			if (inputElement) {
 				window.scrollTo({
@@ -111,7 +113,19 @@
 	}
 
 	function handleKeydown(event: KeyboardEvent) {
-		if (event.key === 'Escape') {
+		if ((event.key === 'Delete' || event.key === 'Backspace') && inputElement) {
+			if (
+				inputElement.selectionStart === 0 &&
+				inputElement.selectionEnd === inputElement.value.length
+			) {
+				event.preventDefault();
+				clearSelection();
+			}
+		}
+	}
+
+	function handleGlobalKeydown(event: KeyboardEvent) {
+		if (event.key === 'Escape' && showOptions) {
 			closeDropdown();
 		}
 	}
@@ -122,11 +136,11 @@
 		document.body.appendChild(overlay);
 
 		document.addEventListener('click', handleClickOutside);
-		document.addEventListener('keydown', handleKeydown);
+		document.addEventListener('keydown', handleGlobalKeydown);
 
 		return () => {
 			document.removeEventListener('click', handleClickOutside);
-			document.removeEventListener('keydown', handleKeydown);
+			document.removeEventListener('keydown', handleGlobalKeydown);
 			if (overlay && overlay.parentNode) {
 				overlay.parentNode.removeChild(overlay);
 			}
@@ -134,93 +148,81 @@
 	});
 </script>
 
-<form class="grid grid-cols-1 gap-2" on:submit|preventDefault={onSubmit}>
-	<div class="relative">
-		<input
-			bind:this={inputElement}
-			id="combobox-input"
-			type="text"
-			class={isLoading
-				? 'pulse-loading block w-full rounded-2xl border border-gray-600 bg-slate-900 p-2.5 text-gray-300 focus:border-blue-500 focus:ring-blue-500'
-				: 'block w-full rounded-2xl border border-gray-600 bg-slate-900 p-2.5 text-gray-300 focus:border-blue-500 focus:ring-blue-500'}
-			class:ambient-focuss={showOptions}
-			class:error={showErrorAnimation}
-			{placeholder}
-			bind:value={searchQuery}
-			on:focus={handleFocus}
-			autocomplete="off"
-			autocorrect="off"
-			autocapitalize="off"
-			disabled={isLoading}
-		/>
+<div class="relative">
+	<input
+		bind:this={inputElement}
+		type="text"
+		class={isLoading
+			? 'pulse-loading block w-full rounded-2xl border border-gray-600 bg-slate-900 p-2.5 text-gray-300 focus:border-blue-500 focus:ring-blue-500'
+			: 'block w-full rounded-2xl border border-gray-600 bg-slate-900 p-2.5 text-gray-300 focus:border-blue-500 focus:ring-blue-500'}
+		class:ambient-focuss={showOptions}
+		class:error={showErrorAnimation}
+		{placeholder}
+		value={searchQuery}
+		on:focus={handleFocus}
+		on:input={handleInput}
+		on:keydown={handleKeydown}
+		autocomplete="off"
+		autocorrect="off"
+		autocapitalize="off"
+		disabled={isLoading}
+	/>
 
-		{#if searchQuery.length > 0}
-			<button
-				type="button"
-				class="clear-button"
-				on:click|stopPropagation={clearSelection}
-				aria-label="Очистить"
+	{#if searchQuery.length > 0}
+		<button
+			type="button"
+			class="clear-button"
+			on:click|stopPropagation={clearSelection}
+			aria-label="Очистить"
+		>
+			<svg
+				width="22"
+				height="22"
+				viewBox="0 0 22 22"
+				fill="none"
+				xmlns="http://www.w3.org/2000/svg"
+				class="clear-icon"
 			>
-				<svg
-					width="22"
-					height="22"
-					viewBox="0 0 22 22"
-					fill="none"
-					xmlns="http://www.w3.org/2000/svg"
-					class="clear-icon"
+				<path
+					d="M6 6L16 16M16 6L6 16"
+					stroke="currentColor"
+					stroke-width="2"
+					stroke-linecap="round"
+				/>
+			</svg>
+		</button>
+	{/if}
+
+	{#if showOptions}
+		<ul
+			id="combobox-options"
+			class="combobox-options absolute mt-1 w-full overflow-hidden rounded-2xl border border-gray-600 bg-slate-900 p-2"
+			class:active={showOptions}
+			class:ambient-focus={showOptions}
+			transition:scale={{
+				duration: 200,
+				opacity: 0,
+				start: 0.95,
+				easing: quintOut
+			}}
+		>
+			{#each filteredItems as item}
+				<li
+					class="cursor-pointer rounded-lg p-2 hover:bg-gray-700"
+					on:mousedown={() => selectItem(item)}
+					role="option"
+					aria-selected={item.id === selectedId}
+					tabindex="0"
+					on:keydown={(e) => {
+						if (e.key === 'Enter' || e.key === ' ') selectItem(item);
+					}}
 				>
-					<path
-						d="M6 6L16 16M16 6L6 16"
-						stroke="currentColor"
-						stroke-width="2"
-						stroke-linecap="round"
-					/>
-				</svg>
-			</button>
-		{/if}
-
-		{#if showOptions}
-			<ul
-				id="combobox-options"
-				class="combobox-options absolute mt-1 w-full overflow-hidden rounded-2xl border border-gray-600 bg-slate-900 p-2"
-				class:active={showOptions}
-				class:ambient-focus={showOptions}
-				transition:scale={{
-					duration: 200,
-					opacity: 0,
-					start: 0.95,
-					easing: quintOut
-				}}
-			>
-				{#each filteredItems as item}
-					<li
-						class="cursor-pointer rounded-lg p-2 hover:bg-gray-700"
-						on:mousedown={() => selectItem(item)}
-						role="option"
-						aria-selected={item.id === selectedId}
-						tabindex="0"
-						on:keydown={(e) => {
-							if (e.key === 'Enter' || e.key === ' ') selectItem(item);
-						}}
-					>
-						{item.displayValue}
-					</li>
-				{/each}
-			</ul>
-		{/if}
-	</div>
-
-	<button
-		type="submit"
-		class="rounded-2xl bg-blue-700 p-2 text-white transition-all hover:bg-blue-600"
-	>
-		{submitButtonText}
-	</button>
-
-	<CopyLinkButton disabled={!selectedId} params={copyParams} successMessage={copyLinkMessage}>
-		{copyButtonText}
-	</CopyLinkButton>
-</form>
+					{item.displayValue}
+				</li>
+			{/each}
+		</ul>
+	{/if}
+</div>
 
 <style>
 	:global(.ambient-overlay) {
@@ -316,10 +318,6 @@
 		color: #888;
 		transition: color 0.2s;
 		pointer-events: none;
-	}
-
-	.relative input:not(:placeholder-shown) + .clear-button {
-		display: block;
 	}
 
 	.combobox-options {
