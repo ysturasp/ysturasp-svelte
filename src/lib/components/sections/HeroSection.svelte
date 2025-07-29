@@ -1,8 +1,10 @@
 <script>
+	import TgsSticker from '$lib/components/common/TgsSticker.svelte';
+
 	const features = [
 		{
 			href: '/rasp',
-			icon: 'https://ysturasp.github.io/tg_emoji/People/Man Technologist.webp',
+			icon: '/stickers/student.tgs',
 			title: 'Расписание студентов',
 			description: 'Узнайте расписание своей группы',
 			gradient: 'from-blue-500/10 to-blue-600/20',
@@ -13,7 +15,7 @@
 		},
 		{
 			href: '/raspprep',
-			icon: 'https://ysturasp.github.io/tg_emoji/People/Man Teacher.webp',
+			icon: '/stickers/teacher.tgs',
 			title: 'Расписание преподавателей',
 			description: 'Расписание для преподавателей',
 			gradient: 'from-purple-500/10 to-purple-600/20',
@@ -24,7 +26,7 @@
 		},
 		{
 			href: '/raspaudience',
-			icon: 'https://ysturasp.github.io/tg_emoji/Travel and Places/Classical Building.webp',
+			icon: '/stickers/audience.tgs',
 			title: 'Расписание аудиторий',
 			description: 'Найдите свободную аудиторию',
 			gradient: 'from-green-500/10 to-green-600/20',
@@ -35,7 +37,7 @@
 		},
 		{
 			href: '/stat',
-			icon: 'https://ysturasp.github.io/tg_emoji/Objects/Bar Chart.webp',
+			icon: '/stickers/statistics.tgs',
 			title: 'Статистика оценок',
 			description: 'Анализ успеваемости',
 			gradient: 'from-yellow-500/10 to-yellow-600/20',
@@ -70,7 +72,18 @@
 					class="absolute inset-0 bg-gradient-to-br {feature.glowFrom} {feature.glowTo} opacity-0 transition-opacity group-hover:opacity-10"
 				></div>
 				<div class="relative z-10">
-					<img src={feature.icon} alt={feature.title} class="mx-auto mb-2" />
+					<div
+						class="mx-auto mb-2 flex h-35 w-35 items-center justify-center md:h-[190px] md:w-[190px]"
+					>
+						<TgsSticker
+							src={feature.icon}
+							autoplay={true}
+							once={false}
+							quality={3}
+							width="100%"
+							height="100%"
+						/>
+					</div>
 					<h3 class="mb-2 text-base font-semibold text-white lg:text-lg">
 						{feature.title}
 					</h3>

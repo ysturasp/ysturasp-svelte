@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import TgsSticker from '$lib/components/common/TgsSticker.svelte';
 	let isVisible = false;
 	let isSwiping = false;
 	let touchStartX = 0;
@@ -51,11 +52,7 @@
 	>
 		<div class="content">
 			<div class="message">
-				<img
-					src="https://ysturasp.github.io/tg_emoji/Food%20and%20Drink/Cookie.webp"
-					alt="Cookie"
-					class="cookie-icon"
-				/>
+				<TgsSticker src="/stickers/cookie.tgs" width="132px" autoplay={true} once={false} />
 				<div class="text">
 					<p>
 						Мы используем cookie и собираем данные для аналитики и улучшения работы
@@ -107,12 +104,6 @@
 		display: flex;
 		align-items: center;
 		gap: 0.75rem;
-	}
-
-	.cookie-icon {
-		width: 62px;
-		height: 62px;
-		flex-shrink: 0;
 	}
 
 	.text {

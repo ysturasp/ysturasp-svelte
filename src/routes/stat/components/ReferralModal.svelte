@@ -4,6 +4,7 @@
 	import { getUserId, getReferralStats, updateReferralStats } from '../utils/api';
 	import NotificationsContainer from '$lib/components/notifications/NotificationsContainer.svelte';
 	import { notifications } from '$lib/stores/notifications';
+	import TgsSticker from '$lib/components/common/TgsSticker.svelte';
 
 	const dispatch = createEventDispatcher<{
 		close: void;
@@ -63,10 +64,11 @@
 		>
 			<div class="flex items-center justify-between p-4">
 				<h3 class="flex items-center gap-2 text-xl font-bold text-white md:text-2xl">
-					<img
-						src="https://ysturasp.github.io/tg_emoji/Animals and Nature/Glowing Star.webp"
-						alt="Star-Struck"
-						class="h-8 w-8"
+					<TgsSticker
+						src="/stickers/star.tgs"
+						width="42px"
+						autoplay={true}
+						once={false}
 					/>
 					<span>Получите больше возможностей!</span>
 				</h3>
