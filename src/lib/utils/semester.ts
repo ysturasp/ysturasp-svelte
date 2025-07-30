@@ -91,3 +91,32 @@ export function groupLessonsByDay(week: any): { [key: number]: { date: string; l
 
 	return lessonsByDay;
 }
+
+export function getCurrentWeekMessage(): string {
+	const today = getCurrentDate();
+	const { start, end } = getCurrentSemesterRange();
+
+	const day = today.getDate();
+	const monthNames = [
+		'января',
+		'февраля',
+		'марта',
+		'апреля',
+		'мая',
+		'июня',
+		'июля',
+		'августа',
+		'сентября',
+		'октября',
+		'ноября',
+		'декабря'
+	];
+	const currentDate = `${day} ${monthNames[today.getMonth()]}`;
+
+	if (today >= start && today <= end) {
+		const currentWeek = getCurrentWeek();
+		return `Сегодня ${currentDate}, ${currentWeek} неделя`;
+	} else {
+		return `Сегодня ${currentDate}, каникулы!`;
+	}
+}

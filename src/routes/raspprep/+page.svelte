@@ -16,7 +16,8 @@
 		getCurrentWeek,
 		isDateInCurrentSemester,
 		groupLessonsByDay,
-		SEMESTER_WEEKS_COUNT
+		SEMESTER_WEEKS_COUNT,
+		getCurrentWeekMessage
 	} from '$lib/utils/semester';
 	import type { Teacher } from './api';
 	import type { TeacherScheduleData } from './types';
@@ -156,6 +157,7 @@
 					></div>
 					<p class="mb-1 font-semibold">Расписание актуально</p>
 				</div>
+				<p class="text-md text-black">{getCurrentWeekMessage()}</p>
 			</div>
 
 			<div class="mb-4 flex items-center">
