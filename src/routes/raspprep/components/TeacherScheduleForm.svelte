@@ -131,6 +131,7 @@
 			placeholder="Выберите неделю"
 			error={weekError}
 			isLoading={false}
+			clearAfterSelect={true}
 		/>
 	</div>
 

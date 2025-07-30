@@ -14,6 +14,7 @@
 	export let isLoading = false;
 	export let error = false;
 	export let id = '';
+	export let clearAfterSelect = false;
 
 	let searchQuery = '';
 	let showOptions = false;
@@ -23,6 +24,15 @@
 	let isUpdatingFromSelection = false;
 	let isUpdatingFromInput = false;
 	let showErrorAnimation = false;
+
+	$: actualPlaceholder = selectedId && items.length > 0 
+		? (() => {
+			const item = items.find(item => item.id === selectedId);
+			if (!item) return placeholder;
+			
+			return item.displayValue;
+		})()
+		: placeholder;
 
 	$: if (error) {
 		showErrorAnimation = false;
@@ -37,14 +47,28 @@
 		filteredItems = items.filter((item) =>
 			item.displayValue.toLowerCase().includes(searchQuery.toLowerCase())
 		);
+		
+		if (clearAfterSelect && searchQuery === '') {
+			filteredItems = items;
+		}
 	}
 
-	$: if (selectedId && items.length > 0 && !isUpdatingFromInput) {
+	$: if (!clearAfterSelect && selectedId && items.length > 0 && !isUpdatingFromInput) {
 		const selectedItem = items.find((item) => item.id === selectedId);
 		if (selectedItem && searchQuery !== selectedItem.displayValue) {
 			isUpdatingFromSelection = true;
 			searchQuery = selectedItem.displayValue;
 			isUpdatingFromSelection = false;
+		}
+	}
+
+	$: if (clearAfterSelect && selectedId && items.length > 0 && !isUpdatingFromInput && !isUpdatingFromSelection) {
+		const selectedItem = items.find((item) => item.id === selectedId);
+		if (selectedItem && searchQuery !== '') {
+			searchQuery = '';
+			if (inputElement) {
+				inputElement.value = '';
+			}
 		}
 	}
 
@@ -71,7 +95,16 @@
 	function selectItem(item: Item) {
 		isUpdatingFromSelection = true;
 		selectedId = item.id;
-		searchQuery = item.displayValue;
+		
+		if (clearAfterSelect) {
+			searchQuery = '';
+			if (inputElement) {
+				inputElement.value = '';
+			}
+		} else {
+			searchQuery = item.displayValue;
+		}
+		
 		closeDropdown();
 		isUpdatingFromSelection = false;
 	}
@@ -159,7 +192,7 @@
 			: 'block w-full rounded-2xl border border-gray-600 bg-slate-900 p-2.5 text-gray-300 focus:border-blue-500 focus:ring-blue-500'}
 		class:ambient-focuss={showOptions}
 		class:error={showErrorAnimation}
-		{placeholder}
+		placeholder={actualPlaceholder}
 		value={searchQuery}
 		on:focus={handleFocus}
 		on:input={handleInput}
