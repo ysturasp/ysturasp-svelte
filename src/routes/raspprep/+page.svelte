@@ -12,6 +12,12 @@
 	import GithubParserInfo from './components/GithubParserInfo.svelte';
 	import { notifications } from '$lib/stores/notifications';
 	import { getTeachers, getTeacherSchedule } from './api';
+	import {
+		getCurrentWeek,
+		isDateInCurrentSemester,
+		groupLessonsByDay,
+		SEMESTER_WEEKS_COUNT
+	} from '$lib/utils/semester';
 	import type { Teacher } from './api';
 	import type { TeacherScheduleData } from './types';
 
@@ -72,29 +78,6 @@
 		}
 	});
 
-	function getCurrentWeek(): number {
-		const today = new Date();
-		const currentMonth = today.getMonth();
-
-		if (currentMonth >= 1 && currentMonth <= 5) {
-			const weeksSinceFebruary = Math.floor(
-				(today.getTime() - new Date(today.getFullYear(), 1, 3).getTime()) /
-					(7 * 24 * 60 * 60 * 1000)
-			);
-			return Math.max(1, Math.min(18, weeksSinceFebruary + 1));
-		} else if (currentMonth >= 8 || currentMonth === 0) {
-			const startDate =
-				currentMonth >= 8
-					? new Date(today.getFullYear(), 8, 1)
-					: new Date(today.getFullYear() - 1, 8, 1);
-			const weeksSinceStart = Math.floor(
-				(today.getTime() - startDate.getTime()) / (7 * 24 * 60 * 60 * 1000)
-			);
-			return Math.max(1, Math.min(18, weeksSinceStart + 1));
-		}
-		return 1;
-	}
-
 	async function loadSchedule() {
 		const teacher = teachers.find((t) => t.name === selectedTeacher);
 		if (!teacher) return;
@@ -121,7 +104,7 @@
 
 	function changeWeek(delta: number) {
 		const newWeek = selectedWeek + delta;
-		if (newWeek >= 1 && newWeek <= 18) {
+		if (newWeek >= 1 && newWeek <= SEMESTER_WEEKS_COUNT) {
 			selectedWeek = newWeek;
 			localStorage.setItem('lastWeek', selectedWeek.toString());
 			updateURL();
@@ -139,29 +122,13 @@
 		return days[index] || 'Неизвестный день';
 	}
 
-	$: filteredWeek = scheduleData?.items?.find((week) => week.number === selectedWeek);
+	$: filteredWeek = scheduleData?.items?.find((week) => {
+		if (week.number !== selectedWeek) return false;
 
-	$: dayLessons = filteredWeek
-		? (() => {
-				const lessonsByDay: { [key: number]: { date: string; lessons: any[] } } = {};
+		return week.days.some((day) => isDateInCurrentSemester(day.info.date));
+	});
 
-				filteredWeek.days.forEach((day) => {
-					const dayDate = new Date(day.info.date);
-					const dayOfWeek = (dayDate.getDay() + 6) % 7;
-
-					if (!lessonsByDay[dayOfWeek]) {
-						lessonsByDay[dayOfWeek] = {
-							date: day.info.date,
-							lessons: []
-						};
-					}
-
-					lessonsByDay[dayOfWeek].lessons.push(...day.lessons);
-				});
-
-				return lessonsByDay;
-			})()
-		: {};
+	$: dayLessons = filteredWeek ? groupLessonsByDay(filteredWeek) : {};
 </script>
 
 <svelte:head>
@@ -210,7 +177,7 @@
 
 			{#if scheduleData && selectedTeacher}
 				<div class="mt-4">
-					<div class="mb-4 flex items-center justify-center">
+					<div class="mb-4 flex justify-center md:items-center">
 						<button
 							on:click={() => changeWeek(-1)}
 							class="mr-2 rounded-lg bg-blue-700 p-2 text-3xl text-white transition-all hover:bg-blue-600"
@@ -228,7 +195,7 @@
 						<button
 							on:click={() => changeWeek(1)}
 							class="ml-2 rounded-lg bg-blue-700 p-2 text-3xl text-white transition-all hover:bg-blue-600"
-							disabled={selectedWeek >= 18}
+							disabled={selectedWeek >= SEMESTER_WEEKS_COUNT}
 						>
 							👉
 						</button>
