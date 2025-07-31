@@ -17,7 +17,11 @@
 		isDateInCurrentSemester,
 		groupLessonsByDay,
 		SEMESTER_WEEKS_COUNT,
-		getCurrentWeekMessage
+		getCurrentWeekMessage,
+		getCurrentSemester,
+		detectAvailableSemesters,
+		isDateInSemester,
+		type SemesterInfo
 	} from '$lib/utils/semester';
 	import type { Teacher } from './api';
 	import type { TeacherScheduleData } from './types';
@@ -28,6 +32,8 @@
 	let selectedTeacher = '';
 	let selectedWeek = 1;
 	let scheduleData: TeacherScheduleData | null = null;
+	let availableSemesters: SemesterInfo[] = [];
+	let selectedSemester: SemesterInfo | null = null;
 
 	const days = [
 		'Понедельник',
@@ -43,10 +49,12 @@
 		try {
 			isLoading = true;
 			teachers = await getTeachers();
+			selectedSemester = getCurrentSemester();
 
 			const urlParams = new URLSearchParams(window.location.search);
 			const teacherFromURL = urlParams.get('teacher');
 			const weekFromURL = urlParams.get('week');
+			const semesterFromURL = urlParams.get('semester');
 
 			if (teacherFromURL) {
 				selectedTeacher = decodeURIComponent(teacherFromURL);
@@ -70,6 +78,15 @@
 
 			if (selectedTeacher && selectedWeek) {
 				await loadSchedule();
+
+				if (semesterFromURL && availableSemesters.length > 0) {
+					const semesterFromParams = availableSemesters.find(
+						(s) => s.id === semesterFromURL
+					);
+					if (semesterFromParams) {
+						selectedSemester = semesterFromParams;
+					}
+				}
 			}
 		} catch (error) {
 			console.error('Error loading teachers:', error);
@@ -79,6 +96,11 @@
 		}
 	});
 
+	function changeSemester(semester: SemesterInfo) {
+		selectedSemester = semester;
+		updateURL();
+	}
+
 	async function loadSchedule() {
 		const teacher = teachers.find((t) => t.name === selectedTeacher);
 		if (!teacher) return;
@@ -86,6 +108,14 @@
 		try {
 			isScheduleLoading = true;
 			scheduleData = await getTeacherSchedule(teacher.id);
+			availableSemesters = detectAvailableSemesters(scheduleData);
+
+			if (
+				availableSemesters.length > 0 &&
+				!availableSemesters.find((s) => s.id === selectedSemester?.id)
+			) {
+				selectedSemester = availableSemesters[0];
+			}
 
 			localStorage.setItem('lastTeacher', selectedTeacher);
 			localStorage.setItem('lastWeek', selectedWeek.toString());
@@ -116,6 +146,9 @@
 		const url = new URL(window.location.href);
 		url.searchParams.set('teacher', selectedTeacher);
 		url.searchParams.set('week', selectedWeek.toString());
+		if (selectedSemester) {
+			url.searchParams.set('semester', selectedSemester.id);
+		}
 		window.history.replaceState({}, '', url.toString());
 	}
 
@@ -126,10 +159,16 @@
 	$: filteredWeek = scheduleData?.items?.find((week) => {
 		if (week.number !== selectedWeek) return false;
 
-		return week.days.some((day) => isDateInCurrentSemester(day.info.date));
+		const filterFn = selectedSemester
+			? (day: any) => isDateInSemester(day.info.date, selectedSemester!)
+			: (day: any) => isDateInCurrentSemester(day.info.date);
+
+		return week.days.some(filterFn);
 	});
 
-	$: dayLessons = filteredWeek ? groupLessonsByDay(filteredWeek) : {};
+	$: dayLessons = filteredWeek
+		? groupLessonsByDay(filteredWeek, selectedSemester || undefined)
+		: {};
 </script>
 
 <svelte:head>
@@ -160,11 +199,13 @@
 				<p class="text-md text-black">{getCurrentWeekMessage()}</p>
 			</div>
 
-			<div class="mb-4 flex items-center">
-				<h2 class="text-3xl font-semibold text-white">📅</h2>
-				<h2 class="text-md ml-2 font-semibold text-white md:text-4xl">
-					Расписание преподавателей
-				</h2>
+			<div class="mb-4 flex items-center justify-between">
+				<div class="flex items-center">
+					<h2 class="text-3xl font-semibold text-white">📅</h2>
+					<h2 class="text-md ml-2 font-semibold text-white md:text-4xl">
+						Расписание преподавателей
+					</h2>
+				</div>
 			</div>
 
 			<TeacherScheduleForm
@@ -188,11 +229,16 @@
 							👈
 						</button>
 
-						<ScheduleTitle
-							type="teacher"
-							title={`${selectedTeacher.split(' ')[0]} ${selectedTeacher.split(' ')[1]?.[0] || ''}${selectedTeacher.split(' ')[2]?.[0] || ''}`}
-							subtitle={`Неделя ${selectedWeek}`}
-						/>
+						<div class="flex flex-col justify-center md:items-center">
+							<ScheduleTitle
+								type="teacher"
+								title={`${selectedTeacher.split(' ')[0]} ${selectedTeacher.split(' ')[1]?.[0] || ''}${selectedTeacher.split(' ')[2]?.[0] || ''}`}
+								weekNumber={selectedWeek}
+								{availableSemesters}
+								{selectedSemester}
+								onSemesterSelect={changeSemester}
+							/>
+						</div>
 
 						<button
 							on:click={() => changeWeek(1)}

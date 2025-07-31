@@ -25,14 +25,15 @@
 	let isUpdatingFromInput = false;
 	let showErrorAnimation = false;
 
-	$: actualPlaceholder = selectedId && items.length > 0 
-		? (() => {
-			const item = items.find(item => item.id === selectedId);
-			if (!item) return placeholder;
-			
-			return item.displayValue;
-		})()
-		: placeholder;
+	$: actualPlaceholder =
+		selectedId && items.length > 0
+			? (() => {
+					const item = items.find((item) => item.id === selectedId);
+					if (!item) return placeholder;
+
+					return item.displayValue;
+				})()
+			: placeholder;
 
 	$: if (error) {
 		showErrorAnimation = false;
@@ -47,7 +48,7 @@
 		filteredItems = items.filter((item) =>
 			item.displayValue.toLowerCase().includes(searchQuery.toLowerCase())
 		);
-		
+
 		if (clearAfterSelect && searchQuery === '') {
 			filteredItems = items;
 		}
@@ -62,7 +63,13 @@
 		}
 	}
 
-	$: if (clearAfterSelect && selectedId && items.length > 0 && !isUpdatingFromInput && !isUpdatingFromSelection) {
+	$: if (
+		clearAfterSelect &&
+		selectedId &&
+		items.length > 0 &&
+		!isUpdatingFromInput &&
+		!isUpdatingFromSelection
+	) {
 		const selectedItem = items.find((item) => item.id === selectedId);
 		if (selectedItem && searchQuery !== '') {
 			searchQuery = '';
@@ -95,7 +102,7 @@
 	function selectItem(item: Item) {
 		isUpdatingFromSelection = true;
 		selectedId = item.id;
-		
+
 		if (clearAfterSelect) {
 			searchQuery = '';
 			if (inputElement) {
@@ -104,7 +111,7 @@
 		} else {
 			searchQuery = item.displayValue;
 		}
-		
+
 		closeDropdown();
 		isUpdatingFromSelection = false;
 	}

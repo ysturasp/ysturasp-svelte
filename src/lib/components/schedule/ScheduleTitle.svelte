@@ -1,13 +1,40 @@
 <script lang="ts">
+	import { quintOut } from 'svelte/easing';
+	import { scale } from 'svelte/transition';
+	import type { SemesterInfo } from '$lib/utils/semester';
+
 	export let title: string;
 	export let subtitle: string | undefined = undefined;
 	export let type: 'group' | 'teacher' | 'audience' = 'group';
+	export let weekNumber: number | undefined = undefined;
+	export let availableSemesters: SemesterInfo[] = [];
+	export let selectedSemester: SemesterInfo | null = null;
+	export let onSemesterSelect: ((semester: SemesterInfo) => void) | undefined = undefined;
 
 	const typeLabels = {
 		group: 'Расписание группы',
 		teacher: 'Расписание преподавателя',
 		audience: 'Расписание аудитории'
 	};
+
+	let showSemesterOptions = false;
+
+	function handleSemesterSelect(semester: SemesterInfo) {
+		if (onSemesterSelect) {
+			onSemesterSelect(semester);
+		}
+		showSemesterOptions = false;
+	}
+
+	function toggleSemesterOptions() {
+		showSemesterOptions = !showSemesterOptions;
+	}
+
+	function handleKeydown(event: KeyboardEvent) {
+		if (event.key === 'Escape' && showSemesterOptions) {
+			showSemesterOptions = false;
+		}
+	}
 </script>
 
 <div class="flex flex-col justify-center md:items-center">
@@ -17,10 +44,92 @@
 	>
 		{typeLabels[type]}
 		{title}
-		{#if subtitle}
+		{#if subtitle || weekNumber || (availableSemesters.length > 0 && selectedSemester)}
 			<p class="mt-2 text-sm text-gray-400">
-				{subtitle}
+				{#if weekNumber}
+					Неделя {weekNumber}<span class="separator-dot"
+						>{availableSemesters.length > 0 || selectedSemester ? ' • ' : ''}</span
+					>
+				{/if}
+				{#if availableSemesters.length > 1}
+					<span class="relative inline-block">
+						<button
+							on:click={toggleSemesterOptions}
+							class="group flex items-center gap-1 text-sm text-gray-400 transition-colors hover:text-white focus:outline-none"
+						>
+							<span>{selectedSemester?.name || 'Текущий семестр'}</span>
+							<svg
+								class="h-4 w-4 transition-transform duration-200 {showSemesterOptions
+									? 'rotate-180'
+									: ''}"
+								fill="none"
+								stroke="currentColor"
+								viewBox="0 0 24 24"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M19 9l-7 7-7-7"
+								/>
+							</svg>
+						</button>
+
+						{#if showSemesterOptions}
+							<div
+								class="absolute top-full left-1/2 z-50 mt-2 min-w-48 -translate-x-1/2 transform rounded-xl bg-slate-800 p-3 shadow-2xl ring-1 ring-blue-500/50"
+								transition:scale={{
+									duration: 200,
+									opacity: 0,
+									start: 0.95,
+									easing: quintOut
+								}}
+							>
+								{#each availableSemesters as semester}
+									<button
+										on:click={() => handleSemesterSelect(semester)}
+										class="mb-1 w-full rounded-lg px-3 py-2 text-left text-sm text-white transition-all last:mb-0 hover:ring-2 hover:ring-blue-500/30 {semester.id ===
+										selectedSemester?.id
+											? 'bg-slate-700'
+											: ''}"
+									>
+										{semester.name}
+									</button>
+								{/each}
+							</div>
+						{/if}
+					</span>
+				{:else if selectedSemester}
+					<span>{selectedSemester.name}</span>
+				{/if}
+				{#if subtitle}
+					{availableSemesters.length > 0 || selectedSemester || weekNumber
+						? ' • '
+						: ''}{subtitle}
+				{/if}
 			</p>
 		{/if}
 	</h2>
 </div>
+
+<svelte:window
+	on:click={(e) => {
+		const target = e.target as Element;
+		if (!target?.closest('.relative')) {
+			showSemesterOptions = false;
+		}
+	}}
+	on:keydown={handleKeydown}
+/>
+
+<style>
+	@media (max-width: 400px) {
+		.separator-dot {
+			display: none;
+		}
+	}
+
+	.separator-dot {
+		display: inline;
+	}
+</style>

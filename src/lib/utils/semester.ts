@@ -3,6 +3,14 @@ export interface SemesterRange {
 	end: Date;
 }
 
+export interface SemesterInfo {
+	id: string;
+	name: string;
+	year: number;
+	type: 'spring' | 'autumn';
+	range: SemesterRange;
+}
+
 export const SPRING_SEMESTER_START_MONTH = 1;
 export const SPRING_SEMESTER_END_MONTH = 6;
 export const AUTUMN_SEMESTER_START_MONTH = 7;
@@ -26,22 +34,101 @@ function getFirstMondayOfMonth(year: number, month: number): Date {
 	return date;
 }
 
+export function getSemesterRange(year: number, type: 'spring' | 'autumn'): SemesterRange {
+	const startMonth =
+		type === 'spring' ? SPRING_SEMESTER_START_MONTH : AUTUMN_SEMESTER_START_MONTH;
+	const start = getFirstMondayOfMonth(year, startMonth);
+	const end = new Date(start);
+	end.setDate(start.getDate() + (SEMESTER_WEEKS_COUNT - 1) * 7 + 6);
+	return { start, end };
+}
+
 export function getCurrentSemesterRange(): SemesterRange {
 	const currentDate = getCurrentDate();
 	const currentMonth = currentDate.getMonth();
 	const currentYear = currentDate.getFullYear();
 
 	if (currentMonth >= AUTUMN_SEMESTER_END_MONTH && currentMonth <= SPRING_SEMESTER_END_MONTH) {
-		const start = getFirstMondayOfMonth(currentYear, SPRING_SEMESTER_START_MONTH);
-		const end = new Date(start);
-		end.setDate(start.getDate() + (SEMESTER_WEEKS_COUNT - 1) * 7 + 6);
-		return { start, end };
+		return getSemesterRange(currentYear, 'spring');
 	} else {
-		const start = getFirstMondayOfMonth(currentYear, AUTUMN_SEMESTER_START_MONTH);
-		const end = new Date(start);
-		end.setDate(start.getDate() + (SEMESTER_WEEKS_COUNT - 1) * 7 + 6);
-		return { start, end };
+		return getSemesterRange(currentYear, 'autumn');
 	}
+}
+
+export function getCurrentSemester(): SemesterInfo {
+	const currentDate = getCurrentDate();
+	const currentMonth = currentDate.getMonth();
+	const currentYear = currentDate.getFullYear();
+
+	if (currentMonth >= AUTUMN_SEMESTER_END_MONTH && currentMonth <= SPRING_SEMESTER_END_MONTH) {
+		const range = getSemesterRange(currentYear, 'spring');
+		return {
+			id: `spring-${currentYear}`,
+			name: `Весенний ${currentYear}`,
+			year: currentYear,
+			type: 'spring',
+			range
+		};
+	} else {
+		const range = getSemesterRange(currentYear, 'autumn');
+		return {
+			id: `autumn-${currentYear}`,
+			name: `Осенний ${currentYear}`,
+			year: currentYear,
+			type: 'autumn',
+			range
+		};
+	}
+}
+
+export function getPreviousSemesters(count: number = 4): SemesterInfo[] {
+	const currentSemester = getCurrentSemester();
+	const semesters: SemesterInfo[] = [currentSemester];
+
+	let year = currentSemester.year;
+	let type: 'spring' | 'autumn' = currentSemester.type;
+
+	for (let i = 0; i < count; i++) {
+		if (type === 'spring') {
+			type = 'autumn';
+			year -= 1;
+		} else {
+			type = 'spring';
+		}
+
+		const range = getSemesterRange(year, type);
+		semesters.push({
+			id: `${type}-${year}`,
+			name: type === 'spring' ? `Весенний ${year}` : `Осенний ${year}`,
+			year,
+			type,
+			range
+		});
+	}
+
+	return semesters;
+}
+
+export function detectAvailableSemesters(scheduleData: any): SemesterInfo[] {
+	if (!scheduleData?.items) return [];
+
+	const availableSemesters = new Set<string>();
+	const allSemesters = getPreviousSemesters(6);
+
+	scheduleData.items.forEach((week: any) => {
+		week.days?.forEach((day: any) => {
+			if (day.info?.date && day.lessons?.length > 0) {
+				const date = new Date(day.info.date);
+				allSemesters.forEach((semester) => {
+					if (date >= semester.range.start && date <= semester.range.end) {
+						availableSemesters.add(semester.id);
+					}
+				});
+			}
+		});
+	});
+
+	return allSemesters.filter((semester) => availableSemesters.has(semester.id));
 }
 
 export function getCurrentWeek(): number {
@@ -70,24 +157,33 @@ export function isDateInCurrentSemester(dateString: string): boolean {
 	return date >= start && date <= end;
 }
 
-export function groupLessonsByDay(week: any): { [key: number]: { date: string; lessons: any[] } } {
+export function isDateInSemester(dateString: string, semester: SemesterInfo): boolean {
+	const date = new Date(dateString);
+	return date >= semester.range.start && date <= semester.range.end;
+}
+
+export function groupLessonsByDay(
+	week: any,
+	semester?: SemesterInfo
+): { [key: number]: { date: string; lessons: any[] } } {
 	const lessonsByDay: { [key: number]: { date: string; lessons: any[] } } = {};
+	const filterFn = semester
+		? (day: any) => isDateInSemester(day.info.date, semester)
+		: (day: any) => isDateInCurrentSemester(day.info.date);
 
-	week.days
-		.filter((day: any) => isDateInCurrentSemester(day.info.date))
-		.forEach((day: any) => {
-			const dayDate = new Date(day.info.date);
-			const dayOfWeek = (dayDate.getDay() + 6) % 7;
+	week.days.filter(filterFn).forEach((day: any) => {
+		const dayDate = new Date(day.info.date);
+		const dayOfWeek = (dayDate.getDay() + 6) % 7;
 
-			if (!lessonsByDay[dayOfWeek]) {
-				lessonsByDay[dayOfWeek] = {
-					date: day.info.date,
-					lessons: []
-				};
-			}
+		if (!lessonsByDay[dayOfWeek]) {
+			lessonsByDay[dayOfWeek] = {
+				date: day.info.date,
+				lessons: []
+			};
+		}
 
-			lessonsByDay[dayOfWeek].lessons.push(...day.lessons);
-		});
+		lessonsByDay[dayOfWeek].lessons.push(...day.lessons);
+	});
 
 	return lessonsByDay;
 }
