@@ -80,10 +80,7 @@
 		class="pointer-events-none fixed inset-0 bg-gradient-to-br from-blue-900/20 to-purple-900/20"
 	></div>
 
-	<Header>
-		<OnlineCounter slot="online-counter-desktop" variant="desktop" />
-		<OnlineCounter slot="online-counter-mobile" variant="mobile" />
-	</Header>
+	<Header />
 
 	<main class="container mx-auto mt-5 px-3 md:mt-7 md:px-0">
 		{#if error}
