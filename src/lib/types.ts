@@ -45,3 +45,20 @@ export interface CacheItem {
 	value: string;
 	selected?: boolean;
 }
+
+export interface ChangelogItem {
+	description: string;
+	originalDescription?: string;
+	author: string;
+	date: string;
+	filesChanged?: number;
+	insertions?: number;
+	deletions?: number;
+	emoji?: string;
+}
+
+export interface ChangelogData {
+	items: ChangelogItem[];
+	loading: boolean;
+	error?: string;
+}
