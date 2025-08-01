@@ -96,14 +96,7 @@
 			>
 				Поддержать проект <span class="align-middle text-xl">💸</span>
 			</a>
-			<a
-				href="https://ystu.expo.app"
-				target="_blank"
-				class="flex items-center justify-center rounded-xl border-2 border-blue-500 bg-slate-900 p-1 text-sm text-white transition-all hover:border-blue-400 md:p-2 md:text-sm"
-				aria-label="Открыть профиль"
-			>
-				<span class="text-xl">👤</span>
-			</a>
+			<slot name="personal-account-ystu" />
 		</div>
 	</div>
 

@@ -184,7 +184,18 @@
 </svelte:head>
 
 <PageLayout>
-	<Header />
+	<Header>
+		<div slot="personal-account-ystu">
+			<a
+				href="https://ystu.expo.app"
+				target="_blank"
+				class="flex items-center justify-center rounded-xl border-2 border-blue-500 bg-slate-900 p-1 text-sm text-white transition-all hover:border-blue-400 md:p-2 md:text-sm"
+				aria-label="Открыть профиль"
+			>
+				<span class="text-xl">👤</span>
+			</a>
+		</div>
+	</Header>
 
 	<main class="container mx-auto mt-5 px-3 md:mt-7 md:px-0">
 		<section class="mt-8 rounded-2xl bg-slate-800 p-4 sm:p-6">

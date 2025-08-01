@@ -1,3 +1,4 @@
+- small improves for margins on yspu schedule page (ysturasp, 2025-08-01) [4 files changed, 4 insertions(+), 2 deletions(-)]
 - add page ystu schedule for audience (ysturasp, 2025-08-01) [8 files changed, 663 insertions(+), 5 deletions(-)]
 - remove integrate online counter with changelog page (ysturasp, 2025-07-31) [3 files changed, 3 insertions(+), 4 deletions(-)]
 - add script for autogenerate changelog by commit and rewrite page /changelog (ysturasp, 2025-07-31) [10 files changed, 659 insertions(+), 1 deletion(-)]
