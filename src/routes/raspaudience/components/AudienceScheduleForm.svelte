@@ -1,0 +1,154 @@
+<script lang="ts">
+	import type { Audience } from '../api';
+	import SimpleCombobox from '$lib/components/schedule/SimpleCombobox.svelte';
+	import CopyLinkButton from '$lib/components/ui/CopyLinkButton.svelte';
+
+	export let audiences: Audience[] = [];
+	export let selectedAudience = '';
+	export let selectedWeek = 1;
+	export let onSubmit: () => void;
+	export let isLoading = false;
+	export let submitButtonText = 'Показать расписание';
+	export let copyButtonText = 'Скопировать ссылку на расписание';
+
+	let audienceError = false;
+	let weekError = false;
+
+	$: if (selectedAudience) audienceError = false;
+	$: if (selectedWeekString) weekError = false;
+
+	function handleSubmit() {
+		audienceError = false;
+		weekError = false;
+
+		setTimeout(() => {
+			audienceError = !selectedAudience;
+			weekError = !selectedWeekString;
+
+			if (!selectedAudience || !selectedWeekString) {
+				return;
+			}
+
+			onSubmit();
+		}, 10);
+	}
+
+	const weeks = Array.from({ length: 18 }, (_, i) => {
+		const weekNum = i + 1;
+		return {
+			value: weekNum,
+			label: `Неделя ${weekNum}`
+		};
+	});
+
+	$: weekItems = weeks.map((week) => ({
+		id: `week-${week.value}`,
+		displayValue: week.label
+	}));
+
+	$: audienceItems = audiences.map((audience) => ({
+		id: audience.name,
+		displayValue: audience.name
+	}));
+
+	let selectedWeekString = '';
+	let isInitialized = false;
+	let previousAudience = '';
+	let previousWeekString = '';
+
+	$: {
+		if (isInitialized) {
+			if (selectedAudience !== previousAudience) {
+				previousAudience = selectedAudience;
+
+				if (selectedAudience) {
+					selectedWeekString = `week-${selectedWeek}`;
+					previousWeekString = selectedWeekString;
+					handleSubmit();
+				} else {
+					selectedWeekString = '';
+					previousWeekString = '';
+				}
+			}
+
+			if (selectedWeekString !== previousWeekString) {
+				previousWeekString = selectedWeekString;
+
+				if (selectedWeekString) {
+					const weekMatch = selectedWeekString.match(/week-(\d+)/);
+					if (weekMatch) {
+						const newWeek = parseInt(weekMatch[1], 10);
+						if (!isNaN(newWeek) && newWeek !== selectedWeek) {
+							selectedWeek = newWeek;
+							localStorage.setItem('lastWeek', selectedWeek.toString());
+
+							const url = new URL(window.location.href);
+							url.searchParams.set('week', selectedWeek.toString());
+							window.history.replaceState({}, '', url.toString());
+						}
+					}
+				} else {
+					selectedWeek = 1;
+					localStorage.removeItem('lastWeek');
+
+					const url = new URL(window.location.href);
+					url.searchParams.delete('week');
+					window.history.replaceState({}, '', url.toString());
+				}
+			}
+		}
+
+		if (audiences.length > 0 && !isInitialized) {
+			isInitialized = true;
+			previousAudience = selectedAudience;
+			if (!selectedWeekString && selectedWeek) {
+				selectedWeekString = `week-${selectedWeek}`;
+			}
+			previousWeekString = selectedWeekString;
+		}
+	}
+</script>
+
+<div class="grid grid-cols-1 gap-4">
+	<div>
+		<label for="audience-select" class="mb-2 block text-white">Аудитория:</label>
+		<SimpleCombobox
+			id="audience-select"
+			items={audienceItems}
+			bind:selectedId={selectedAudience}
+			placeholder={isLoading ? 'Загрузка аудиторий...' : 'Выберите аудиторию'}
+			error={audienceError}
+			{isLoading}
+		/>
+	</div>
+
+	<div>
+		<label for="week-select" class="mb-2 block text-white">Неделя:</label>
+		<SimpleCombobox
+			id="week-select"
+			items={weekItems}
+			bind:selectedId={selectedWeekString}
+			placeholder="Выберите неделю"
+			error={weekError}
+			isLoading={false}
+			clearAfterSelect={true}
+		/>
+	</div>
+
+	<button
+		type="button"
+		on:click={handleSubmit}
+		class="rounded-lg bg-blue-700 p-2 text-white transition-all hover:bg-blue-600"
+		disabled={isLoading}
+	>
+		{isLoading ? 'Загрузка...' : submitButtonText}
+	</button>
+
+	<CopyLinkButton
+		disabled={!selectedAudience || !selectedWeek}
+		params={{ audience: selectedAudience }}
+		successMessage="Ссылка на расписание аудитории скопирована"
+	>
+		{copyButtonText}
+	</CopyLinkButton>
+</div>

@@ -73,13 +73,23 @@
 					/>
 				</div>
 				<p class="mt-2 text-slate-400">© 2024 Made with ❤️ by ystuRASP</p>
-				<a 
-					href="/changelog" 
-					class="mt-2 inline-flex items-center text-blue-400 transition-all hover:text-blue-300 group"
+				<a
+					href="/changelog"
+					class="group mt-2 inline-flex items-center text-blue-400 transition-all hover:text-blue-300"
 				>
 					<span class="mr-2">История изменений</span>
-					<svg class="h-5 w-5 transform transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+					<svg
+						class="h-5 w-5 transform transition-transform group-hover:translate-x-1"
+						fill="none"
+						stroke="currentColor"
+						viewBox="0 0 24 24"
+					>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M13 7l5 5m0 0l-5 5m5-5H6"
+						></path>
 					</svg>
 				</a>
 			</div>
