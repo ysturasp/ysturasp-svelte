@@ -1,3 +1,4 @@
+- add page ystu schedule for audience (ysturasp, 2025-08-01) [8 files changed, 663 insertions(+), 5 deletions(-)]
 - remove integrate online counter with changelog page (ysturasp, 2025-07-31) [3 files changed, 3 insertions(+), 4 deletions(-)]
 - add script for autogenerate changelog by commit and rewrite page /changelog (ysturasp, 2025-07-31) [10 files changed, 659 insertions(+), 1 deletion(-)]
 - add ability to view previous semester if it exists on API (ysturasp, 2025-07-31) [4 files changed, 310 insertions(+), 52 deletions(-)]
