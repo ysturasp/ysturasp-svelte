@@ -23,7 +23,6 @@
 		}
 	});
 
-	export let dayName: string;
 	export let date: string;
 	export let lessons: YSTULesson[];
 	export let selectedGroup: string;

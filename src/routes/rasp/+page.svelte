@@ -316,7 +316,6 @@
 					{#each filteredDays as day}
 						{#if day.lessons && day.lessons.length > 0}
 							<YSTUScheduleDay
-								dayName=""
 								date={day.info.date}
 								lessons={day.lessons}
 								{selectedGroup}
