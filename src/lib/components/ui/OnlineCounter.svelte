@@ -36,11 +36,15 @@
 	const getGroupFromSelect = () => {
 		if (!browser) return 'Гость';
 
-		if (!selectedDirectionLabel || !selectedGroupLabel) {
+		if (!selectedDirectionLabel && !selectedGroupLabel) {
 			return 'Гость';
 		}
 
-		return `ЯГПУ ${selectedDirectionLabel} - ${selectedGroupLabel}`;
+		if (selectedDirectionLabel) {
+			return `ЯГПУ ${selectedDirectionLabel} - ${selectedGroupLabel}`;
+		}
+
+		return `ЯГТУ ${selectedGroupLabel}`;
 	};
 
 	const updateLastActivity = () => {

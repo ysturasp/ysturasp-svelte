@@ -579,7 +579,7 @@
 								/>
 								<button
 									on:click={generateRandomName}
-									class="rounded-2xl bg-slate-900 p-2 text-white transition-all hover:bg-slate-700"
+									class="w-10 rounded-2xl bg-slate-900 p-2 text-white transition-all hover:bg-slate-700"
 								>
 									🎲
 								</button>

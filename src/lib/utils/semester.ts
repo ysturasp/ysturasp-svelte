@@ -13,7 +13,7 @@ export interface SemesterInfo {
 
 export const SPRING_SEMESTER_START_MONTH = 1;
 export const SPRING_SEMESTER_END_MONTH = 6;
-export const AUTUMN_SEMESTER_START_MONTH = 7;
+export const AUTUMN_SEMESTER_START_MONTH = 8;
 export const AUTUMN_SEMESTER_END_MONTH = 0;
 export const SEMESTER_WEEKS_COUNT = 18;
 

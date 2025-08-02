@@ -9,7 +9,7 @@
 	import TeacherScheduleForm from './components/TeacherScheduleForm.svelte';
 	import TeacherScheduleDay from './components/TeacherScheduleDay.svelte';
 	import ScheduleTitle from '$lib/components/schedule/ScheduleTitle.svelte';
-	import GithubParserInfo from './components/GithubParserInfo.svelte';
+	import GithubParserInfo from '$lib/components/sections/GithubApiSection.svelte';
 	import { notifications } from '$lib/stores/notifications';
 	import { getTeachers, getTeacherSchedule } from './api';
 	import {
