@@ -1,3 +1,4 @@
+- add minimal working ystu schedule page (ysturasp, 2025-08-02) [12 files changed, 802 insertions(+), 5 deletions(-)]
 - add slot for link on personal account ystu.expo.app and integrate on necessary pages (ysturasp, 2025-08-01) [5 files changed, 27 insertions(+), 10 deletions(-)]
 - small improves for margins on yspu schedule page (ysturasp, 2025-08-01) [4 files changed, 4 insertions(+), 2 deletions(-)]
 - add page ystu schedule for audience (ysturasp, 2025-08-01) [8 files changed, 663 insertions(+), 5 deletions(-)]

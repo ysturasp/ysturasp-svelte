@@ -2,6 +2,11 @@
 	import { onMount } from 'svelte';
 	import { getInstitutes, getSchedule } from './api';
 	import type { Institute, ScheduleData } from './types';
+	import { LessonTypes } from './types';
+	import { hiddenSubjects, restoreAllSubjects, toggleSubjectVisibility } from './stores';
+	import { crossfade } from 'svelte/transition';
+	import { quintOut } from 'svelte/easing';
+	import { flip } from 'svelte/animate';
 	import PageLayout from '$lib/components/layout/PageLayout.svelte';
 	import Header from '$lib/components/layout/Header.svelte';
 	import Footer from '$lib/components/layout/Footer.svelte';
@@ -22,6 +27,23 @@
 		type SemesterInfo
 	} from '$lib/utils/semester';
 	import { notifications } from '$lib/stores/notifications';
+
+	const [send, receive] = crossfade({
+		duration: (d) => Math.sqrt(d * 1000),
+		fallback(node, params) {
+			const style = getComputedStyle(node);
+			const transform = style.transform === 'none' ? '' : style.transform;
+
+			return {
+				duration: 600,
+				easing: quintOut,
+				css: (t) => `
+					transform: ${transform} scale(${t});
+					opacity: ${t}
+				`
+			};
+		}
+	});
 
 	let isLoading = false;
 	let isScheduleLoading = false;
@@ -52,12 +74,18 @@
 				selectedInstitute = urlInstitute;
 				selectedGroup = urlGroup;
 
-				// Если неделя не указана, используем текущую
+				const savedHiddenSubjects = localStorage.getItem(`hiddenSubjects_${selectedGroup}`);
+				if (savedHiddenSubjects) {
+					hiddenSubjects.update((subjects) => ({
+						...subjects,
+						[selectedGroup]: JSON.parse(savedHiddenSubjects)
+					}));
+				}
+
 				if (urlWeek) {
 					selectedWeek = urlWeek;
 				} else {
 					selectedWeek = getCurrentWeek().toString();
-					// Обновляем URL с текущей неделей
 					const url = new URL(window.location.href);
 					url.searchParams.set('week', selectedWeek);
 					window.history.replaceState({}, '', url.toString());
@@ -65,7 +93,6 @@
 
 				await loadSchedule();
 
-				// Если семестр не указан, используем текущий или первый доступный
 				if (semesterFromURL && availableSemesters.length > 0) {
 					const semesterFromParams = availableSemesters.find(
 						(s) => s.id === semesterFromURL
@@ -74,12 +101,10 @@
 						selectedSemester = semesterFromParams;
 					}
 				} else if (availableSemesters.length > 0) {
-					// Пытаемся найти текущий семестр среди доступных
 					const currentSem = getCurrentSemester();
 					const foundSemester = availableSemesters.find((s) => s.id === currentSem.id);
 					selectedSemester = foundSemester || availableSemesters[0];
 
-					// Обновляем URL с выбранным семестром
 					const url = new URL(window.location.href);
 					url.searchParams.set('semester', selectedSemester.id);
 					window.history.replaceState({}, '', url.toString());
@@ -116,6 +141,14 @@
 			scheduleData = await getSchedule(selectedGroup);
 
 			if (scheduleData) {
+				const savedHiddenSubjects = localStorage.getItem(`hiddenSubjects_${selectedGroup}`);
+				if (savedHiddenSubjects) {
+					hiddenSubjects.update((subjects) => ({
+						...subjects,
+						[selectedGroup]: JSON.parse(savedHiddenSubjects)
+					}));
+				}
+
 				availableSemesters = detectAvailableSemesters(scheduleData);
 				if (!selectedSemester && availableSemesters.length > 0) {
 					selectedSemester = availableSemesters[0];
@@ -179,6 +212,9 @@
 			if (!selectedSemester) return true;
 			return isDateInSemester(day.info.date, selectedSemester);
 		}) || [];
+
+	$: hiddenSubjectsForGroup = $hiddenSubjects[selectedGroup] || [];
+	$: hasHiddenSubjects = hiddenSubjectsForGroup.length > 0;
 </script>
 
 <svelte:head>
@@ -283,6 +319,7 @@
 								dayName=""
 								date={day.info.date}
 								lessons={day.lessons}
+								{selectedGroup}
 							/>
 						{/if}
 					{/each}
@@ -324,6 +361,58 @@
 				</p>
 			</div>
 		</section>
+		{#if hasHiddenSubjects}
+			<section
+				class="mt-8 rounded-lg bg-slate-800 p-4 transition-[height] duration-500 ease-out md:p-6"
+				in:receive|local={{ key: 'hidden-section', duration: 500 }}
+				out:send|local={{ key: 'hidden-section', duration: 500 }}
+			>
+				<div class="mb-4 flex items-center justify-between">
+					<h2 class="text-2xl font-semibold text-white md:text-4xl">Скрытые предметы</h2>
+					<button
+						on:click={() => restoreAllSubjects(selectedGroup)}
+						class="flex items-center justify-center rounded-lg border-2 border-blue-700 p-2 text-white transition-all hover:border-indigo-800 hover:text-indigo-800"
+					>
+						<span class="align-middle text-3xl md:text-xl">↩️</span>
+						<span class="ml-2 hidden align-middle text-sm md:inline"
+							>Вернуть скрытые</span
+						>
+					</button>
+				</div>
+				<div class="relative grid grid-cols-1 gap-2">
+					{#each hiddenSubjectsForGroup as subject, i (subject.lessonName + subject.type + subject.teacher)}
+						<div
+							class="flex items-center justify-between rounded-lg bg-slate-900 p-4"
+							animate:flip={{
+								duration: 500,
+								easing: quintOut
+							}}
+							in:receive|local={{
+								key: subject.lessonName + subject.type + subject.teacher,
+								duration: 500
+							}}
+							out:send|local={{
+								key: subject.lessonName + subject.type + subject.teacher,
+								duration: 500
+							}}
+						>
+							<p class="text-sm font-semibold text-white md:text-lg">
+								{subject.lessonName} ({LessonTypes[subject.type]}, {subject.teacher})
+							</p>
+							<label class="switch ml-2">
+								<input
+									type="checkbox"
+									checked={false}
+									on:change={() =>
+										toggleSubjectVisibility(selectedGroup, subject)}
+								/>
+								<span class="slider round"></span>
+							</label>
+						</div>
+					{/each}
+				</div>
+			</section>
+		{/if}
 
 		<GithubApiSection />
 	</main>
@@ -336,3 +425,63 @@
 </PageLayout>
 
 <NotificationsContainer />
+
+<style>
+	.switch {
+		position: relative;
+		display: inline-block;
+		width: 34px;
+		height: 20px;
+		flex-shrink: 0;
+	}
+
+	.switch input {
+		opacity: 0;
+		width: 0;
+		height: 0;
+	}
+
+	.slider {
+		position: absolute;
+		cursor: pointer;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		background-color: #ccc;
+		transition: 0.4s;
+		border-radius: 34px;
+	}
+
+	.slider:before {
+		position: absolute;
+		content: '';
+		height: 14px;
+		width: 14px;
+		left: 3px;
+		bottom: 3px;
+		background-color: white;
+		transition: 0.4s;
+		border-radius: 50%;
+	}
+
+	input:checked + .slider {
+		background-color: #2196f3;
+	}
+
+	input:checked + .slider:before {
+		transform: translateX(14px);
+	}
+
+	.slider.round {
+		border-radius: 34px;
+	}
+
+	.slider.round:before {
+		border-radius: 50%;
+	}
+
+	:global(.grid) {
+		transition: height 500ms cubic-bezier(0.4, 0, 0.2, 1);
+	}
+</style>
