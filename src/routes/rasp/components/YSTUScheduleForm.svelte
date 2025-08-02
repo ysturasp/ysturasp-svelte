@@ -2,7 +2,7 @@
 	import type { Institute } from '../types';
 	import CustomSelect from '$lib/components/ui/CustomSelect.svelte';
 	import CopyLinkButton from '$lib/components/ui/CopyLinkButton.svelte';
-	import { SEMESTER_WEEKS_COUNT } from '$lib/utils/semester';
+	import { SEMESTER_WEEKS_COUNT, formatWeekStartDate } from '$lib/utils/semester';
 
 	export let institutes: Institute[] = [];
 	export let selectedInstitute = '';
@@ -38,10 +38,14 @@
 				})) || []
 		: [];
 
-	$: weeks = Array.from({ length: SEMESTER_WEEKS_COUNT }, (_, i) => ({
-		id: (i + 1).toString(),
-		label: (i + 1).toString()
-	}));
+	$: weeks = Array.from({ length: SEMESTER_WEEKS_COUNT }, (_, i) => {
+		const weekNum = i + 1;
+		const startDate = formatWeekStartDate(weekNum);
+		return {
+			id: weekNum.toString(),
+			label: `${weekNum} - ${startDate}`
+		};
+	});
 
 	function handleGroupClick() {
 		if (!selectedInstitute && !isLoading) {

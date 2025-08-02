@@ -2,6 +2,7 @@
 	import type { Teacher } from '../api';
 	import SimpleCombobox from '$lib/components/schedule/SimpleCombobox.svelte';
 	import CopyLinkButton from '$lib/components/ui/CopyLinkButton.svelte';
+	import { formatWeekStartDate } from '$lib/utils/semester';
 
 	export let teachers: Teacher[] = [];
 	export let selectedTeacher = '';
@@ -35,9 +36,10 @@
 
 	const weeks = Array.from({ length: 18 }, (_, i) => {
 		const weekNum = i + 1;
+		const startDate = formatWeekStartDate(weekNum);
 		return {
 			value: weekNum,
-			label: `Неделя ${weekNum}`
+			label: `Неделя ${weekNum} - ${startDate}`
 		};
 	});
 

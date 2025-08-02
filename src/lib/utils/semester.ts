@@ -188,6 +188,23 @@ export function groupLessonsByDay(
 	return lessonsByDay;
 }
 
+export function getWeekStartDate(weekNumber: number, semester?: SemesterInfo): Date {
+	const semesterInfo = semester || getCurrentSemester();
+	const weekStartDate = new Date(semesterInfo.range.start);
+	weekStartDate.setDate(weekStartDate.getDate() + (weekNumber - 1) * 7);
+	return weekStartDate;
+}
+
+export function formatWeekStartDate(weekNumber: number, semester?: SemesterInfo): string {
+	const startDate = getWeekStartDate(weekNumber, semester);
+	const day = startDate.getDate();
+	const monthNames = [
+		'января', 'февраля', 'марта', 'апреля', 'мая', 'июня',
+		'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'
+	];
+	return `${day} ${monthNames[startDate.getMonth()]}`;
+}
+
 export function getCurrentWeekMessage(): string {
 	const today = getCurrentDate();
 	const { start, end } = getCurrentSemesterRange();

@@ -47,6 +47,7 @@
 
 	let isLoading = false;
 	let isScheduleLoading = false;
+	let isWeekChanging = false;
 	let institutes: Institute[] = [];
 	let selectedInstitute = '';
 	let selectedGroup = '';
@@ -169,11 +170,18 @@
 	}
 
 	function changeWeek(delta: number) {
+		if (isWeekChanging) return;
+		
 		const newWeek = parseInt(selectedWeek, 10) + delta;
 		if (newWeek >= 1 && newWeek <= SEMESTER_WEEKS_COUNT) {
+			isWeekChanging = true;
 			selectedWeek = newWeek.toString();
 			localStorage.setItem('lastWeek', selectedWeek);
 			updateURL();
+			
+			setTimeout(() => {
+				isWeekChanging = false;
+			}, 600);
 		}
 	}
 
@@ -283,13 +291,13 @@
 				{isLoading}
 			/>
 
-			{#if scheduleData && currentWeekData}
+			{#if scheduleData}
 				<div class="mt-4">
 					<div class="mb-4 flex justify-center md:items-center">
 						<button
 							on:click={() => changeWeek(-1)}
 							class="mr-2 rounded-lg bg-blue-700 p-2 text-3xl text-white transition-all hover:bg-blue-600"
-							disabled={parseInt(selectedWeek, 10) <= 1}
+							disabled={parseInt(selectedWeek, 10) <= 1 || isWeekChanging}
 						>
 							👈
 						</button>
@@ -307,26 +315,39 @@
 						<button
 							on:click={() => changeWeek(1)}
 							class="ml-2 rounded-lg bg-blue-700 p-2 text-3xl text-white transition-all hover:bg-blue-600"
-							disabled={parseInt(selectedWeek, 10) >= SEMESTER_WEEKS_COUNT}
+							disabled={parseInt(selectedWeek, 10) >= SEMESTER_WEEKS_COUNT || isWeekChanging}
 						>
 							👉
 						</button>
 					</div>
 
-					{#each filteredDays as day}
-						{#if day.lessons && day.lessons.length > 0}
-							<YSTUScheduleDay
-								date={day.info.date}
-								lessons={day.lessons}
-								{selectedGroup}
-							/>
-						{/if}
-					{/each}
+					{#if currentWeekData}
+						{#each filteredDays as day}
+							{#if day.lessons && day.lessons.length > 0}
+								<YSTUScheduleDay
+									date={day.info.date}
+									lessons={day.lessons}
+									{selectedGroup}
+								/>
+							{/if}
+						{/each}
 
-					{#if filteredDays.length === 0}
+						{#if filteredDays.length === 0}
+							<div class="text-center">
+								<p class="text-xl font-bold text-green-500">
+									На этой неделе в группе нет пар
+								</p>
+								<img
+									src="https://steamuserimages-a.akamaihd.net/ugc/543050193621050493/822D951ADFCB3C9ADE095AC49917043365AFD48E/"
+									alt="Chill"
+									class="mx-auto my-4 rounded-lg"
+								/>
+							</div>
+						{/if}
+					{:else}
 						<div class="text-center">
 							<p class="text-xl font-bold text-green-500">
-								На этой неделе в группе нет пар
+								На выбранной неделе нет занятий
 							</p>
 							<img
 								src="https://steamuserimages-a.akamaihd.net/ugc/543050193621050493/822D951ADFCB3C9ADE095AC49917043365AFD48E/"
@@ -335,10 +356,6 @@
 							/>
 						</div>
 					{/if}
-				</div>
-			{:else if scheduleData && !currentWeekData}
-				<div class="mt-4 rounded-lg bg-slate-700 p-4">
-					<p class="text-center text-white">На выбранной неделе нет занятий</p>
 				</div>
 			{/if}
 

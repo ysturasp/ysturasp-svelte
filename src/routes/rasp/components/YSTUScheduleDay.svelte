@@ -132,7 +132,7 @@
 			{#each filteredLessons as lesson, i (lesson.lessonName + lesson.type + lesson.teacherName)}
 				{@const typeInfo = getLessonTypeInfo(lesson.type)}
 				<div
-					class="mb-2 last:mb-0 flex rounded-2xl bg-slate-800 p-4"
+					class="mb-2 flex rounded-2xl bg-slate-800 p-4 last:mb-0"
 					animate:flip={{
 						duration: 500,
 						easing: quintOut
