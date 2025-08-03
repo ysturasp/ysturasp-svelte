@@ -98,7 +98,7 @@
 				{#if lesson.teacherName}
 					<p class="text-sm text-slate-400">
 						<a
-							href="/raspprep?teacher={encodeURIComponent(lesson.teacherName)}"
+							href="/raspprep?id={lesson.teacherId}"
 							class="transition-all hover:text-blue-400"
 						>
 							{lesson.teacherName}

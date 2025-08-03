@@ -41,6 +41,8 @@
 		type SubgroupSettings,
 		type TeacherSubgroups
 	} from './stores/subgroups';
+	import { page } from '$app/stores';
+	import { replaceState } from '$app/navigation';
 
 	const [send, receive] = crossfade({
 		duration: (d) => Math.sqrt(d * 1000),
@@ -261,11 +263,11 @@
 		const url = new URL(window.location.href);
 		url.searchParams.set('institute', selectedInstitute);
 		url.searchParams.set('group', selectedGroup);
-		url.searchParams.set('week', selectedWeek);
+		url.searchParams.set('week', selectedWeek.toString());
 		if (selectedSemester) {
 			url.searchParams.set('semester', selectedSemester.id);
 		}
-		window.history.replaceState({}, '', url.toString());
+		replaceState(url, { noscroll: true });
 	}
 
 	function changeSemester(semester: SemesterInfo) {

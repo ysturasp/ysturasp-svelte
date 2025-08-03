@@ -3,7 +3,7 @@ import type { TeacherScheduleData } from './types';
 const API_URL = 'https://api-ochre-eta-11.vercel.app/s/schedule/v1/schedule';
 
 export interface Teacher {
-	id: string;
+	id: number;
 	name: string;
 }
 
@@ -21,7 +21,7 @@ export async function getTeachers(): Promise<Teacher[]> {
 	}
 }
 
-export async function getTeacherSchedule(teacherId: string): Promise<TeacherScheduleData> {
+export async function getTeacherSchedule(teacherId: number): Promise<TeacherScheduleData> {
 	try {
 		const response = await fetch(`${API_URL}/teacher/${teacherId}`);
 		if (!response.ok) {

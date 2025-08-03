@@ -49,7 +49,13 @@
 </script>
 
 {#if hasHiddenSubjects}
-	<div class="relative mt-4 rounded-lg bg-slate-800" on:click|stopPropagation>
+	<div
+		class="relative mt-4 rounded-lg bg-slate-800"
+		on:click|stopPropagation
+		on:keydown|stopPropagation
+		role="button"
+		tabindex="0"
+	>
 		<div class="flex items-center justify-between">
 			<div class="flex items-center gap-2">
 				<svg
@@ -100,7 +106,7 @@
 
 		{#if showSubjectsList}
 			<div
-				class="mt-4 rounded-2xl bg-slate-900 p-3"
+				class="mt-4 rounded-2xl bg-slate-900 p-4"
 				transition:scale={{
 					duration: 200,
 					opacity: 0,

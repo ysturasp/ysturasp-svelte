@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
+	import { replaceState } from '$app/navigation';
 	import PageLayout from '$lib/components/layout/PageLayout.svelte';
 	import Header from '$lib/components/layout/Header.svelte';
 	import Footer from '$lib/components/layout/Footer.svelte';
@@ -53,10 +54,16 @@
 
 			const urlParams = new URLSearchParams(window.location.search);
 			const teacherFromURL = urlParams.get('teacher');
+			const teacherIdFromURL = urlParams.get('id');
 			const weekFromURL = urlParams.get('week');
 			const semesterFromURL = urlParams.get('semester');
 
-			if (teacherFromURL) {
+			if (teacherIdFromURL) {
+				const teacher = teachers.find((t) => t.id === Number(teacherIdFromURL));
+				if (teacher) {
+					selectedTeacher = teacher.name;
+				}
+			} else if (teacherFromURL) {
 				selectedTeacher = decodeURIComponent(teacherFromURL);
 			} else {
 				const lastTeacher = localStorage.getItem('lastTeacher');
@@ -144,12 +151,16 @@
 
 	function updateURL() {
 		const url = new URL(window.location.href);
-		url.searchParams.set('teacher', selectedTeacher);
-		url.searchParams.set('week', selectedWeek.toString());
+		const urlParams = url.searchParams;
+
+		urlParams.delete('id');
+
+		urlParams.set('teacher', selectedTeacher);
+		urlParams.set('week', selectedWeek.toString());
 		if (selectedSemester) {
-			url.searchParams.set('semester', selectedSemester.id);
+			urlParams.set('semester', selectedSemester.id);
 		}
-		window.history.replaceState({}, '', url.toString());
+		replaceState(url, { noscroll: true });
 	}
 
 	function getDayNameByIndex(index: number): string {

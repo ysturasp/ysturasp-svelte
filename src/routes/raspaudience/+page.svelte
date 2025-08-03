@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
+	import { replaceState } from '$app/navigation';
 	import PageLayout from '$lib/components/layout/PageLayout.svelte';
 	import Header from '$lib/components/layout/Header.svelte';
 	import Footer from '$lib/components/layout/Footer.svelte';
@@ -155,7 +156,7 @@
 		if (selectedSemester) {
 			url.searchParams.set('semester', selectedSemester.id);
 		}
-		window.history.replaceState({}, '', url.toString());
+		replaceState(url, { noscroll: true });
 	}
 
 	function getDayNameByIndex(index: number): string {

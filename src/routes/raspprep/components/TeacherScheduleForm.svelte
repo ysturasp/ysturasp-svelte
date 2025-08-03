@@ -3,6 +3,8 @@
 	import SimpleCombobox from '$lib/components/schedule/SimpleCombobox.svelte';
 	import CopyLinkButton from '$lib/components/ui/CopyLinkButton.svelte';
 	import { formatWeekStartDate } from '$lib/utils/semester';
+	import { page } from '$app/stores';
+	import { replaceState } from '$app/navigation';
 
 	export let teachers: Teacher[] = [];
 	export let selectedTeacher = '';
@@ -14,9 +16,20 @@
 
 	let teacherError = false;
 	let weekError = false;
+	let copied = false;
 
 	$: if (selectedTeacher) teacherError = false;
 	$: if (selectedWeekString) weekError = false;
+
+	function copyScheduleLink() {
+		const url = new URL(window.location.href);
+		url.searchParams.set('teacher', selectedTeacher);
+		url.searchParams.set('week', selectedWeek.toString());
+		navigator.clipboard.writeText(url.toString());
+		copied = true;
+		setTimeout(() => (copied = false), 2000);
+		replaceState(url, { noscroll: true });
+	}
 
 	function handleSubmit() {
 		teacherError = false;
@@ -30,6 +43,10 @@
 				return;
 			}
 
+			const url = new URL(window.location.href);
+			url.searchParams.set('teacher', selectedTeacher);
+			url.searchParams.set('week', selectedWeek.toString());
+			replaceState(url, { noscroll: true });
 			onSubmit();
 		}, 10);
 	}

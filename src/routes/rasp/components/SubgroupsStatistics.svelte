@@ -316,7 +316,7 @@
 														>
 														{#if dateInfo.isVUC}
 															<span
-																class="ml-auto text-xs text-blue-400"
+																class="ml-auto hidden text-xs text-blue-400 md:block"
 																>(ВУЦ)</span
 															>
 														{/if}
@@ -361,7 +361,7 @@
 														>
 														{#if dateInfo.isVUC}
 															<span
-																class="ml-auto text-xs text-blue-400"
+																class="ml-auto hidden text-xs text-blue-400 md:block"
 																>(ВУЦ)</span
 															>
 														{/if}

@@ -27,6 +27,7 @@ export interface YSTULesson {
 	startAt: string;
 	endAt: string;
 	teacherName: string;
+	teacherId: number;
 	auditoryName: string;
 	isDistant?: boolean;
 	isDivision?: boolean;

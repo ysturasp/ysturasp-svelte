@@ -19,6 +19,7 @@ export interface AudienceLesson {
 	type: number;
 	timeRange: string;
 	teacherName: string;
+	teacherId: number;
 	isDistant: boolean;
 	groups: string[];
 }
