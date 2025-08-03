@@ -1,3 +1,4 @@
+- add additional communication channel - github repo (ysturasp, 2025-08-03) [3 files changed, 20 insertions(+)]
 - add support page with chat by problem and integrate send message on telegram for admin (ysturasp, 2025-08-03) [5 files changed, 298 insertions(+), 2 deletions(-)]
 - fix routing for prepods schedule with general and audience, and fix warn with history navigation (ysturasp, 2025-08-03) [14 files changed, 74 insertions(+), 18 deletions(-)]
 - add subgroup logic distribution and modal for select lesson and integrate in schedule label and create section carousel with shadcn component (ysturasp, 2025-08-03) [31 files changed, 1756 insertions(+), 141 deletions(-)]

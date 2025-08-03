@@ -15,12 +15,27 @@
 	let items: ChangelogItemType[] = [];
 	let translating = false;
 	let translated = false;
+	let wakatimeData: any = null;
+	let wakatimeLoading = true;
+
+	async function loadWakatimeStats() {
+		try {
+			const response = await fetch('/api/wakatime');
+			const data = await response.json();
+			wakatimeData = data.data;
+		} catch (e) {
+			console.error('Ошибка загрузки Wakatime:', e);
+		} finally {
+			wakatimeLoading = false;
+		}
+	}
 
 	onMount(async () => {
 		if (!browser) return;
 
 		try {
 			items = await loadChangelog();
+			await loadWakatimeStats();
 		} catch (e) {
 			error = 'Ошибка при загрузке истории изменений. Пожалуйста, попробуйте позже.';
 			console.error(e);
@@ -88,53 +103,65 @@
 		{:else}
 			<section class="py-6 md:py-8">
 				<div class="mx-auto max-w-4xl">
-					<div class="mb-6 flex items-center justify-between">
-						<h1 class="text-3xl font-bold text-white md:text-4xl">История изменений</h1>
-
-						<button
-							on:click={handleTranslate}
-							disabled={translating || !items.length}
-							class="flex items-center gap-2 rounded-lg bg-blue-700 p-2 text-white transition-all hover:bg-blue-600 disabled:opacity-50"
-						>
-							{#if translating}
-								<span>Перевод...</span>
-								<svg
-									class="h-5 w-5 animate-spin"
-									xmlns="http://www.w3.org/2000/svg"
-									fill="none"
-									viewBox="0 0 24 24"
-								>
-									<circle
-										class="opacity-25"
-										cx="12"
-										cy="12"
-										r="10"
+					<div class="mb-6">
+						<div class="flex items-center justify-between">
+							<h1 class="text-3xl font-bold text-white md:text-4xl">
+								История изменений
+							</h1>
+							<button
+								on:click={handleTranslate}
+								disabled={translating || !items.length}
+								class="flex items-center gap-2 rounded-lg bg-blue-700 p-2 text-white transition-all hover:bg-blue-600 disabled:opacity-50"
+							>
+								{#if translating}
+									<span>Перевод...</span>
+									<svg
+										class="h-5 w-5 animate-spin"
+										xmlns="http://www.w3.org/2000/svg"
+										fill="none"
+										viewBox="0 0 24 24"
+									>
+										<circle
+											class="opacity-25"
+											cx="12"
+											cy="12"
+											r="10"
+											stroke="currentColor"
+											stroke-width="4"
+										></circle>
+										<path
+											class="opacity-75"
+											fill="currentColor"
+											d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+										></path>
+									</svg>
+								{:else}
+									<span>{translated ? 'Оригинал' : 'Перевести'}</span>
+									<svg
+										class="h-5 w-5"
+										fill="none"
 										stroke="currentColor"
-										stroke-width="4"
-									></circle>
-									<path
-										class="opacity-75"
-										fill="currentColor"
-										d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-									></path>
-								</svg>
-							{:else}
-								<span>{translated ? 'Оригинал' : 'Перевести'}</span>
-								<svg
-									class="h-5 w-5"
-									fill="none"
-									stroke="currentColor"
-									viewBox="0 0 24 24"
-								>
-									<path
-										stroke-linecap="round"
-										stroke-linejoin="round"
-										stroke-width="2"
-										d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"
-									></path>
-								</svg>
-							{/if}
-						</button>
+										viewBox="0 0 24 24"
+									>
+										<path
+											stroke-linecap="round"
+											stroke-linejoin="round"
+											stroke-width="2"
+											d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"
+										></path>
+									</svg>
+								{/if}
+							</button>
+						</div>
+						{#if wakatimeData}
+							<div class="mt-2">
+								<p class="text-sm text-gray-400">
+									Время разработки: <span class="text-blue-400"
+										>{wakatimeData.human_readable_total}</span
+									>
+								</p>
+							</div>
+						{/if}
 					</div>
 
 					<div class="space-y-6">
