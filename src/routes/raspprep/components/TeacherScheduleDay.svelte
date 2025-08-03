@@ -79,7 +79,7 @@
 							href="/raspaudience?audience={encodeURIComponent(lesson.auditoryName)}"
 							class="transition-all hover:text-blue-400"
 						>
-							Аудитория: {lesson.auditoryName}
+							{lesson.auditoryName}
 						</a>
 					</p>
 				{:else}
@@ -87,7 +87,7 @@
 				{/if}
 
 				{#if lesson.groups && lesson.groups.length > 0}
-					<p class="text-sm text-gray-400">Группы: {lesson.groups.join(', ')}</p>
+					<p class="text-sm text-gray-400">{lesson.groups.join(', ')}</p>
 				{/if}
 			</div>
 		</div>

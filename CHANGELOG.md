@@ -1,3 +1,4 @@
+- fix routing for prepods schedule with general and audience, and fix warn with history navigation (ysturasp, 2025-08-03) [14 files changed, 74 insertions(+), 18 deletions(-)]
 - add subgroup logic distribution and modal for select lesson and integrate in schedule label and create section carousel with shadcn component (ysturasp, 2025-08-03) [31 files changed, 1756 insertions(+), 141 deletions(-)]
 - add hint for week in week select and improve toogle week animation (ysturasp, 2025-08-02) [8 files changed, 70 insertions(+), 26 deletions(-)]
 - delete unused param dayName (ysturasp, 2025-08-02) [4 files changed, 2 insertions(+), 2 deletions(-)]
