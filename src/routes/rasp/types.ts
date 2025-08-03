@@ -28,17 +28,11 @@ export interface YSTULesson {
 	endAt: string;
 	teacherName: string;
 	auditoryName: string;
-	isDistant: boolean;
-	isStream: boolean;
-	isDivision: boolean;
-	groups: string;
-	direction: string;
-	additionalSlots?: {
-		number: number;
-		startAt?: string;
-		endAt: string;
-	}[];
+	isDistant?: boolean;
+	isDivision?: boolean;
+	groups?: string;
 	originalTimeTitle?: string;
+	uniqueIndex?: number;
 }
 
 export const LessonTypes: Record<number, string> = {

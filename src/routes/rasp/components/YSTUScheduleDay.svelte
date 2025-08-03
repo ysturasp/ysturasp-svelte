@@ -5,6 +5,8 @@
 	import { crossfade, fade } from 'svelte/transition';
 	import { quintOut } from 'svelte/easing';
 	import { flip } from 'svelte/animate';
+	import { getSubgroupIndicator } from '../stores/subgroups';
+	import type { SubgroupSettings, TeacherSubgroups } from '../stores/subgroups';
 
 	const [send, receive] = crossfade({
 		duration: (d) => Math.sqrt(d * 1000),
@@ -26,6 +28,8 @@
 	export let date: string;
 	export let lessons: YSTULesson[];
 	export let selectedGroup: string;
+	export let subgroupSettings: SubgroupSettings = {};
+	export let teacherSubgroups: TeacherSubgroups = {};
 
 	function getLessonTypeInfo(type: number) {
 		const label = LessonTypes[type] || 'Занятие';
@@ -107,20 +111,40 @@
 	$: dayOfWeek = getDayName(lessonDate.getDay());
 	$: isCurrentDay = isToday(date);
 
-	$: filteredLessons = lessons.filter((lesson) => {
-		if (!selectedGroup || !$hiddenSubjects[selectedGroup]) return true;
-		return !$hiddenSubjects[selectedGroup].some(
-			(s) =>
-				s.lessonName === lesson.lessonName &&
-				s.type === lesson.type &&
-				s.teacher === lesson.teacherName
-		);
-	});
+	$: filteredLessons = lessons
+		.filter((lesson) => {
+			if (!selectedGroup || !$hiddenSubjects[selectedGroup]) return true;
+			return !$hiddenSubjects[selectedGroup].some(
+				(s) =>
+					s.lessonName === lesson.lessonName &&
+					s.type === lesson.type &&
+					s.teacher === lesson.teacherName
+			);
+		})
+		.map((lesson, index, array) => {
+			const key =
+				lesson.lessonName +
+				lesson.type +
+				lesson.teacherName +
+				lesson.startAt +
+				lesson.endAt;
+			const duplicateIndex = array.findIndex(
+				(l, i) =>
+					i < index && l.lessonName + l.type + l.teacherName + l.startAt + l.endAt === key
+			);
+			if (duplicateIndex !== -1) {
+				return {
+					...lesson,
+					uniqueIndex: index
+				};
+			}
+			return lesson;
+		});
 </script>
 
 <div class="mt-4">
 	<div
-		class="day-schedule mb-4 rounded-2xl bg-slate-900 p-4 transition-[height] duration-500 ease-out"
+		class="day-schedule mb-4 rounded-2xl bg-slate-900 p-4 transition-[height] duration-500 ease-out last:mb-0"
 		class:border-2={isCurrentDay}
 		class:border-blue-500={isCurrentDay}
 	>
@@ -129,8 +153,14 @@
 		</h3>
 
 		<div class="relative">
-			{#each filteredLessons as lesson, i (lesson.lessonName + lesson.type + lesson.teacherName)}
+			{#each filteredLessons as lesson, i (lesson.lessonName + lesson.type + lesson.teacherName + lesson.startAt + lesson.endAt + (lesson.uniqueIndex ?? ''))}
 				{@const typeInfo = getLessonTypeInfo(lesson.type)}
+				{@const subgroupIndicator = getSubgroupIndicator(
+					lesson,
+					date,
+					subgroupSettings,
+					teacherSubgroups
+				)}
 				<div
 					class="mb-2 flex rounded-2xl bg-slate-800 p-4 last:mb-0"
 					animate:flip={{
@@ -138,11 +168,23 @@
 						easing: quintOut
 					}}
 					in:receive|local={{
-						key: lesson.lessonName + lesson.type + lesson.teacherName,
+						key:
+							lesson.lessonName +
+							lesson.type +
+							lesson.teacherName +
+							lesson.startAt +
+							lesson.endAt +
+							(lesson.uniqueIndex ?? ''),
 						duration: 500
 					}}
 					out:send|local={{
-						key: lesson.lessonName + lesson.type + lesson.teacherName,
+						key:
+							lesson.lessonName +
+							lesson.type +
+							lesson.teacherName +
+							lesson.startAt +
+							lesson.endAt +
+							(lesson.uniqueIndex ?? ''),
 						duration: 500
 					}}
 				>
@@ -155,9 +197,18 @@
 
 					<div class="flex-grow">
 						<div class="flex items-center justify-between">
-							<p class="font-bold text-white md:text-lg">
-								{lesson.lessonName || 'Название предмета не указано'}
-							</p>
+							<div class="flex flex-wrap items-center gap-2">
+								<p class="font-bold text-white md:text-lg">
+									{lesson.lessonName || 'Название предмета не указано'}
+								</p>
+								{#if subgroupIndicator}
+									<span
+										class="rounded-full bg-yellow-900/30 px-2 py-1 text-xs text-yellow-500"
+									>
+										{subgroupIndicator}
+									</span>
+								{/if}
+							</div>
 						</div>
 						<p class="text-sm {typeInfo.text}">{typeInfo.label}</p>
 

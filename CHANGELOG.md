@@ -1,3 +1,4 @@
+- add hint for week in week select and improve toogle week animation (ysturasp, 2025-08-02) [8 files changed, 70 insertions(+), 26 deletions(-)]
 - delete unused param dayName (ysturasp, 2025-08-02) [4 files changed, 2 insertions(+), 2 deletions(-)]
 - add hide subjects with save, animate and other improves (ysturasp, 2025-08-02) [9 files changed, 390 insertions(+), 69 deletions(-)]
 - add minimal working ystu schedule page (ysturasp, 2025-08-02) [12 files changed, 802 insertions(+), 5 deletions(-)]

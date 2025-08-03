@@ -10,6 +10,7 @@
 	export let availableSemesters: SemesterInfo[] = [];
 	export let selectedSemester: SemesterInfo | null = null;
 	export let onSemesterSelect: ((semester: SemesterInfo) => void) | undefined = undefined;
+	export let onSubgroupsClick: (() => void) | undefined = undefined;
 
 	const typeLabels = {
 		group: 'Расписание группы',
@@ -45,7 +46,7 @@
 		{typeLabels[type]}
 		{title}
 		{#if subtitle || weekNumber || (availableSemesters.length > 0 && selectedSemester)}
-			<p class="mt-2 text-sm text-gray-400">
+			<p class="text-sm text-gray-400">
 				{#if weekNumber}
 					Неделя {weekNumber}<span class="separator-dot"
 						>{availableSemesters.length > 0 || selectedSemester ? ' • ' : ''}</span
@@ -108,6 +109,22 @@
 						: ''}{subtitle}
 				{/if}
 			</p>
+			{#if onSubgroupsClick}
+				<button
+					on:click={onSubgroupsClick}
+					class="mx-auto flex items-center justify-center gap-1 text-sm text-gray-300 transition-colors hover:text-gray-100"
+				>
+					<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"
+						></path>
+					</svg>
+					Настроить подгруппы
+				</button>
+			{/if}
 		{/if}
 	</h2>
 </div>

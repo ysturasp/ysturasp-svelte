@@ -16,6 +16,9 @@
 	import OnlineCounter from '$lib/components/ui/OnlineCounter.svelte';
 	import YSTUScheduleDay from './components/YSTUScheduleDay.svelte';
 	import YSTUScheduleForm from './components/YSTUScheduleForm.svelte';
+	import SubgroupSettingsModal from './components/SubgroupSettingsModal.svelte';
+	import SubgroupsStatistics from './components/SubgroupsStatistics.svelte';
+	import HiddenSubjects from './components/HiddenSubjects.svelte';
 	import GithubApiSection from '$lib/components/sections/GithubApiSection.svelte';
 	import {
 		SEMESTER_WEEKS_COUNT,
@@ -27,6 +30,17 @@
 		type SemesterInfo
 	} from '$lib/utils/semester';
 	import { notifications } from '$lib/stores/notifications';
+	import {
+		subgroupSettings,
+		teacherSubgroups,
+		loadSubgroupSettings,
+		saveSubgroupSettings,
+		loadTeacherSubgroups,
+		saveTeacherSubgroups,
+		generateSubgroupDistribution,
+		type SubgroupSettings,
+		type TeacherSubgroups
+	} from './stores/subgroups';
 
 	const [send, receive] = crossfade({
 		duration: (d) => Math.sqrt(d * 1000),
@@ -45,6 +59,9 @@
 		}
 	});
 
+	const imageChill =
+		'https://steamuserimages-a.akamaihd.net/ugc/543050193621050493/822D951ADFCB3C9ADE095AC49917043365AFD48E/';
+
 	let isLoading = false;
 	let isScheduleLoading = false;
 	let isWeekChanging = false;
@@ -53,23 +70,32 @@
 	let selectedGroup = '';
 	let selectedWeek = '1';
 	let scheduleData: ScheduleData | null = null;
+
 	let favoriteGroups: string[] = [];
 	let showFavoriteButton = false;
 	let isFavorite = false;
 	let availableSemesters: SemesterInfo[] = [];
 	let selectedSemester: SemesterInfo | null = null;
 
+	let isSubgroupModalOpen = false;
+	let currentSubgroupSettings: SubgroupSettings = {};
+	let currentTeacherSubgroups: TeacherSubgroups = {};
+
 	onMount(async () => {
 		try {
 			isLoading = true;
 			institutes = await getInstitutes();
-			selectedSemester = getCurrentSemester();
 
 			const urlParams = new URLSearchParams(window.location.search);
 			const urlInstitute = urlParams.get('institute');
 			const urlGroup = urlParams.get('group');
 			const urlWeek = urlParams.get('week');
 			const semesterFromURL = urlParams.get('semester');
+
+			currentSubgroupSettings = loadSubgroupSettings();
+			currentTeacherSubgroups = loadTeacherSubgroups();
+			subgroupSettings.set(currentSubgroupSettings);
+			teacherSubgroups.set(currentTeacherSubgroups);
 
 			if (urlInstitute && urlGroup) {
 				selectedInstitute = urlInstitute;
@@ -100,20 +126,40 @@
 					);
 					if (semesterFromParams) {
 						selectedSemester = semesterFromParams;
+						localStorage.setItem('lastSemester', semesterFromParams.id);
 					}
-				} else if (availableSemesters.length > 0) {
-					const currentSem = getCurrentSemester();
-					const foundSemester = availableSemesters.find((s) => s.id === currentSem.id);
-					selectedSemester = foundSemester || availableSemesters[0];
+				} else {
+					const lastSemester = localStorage.getItem('lastSemester');
+					if (lastSemester && availableSemesters.length > 0) {
+						const foundSemester = availableSemesters.find((s) => s.id === lastSemester);
+						if (foundSemester) {
+							selectedSemester = foundSemester;
+						}
+					}
+					if (!selectedSemester && availableSemesters.length > 0) {
+						const currentSem = getCurrentSemester();
+						const foundSemester = availableSemesters.find(
+							(s) => s.id === currentSem.id
+						);
+						selectedSemester = foundSemester || availableSemesters[0];
+					}
+				}
 
-					const url = new URL(window.location.href);
-					url.searchParams.set('semester', selectedSemester.id);
-					window.history.replaceState({}, '', url.toString());
+				if (selectedSemester) {
+					const newTeacherSubgroups = generateSubgroupDistribution(
+						scheduleData,
+						selectedSemester
+					);
+					currentTeacherSubgroups = newTeacherSubgroups;
+					teacherSubgroups.set(currentTeacherSubgroups);
+					saveTeacherSubgroups(currentTeacherSubgroups);
+					updateURL();
 				}
 			} else {
 				const lastInstitute = localStorage.getItem('lastInstitut');
 				const lastGroup = localStorage.getItem('lastGroup');
 				const lastWeek = localStorage.getItem('lastWeek');
+				const lastSemester = localStorage.getItem('lastSemester');
 
 				if (lastInstitute) {
 					selectedInstitute = lastInstitute;
@@ -122,6 +168,22 @@
 						if (lastWeek) {
 							selectedWeek = lastWeek;
 							await loadSchedule();
+							if (lastSemester && availableSemesters.length > 0) {
+								const foundSemester = availableSemesters.find(
+									(s) => s.id === lastSemester
+								);
+								if (foundSemester) {
+									selectedSemester = foundSemester;
+									const newTeacherSubgroups = generateSubgroupDistribution(
+										scheduleData,
+										foundSemester
+									);
+									currentTeacherSubgroups = newTeacherSubgroups;
+									teacherSubgroups.set(currentTeacherSubgroups);
+									saveTeacherSubgroups(currentTeacherSubgroups);
+									updateURL();
+								}
+							}
 						}
 					}
 				}
@@ -154,6 +216,16 @@
 				if (!selectedSemester && availableSemesters.length > 0) {
 					selectedSemester = availableSemesters[0];
 				}
+
+				if (selectedSemester) {
+					const newTeacherSubgroups = generateSubgroupDistribution(
+						scheduleData,
+						selectedSemester
+					);
+					currentTeacherSubgroups = newTeacherSubgroups;
+					teacherSubgroups.set(currentTeacherSubgroups);
+					saveTeacherSubgroups(currentTeacherSubgroups);
+				}
 			}
 
 			localStorage.setItem('lastInstitut', selectedInstitute);
@@ -171,14 +243,14 @@
 
 	function changeWeek(delta: number) {
 		if (isWeekChanging) return;
-		
+
 		const newWeek = parseInt(selectedWeek, 10) + delta;
 		if (newWeek >= 1 && newWeek <= SEMESTER_WEEKS_COUNT) {
 			isWeekChanging = true;
 			selectedWeek = newWeek.toString();
 			localStorage.setItem('lastWeek', selectedWeek);
 			updateURL();
-			
+
 			setTimeout(() => {
 				isWeekChanging = false;
 			}, 600);
@@ -198,7 +270,28 @@
 
 	function changeSemester(semester: SemesterInfo) {
 		selectedSemester = semester;
+		localStorage.setItem('lastSemester', semester.id);
+		if (scheduleData) {
+			const newTeacherSubgroups = generateSubgroupDistribution(scheduleData, semester);
+			currentTeacherSubgroups = newTeacherSubgroups;
+			teacherSubgroups.set(currentTeacherSubgroups);
+			saveTeacherSubgroups(currentTeacherSubgroups);
+		}
 		updateURL();
+	}
+
+	function handleSubgroupSettingsSave(settings: SubgroupSettings) {
+		currentSubgroupSettings = settings;
+		subgroupSettings.set(currentSubgroupSettings);
+		saveSubgroupSettings(currentSubgroupSettings);
+	}
+
+	function openSubgroupModal() {
+		isSubgroupModalOpen = true;
+	}
+
+	function closeSubgroupModal() {
+		isSubgroupModalOpen = false;
 	}
 
 	$: {
@@ -309,13 +402,15 @@
 								{selectedSemester}
 								onSemesterSelect={changeSemester}
 								weekNumber={parseInt(selectedWeek, 10)}
+								onSubgroupsClick={openSubgroupModal}
 							/>
 						</div>
 
 						<button
 							on:click={() => changeWeek(1)}
 							class="ml-2 rounded-lg bg-blue-700 p-2 text-3xl text-white transition-all hover:bg-blue-600"
-							disabled={parseInt(selectedWeek, 10) >= SEMESTER_WEEKS_COUNT || isWeekChanging}
+							disabled={parseInt(selectedWeek, 10) >= SEMESTER_WEEKS_COUNT ||
+								isWeekChanging}
 						>
 							👉
 						</button>
@@ -328,6 +423,8 @@
 									date={day.info.date}
 									lessons={day.lessons}
 									{selectedGroup}
+									subgroupSettings={currentSubgroupSettings}
+									teacherSubgroups={currentTeacherSubgroups}
 								/>
 							{/if}
 						{/each}
@@ -337,110 +434,48 @@
 								<p class="text-xl font-bold text-green-500">
 									На этой неделе в группе нет пар
 								</p>
-								<img
-									src="https://steamuserimages-a.akamaihd.net/ugc/543050193621050493/822D951ADFCB3C9ADE095AC49917043365AFD48E/"
-									alt="Chill"
-									class="mx-auto my-4 rounded-lg"
-								/>
+								<img src={imageChill} alt="Chill" class="mx-auto my-4 rounded-lg" />
 							</div>
 						{/if}
 					{:else}
 						<div class="text-center">
 							<p class="text-xl font-bold text-green-500">
-								На выбранной неделе нет занятий
+								На этой неделе в группе нет пар
 							</p>
-							<img
-								src="https://steamuserimages-a.akamaihd.net/ugc/543050193621050493/822D951ADFCB3C9ADE095AC49917043365AFD48E/"
-								alt="Chill"
-								class="mx-auto my-4 rounded-lg"
-							/>
+							<img src={imageChill} alt="Chill" class="mx-auto my-4 rounded-lg" />
 						</div>
 					{/if}
+
+					<HiddenSubjects {selectedGroup} />
 				</div>
 			{/if}
 
-			<div class="mt-4 mb-2 rounded-lg border-2 border-red-600 bg-transparent p-2 text-white">
-				<p class="text-center text-base">
-					Если данные не отображаются, возможно, проблемы API и в данный момент она
-					перегружена пользователями. Попробуйте обновить страницу позже.
-					<a
-						href="https://stats.uptimerobot.com/COz2FUGsub"
-						class="text-blue-500 hover:text-blue-300"
-						target="_blank"
-					>
-						Нажми, чтобы узнать о состоянии сервисов сайта
-					</a>
-					или
-					<a href="/support" class="text-blue-500 hover:text-blue-300"
-						>напиши в нашу поддержку</a
-					>.
-				</p>
-			</div>
+			<SubgroupsStatistics
+				teacherSubgroups={currentTeacherSubgroups}
+				{scheduleData}
+				{selectedSemester}
+			/>
 		</section>
-		{#if hasHiddenSubjects}
-			<section
-				class="mt-8 rounded-lg bg-slate-800 p-4 transition-[height] duration-500 ease-out md:p-6"
-				in:receive|local={{ key: 'hidden-section', duration: 500 }}
-				out:send|local={{ key: 'hidden-section', duration: 500 }}
-			>
-				<div class="mb-4 flex items-center justify-between">
-					<h2 class="text-2xl font-semibold text-white md:text-4xl">Скрытые предметы</h2>
-					<button
-						on:click={() => restoreAllSubjects(selectedGroup)}
-						class="flex items-center justify-center rounded-lg border-2 border-blue-700 p-2 text-white transition-all hover:border-indigo-800 hover:text-indigo-800"
-					>
-						<span class="align-middle text-3xl md:text-xl">↩️</span>
-						<span class="ml-2 hidden align-middle text-sm md:inline"
-							>Вернуть скрытые</span
-						>
-					</button>
-				</div>
-				<div class="relative grid grid-cols-1 gap-2">
-					{#each hiddenSubjectsForGroup as subject, i (subject.lessonName + subject.type + subject.teacher)}
-						<div
-							class="flex items-center justify-between rounded-lg bg-slate-900 p-4"
-							animate:flip={{
-								duration: 500,
-								easing: quintOut
-							}}
-							in:receive|local={{
-								key: subject.lessonName + subject.type + subject.teacher,
-								duration: 500
-							}}
-							out:send|local={{
-								key: subject.lessonName + subject.type + subject.teacher,
-								duration: 500
-							}}
-						>
-							<p class="text-sm font-semibold text-white md:text-lg">
-								{subject.lessonName} ({LessonTypes[subject.type]}, {subject.teacher})
-							</p>
-							<label class="switch ml-2">
-								<input
-									type="checkbox"
-									checked={false}
-									on:change={() =>
-										toggleSubjectVisibility(selectedGroup, subject)}
-								/>
-								<span class="slider round"></span>
-							</label>
-						</div>
-					{/each}
-				</div>
-			</section>
-		{/if}
 
 		<GithubApiSection />
 	</main>
 
 	<Footer />
-
-	{#if isScheduleLoading}
-		<LoadingOverlay />
-	{/if}
+	<NotificationsContainer />
 </PageLayout>
 
-<NotificationsContainer />
+<SubgroupSettingsModal
+	isOpen={isSubgroupModalOpen}
+	{scheduleData}
+	{selectedSemester}
+	settings={currentSubgroupSettings}
+	onSave={handleSubgroupSettingsSave}
+	onClose={closeSubgroupModal}
+/>
+
+{#if isScheduleLoading}
+	<LoadingOverlay />
+{/if}
 
 <style>
 	.switch {

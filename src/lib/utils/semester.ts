@@ -131,24 +131,17 @@ export function detectAvailableSemesters(scheduleData: any): SemesterInfo[] {
 	return allSemesters.filter((semester) => availableSemesters.has(semester.id));
 }
 
+export function getWeekNumberByDate(date: Date, semester: SemesterInfo): number {
+	const weeksSinceStart = Math.floor(
+		(date.getTime() - semester.range.start.getTime()) / (7 * 24 * 60 * 60 * 1000)
+	);
+	return Math.max(1, Math.min(SEMESTER_WEEKS_COUNT, weeksSinceStart + 1));
+}
+
 export function getCurrentWeek(): number {
 	const currentDate = getCurrentDate();
-	const currentMonth = currentDate.getMonth();
-	const currentYear = currentDate.getFullYear();
-
-	let semesterStartDate: Date;
-
-	if (currentMonth >= AUTUMN_SEMESTER_END_MONTH && currentMonth <= SPRING_SEMESTER_END_MONTH) {
-		semesterStartDate = getFirstMondayOfMonth(currentYear, SPRING_SEMESTER_START_MONTH);
-	} else {
-		semesterStartDate = getFirstMondayOfMonth(currentYear, AUTUMN_SEMESTER_START_MONTH);
-	}
-
-	const weeksSinceStart = Math.floor(
-		(currentDate.getTime() - semesterStartDate.getTime()) / (7 * 24 * 60 * 60 * 1000)
-	);
-
-	return Math.max(1, Math.min(SEMESTER_WEEKS_COUNT, weeksSinceStart + 1));
+	const currentSemester = getCurrentSemester();
+	return getWeekNumberByDate(currentDate, currentSemester);
 }
 
 export function isDateInCurrentSemester(dateString: string): boolean {
@@ -199,8 +192,18 @@ export function formatWeekStartDate(weekNumber: number, semester?: SemesterInfo)
 	const startDate = getWeekStartDate(weekNumber, semester);
 	const day = startDate.getDate();
 	const monthNames = [
-		'января', 'февраля', 'марта', 'апреля', 'мая', 'июня',
-		'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'
+		'января',
+		'февраля',
+		'марта',
+		'апреля',
+		'мая',
+		'июня',
+		'июля',
+		'августа',
+		'сентября',
+		'октября',
+		'ноября',
+		'декабря'
 	];
 	return `${day} ${monthNames[startDate.getMonth()]}`;
 }
