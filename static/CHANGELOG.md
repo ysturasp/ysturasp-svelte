@@ -1,3 +1,4 @@
+- add header adaptive link for schedule pages student teacher and audience (ysturasp, 2025-08-04) [11 files changed, 151 insertions(+), 66 deletions(-)]
 - fix subgroup statistics section merged with schedule and render only with data (ysturasp, 2025-08-04) [4 files changed, 13 insertions(+), 7 deletions(-)]
 - add time for developing in changelog (ysturasp, 2025-08-03) [4 files changed, 90 insertions(+), 46 deletions(-)]
 - add additional communication channel - github repo (ysturasp, 2025-08-03) [3 files changed, 20 insertions(+)]

@@ -2,11 +2,7 @@
 	import { onMount } from 'svelte';
 	import { getInstitutes, getSchedule } from './api';
 	import type { Institute, ScheduleData } from './types';
-	import { LessonTypes } from './types';
-	import { hiddenSubjects, restoreAllSubjects, toggleSubjectVisibility } from './stores';
-	import { crossfade } from 'svelte/transition';
-	import { quintOut } from 'svelte/easing';
-	import { flip } from 'svelte/animate';
+	import { hiddenSubjects } from './stores';
 	import PageLayout from '$lib/components/layout/PageLayout.svelte';
 	import Header from '$lib/components/layout/Header.svelte';
 	import Footer from '$lib/components/layout/Footer.svelte';
@@ -44,22 +40,21 @@
 	import { page } from '$app/stores';
 	import { replaceState } from '$app/navigation';
 	import NavigationLinks from '$lib/components/ui/NavigationLinks.svelte';
+	import { writable } from 'svelte/store';
 
-	const [send, receive] = crossfade({
-		duration: (d) => Math.sqrt(d * 1000),
-		fallback(node, params) {
-			const style = getComputedStyle(node);
-			const transform = style.transform === 'none' ? '' : style.transform;
+	const isMobile = writable(false);
 
-			return {
-				duration: 600,
-				easing: quintOut,
-				css: (t) => `
-					transform: ${transform} scale(${t});
-					opacity: ${t}
-				`
-			};
-		}
+	onMount(() => {
+		const checkMobile = () => {
+			isMobile.set(window.innerWidth <= 768);
+		};
+
+		checkMobile();
+		window.addEventListener('resize', checkMobile);
+
+		return () => {
+			window.removeEventListener('resize', checkMobile);
+		};
 	});
 
 	const imageChill =
@@ -67,12 +62,28 @@
 
 	let isLoading = false;
 	let isScheduleLoading = false;
-	let isWeekChanging = false;
+	let isViewChanging = false;
 	let institutes: Institute[] = [];
 	let selectedInstitute = '';
 	let selectedGroup = '';
 	let selectedWeek = '1';
 	let scheduleData: ScheduleData | null = null;
+	let isFullView = false;
+	let selectedDay = '';
+
+	function handleViewChange() {
+		isViewChanging = true;
+		localStorage.setItem('isFullView', isFullView.toString());
+		if (!isFullView) {
+			selectedDay = filteredDays[0]?.info.date || '';
+			localStorage.setItem('lastSelectedDay', selectedDay);
+		} else {
+			localStorage.removeItem('lastSelectedDay');
+		}
+		setTimeout(() => {
+			isViewChanging = false;
+		}, 500);
+	}
 
 	let favoriteGroups: string[] = [];
 	let showFavoriteButton = false;
@@ -94,6 +105,9 @@
 			const urlGroup = urlParams.get('group');
 			const urlWeek = urlParams.get('week');
 			const semesterFromURL = urlParams.get('semester');
+
+			isFullView = localStorage.getItem('isFullView') === 'true';
+			selectedDay = localStorage.getItem('lastSelectedDay') || '';
 
 			currentSubgroupSettings = loadSubgroupSettings();
 			currentTeacherSubgroups = loadTeacherSubgroups();
@@ -245,18 +259,25 @@
 	}
 
 	function changeWeek(delta: number) {
-		if (isWeekChanging) return;
-
 		const newWeek = parseInt(selectedWeek, 10) + delta;
 		if (newWeek >= 1 && newWeek <= SEMESTER_WEEKS_COUNT) {
-			isWeekChanging = true;
 			selectedWeek = newWeek.toString();
 			localStorage.setItem('lastWeek', selectedWeek);
 			updateURL();
 
-			setTimeout(() => {
-				isWeekChanging = false;
-			}, 600);
+			if (!isFullView && window.innerWidth <= 768) {
+				const newWeekData = scheduleData?.items.find((week) => week.number === newWeek);
+				const newFilteredDays =
+					newWeekData?.days.filter((day) => {
+						if (!selectedSemester) return true;
+						return isDateInSemester(day.info.date, selectedSemester);
+					}) || [];
+
+				if (newFilteredDays.length > 0) {
+					selectedDay = newFilteredDays[0].info.date;
+					localStorage.setItem('lastSelectedDay', selectedDay);
+				}
+			}
 		}
 	}
 
@@ -279,6 +300,21 @@
 			currentTeacherSubgroups = newTeacherSubgroups;
 			teacherSubgroups.set(currentTeacherSubgroups);
 			saveTeacherSubgroups(currentTeacherSubgroups);
+
+			if (!isFullView && window.innerWidth <= 768) {
+				const currentWeekData = scheduleData.items.find(
+					(week) => week.number === parseInt(selectedWeek, 10)
+				);
+				const newFilteredDays =
+					currentWeekData?.days.filter((day) => {
+						return isDateInSemester(day.info.date, semester);
+					}) || [];
+
+				if (newFilteredDays.length > 0) {
+					selectedDay = newFilteredDays[0].info.date;
+					localStorage.setItem('lastSelectedDay', selectedDay);
+				}
+			}
 		}
 		updateURL();
 	}
@@ -295,6 +331,19 @@
 
 	function closeSubgroupModal() {
 		isSubgroupModalOpen = false;
+	}
+
+	function isToday(dateString: string): boolean {
+		const date = new Date(dateString);
+		const today = new Date();
+		date.setHours(0, 0, 0, 0);
+		today.setHours(0, 0, 0, 0);
+		return date.getTime() === today.getTime();
+	}
+
+	function getDayName(dayIndex: number): string {
+		const days = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
+		return days[dayIndex];
 	}
 
 	$: {
@@ -405,7 +454,7 @@
 						<button
 							on:click={() => changeWeek(-1)}
 							class="mr-2 rounded-lg bg-blue-700 p-2 text-3xl text-white transition-all hover:bg-blue-600"
-							disabled={parseInt(selectedWeek, 10) <= 1 || isWeekChanging}
+							disabled={parseInt(selectedWeek, 10) <= 1}
 						>
 							👈
 						</button>
@@ -424,46 +473,126 @@
 						<button
 							on:click={() => changeWeek(1)}
 							class="ml-2 rounded-lg bg-blue-700 p-2 text-3xl text-white transition-all hover:bg-blue-600"
-							disabled={parseInt(selectedWeek, 10) >= SEMESTER_WEEKS_COUNT ||
-								isWeekChanging}
+							disabled={parseInt(selectedWeek, 10) >= SEMESTER_WEEKS_COUNT}
 						>
 							👉
 						</button>
 					</div>
 
-					{#if currentWeekData}
-						{#each filteredDays as day}
-							{#if day.lessons && day.lessons.length > 0}
-								<YSTUScheduleDay
-									date={day.info.date}
-									lessons={day.lessons}
-									{selectedGroup}
-									subgroupSettings={currentSubgroupSettings}
-									teacherSubgroups={currentTeacherSubgroups}
+					{#if $isMobile}
+						<div class="mb-4 flex items-center justify-end">
+							<span class="mr-2 text-white">По дням</span>
+							<label class="switch flex items-center">
+								<input
+									type="checkbox"
+									bind:checked={isFullView}
+									on:change={handleViewChange}
 								/>
-							{/if}
-						{/each}
+								<span class="slider round"></span>
+							</label>
+							<span class="ml-2 text-white">На неделю</span>
+						</div>
+					{/if}
+
+					{#if currentWeekData}
+						{#if $isMobile}
+							<div class="relative">
+								<div
+									class="absolute w-full transition-all duration-500 ease-out"
+									class:pointer-events-none={isFullView}
+									class:opacity-0={isFullView || isViewChanging}
+									class:invisible={isFullView}
+								>
+									<div
+										class="mb-4 grid gap-1"
+										style="grid-template-columns: repeat({filteredDays.length}, 1fr)"
+									>
+										{#each filteredDays as day}
+											{@const dayDate = new Date(day.info.date)}
+											<button
+												class="day-button flex flex-col items-center rounded-lg p-2 transition-all {dayDate.toDateString() ===
+												new Date(selectedDay || '').toDateString()
+													? 'bg-blue-600'
+													: 'bg-gray-700'} {isToday(day.info.date)
+													? 'border-2 border-blue-300'
+													: ''}"
+												on:click={() => {
+													selectedDay = day.info.date;
+													localStorage.setItem(
+														'lastSelectedDay',
+														selectedDay
+													);
+												}}
+											>
+												<span class="text-sm"
+													>{getDayName(dayDate.getDay())}</span
+												>
+												<span class="text-lg font-bold"
+													>{dayDate.getDate()}</span
+												>
+											</button>
+										{/each}
+									</div>
+
+									{#each filteredDays as day}
+										{#if selectedDay && day.info.date === selectedDay && day.lessons && day.lessons.length > 0}
+											<YSTUScheduleDay
+												date={day.info.date}
+												lessons={day.lessons}
+												{selectedGroup}
+												subgroupSettings={currentSubgroupSettings}
+												teacherSubgroups={currentTeacherSubgroups}
+											/>
+										{/if}
+									{/each}
+								</div>
+
+								<div
+									class="transition-all duration-500 ease-out"
+									class:pointer-events-none={!isFullView}
+									class:opacity-0={!isFullView || isViewChanging}
+									class:invisible={!isFullView}
+								>
+									{#each filteredDays as day}
+										{#if day.lessons && day.lessons.length > 0}
+											<YSTUScheduleDay
+												date={day.info.date}
+												lessons={day.lessons}
+												{selectedGroup}
+												subgroupSettings={currentSubgroupSettings}
+												teacherSubgroups={currentTeacherSubgroups}
+											/>
+										{/if}
+									{/each}
+								</div>
+							</div>
+						{:else}
+							{#each filteredDays as day}
+								{#if day.lessons && day.lessons.length > 0}
+									<YSTUScheduleDay
+										date={day.info.date}
+										lessons={day.lessons}
+										{selectedGroup}
+										subgroupSettings={currentSubgroupSettings}
+										teacherSubgroups={currentTeacherSubgroups}
+									/>
+								{/if}
+							{/each}
+						{/if}
 
 						{#if filteredDays.length === 0}
 							<div class="text-center">
 								<p class="text-xl font-bold text-green-500">
 									На этой неделе в группе нет пар
 								</p>
-								<img src={imageChill} alt="Chill" class="mx-auto my-4 rounded-lg" />
+								<img src={imageChill} alt="Chill" class="mx-auto mt-4 rounded-lg" />
 							</div>
 						{/if}
-					{:else}
-						<div class="text-center">
-							<p class="text-xl font-bold text-green-500">
-								На этой неделе в группе нет пар
-							</p>
-							<img src={imageChill} alt="Chill" class="mx-auto my-4 rounded-lg" />
-						</div>
 					{/if}
-
-					<HiddenSubjects {selectedGroup} />
 				</div>
 			{/if}
+
+			<HiddenSubjects {selectedGroup} />
 		</section>
 
 		{#if scheduleData && selectedSemester && Object.keys(currentTeacherSubgroups).length > 0}
@@ -492,12 +621,76 @@
 	onClose={closeSubgroupModal}
 />
 
-{#if isScheduleLoading}
+{#if isScheduleLoading && !isViewChanging}
 	<LoadingOverlay />
 {/if}
 
 <style>
 	:global(.grid) {
 		transition: height 500ms cubic-bezier(0.4, 0, 0.2, 1);
+	}
+
+	.switch {
+		position: relative;
+		display: inline-block;
+		width: 34px;
+		height: 20px;
+		flex-shrink: 0;
+	}
+
+	.switch input {
+		opacity: 0;
+		width: 0;
+		height: 0;
+	}
+
+	.slider {
+		position: absolute;
+		cursor: pointer;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		background-color: #ccc;
+		transition: 0.4s;
+		border-radius: 34px;
+	}
+
+	.slider:before {
+		position: absolute;
+		content: '';
+		height: 14px;
+		width: 14px;
+		left: 3px;
+		bottom: 3px;
+		background-color: white;
+		transition: 0.4s;
+		border-radius: 50%;
+	}
+
+	input:checked + .slider {
+		background-color: #2196f3;
+	}
+
+	input:checked + .slider:before {
+		transform: translateX(14px);
+	}
+
+	.slider.round {
+		border-radius: 34px;
+	}
+
+	.slider.round:before {
+		border-radius: 50%;
+	}
+
+	@media (max-width: 768px) {
+		.day-button {
+			transition: all 0.3s ease;
+		}
+
+		.day-button:active {
+			transform: scale(0.95);
+		}
 	}
 </style>

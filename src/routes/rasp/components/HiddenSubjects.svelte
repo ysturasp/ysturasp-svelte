@@ -78,7 +78,7 @@
 					on:click|stopPropagation={toggleList}
 					class="flex items-center gap-1 rounded-lg bg-slate-700 px-3 py-1 text-sm text-white transition-all hover:bg-slate-600"
 				>
-					{showSubjectsList ? 'Скрыть список' : 'Показать список'}
+					{showSubjectsList ? 'Скрыть' : 'Открыть'}
 					<svg
 						class="h-4 w-4 transition-transform duration-200 {showSubjectsList
 							? 'rotate-180'
@@ -99,14 +99,13 @@
 					on:click|stopPropagation={() => restoreAllSubjects(selectedGroup)}
 					class="rounded-lg bg-yellow-600 px-3 py-1 text-sm text-white transition-all hover:bg-yellow-500"
 				>
-					Показать все
+					Вернуть
 				</button>
 			</div>
 		</div>
 
 		{#if showSubjectsList}
 			<div
-				class="mt-4 rounded-2xl bg-slate-900 p-4"
 				transition:scale={{
 					duration: 200,
 					opacity: 0,
@@ -114,10 +113,10 @@
 					easing: quintOut
 				}}
 			>
-				<div class="grid gap-2">
+				<div class="mt-4 grid gap-2">
 					{#each hiddenSubjectsForGroup as subject}
 						{@const typeInfo = getLessonTypeInfo(subject.type)}
-						<div class="flex items-center justify-between rounded-xl bg-slate-800 p-2">
+						<div class="flex items-center justify-between rounded-xl bg-slate-900 p-4">
 							<div class="flex flex-col gap-0.5">
 								<span class="text-sm text-white"
 									>{subject.lessonName || 'Название предмета не указано'}</span
@@ -130,7 +129,7 @@
 									toggleSubjectVisibility(selectedGroup, subject)}
 								class="rounded-lg bg-slate-700 px-2 py-1 text-xs text-white transition-all hover:bg-slate-600"
 							>
-								Показать
+								Вернуть
 							</button>
 						</div>
 					{/each}

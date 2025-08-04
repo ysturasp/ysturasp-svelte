@@ -2,34 +2,36 @@
 	import type { YSTULesson } from '../types';
 	import { LessonTypes } from '../types';
 	import { hiddenSubjects, toggleSubjectVisibility } from '../stores';
-	import { crossfade, fade } from 'svelte/transition';
+	import { fade } from 'svelte/transition';
 	import { quintOut } from 'svelte/easing';
 	import { flip } from 'svelte/animate';
 	import { getSubgroupIndicator } from '../stores/subgroups';
 	import type { SubgroupSettings, TeacherSubgroups } from '../stores/subgroups';
-
-	const [send, receive] = crossfade({
-		duration: (d) => Math.sqrt(d * 1000),
-		fallback(node, params) {
-			const style = getComputedStyle(node);
-			const transform = style.transform === 'none' ? '' : style.transform;
-
-			return {
-				duration: 600,
-				easing: quintOut,
-				css: (t) => `
-					transform: ${transform} scale(${t});
-					opacity: ${t}
-				`
-			};
-		}
-	});
 
 	export let date: string;
 	export let lessons: YSTULesson[];
 	export let selectedGroup: string;
 	export let subgroupSettings: SubgroupSettings = {};
 	export let teacherSubgroups: TeacherSubgroups = {};
+
+	let previousLessons = lessons;
+	let isHiding = false;
+
+	$: {
+		if (lessons !== previousLessons) {
+			isHiding = false;
+			previousLessons = lessons;
+		}
+	}
+
+	function handleVisibilityToggle(lesson: YSTULesson) {
+		isHiding = true;
+		toggleSubjectVisibility(selectedGroup, {
+			lessonName: lesson.lessonName,
+			type: lesson.type,
+			teacher: lesson.teacherName
+		});
+	}
 
 	function getLessonTypeInfo(type: number) {
 		const label = LessonTypes[type] || 'Занятие';
@@ -164,28 +166,12 @@
 				<div
 					class="mb-2 flex rounded-2xl bg-slate-800 p-4 last:mb-0"
 					animate:flip={{
-						duration: 500,
+						duration: isHiding ? 500 : 0,
 						easing: quintOut
 					}}
-					in:receive|local={{
-						key:
-							lesson.lessonName +
-							lesson.type +
-							lesson.teacherName +
-							lesson.startAt +
-							lesson.endAt +
-							(lesson.uniqueIndex ?? ''),
-						duration: 500
-					}}
-					out:send|local={{
-						key:
-							lesson.lessonName +
-							lesson.type +
-							lesson.teacherName +
-							lesson.startAt +
-							lesson.endAt +
-							(lesson.uniqueIndex ?? ''),
-						duration: 500
+					out:fade|local={{
+						duration: isHiding ? 500 : 0,
+						easing: quintOut
 					}}
 				>
 					<div
@@ -246,12 +232,7 @@
 						<input
 							type="checkbox"
 							checked={!isLessonHidden(lesson)}
-							on:change={() =>
-								toggleSubjectVisibility(selectedGroup, {
-									lessonName: lesson.lessonName,
-									type: lesson.type,
-									teacher: lesson.teacherName
-								})}
+							on:change={() => handleVisibilityToggle(lesson)}
 						/>
 						<span class="slider round"></span>
 					</label>

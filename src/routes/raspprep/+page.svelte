@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { page } from '$app/stores';
 	import { replaceState } from '$app/navigation';
 	import PageLayout from '$lib/components/layout/PageLayout.svelte';
 	import Header from '$lib/components/layout/Header.svelte';
@@ -296,14 +295,14 @@
 							{/if}
 						{/each}
 					{:else}
-						<div class="p-4 text-center">
+						<div class="text-center">
 							<p class="text-xl font-bold text-green-500">
 								На этой неделе у преподавателя нет пар
 							</p>
 							<img
 								src="https://steamuserimages-a.akamaihd.net/ugc/543050193621050493/822D951ADFCB3C9ADE095AC49917043365AFD48E/"
 								alt="Chill"
-								class="mx-auto my-4 rounded-lg"
+								class="mx-auto mt-4 rounded-lg"
 							/>
 						</div>
 					{/if}

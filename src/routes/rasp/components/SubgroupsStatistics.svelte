@@ -177,6 +177,16 @@
 		const date = new Date(dateStr.split('.').reverse().join('-'));
 		return days[date.getDay()];
 	}
+
+	function pluralize(number: number, one: string, few: string, many: string): string {
+		const lastDigit = number % 10;
+		const lastTwoDigits = number % 100;
+
+		if (lastTwoDigits >= 11 && lastTwoDigits <= 19) return many;
+		if (lastDigit === 1) return one;
+		if (lastDigit >= 2 && lastDigit <= 4) return few;
+		return many;
+	}
 </script>
 
 {#if Object.keys(teacherSubgroups).length > 0}
@@ -254,40 +264,85 @@
 							<div
 								class="rounded-2xl border border-gray-700 bg-gray-900 p-4 shadow backdrop-blur"
 							>
-								<div class="mb-2 flex items-center justify-between gap-2">
-									<h5 class="text-lg font-medium text-white">{stat.subject}</h5>
-									{#if stat.isStreamLesson}
-										<span class="rounded-full bg-yellow-600 px-2 py-1 text-xs"
-											>Всей группой</span
-										>
-									{:else}
-										<span class="rounded-full bg-green-600 px-2 py-1 text-xs"
-											>По подгруппам</span
-										>
-									{/if}
+								<div class="mb-2">
+									<div
+										class="{stat.isStreamLesson
+											? 'bg-yellow-600/20'
+											: 'bg-green-600/20'} -mx-4 -mt-4 rounded-t-2xl px-4 py-2"
+									>
+										<div class="flex justify-center">
+											<div class="text-sm">
+												<span
+													class={stat.isStreamLesson
+														? 'text-yellow-400'
+														: 'text-green-400'}
+												>
+													{stat.isStreamLesson
+														? 'Всей группой'
+														: 'По подгруппам'}
+												</span>
+											</div>
+										</div>
+									</div>
+									<h5 class="mt-2 text-lg font-medium text-white">
+										{stat.subject}
+									</h5>
 								</div>
 
-								<div class="mb-2 grid grid-cols-3 gap-4">
-									<div class="rounded-2xl bg-gray-800 p-3 text-center">
-										<span class="text-sm text-blue-400">1-я подгр.</span>
+								<div
+									class="mb-2 grid {stat.vucCount > 0
+										? 'grid-cols-3'
+										: 'grid-cols-2'} gap-2"
+								>
+									<div
+										class="flex flex-col items-center justify-center rounded-2xl bg-gray-800 p-3 text-center"
+									>
+										<p class="text-sm text-blue-400">первая подгруппа</p>
 										<div class="text-2xl font-bold text-white">
 											{stat.subgroup1Count}
 										</div>
-										<span class="text-sm text-gray-400">занятий</span>
+										<span class="text-sm text-gray-400"
+											>{pluralize(
+												stat.subgroup1Count,
+												'занятие',
+												'занятия',
+												'занятий'
+											)}</span
+										>
 									</div>
-									<div class="rounded-2xl bg-gray-800 p-3 text-center">
-										<span class="text-sm text-blue-400">2-я подгр.</span>
+									{#if stat.vucCount > 0}
+										<div
+											class="flex flex-col items-center justify-center rounded-2xl bg-gray-800 p-3 text-center"
+										>
+											<span class="text-sm text-blue-400">ВУЦ</span>
+											<div class="text-2xl font-bold text-white">
+												{stat.vucCount}
+											</div>
+											<span class="text-sm text-gray-400"
+												>{pluralize(
+													stat.vucCount,
+													'день',
+													'дня',
+													'дней'
+												)}</span
+											>
+										</div>
+									{/if}
+									<div
+										class="flex flex-col items-center justify-center rounded-2xl bg-gray-800 p-3 text-center"
+									>
+										<p class="text-sm text-blue-400">вторая подгруппа</p>
 										<div class="text-2xl font-bold text-white">
 											{stat.subgroup2Count}
 										</div>
-										<span class="text-sm text-gray-400">занятий</span>
-									</div>
-									<div class="rounded-2xl bg-gray-800 p-3 text-center">
-										<span class="text-sm text-blue-400">ВУЦ</span>
-										<div class="text-2xl font-bold text-white">
-											{stat.vucCount}
-										</div>
-										<span class="text-sm text-gray-400">дней</span>
+										<span class="text-sm text-gray-400"
+											>{pluralize(
+												stat.subgroup2Count,
+												'занятие',
+												'занятия',
+												'занятий'
+											)}</span
+										>
 									</div>
 								</div>
 
@@ -297,7 +352,6 @@
 
 								<div class="grid grid-cols-2 gap-2">
 									<div class="space-y-2">
-										<h6 class="font-medium text-blue-400">1-я подгруппа</h6>
 										<div class="grid gap-2">
 											{#each stat.dates.filter((d) => d.subgroup === 1) as dateInfo}
 												<div
@@ -342,7 +396,6 @@
 									</div>
 
 									<div class="space-y-2">
-										<h6 class="font-medium text-blue-400">2-я подгруппа</h6>
 										<div class="grid gap-2">
 											{#each stat.dates.filter((d) => d.subgroup === 2) as dateInfo}
 												<div
