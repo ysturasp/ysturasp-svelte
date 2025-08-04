@@ -25,6 +25,7 @@
 	} from '$lib/utils/semester';
 	import type { Audience } from './api';
 	import type { AudienceScheduleData } from './types';
+	import NavigationLinks from '$lib/components/ui/NavigationLinks.svelte';
 
 	let isLoading = false;
 	let isScheduleLoading = false;
@@ -192,6 +193,18 @@
 
 <PageLayout>
 	<Header>
+		<NavigationLinks
+			slot="links-desktop"
+			variant="desktop"
+			currentPage="ystu"
+			pageType="audience"
+		/>
+		<NavigationLinks
+			slot="links-mobile"
+			variant="mobile"
+			currentPage="ystu"
+			pageType="audience"
+		/>
 		<div slot="personal-account-ystu">
 			<a
 				href="https://ystu.expo.app"

@@ -20,6 +20,7 @@
 	import BetaModal from '$lib/components/ui/BottomModal.svelte';
 	import OnlineCounter from '$lib/components/ui/OnlineCounter.svelte';
 	import GithubParserInfo from './components/GithubParserInfo.svelte';
+	import NavigationLinks from '$lib/components/ui/NavigationLinks.svelte';
 
 	let isLoading = false;
 	let isScheduleLoading = false;
@@ -211,17 +212,23 @@
 
 <PageLayout>
 	<Header>
+		<NavigationLinks
+			slot="links-desktop"
+			variant="desktop"
+			currentPage="yspu"
+			pageType="students"
+		/>
+		<NavigationLinks
+			slot="links-mobile"
+			variant="mobile"
+			currentPage="yspu"
+			pageType="students"
+		/>
 		<OnlineCounter
 			variant="desktop"
 			slot="online-counter-desktop"
-			selectedDirectionLabel={selectedDirection
-				? directions.find((d) => d.id === selectedDirection)?.name || ''
-				: ''}
-			selectedGroupLabel={selectedGroup
-				? Object.entries(
-						directions.find((d) => d.id === selectedDirection)?.courses || {}
-					).find(([key]) => key === selectedGroup)?.[1].name || ''
-				: ''}
+			selectedGroupLabel={selectedGroup}
+			selectedDirectionLabel={selectedDirection}
 		/>
 		<OnlineCounter
 			variant="mobile"

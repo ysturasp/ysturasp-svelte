@@ -43,6 +43,7 @@
 	} from './stores/subgroups';
 	import { page } from '$app/stores';
 	import { replaceState } from '$app/navigation';
+	import NavigationLinks from '$lib/components/ui/NavigationLinks.svelte';
 
 	const [send, receive] = crossfade({
 		duration: (d) => Math.sqrt(d * 1000),
@@ -330,6 +331,18 @@
 
 <PageLayout>
 	<Header>
+		<NavigationLinks
+			slot="links-desktop"
+			variant="desktop"
+			currentPage="ystu"
+			pageType="students"
+		/>
+		<NavigationLinks
+			slot="links-mobile"
+			variant="mobile"
+			currentPage="ystu"
+			pageType="students"
+		/>
 		<OnlineCounter
 			variant="desktop"
 			slot="online-counter-desktop"
@@ -484,60 +497,6 @@
 {/if}
 
 <style>
-	.switch {
-		position: relative;
-		display: inline-block;
-		width: 34px;
-		height: 20px;
-		flex-shrink: 0;
-	}
-
-	.switch input {
-		opacity: 0;
-		width: 0;
-		height: 0;
-	}
-
-	.slider {
-		position: absolute;
-		cursor: pointer;
-		top: 0;
-		left: 0;
-		right: 0;
-		bottom: 0;
-		background-color: #ccc;
-		transition: 0.4s;
-		border-radius: 34px;
-	}
-
-	.slider:before {
-		position: absolute;
-		content: '';
-		height: 14px;
-		width: 14px;
-		left: 3px;
-		bottom: 3px;
-		background-color: white;
-		transition: 0.4s;
-		border-radius: 50%;
-	}
-
-	input:checked + .slider {
-		background-color: #2196f3;
-	}
-
-	input:checked + .slider:before {
-		transform: translateX(14px);
-	}
-
-	.slider.round {
-		border-radius: 34px;
-	}
-
-	.slider.round:before {
-		border-radius: 50%;
-	}
-
 	:global(.grid) {
 		transition: height 500ms cubic-bezier(0.4, 0, 0.2, 1);
 	}

@@ -26,6 +26,7 @@
 	} from '$lib/utils/semester';
 	import type { Teacher } from './api';
 	import type { TeacherScheduleData } from './types';
+	import NavigationLinks from '$lib/components/ui/NavigationLinks.svelte';
 
 	let isLoading = false;
 	let isScheduleLoading = false;
@@ -196,6 +197,18 @@
 
 <PageLayout>
 	<Header>
+		<NavigationLinks
+			slot="links-desktop"
+			variant="desktop"
+			currentPage="ystu"
+			pageType="teachers"
+		/>
+		<NavigationLinks
+			slot="links-mobile"
+			variant="mobile"
+			currentPage="ystu"
+			pageType="teachers"
+		/>
 		<div slot="personal-account-ystu">
 			<a
 				href="https://ystu.expo.app"

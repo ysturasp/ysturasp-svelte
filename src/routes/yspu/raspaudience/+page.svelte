@@ -13,6 +13,7 @@
 	import ScheduleTitle from '$lib/components/schedule/ScheduleTitle.svelte';
 	import { notifications } from '$lib/stores/notifications';
 	import GithubParserInfo from '../rasp/components/GithubParserInfo.svelte';
+	import NavigationLinks from '$lib/components/ui/NavigationLinks.svelte';
 
 	let isLoading = false;
 	let isScheduleLoading = false;
@@ -91,7 +92,20 @@
 </svelte:head>
 
 <PageLayout>
-	<Header />
+	<Header>
+		<NavigationLinks
+			slot="links-desktop"
+			variant="desktop"
+			currentPage="yspu"
+			pageType="audience"
+		/>
+		<NavigationLinks
+			slot="links-mobile"
+			variant="mobile"
+			currentPage="yspu"
+			pageType="audience"
+		/>
+	</Header>
 
 	<main class="container mx-auto mt-5 px-3 md:mt-7 md:px-0">
 		<section class="mt-8 rounded-2xl bg-slate-800 p-4 sm:p-6">

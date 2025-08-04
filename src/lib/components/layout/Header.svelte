@@ -31,6 +31,7 @@
 		class="flex items-center justify-between rounded-2xl px-3 py-2 shadow-xl ring-1 ring-blue-500/50 transition-all md:px-5 md:py-3"
 	>
 		<nav class="hidden gap-x-2 lg:flex">
+			<slot name="links-desktop" />
 			<a
 				href="/"
 				class="flex items-center text-sm font-semibold text-blue-500 transition-all hover:text-blue-400 md:text-base"
@@ -108,6 +109,7 @@
 			: ''} {isClosing ? 'hide' : 'show'}"
 		on:animationend={handleAnimationEnd}
 	>
+		<slot name="links-mobile" />
 		<a
 			href="/"
 			class="block py-2 text-sm font-semibold text-blue-500 md:text-base"

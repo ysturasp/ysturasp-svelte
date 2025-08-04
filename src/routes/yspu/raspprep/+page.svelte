@@ -12,7 +12,7 @@
 	import { getTeachers, getTeacherSchedule } from './api';
 	import type { Teacher } from './api';
 	import GithubParserInfo from '../rasp/components/GithubParserInfo.svelte';
-
+	import NavigationLinks from '$lib/components/ui/NavigationLinks.svelte';
 	interface TeacherScheduleData {
 		items: {
 			courseInfo: {
@@ -122,7 +122,20 @@
 </svelte:head>
 
 <PageLayout>
-	<Header />
+	<Header>
+		<NavigationLinks
+			slot="links-desktop"
+			variant="desktop"
+			currentPage="yspu"
+			pageType="teachers"
+		/>
+		<NavigationLinks
+			slot="links-mobile"
+			variant="mobile"
+			currentPage="yspu"
+			pageType="teachers"
+		/>
+	</Header>
 
 	<main class="container mx-auto mt-5 px-3 md:mt-7 md:px-0">
 		<section class="sаm:p-6 mt-8 rounded-2xl bg-slate-800 p-4">

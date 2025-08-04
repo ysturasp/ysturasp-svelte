@@ -85,7 +85,7 @@
 				Предметов для деления на подгруппы не найдено
 			</div>
 		{:else}
-			{#each uniqueLabWorks as labWork}
+			{#each uniqueLabWorks.sort((a, b) => Number(b.isDivision) - Number(a.isDivision)) as labWork}
 				<div class="flex items-center justify-between rounded-lg bg-slate-800 p-3">
 					<div class="flex flex-grow flex-col gap-1 text-white">
 						{#if !labWork.isDivision}
