@@ -180,7 +180,7 @@
 </script>
 
 {#if Object.keys(teacherSubgroups).length > 0}
-	<section class="mt-4 rounded-2xl bg-slate-800">
+	<section class="rounded-2xl bg-slate-800">
 		<h3 class="mb-4 text-2xl font-semibold text-white">📊 Распределение подгрупп</h3>
 
 		{#if hasUnbalancedDistribution}

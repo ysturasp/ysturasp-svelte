@@ -451,13 +451,17 @@
 					<HiddenSubjects {selectedGroup} />
 				</div>
 			{/if}
-
-			<SubgroupsStatistics
-				teacherSubgroups={currentTeacherSubgroups}
-				{scheduleData}
-				{selectedSemester}
-			/>
 		</section>
+
+		{#if scheduleData && selectedSemester && Object.keys(currentTeacherSubgroups).length > 0}
+			<section class="mt-4 rounded-2xl bg-slate-800 p-4 sm:p-6">
+				<SubgroupsStatistics
+					teacherSubgroups={currentTeacherSubgroups}
+					{scheduleData}
+					{selectedSemester}
+				/>
+			</section>
+		{/if}
 
 		<GithubApiSection />
 	</main>
