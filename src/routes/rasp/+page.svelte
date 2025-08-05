@@ -37,10 +37,11 @@
 		type SubgroupSettings,
 		type TeacherSubgroups
 	} from './stores/subgroups';
-	import { page } from '$app/stores';
 	import { replaceState } from '$app/navigation';
 	import NavigationLinks from '$lib/components/ui/NavigationLinks.svelte';
 	import { writable } from 'svelte/store';
+	import { fade } from 'svelte/transition';
+	import { quintOut } from 'svelte/easing';
 
 	const isMobile = writable(false);
 
@@ -497,74 +498,74 @@
 					{#if currentWeekData}
 						{#if $isMobile}
 							<div class="relative">
-								<div
-									class="absolute w-full transition-all duration-500 ease-out"
-									class:pointer-events-none={isFullView}
-									class:opacity-0={isFullView || isViewChanging}
-									class:invisible={isFullView}
-								>
+								{#if !isFullView}
 									<div
-										class="mb-4 grid gap-1"
-										style="grid-template-columns: repeat({filteredDays.length}, 1fr)"
+										class="w-full"
+										in:fade={{ duration: 500, easing: quintOut }}
+										out:fade={{ duration: 500, easing: quintOut }}
 									>
+										<div
+											class="mb-4 grid gap-1"
+											style="grid-template-columns: repeat({filteredDays.length}, 1fr)"
+										>
+											{#each filteredDays as day}
+												{@const dayDate = new Date(day.info.date)}
+												<button
+													class="day-button flex flex-col items-center rounded-lg p-2 transition-all {dayDate.toDateString() ===
+													new Date(selectedDay || '').toDateString()
+														? 'bg-blue-600'
+														: 'bg-gray-700'} {isToday(day.info.date)
+														? 'border-2 border-blue-300'
+														: ''}"
+													on:click={() => {
+														selectedDay = day.info.date;
+														localStorage.setItem(
+															'lastSelectedDay',
+															selectedDay
+														);
+													}}
+												>
+													<span class="text-sm"
+														>{getDayName(dayDate.getDay())}</span
+													>
+													<span class="text-lg font-bold"
+														>{dayDate.getDate()}</span
+													>
+												</button>
+											{/each}
+										</div>
+
 										{#each filteredDays as day}
-											{@const dayDate = new Date(day.info.date)}
-											<button
-												class="day-button flex flex-col items-center rounded-lg p-2 transition-all {dayDate.toDateString() ===
-												new Date(selectedDay || '').toDateString()
-													? 'bg-blue-600'
-													: 'bg-gray-700'} {isToday(day.info.date)
-													? 'border-2 border-blue-300'
-													: ''}"
-												on:click={() => {
-													selectedDay = day.info.date;
-													localStorage.setItem(
-														'lastSelectedDay',
-														selectedDay
-													);
-												}}
-											>
-												<span class="text-sm"
-													>{getDayName(dayDate.getDay())}</span
-												>
-												<span class="text-lg font-bold"
-													>{dayDate.getDate()}</span
-												>
-											</button>
+											{#if selectedDay && day.info.date === selectedDay && day.lessons && day.lessons.length > 0}
+												<YSTUScheduleDay
+													date={day.info.date}
+													lessons={day.lessons}
+													{selectedGroup}
+													subgroupSettings={currentSubgroupSettings}
+													teacherSubgroups={currentTeacherSubgroups}
+												/>
+											{/if}
 										{/each}
 									</div>
-
-									{#each filteredDays as day}
-										{#if selectedDay && day.info.date === selectedDay && day.lessons && day.lessons.length > 0}
-											<YSTUScheduleDay
-												date={day.info.date}
-												lessons={day.lessons}
-												{selectedGroup}
-												subgroupSettings={currentSubgroupSettings}
-												teacherSubgroups={currentTeacherSubgroups}
-											/>
-										{/if}
-									{/each}
-								</div>
-
-								<div
-									class="transition-all duration-500 ease-out"
-									class:pointer-events-none={!isFullView}
-									class:opacity-0={!isFullView || isViewChanging}
-									class:invisible={!isFullView}
-								>
-									{#each filteredDays as day}
-										{#if day.lessons && day.lessons.length > 0}
-											<YSTUScheduleDay
-												date={day.info.date}
-												lessons={day.lessons}
-												{selectedGroup}
-												subgroupSettings={currentSubgroupSettings}
-												teacherSubgroups={currentTeacherSubgroups}
-											/>
-										{/if}
-									{/each}
-								</div>
+								{:else}
+									<div
+										class="w-full"
+										in:fade={{ duration: 500, easing: quintOut }}
+										out:fade={{ duration: 500, easing: quintOut }}
+									>
+										{#each filteredDays as day}
+											{#if day.lessons && day.lessons.length > 0}
+												<YSTUScheduleDay
+													date={day.info.date}
+													lessons={day.lessons}
+													{selectedGroup}
+													subgroupSettings={currentSubgroupSettings}
+													teacherSubgroups={currentTeacherSubgroups}
+												/>
+											{/if}
+										{/each}
+									</div>
+								{/if}
 							</div>
 						{:else}
 							{#each filteredDays as day}

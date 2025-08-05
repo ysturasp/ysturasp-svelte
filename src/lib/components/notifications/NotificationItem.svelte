@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { onMount, createEventDispatcher } from 'svelte';
 	import type { NotificationType } from '$lib/types';
-	import { fade } from 'svelte/transition';
 
 	export let message: string;
 	export let type: NotificationType;
 	export let id: string;
+	export let isHiding = false;
 
 	const dispatch = createEventDispatcher();
 	let notificationElement: HTMLDivElement;
@@ -14,7 +14,6 @@
 	let currentX = 0;
 	let moveX = 0;
 	let isVisible = false;
-	let isHiding = false;
 
 	const colors = {
 		success: 'bg-emerald-500',

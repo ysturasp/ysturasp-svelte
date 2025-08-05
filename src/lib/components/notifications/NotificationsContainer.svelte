@@ -13,6 +13,7 @@
 				message={notification.message}
 				type={notification.type}
 				id={notification.id}
+				isHiding={notification.isHiding || false}
 				on:remove={(e) => notifications.remove(e.detail)}
 			/>
 		</div>

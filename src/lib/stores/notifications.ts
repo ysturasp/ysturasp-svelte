@@ -6,6 +6,7 @@ export interface NotificationItem {
 	message: string;
 	type: NotificationType;
 	height?: number;
+	isHiding?: boolean;
 }
 
 function createNotificationsStore() {
@@ -18,7 +19,13 @@ function createNotificationsStore() {
 			update((notifications) => [...notifications, { id, message, type }]);
 
 			setTimeout(() => {
-				store.remove(id);
+				update((notifications) =>
+					notifications.map((n) => (n.id === id ? { ...n, isHiding: true } : n))
+				);
+
+				setTimeout(() => {
+					store.remove(id);
+				}, 500);
 			}, 5000);
 		},
 		remove: (id: string) => {
