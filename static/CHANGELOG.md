@@ -1,3 +1,4 @@
+- add sort of subgroup statistics by lesson type and text for all group lesson (ysturasp, 2025-08-05) [3 files changed, 13 insertions(+), 5 deletions(-)]
 - optimize of subgroup distribution, improve of logic for processing VUZ and non-VUZ classes (ysturasp, 2025-08-05) [3 files changed, 50 insertions(+), 20 deletions(-)]
 - improve distibute subgroup section and working logic, add more checks and fix existing errors (ysturasp, 2025-08-05) [7 files changed, 371 insertions(+), 138 deletions(-)]
 - add animation for hide notification with expiration time (ysturasp, 2025-08-05) [6 files changed, 77 insertions(+), 67 deletions(-)]

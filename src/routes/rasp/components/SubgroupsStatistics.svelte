@@ -36,6 +36,7 @@
 	}
 
 	$: stats = calculateStats(teacherSubgroups, scheduleData, selectedSemester);
+	$: sortedStats = stats.sort((a, b) => a.isStreamLesson ? 1 : -1);
 	$: {
 		console.log(
 			'Stats:',
