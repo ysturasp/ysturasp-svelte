@@ -213,39 +213,67 @@
 
 		const vucDays = subjectData.rawDates.filter((d: RawDate) => d.isVUC);
 		const nonVucDays = subjectData.rawDates.filter((d: RawDate) => !d.isVUC);
+		const assignments = new Map();
+
+		const totalDays = subjectData.rawDates.length;
+		const targetPerGroup = Math.ceil(totalDays / 2);
+		const maxDiff = Math.ceil(totalDays * 0.3);
+
+		let group1NonVUC = [];
+		let group2NonVUC = [];
+		let group1VUC = [];
+		let group2VUC = [];
 
 		for (const dateInfo of vucDays) {
-			const uniqueKey = `${dateInfo.dateTime}_${dateInfo.teacher}`;
-			subjectData.dates[uniqueKey] = {
-				subgroup: 2,
-				isVUC: true,
-				teacher: dateInfo.teacher,
-				originalDateTime: dateInfo.dateTime
-			};
-			subjectData.subgroup2Count++;
+			const currentDiff = subjectData.subgroup2Count - subjectData.subgroup1Count;
+			if (currentDiff >= maxDiff) {
+				group1VUC.push(dateInfo);
+				subjectData.subgroup1Count++;
+			} else {
+				group2VUC.push(dateInfo);
+				subjectData.subgroup2Count++;
+			}
 			subjectData.vucCount++;
 		}
 
 		for (const dateInfo of nonVucDays) {
-			const uniqueKey = `${dateInfo.dateTime}_${dateInfo.teacher}`;
-
-			const subgroup1Count = subjectData.subgroup1Count;
-			const subgroup2Count = subjectData.subgroup2Count;
-			const assignedSubgroup = subgroup1Count <= subgroup2Count ? 1 : 2;
-
-			subjectData.dates[uniqueKey] = {
-				subgroup: assignedSubgroup,
-				isVUC: false,
-				teacher: dateInfo.teacher,
-				originalDateTime: dateInfo.dateTime
-			};
-
+			const assignedSubgroup =
+				subjectData.subgroup1Count <= subjectData.subgroup2Count ? 1 : 2;
 			if (assignedSubgroup === 1) {
+				group1NonVUC.push(dateInfo);
 				subjectData.subgroup1Count++;
 			} else {
+				group2NonVUC.push(dateInfo);
 				subjectData.subgroup2Count++;
 			}
 		}
+
+		for (let i = 0; i < group1VUC.length; i++) {
+			if (group2NonVUC.length > 0) {
+				const vucDate = group1VUC[i];
+				const nonVucDate = group2NonVUC[0];
+				group2VUC.push(vucDate);
+				group1NonVUC.push(nonVucDate);
+				group1VUC.splice(i, 1);
+				group2NonVUC.splice(0, 1);
+				i--;
+			}
+		}
+
+		function addToSubjectData(dateInfo: RawDate, subgroup: number, isVUC: boolean) {
+			const uniqueKey = `${dateInfo.dateTime}_${dateInfo.teacher}`;
+			subjectData.dates[uniqueKey] = {
+				subgroup,
+				isVUC,
+				teacher: dateInfo.teacher,
+				originalDateTime: dateInfo.dateTime
+			};
+		}
+
+		group1VUC.forEach((d) => addToSubjectData(d, 1, true));
+		group2VUC.forEach((d) => addToSubjectData(d, 2, true));
+		group1NonVUC.forEach((d) => addToSubjectData(d, 1, false));
+		group2NonVUC.forEach((d) => addToSubjectData(d, 2, false));
 	}
 
 	function countTotalLessons(
