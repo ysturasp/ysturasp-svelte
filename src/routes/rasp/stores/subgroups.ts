@@ -135,7 +135,8 @@ export function generateSubgroupDistribution(scheduleData: any, semester: Semest
 
 			day.lessons?.forEach((lesson: any) => {
 				if (lesson.type === 8) {
-					const key = `${lesson.lessonName}_${lesson.teacherName}`;
+					const teacherName = lesson.teacherName || lesson.additionalTeacherName;
+					const key = `${lesson.lessonName}_${teacherName}`;
 					if (!labWorks.has(key)) {
 						labWorks.set(key, []);
 					}

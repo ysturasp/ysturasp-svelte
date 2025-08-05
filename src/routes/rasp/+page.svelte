@@ -495,100 +495,96 @@
 						</div>
 					{/if}
 
-					{#if currentWeekData}
-						{#if $isMobile}
-							<div class="relative">
-								{#if !isFullView}
+					{#if !currentWeekData || filteredDays.length === 0}
+						<div class="text-center">
+							<p class="text-xl font-bold text-green-500">
+								На этой неделе в группе нет пар
+							</p>
+							<img src={imageChill} alt="Chill" class="mx-auto mt-4 rounded-lg" />
+						</div>
+					{:else if $isMobile}
+						<div class="relative">
+							{#if !isFullView}
+								<div
+									class="w-full"
+									in:fade={{ duration: 500, easing: quintOut }}
+									out:fade={{ duration: 500, easing: quintOut }}
+								>
 									<div
-										class="w-full"
-										in:fade={{ duration: 500, easing: quintOut }}
-										out:fade={{ duration: 500, easing: quintOut }}
+										class="mb-4 grid gap-1"
+										style="grid-template-columns: repeat({filteredDays.length}, 1fr)"
 									>
-										<div
-											class="mb-4 grid gap-1"
-											style="grid-template-columns: repeat({filteredDays.length}, 1fr)"
-										>
-											{#each filteredDays as day}
-												{@const dayDate = new Date(day.info.date)}
-												<button
-													class="day-button flex flex-col items-center rounded-lg p-2 transition-all {dayDate.toDateString() ===
-													new Date(selectedDay || '').toDateString()
-														? 'bg-blue-600'
-														: 'bg-gray-700'} {isToday(day.info.date)
-														? 'border-2 border-blue-300'
-														: ''}"
-													on:click={() => {
-														selectedDay = day.info.date;
-														localStorage.setItem(
-															'lastSelectedDay',
-															selectedDay
-														);
-													}}
+										{#each filteredDays as day}
+											{@const dayDate = new Date(day.info.date)}
+											<button
+												class="day-button flex flex-col items-center rounded-lg p-2 transition-all {dayDate.toDateString() ===
+												new Date(selectedDay || '').toDateString()
+													? 'bg-blue-600'
+													: 'bg-gray-700'} {isToday(day.info.date)
+													? 'border-2 border-blue-300'
+													: ''}"
+												on:click={() => {
+													selectedDay = day.info.date;
+													localStorage.setItem(
+														'lastSelectedDay',
+														selectedDay
+													);
+												}}
+											>
+												<span class="text-sm"
+													>{getDayName(dayDate.getDay())}</span
 												>
-													<span class="text-sm"
-														>{getDayName(dayDate.getDay())}</span
-													>
-													<span class="text-lg font-bold"
-														>{dayDate.getDate()}</span
-													>
-												</button>
-											{/each}
-										</div>
-
-										{#each filteredDays as day}
-											{#if selectedDay && day.info.date === selectedDay && day.lessons && day.lessons.length > 0}
-												<YSTUScheduleDay
-													date={day.info.date}
-													lessons={day.lessons}
-													{selectedGroup}
-													subgroupSettings={currentSubgroupSettings}
-													teacherSubgroups={currentTeacherSubgroups}
-												/>
-											{/if}
+												<span class="text-lg font-bold"
+													>{dayDate.getDate()}</span
+												>
+											</button>
 										{/each}
 									</div>
-								{:else}
-									<div
-										class="w-full"
-										in:fade={{ duration: 500, easing: quintOut }}
-										out:fade={{ duration: 500, easing: quintOut }}
-									>
-										{#each filteredDays as day}
-											{#if day.lessons && day.lessons.length > 0}
-												<YSTUScheduleDay
-													date={day.info.date}
-													lessons={day.lessons}
-													{selectedGroup}
-													subgroupSettings={currentSubgroupSettings}
-													teacherSubgroups={currentTeacherSubgroups}
-												/>
-											{/if}
-										{/each}
-									</div>
-								{/if}
-							</div>
-						{:else}
-							{#each filteredDays as day}
-								{#if day.lessons && day.lessons.length > 0}
-									<YSTUScheduleDay
-										date={day.info.date}
-										lessons={day.lessons}
-										{selectedGroup}
-										subgroupSettings={currentSubgroupSettings}
-										teacherSubgroups={currentTeacherSubgroups}
-									/>
-								{/if}
-							{/each}
-						{/if}
 
-						{#if filteredDays.length === 0}
-							<div class="text-center">
-								<p class="text-xl font-bold text-green-500">
-									На этой неделе в группе нет пар
-								</p>
-								<img src={imageChill} alt="Chill" class="mx-auto mt-4 rounded-lg" />
-							</div>
-						{/if}
+									{#each filteredDays as day}
+										{#if selectedDay && day.info.date === selectedDay && day.lessons && day.lessons.length > 0}
+											<YSTUScheduleDay
+												date={day.info.date}
+												lessons={day.lessons}
+												{selectedGroup}
+												subgroupSettings={currentSubgroupSettings}
+												teacherSubgroups={currentTeacherSubgroups}
+											/>
+										{/if}
+									{/each}
+								</div>
+							{:else}
+								<div
+									class="w-full"
+									in:fade={{ duration: 500, easing: quintOut }}
+									out:fade={{ duration: 500, easing: quintOut }}
+								>
+									{#each filteredDays as day}
+										{#if day.lessons && day.lessons.length > 0}
+											<YSTUScheduleDay
+												date={day.info.date}
+												lessons={day.lessons}
+												{selectedGroup}
+												subgroupSettings={currentSubgroupSettings}
+												teacherSubgroups={currentTeacherSubgroups}
+											/>
+										{/if}
+									{/each}
+								</div>
+							{/if}
+						</div>
+					{:else}
+						{#each filteredDays as day}
+							{#if day.lessons && day.lessons.length > 0}
+								<YSTUScheduleDay
+									date={day.info.date}
+									lessons={day.lessons}
+									{selectedGroup}
+									subgroupSettings={currentSubgroupSettings}
+									teacherSubgroups={currentTeacherSubgroups}
+								/>
+							{/if}
+						{/each}
 					{/if}
 				</div>
 			{/if}

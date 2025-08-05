@@ -5,13 +5,19 @@
 	import { isDateInSemester, getWeekNumberByDate } from '$lib/utils/semester';
 	import * as Carousel from '$lib/components/ui/carousel';
 
+	interface RawDate {
+		dateTime: string;
+		teacher: string;
+		isVUC: boolean;
+	}
+
 	export let teacherSubgroups: TeacherSubgroups = {};
 	export let scheduleData: ScheduleData | null = null;
 	export let selectedSemester: SemesterInfo | null = null;
 
 	interface SubgroupStats {
 		subject: string;
-		teacher: string;
+		teachers: string[];
 		subgroup1Count: number;
 		subgroup2Count: number;
 		vucCount: number;
@@ -25,13 +31,38 @@
 			subgroup: number;
 			isVUC: boolean;
 			isNext: boolean;
+			teacher: string;
 		}[];
 	}
 
 	$: stats = calculateStats(teacherSubgroups, scheduleData, selectedSemester);
-	$: hasUnbalancedDistribution = stats.some(
-		(stat) => Math.abs(stat.subgroup1Count - stat.subgroup2Count) > 1
-	);
+	$: {
+		console.log(
+			'Stats:',
+			stats.map((stat) => ({
+				subject: stat.subject,
+				teachers: stat.teachers,
+				subgroup1: stat.subgroup1Count,
+				subgroup2: stat.subgroup2Count,
+				total: stat.subgroup1Count + stat.subgroup2Count
+			}))
+		);
+	}
+
+	$: hasUnbalancedDistribution = stats.some((stat) => {
+		const totalCount = stat.subgroup1Count + stat.subgroup2Count;
+		const diff = Math.abs(stat.subgroup1Count - stat.subgroup2Count);
+		if (totalCount > 1 && diff > 1) {
+			console.log('Unbalanced distribution found:', {
+				subject: stat.subject,
+				subgroup1: stat.subgroup1Count,
+				subgroup2: stat.subgroup2Count,
+				diff
+			});
+			return true;
+		}
+		return false;
+	});
 
 	function calculateStats(
 		data: TeacherSubgroups,
@@ -47,49 +78,94 @@
 			if (!teacherData.dates) continue;
 
 			const [subject, teacher] = key.split('_');
-			const groupKey = subject === 'null' ? `${subject}_${teacher}` : subject;
+			const groupKey = subject === 'null' ? key : subject;
 
 			if (!groupedSubjects.has(groupKey)) {
-				groupedSubjects.set(groupKey, { dates: {}, teacher });
+				groupedSubjects.set(groupKey, {
+					rawDates: [],
+					teachers: new Set(),
+					teacherDates: new Map(),
+					dates: {},
+					subgroup1Count: 0,
+					subgroup2Count: 0,
+					vucCount: 0
+				});
 			}
-			Object.assign(groupedSubjects.get(groupKey).dates, teacherData.dates);
+			const group = groupedSubjects.get(groupKey);
+			group.teachers.add(teacherData.teacher);
+
+			for (const [dateTime, info] of Object.entries(teacherData.dates)) {
+				group.rawDates.push({
+					dateTime,
+					teacher: teacherData.teacher,
+					isVUC: info.isVUC
+				});
+
+				if (!group.teacherDates.has(teacherData.teacher)) {
+					group.teacherDates.set(teacherData.teacher, []);
+				}
+				group.teacherDates.get(teacherData.teacher).push({
+					dateTime,
+					isVUC: info.isVUC
+				});
+			}
 		}
 
 		for (const [groupKey, subjectData] of groupedSubjects) {
-			const dates = subjectData.dates || {};
-			const [subject, teacher] = groupKey.split('_');
+			const teachers = Array.from(subjectData.teachers) as string[];
+			const canSplitByTeachers =
+				teachers.length === 2 && !subjectData.rawDates.some((d: RawDate) => d.isVUC);
 
-			const subgroup1Dates = Object.entries(dates).filter(
-				([_, info]) => (info as SubgroupInfo).subgroup === 1
-			);
-			const subgroup2Dates = Object.entries(dates).filter(
-				([_, info]) => (info as SubgroupInfo).subgroup === 2
-			);
-			const vucDays = Object.entries(dates).filter(
-				([_, info]) => (info as SubgroupInfo).isVUC
-			);
+			if (canSplitByTeachers) {
+				const [teacher1, teacher2] = teachers;
+				const teacher1Dates = subjectData.teacherDates.get(teacher1);
+				const teacher2Dates = subjectData.teacherDates.get(teacher2);
 
-			const totalLessons = countTotalLessons(schedule, subject, semester);
-			const distributedLessons = subgroup1Dates.length + subgroup2Dates.length;
+				if (teacher1Dates.length === teacher2Dates.length) {
+					for (const dateInfo of teacher1Dates) {
+						const uniqueKey = `${dateInfo.dateTime}_${teacher1}`;
+						subjectData.dates[uniqueKey] = {
+							subgroup: 1,
+							isVUC: false,
+							teacher: teacher1,
+							originalDateTime: dateInfo.dateTime
+						};
+						subjectData.subgroup1Count++;
+					}
 
-			const isStreamLesson = checkIfStreamLesson(schedule, subject);
+					for (const dateInfo of teacher2Dates) {
+						const uniqueKey = `${dateInfo.dateTime}_${teacher2}`;
+						subjectData.dates[uniqueKey] = {
+							subgroup: 2,
+							isVUC: false,
+							teacher: teacher2,
+							originalDateTime: dateInfo.dateTime
+						};
+						subjectData.subgroup2Count++;
+					}
+				} else {
+					distributeRegularly(subjectData);
+				}
+			} else {
+				distributeRegularly(subjectData);
+			}
 
-			const allDates = [
-				...subgroup1Dates.map(([dateTime, info]) => ({
-					...formatDateTime(dateTime),
-					subgroup: 1,
-					isVUC: (info as SubgroupInfo).isVUC
-				})),
-				...subgroup2Dates.map(([dateTime, info]) => ({
-					...formatDateTime(dateTime),
-					subgroup: 2,
-					isVUC: (info as SubgroupInfo).isVUC
-				}))
-			].sort(
-				(a, b) =>
-					new Date(a.date.split('.').reverse().join('-')).getTime() -
-					new Date(b.date.split('.').reverse().join('-')).getTime()
-			);
+			const allDates = Object.entries(subjectData.dates)
+				.map(([key, info]: [string, any]) => {
+					const [date, time] = info.originalDateTime.split('_');
+					return {
+						...formatDateTime(`${date}_${time}`),
+						subgroup: info.subgroup,
+						isVUC: info.isVUC,
+						teacher: info.teacher,
+						isNext: false
+					};
+				})
+				.sort(
+					(a, b) =>
+						new Date(a.date.split('.').reverse().join('-')).getTime() -
+						new Date(b.date.split('.').reverse().join('-')).getTime()
+				);
 
 			const today = new Date();
 			today.setHours(0, 0, 0, 0);
@@ -105,14 +181,19 @@
 				}
 			}
 
-			const displayName = subject === 'null' ? `null (${subjectData.teacher})` : subject;
+			const totalLessons = countTotalLessons(schedule, groupKey.split('_')[0], semester);
+			const distributedLessons = subjectData.subgroup1Count + subjectData.subgroup2Count;
+			const isStreamLesson = checkIfStreamLesson(schedule, groupKey.split('_')[0]);
+
+			const [subject, teacher] = groupKey.split('_');
+			const displayName = subject === 'null' ? `${subject} (${teacher})` : subject;
 
 			result.push({
 				subject: displayName,
-				teacher: subjectData.teacher,
-				subgroup1Count: subgroup1Dates.length,
-				subgroup2Count: subgroup2Dates.length,
-				vucCount: vucDays.length,
+				teachers,
+				subgroup1Count: subjectData.subgroup1Count,
+				subgroup2Count: subjectData.subgroup2Count,
+				vucCount: subjectData.vucCount,
 				totalLessons,
 				distributedLessons,
 				isStreamLesson,
@@ -121,6 +202,50 @@
 		}
 
 		return result;
+	}
+
+	function distributeRegularly(subjectData: any) {
+		subjectData.rawDates.sort((a: any, b: any) => {
+			const dateA = new Date(a.dateTime.split('_')[0].split('.').reverse().join('-'));
+			const dateB = new Date(b.dateTime.split('_')[0].split('.').reverse().join('-'));
+			return dateA.getTime() - dateB.getTime();
+		});
+
+		const vucDays = subjectData.rawDates.filter((d: RawDate) => d.isVUC);
+		const nonVucDays = subjectData.rawDates.filter((d: RawDate) => !d.isVUC);
+
+		for (const dateInfo of vucDays) {
+			const uniqueKey = `${dateInfo.dateTime}_${dateInfo.teacher}`;
+			subjectData.dates[uniqueKey] = {
+				subgroup: 2,
+				isVUC: true,
+				teacher: dateInfo.teacher,
+				originalDateTime: dateInfo.dateTime
+			};
+			subjectData.subgroup2Count++;
+			subjectData.vucCount++;
+		}
+
+		for (const dateInfo of nonVucDays) {
+			const uniqueKey = `${dateInfo.dateTime}_${dateInfo.teacher}`;
+
+			const subgroup1Count = subjectData.subgroup1Count;
+			const subgroup2Count = subjectData.subgroup2Count;
+			const assignedSubgroup = subgroup1Count <= subgroup2Count ? 1 : 2;
+
+			subjectData.dates[uniqueKey] = {
+				subgroup: assignedSubgroup,
+				isVUC: false,
+				teacher: dateInfo.teacher,
+				originalDateTime: dateInfo.dateTime
+			};
+
+			if (assignedSubgroup === 1) {
+				subjectData.subgroup1Count++;
+			} else {
+				subjectData.subgroup2Count++;
+			}
+		}
 	}
 
 	function countTotalLessons(
@@ -186,6 +311,50 @@
 		if (lastDigit === 1) return one;
 		if (lastDigit >= 2 && lastDigit <= 4) return few;
 		return many;
+	}
+
+	function getTeacherInitial(teacherName: string): string {
+		const withoutPosition = teacherName
+			.replace(/^(асс\.|доц\.|ст\.преп\.|проф\.|преп\.) /, '')
+			.trim();
+		const lastName = withoutPosition.split(' ')[0];
+		return lastName.charAt(0).toUpperCase();
+	}
+
+	function getTeacherColor(teacherName: string): string {
+		const colorMap: Record<string, string> = {
+			А: 'bg-red-500 border-red-400',
+			Б: 'bg-blue-500 border-blue-400',
+			В: 'bg-emerald-500 border-emerald-400',
+			Г: 'bg-amber-500 border-amber-400',
+			Д: 'bg-purple-500 border-purple-400',
+			Е: 'bg-pink-500 border-pink-400',
+			Ж: 'bg-cyan-500 border-cyan-400',
+			З: 'bg-orange-500 border-orange-400',
+			И: 'bg-lime-500 border-lime-400',
+			К: 'bg-indigo-500 border-indigo-400',
+			Л: 'bg-rose-500 border-rose-400',
+			М: 'bg-teal-500 border-teal-400',
+			Н: 'bg-fuchsia-500 border-fuchsia-400',
+			О: 'bg-sky-500 border-sky-400',
+			П: 'bg-violet-500 border-violet-400',
+			Р: 'bg-yellow-500 border-yellow-400',
+			С: 'bg-green-500 border-green-400',
+			Т: 'bg-blue-600 border-blue-500',
+			У: 'bg-red-600 border-red-500',
+			Ф: 'bg-purple-600 border-purple-500',
+			Х: 'bg-emerald-600 border-emerald-500',
+			Ц: 'bg-orange-600 border-orange-500',
+			Ч: 'bg-cyan-600 border-cyan-500',
+			Ш: 'bg-pink-600 border-pink-500',
+			Щ: 'bg-indigo-600 border-indigo-500',
+			Э: 'bg-amber-600 border-amber-500',
+			Ю: 'bg-teal-600 border-teal-500',
+			Я: 'bg-rose-600 border-rose-500'
+		};
+
+		const initial = getTeacherInitial(teacherName);
+		return colorMap[initial] || 'bg-gray-500 border-gray-400';
 	}
 </script>
 
@@ -287,6 +456,24 @@
 									<h5 class="mt-2 text-lg font-medium text-white">
 										{stat.subject}
 									</h5>
+									{#if stat.teachers.length > 0}
+										<div class="flex flex-wrap gap-2">
+											{#each stat.teachers as teacher}
+												<div class="flex items-center gap-1">
+													<div
+														class="flex h-5 w-5 items-center justify-center rounded-full border {getTeacherColor(
+															teacher
+														)} text-xs font-bold text-white"
+													>
+														{getTeacherInitial(teacher)}
+													</div>
+													<span class="text-sm text-gray-400"
+														>{teacher}</span
+													>
+												</div>
+											{/each}
+										</div>
+									{/if}
 								</div>
 
 								<div
@@ -346,7 +533,11 @@
 									</div>
 								</div>
 
-								<div class="mb-2 text-xs text-gray-400">
+								<div
+									class={stat.vucCount > 0
+										? 'mb-2 text-xs text-gray-400'
+										: 'hidden'}
+								>
 									* Синяя полоса слева означает день с ВУЦ
 								</div>
 
@@ -362,11 +553,26 @@
 														: ''}"
 												>
 													<div class="flex items-center gap-2">
+														{#if stat.teachers.length > 1}
+															<div
+																class="flex h-4 w-4 items-center justify-center rounded-full border {getTeacherColor(
+																	dateInfo.teacher
+																)} text-[10px] font-bold text-white"
+															>
+																{getTeacherInitial(
+																	dateInfo.teacher
+																)}
+															</div>
+														{/if}
 														<span class="text-white"
 															>{dateInfo.date}</span
 														>
 														<span class="text-xs text-gray-400"
 															>({getDayOfWeek(dateInfo.date)})</span
+														>
+														<span
+															class="hidden text-xs text-yellow-400 md:block"
+															>{dateInfo.week} неделя</span
 														>
 														{#if dateInfo.isVUC}
 															<span
@@ -375,7 +581,7 @@
 															>
 														{/if}
 													</div>
-													<div class="text-xs text-yellow-400">
+													<div class="text-xs text-yellow-400 md:hidden">
 														{dateInfo.week} неделя
 													</div>
 													{#if dateInfo.time}
@@ -406,11 +612,26 @@
 														: ''}"
 												>
 													<div class="flex items-center gap-2">
+														{#if stat.teachers.length > 1}
+															<div
+																class="flex h-4 w-4 items-center justify-center rounded-full border {getTeacherColor(
+																	dateInfo.teacher
+																)} text-[10px] font-bold text-white"
+															>
+																{getTeacherInitial(
+																	dateInfo.teacher
+																)}
+															</div>
+														{/if}
 														<span class="text-white"
 															>{dateInfo.date}</span
 														>
 														<span class="text-xs text-gray-400"
 															>({getDayOfWeek(dateInfo.date)})</span
+														>
+														<span
+															class="hidden text-xs text-yellow-400 md:block"
+															>{dateInfo.week} неделя</span
 														>
 														{#if dateInfo.isVUC}
 															<span
@@ -419,7 +640,7 @@
 															>
 														{/if}
 													</div>
-													<div class="text-xs text-yellow-400">
+													<div class="text-xs text-yellow-400 md:hidden">
 														{dateInfo.week} неделя
 													</div>
 													{#if dateInfo.time}

@@ -224,6 +224,17 @@
 							</p>
 						{/if}
 
+						{#if lesson.additionalTeacherName}
+							<p class="text-sm text-gray-400">
+								<a
+									href="/raspprep?id={lesson.additionalTeacherId}"
+									class="text-sm text-gray-400 transition-all hover:text-blue-400"
+								>
+									{lesson.additionalTeacherName}
+								</a>
+							</p>
+						{/if}
+
 						{#if lesson.groups}
 							<p class="text-sm text-gray-400">Группы: {lesson.groups}</p>
 						{/if}

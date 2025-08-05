@@ -29,6 +29,8 @@ export interface YSTULesson {
 	teacherName: string;
 	teacherId: number;
 	auditoryName: string;
+	additionalTeacherName?: string;
+	additionalTeacherId?: number;
 	isDistant?: boolean;
 	isDivision?: boolean;
 	groups?: string;

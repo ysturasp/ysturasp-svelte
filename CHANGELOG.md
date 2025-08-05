@@ -1,3 +1,4 @@
+- add animation for hide notification with expiration time (ysturasp, 2025-08-05) [6 files changed, 77 insertions(+), 67 deletions(-)]
 - optimize of schedule display by adding switch between days and weeks, improve state preservation logic, updating styles, and fixing errors in components (ysturasp, 2025-08-04) [8 files changed, 361 insertions(+), 135 deletions(-)]
 - add header adaptive link for schedule pages student teacher and audience (ysturasp, 2025-08-04) [11 files changed, 151 insertions(+), 66 deletions(-)]
 - fix subgroup statistics section merged with schedule and render only with data (ysturasp, 2025-08-04) [4 files changed, 13 insertions(+), 7 deletions(-)]
