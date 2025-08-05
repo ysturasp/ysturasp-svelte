@@ -7,6 +7,9 @@
 	export let onClose: () => void;
 
 	let modalContent: HTMLElement;
+	let scrollPosition: number;
+	let originalOverflow: string;
+	let originalPaddingRight: string;
 
 	function handleClickOutside(event: MouseEvent) {
 		if (isOpen && modalContent && !modalContent.contains(event.target as Node)) {
@@ -33,6 +36,21 @@
 			document.removeEventListener('keydown', handleKeydown);
 		}
 	});
+
+	$: if (browser) {
+		if (isOpen) {
+			scrollPosition = window.pageYOffset;
+			originalOverflow = document.body.style.overflow;
+			originalPaddingRight = document.body.style.paddingRight;
+			const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+			document.documentElement.style.overflow = 'hidden';
+			document.documentElement.style.paddingRight = `${scrollbarWidth}px`;
+		} else {
+			document.documentElement.style.overflow = originalOverflow;
+			document.documentElement.style.paddingRight = originalPaddingRight;
+			window.scrollTo(0, scrollPosition);
+		}
+	}
 </script>
 
 <div
