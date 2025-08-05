@@ -1,3 +1,4 @@
+- add ScheduleSwitcher component to schedule pages and revert to actual semester with select old schedule (ysturasp, 2025-08-05) [7 files changed, 76 insertions(+), 2 deletions(-)]
 - add casually deleted sortedStats (ysturasp, 2025-08-05) [3 files changed, 3 insertions(+)]
 - add sort of subgroup statistics by lesson type and text for all group lesson (ysturasp, 2025-08-05) [3 files changed, 13 insertions(+), 5 deletions(-)]
 - optimize of subgroup distribution, improve of logic for processing VUZ and non-VUZ classes (ysturasp, 2025-08-05) [3 files changed, 50 insertions(+), 20 deletions(-)]
