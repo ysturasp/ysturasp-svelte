@@ -42,6 +42,7 @@
 	import { writable } from 'svelte/store';
 	import { fade } from 'svelte/transition';
 	import { quintOut } from 'svelte/easing';
+	import ScheduleSwitcher from '$lib/components/schedule/ScheduleSwitcher.svelte';
 
 	const isMobile = writable(false);
 
@@ -617,6 +618,8 @@
 	onSave={handleSubgroupSettingsSave}
 	onClose={closeSubgroupModal}
 />
+
+<ScheduleSwitcher {selectedSemester} onSemesterChange={changeSemester} currentPage="students" />
 
 {#if isScheduleLoading && !isViewChanging}
 	<LoadingOverlay />

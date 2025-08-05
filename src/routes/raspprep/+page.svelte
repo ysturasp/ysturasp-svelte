@@ -26,6 +26,7 @@
 	import type { Teacher } from './api';
 	import type { TeacherScheduleData } from './types';
 	import NavigationLinks from '$lib/components/ui/NavigationLinks.svelte';
+	import ScheduleSwitcher from '$lib/components/schedule/ScheduleSwitcher.svelte';
 
 	let isLoading = false;
 	let isScheduleLoading = false;
@@ -316,6 +317,8 @@
 	<Footer />
 	<NotificationsContainer />
 </PageLayout>
+
+<ScheduleSwitcher {selectedSemester} onSemesterChange={changeSemester} currentPage="teachers" />
 
 {#if isScheduleLoading}
 	<LoadingOverlay />

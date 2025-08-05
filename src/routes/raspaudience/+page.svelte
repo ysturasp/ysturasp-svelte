@@ -25,7 +25,7 @@
 	import type { Audience } from './api';
 	import type { AudienceScheduleData } from './types';
 	import NavigationLinks from '$lib/components/ui/NavigationLinks.svelte';
-
+	import ScheduleSwitcher from '$lib/components/schedule/ScheduleSwitcher.svelte';
 	let isLoading = false;
 	let isScheduleLoading = false;
 	let audiences: Audience[] = [];
@@ -315,6 +315,8 @@
 	<Footer />
 	<NotificationsContainer />
 </PageLayout>
+
+<ScheduleSwitcher {selectedSemester} onSemesterChange={changeSemester} currentPage="audiences" />
 
 {#if isScheduleLoading}
 	<LoadingOverlay />
