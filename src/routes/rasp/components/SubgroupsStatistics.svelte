@@ -446,17 +446,17 @@
 						/>
 					</div>
 					<div class="text-sm text-gray-400">
-						{stats.length}
-						{stats.length === 1
+						{sortedStats.length}
+						{sortedStats.length === 1
 							? 'предмет'
-							: stats.length < 5
+							: sortedStats.length < 5
 								? 'предмета'
 								: 'предметов'}
 					</div>
 				</div>
 
 				<Carousel.Content class="-ml-2 md:-ml-4">
-					{#each stats as stat}
+					{#each sortedStats as stat}
 						<Carousel.Item class="basis-full pl-2 md:pl-4">
 							<div
 								class="rounded-2xl border border-gray-700 bg-gray-900 p-4 shadow backdrop-blur"
@@ -467,7 +467,7 @@
 											? 'bg-yellow-600/20'
 											: 'bg-green-600/20'} -mx-4 -mt-4 rounded-t-2xl px-4 py-2"
 									>
-										<div class="flex justify-center">
+										<div class="flex justify-center text-center">
 											<div class="text-sm">
 												<span
 													class={stat.isStreamLesson
@@ -478,6 +478,12 @@
 														? 'Всей группой'
 														: 'По подгруппам'}
 												</span>
+												{#if stat.isStreamLesson}
+													<div class="mt-1 text-xs text-yellow-400/70">
+														но.. мы всё равно рассчитываем, мало ли
+														пригодится
+													</div>
+												{/if}
 											</div>
 										</div>
 									</div>
