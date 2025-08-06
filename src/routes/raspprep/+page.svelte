@@ -315,7 +315,7 @@
 	</main>
 
 	<Footer />
-	<NotificationsContainer />
+	<NotificationsContainer hasScheduleSwitcher={true} />
 </PageLayout>
 
 <ScheduleSwitcher {selectedSemester} onSemesterChange={changeSemester} currentPage="teachers" />

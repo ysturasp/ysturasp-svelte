@@ -7,6 +7,7 @@
 	import { flip } from 'svelte/animate';
 	import { getSubgroupIndicator } from '../stores/subgroups';
 	import type { SubgroupSettings, TeacherSubgroups } from '../stores/subgroups';
+	import { notifications } from '$lib/stores/notifications';
 
 	export let date: string;
 	export let lessons: YSTULesson[];
@@ -25,6 +26,7 @@
 	}
 
 	function handleVisibilityToggle(lesson: YSTULesson) {
+		notifications.add('Предмет скрыт во всём семестре', 'info');
 		isHiding = true;
 		toggleSubjectVisibility(selectedGroup, {
 			lessonName: lesson.lessonName,

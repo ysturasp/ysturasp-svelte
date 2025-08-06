@@ -607,7 +607,7 @@
 	</main>
 
 	<Footer />
-	<NotificationsContainer />
+	<NotificationsContainer hasScheduleSwitcher={true} />
 </PageLayout>
 
 <SubgroupSettingsModal
