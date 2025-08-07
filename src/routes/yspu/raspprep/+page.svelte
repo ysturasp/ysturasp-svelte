@@ -139,7 +139,7 @@
 
 	<main class="container mx-auto mt-5 px-3 md:mt-7 md:px-0">
 		<section class="sаm:p-6 mt-8 rounded-2xl bg-slate-800 p-4">
-			<div class="mb-4 rounded-lg bg-amber-500 p-4 text-center text-black">
+			<div class="relative mb-2 rounded-2xl bg-amber-500 p-4 text-center text-black">
 				<div class="flex items-center justify-center gap-2">
 					<div
 						class="mr-1 h-3 w-3 animate-pulse rounded-full ring-8"

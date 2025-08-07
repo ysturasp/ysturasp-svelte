@@ -8,7 +8,6 @@
 	import { getSubgroupIndicator } from '../stores/subgroups';
 	import type { SubgroupSettings, TeacherSubgroups } from '../stores/subgroups';
 	import { notifications } from '$lib/stores/notifications';
-	import { onDestroy } from 'svelte';
 
 	export let date: string;
 	export let lessons: YSTULesson[];
@@ -153,7 +152,7 @@
 		});
 </script>
 
-<div class="mt-4">
+<div class="mt-3">
 	<div
 		class="day-schedule mb-4 rounded-2xl bg-slate-900 p-4 transition-[height] duration-500 ease-out last:mb-0"
 		class:border-2={isCurrentDay}
@@ -173,7 +172,7 @@
 					teacherSubgroups
 				)}
 				<div
-					class="mb-2 flex cursor-pointer rounded-2xl bg-slate-800 p-4 transition-all last:mb-0 hover:bg-slate-700"
+					class="mb-2 flex w-full cursor-pointer rounded-2xl bg-slate-800 p-4 transition-all last:mb-0 hover:bg-slate-700"
 					animate:flip={{
 						duration: isHiding ? 500 : 0,
 						easing: quintOut
@@ -183,6 +182,10 @@
 						easing: quintOut
 					}}
 					on:click={() => handleLessonClick(lesson)}
+					on:keydown={(e) => e.key === 'Enter' && handleLessonClick(lesson)}
+					role="button"
+					tabindex="0"
+					aria-label="Информация о занятии {lesson.lessonName}"
 				>
 					<div
 						class="mr-2 flex w-14 flex-col items-end justify-between border-r-2 pr-2 {typeInfo.color}"
@@ -249,14 +252,17 @@
 							<p class="text-sm text-gray-400">Группы: {lesson.groups}</p>
 						{/if}
 					</div>
-					<label class="switch ml-auto self-center" on:click|stopPropagation>
-						<input
-							type="checkbox"
-							checked={!isLessonHidden(lesson)}
-							on:change={(e) => handleVisibilityToggle(e, lesson)}
-						/>
+					<button
+						type="button"
+						class="switch ml-auto self-center"
+						aria-label="Переключить видимость предмета"
+						on:click|stopPropagation={(e) => handleVisibilityToggle(e, lesson)}
+						on:keydown|stopPropagation={(e) =>
+							e.key === 'Enter' && handleVisibilityToggle(e, lesson)}
+					>
+						<input type="checkbox" checked={!isLessonHidden(lesson)} />
 						<span class="slider round"></span>
-					</label>
+					</button>
 				</div>
 			{/each}
 		</div>

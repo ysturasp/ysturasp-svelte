@@ -15,7 +15,7 @@
 		(state) => !state.name.toLowerCase().includes('duplicate')
 	);
 
-	function handleClickOutside(event: MouseEvent) {
+	function handleClickOutside(event: MouseEvent | KeyboardEvent) {
 		if (container && !container.contains(event.target as Node)) {
 			event.stopPropagation();
 			onClose();
@@ -27,7 +27,7 @@
 		onClose();
 	}
 
-	function handleContainerClick(event: MouseEvent) {
+	function handleContainerClick(event: MouseEvent | KeyboardEvent) {
 		event.stopPropagation();
 	}
 
@@ -82,15 +82,26 @@
 			class="fixed inset-0 z-120 flex items-center justify-center bg-black/50 px-4"
 			transition:fade={{ duration: 200 }}
 			on:click={handleClickOutside}
+			on:keydown={(e) => e.key === 'Escape' && handleClickOutside(e)}
+			role="button"
+			tabindex="0"
+			aria-label="Закрыть окно выбора статуса"
 		>
 			<div
 				bind:this={container}
 				class="w-full max-w-sm rounded-2xl bg-slate-900 p-4 shadow-xl ring-1 ring-blue-500/50"
 				transition:scale={{ duration: 200, easing: quintOut }}
 				on:click={handleContainerClick}
+				on:keydown={(e) => e.key === 'Enter' && handleContainerClick(e)}
+				role="dialog"
+				tabindex="-1"
+				aria-modal="true"
+				aria-labelledby="dialog-title"
 			>
 				<div class="mb-4 flex items-center justify-between">
-					<h3 class="text-lg font-semibold text-white">Выберите статус</h3>
+					<h3 id="dialog-title" class="text-lg font-semibold text-white">
+						Выберите статус
+					</h3>
 					<button
 						on:click={onClose}
 						class="text-gray-400 hover:text-white"

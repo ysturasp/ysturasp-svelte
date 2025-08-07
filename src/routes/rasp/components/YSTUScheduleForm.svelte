@@ -126,9 +126,9 @@
 	}
 </script>
 
-<form class="grid grid-cols-1 gap-4" on:submit|preventDefault={handleSubmit}>
+<form class="grid grid-cols-1 gap-1" on:submit|preventDefault={handleSubmit}>
 	<div>
-		<label for="institute-select" class="mb-2 block text-white">Выберите институт:</label>
+		<label for="institute-select" class="mb-1 block text-white">Выберите институт:</label>
 		<CustomSelect
 			items={instituteItems}
 			bind:selectedId={selectedInstitute}
@@ -142,7 +142,7 @@
 	</div>
 
 	<div>
-		<label for="group-select" class="mb-2 block text-white">Выберите группу:</label>
+		<label for="group-select" class="mb-1 block text-white">Выберите группу:</label>
 		<div
 			role="button"
 			tabindex="-1"
@@ -167,7 +167,7 @@
 	</div>
 
 	<div>
-		<label for="week-select" class="mb-2 block text-white">Выберите неделю:</label>
+		<label for="week-select" class="mb-1 block text-white">Выберите неделю:</label>
 		<CustomSelect
 			items={weeks}
 			bind:selectedId={selectedWeek}
@@ -181,7 +181,7 @@
 
 	<button
 		type="submit"
-		class="rounded-lg bg-blue-700 p-2 text-white transition-all hover:bg-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
+		class="my-1 rounded-lg bg-blue-700 p-2 text-white transition-all hover:bg-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
 		disabled={isLoading}
 	>
 		{isLoading ? 'Загрузка...' : submitButtonText}

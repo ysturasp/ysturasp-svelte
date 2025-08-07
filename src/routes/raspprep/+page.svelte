@@ -223,7 +223,7 @@
 
 	<main class="container mx-auto mt-5 px-3 md:mt-7 md:px-0">
 		<section class="mt-8 rounded-2xl bg-slate-800 p-4 sm:p-6">
-			<div class="mb-4 rounded-lg bg-amber-500 p-4 text-center text-black">
+			<div class="relative mb-2 rounded-2xl bg-amber-500 p-4 text-center text-black">
 				<div class="flex items-center justify-center gap-2">
 					<div
 						class="mr-1 h-3 w-3 animate-pulse rounded-full ring-8"
@@ -232,15 +232,6 @@
 					<p class="mb-1 font-semibold">Расписание актуально</p>
 				</div>
 				<p class="text-md text-black">{getCurrentWeekMessage()}</p>
-			</div>
-
-			<div class="mb-4 flex items-center justify-between">
-				<div class="flex items-center">
-					<h2 class="text-3xl font-semibold text-white">📅</h2>
-					<h2 class="text-md ml-2 font-semibold text-white md:text-4xl">
-						Расписание преподавателей
-					</h2>
-				</div>
 			</div>
 
 			<TeacherScheduleForm
@@ -255,7 +246,7 @@
 
 			{#if scheduleData && selectedTeacher}
 				<div class="mt-4">
-					<div class="mb-4 flex justify-center md:items-center">
+					<div class="mb-2 flex justify-center md:items-center">
 						<button
 							on:click={() => changeWeek(-1)}
 							class="mr-2 rounded-lg bg-blue-700 p-2 text-3xl text-white transition-all hover:bg-blue-600"

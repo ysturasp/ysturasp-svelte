@@ -3,7 +3,6 @@
 	import SimpleCombobox from '$lib/components/schedule/SimpleCombobox.svelte';
 	import CopyLinkButton from '$lib/components/ui/CopyLinkButton.svelte';
 	import { formatWeekStartDate } from '$lib/utils/semester';
-	import { page } from '$app/stores';
 	import { replaceState } from '$app/navigation';
 
 	export let teachers: Teacher[] = [];
@@ -128,9 +127,9 @@
 	}
 </script>
 
-<div class="grid grid-cols-1 gap-4">
+<div class="grid grid-cols-1 gap-1">
 	<div>
-		<label for="teacher-select" class="mb-2 block text-white">Преподаватель:</label>
+		<label for="teacher-select" class="mb-1 block text-white">Преподаватель:</label>
 		<SimpleCombobox
 			id="teacher-select"
 			items={teacherItems}
@@ -142,7 +141,7 @@
 	</div>
 
 	<div>
-		<label for="week-select" class="mb-2 block text-white">Неделя:</label>
+		<label for="week-select" class="mb-1 block text-white">Неделя:</label>
 		<SimpleCombobox
 			id="week-select"
 			items={weekItems}
@@ -157,7 +156,7 @@
 	<button
 		type="button"
 		on:click={handleSubmit}
-		class="rounded-lg bg-blue-700 p-2 text-white transition-all hover:bg-blue-600"
+		class="my-1 rounded-lg bg-blue-700 p-2 text-white transition-all hover:bg-blue-600"
 		disabled={isLoading}
 	>
 		{isLoading ? 'Загрузка...' : submitButtonText}

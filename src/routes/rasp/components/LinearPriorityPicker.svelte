@@ -2,7 +2,7 @@
 	import { fade, scale } from 'svelte/transition';
 	import { quintOut } from 'svelte/easing';
 	import { LINEAR_PRIORITIES } from '../stores/linear';
-	import Portal from '$lib/components/ui/Portal.svelte';
+	import Portal from '../../../lib/components/ui/Portal.svelte';
 
 	export let isOpen = false;
 	export let onClose: () => void;
@@ -14,6 +14,12 @@
 	function handleClickOutside(event: MouseEvent) {
 		if (container && !container.contains(event.target as Node)) {
 			event.stopPropagation();
+			onClose();
+		}
+	}
+
+	function handleEscape(event: KeyboardEvent) {
+		if (event.key === 'Escape') {
 			onClose();
 		}
 	}
@@ -50,13 +56,20 @@
 		<div
 			class="fixed inset-0 z-120 flex items-center justify-center bg-black/50 px-4"
 			transition:fade={{ duration: 200 }}
+			on:keydown={handleEscape}
 			on:click={handleClickOutside}
+			role="presentation"
 		>
 			<div
 				bind:this={container}
 				class="w-full max-w-sm rounded-2xl bg-slate-900 p-4 shadow-xl ring-1 ring-blue-500/50"
 				transition:scale={{ duration: 200, easing: quintOut }}
-				on:click={handleContainerClick}
+				on:click|stopPropagation={handleContainerClick}
+				on:keydown={handleEscape}
+				role="dialog"
+				aria-modal="true"
+				aria-label="Выбор приоритета"
+				tabindex="0"
 			>
 				<div class="mb-4 flex items-center justify-between">
 					<h3 class="text-lg font-semibold text-white">Выберите приоритет</h3>

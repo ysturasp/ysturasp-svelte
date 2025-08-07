@@ -272,7 +272,7 @@
 			localStorage.setItem('lastWeek', selectedWeek);
 			updateURL();
 
-			if (!isFullView && window.innerWidth <= 768) {
+			if (!isFullView && $isMobile) {
 				const newWeekData = scheduleData?.items.find((week) => week.number === newWeek);
 				const newFilteredDays =
 					newWeekData?.days.filter((day) => {
@@ -308,7 +308,7 @@
 			teacherSubgroups.set(currentTeacherSubgroups);
 			saveTeacherSubgroups(currentTeacherSubgroups);
 
-			if (!isFullView && window.innerWidth <= 768) {
+			if (!isFullView && $isMobile) {
 				const currentWeekData = scheduleData.items.find(
 					(week) => week.number === parseInt(selectedWeek, 10)
 				);
@@ -379,6 +379,15 @@
 		}
 	}
 
+	$: {
+		if ($isMobile && !isFullView && filteredDays.length > 0) {
+			if (!selectedDay || !filteredDays.some((day) => day.info.date === selectedDay)) {
+				selectedDay = filteredDays[0].info.date;
+				localStorage.setItem('lastSelectedDay', selectedDay);
+			}
+		}
+	}
+
 	$: currentWeekMessage = getCurrentWeekMessage();
 	$: currentWeekData = scheduleData?.items.find(
 		(week) => week.number === parseInt(selectedWeek, 10)
@@ -441,7 +450,7 @@
 
 	<main class="container mx-auto mt-5 px-3 md:mt-7 md:px-0">
 		<section class="mt-8 rounded-2xl bg-slate-800 p-4 sm:p-6">
-			<div class="mb-4 rounded-lg bg-amber-500 p-4 text-center text-black">
+			<div class="relative mb-2 rounded-2xl bg-amber-500 p-4 text-center text-black">
 				<div class="flex items-center justify-center gap-2">
 					<div
 						class="mr-1 h-3 w-3 animate-pulse rounded-full ring-8"
@@ -450,13 +459,6 @@
 					<p class="mb-1 font-semibold">Расписание актуально</p>
 				</div>
 				<p class="text-md text-black">{getCurrentWeekMessage()}</p>
-			</div>
-
-			<div class="mb-4 flex items-center">
-				<h2 class="text-4xl font-semibold text-white">📅</h2>
-				<h2 class="ml-2 text-2xl font-semibold text-white md:text-4xl">
-					Расписание занятий
-				</h2>
 			</div>
 
 			<YSTUScheduleForm
@@ -473,7 +475,7 @@
 
 			{#if scheduleData}
 				<div class="mt-4">
-					<div class="mb-4 flex justify-center md:items-center">
+					<div class="mb-2 flex justify-center md:items-center">
 						<button
 							on:click={() => changeWeek(-1)}
 							class="mr-2 rounded-lg bg-blue-700 p-2 text-3xl text-white transition-all hover:bg-blue-600"
@@ -503,7 +505,7 @@
 					</div>
 
 					{#if $isMobile}
-						<div class="mb-4 flex items-center justify-end">
+						<div class="mb-2 flex items-center justify-end">
 							<span class="mr-2 text-white">По дням</span>
 							<label class="switch flex items-center">
 								<input
@@ -533,7 +535,7 @@
 									out:fade={{ duration: 500, easing: quintOut }}
 								>
 									<div
-										class="mb-4 grid gap-1"
+										class="mb-2 grid gap-1"
 										style="grid-template-columns: repeat({filteredDays.length}, 1fr)"
 									>
 										{#each filteredDays as day}

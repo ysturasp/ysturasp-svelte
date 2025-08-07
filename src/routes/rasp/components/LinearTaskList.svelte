@@ -400,6 +400,7 @@
 					<button
 						on:click={() => handleDeleteTask(task.id)}
 						class="flex h-8 w-8 items-center justify-center rounded-lg bg-red-600 text-white transition-all hover:bg-red-700"
+						aria-label="Удалить задачу"
 					>
 						<svg
 							class="h-4 w-4"
