@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { getInstitutes, getSchedule } from './api';
-	import type { Institute, ScheduleData } from './types';
+	import type { Institute, ScheduleData, YSTULesson } from './types';
 	import { hiddenSubjects } from './stores';
 	import PageLayout from '$lib/components/layout/PageLayout.svelte';
 	import Header from '$lib/components/layout/Header.svelte';
@@ -16,6 +16,7 @@
 	import SubgroupsStatistics from './components/SubgroupsStatistics.svelte';
 	import HiddenSubjects from './components/HiddenSubjects.svelte';
 	import GithubApiSection from '$lib/components/sections/GithubApiSection.svelte';
+	import LinearIntegrationModal from './components/LinearIntegrationModal.svelte';
 	import {
 		SEMESTER_WEEKS_COUNT,
 		getCurrentWeekMessage,
@@ -96,6 +97,10 @@
 	let isSubgroupModalOpen = false;
 	let currentSubgroupSettings: SubgroupSettings = {};
 	let currentTeacherSubgroups: TeacherSubgroups = {};
+
+	let isLinearModalOpen = false;
+	let selectedLesson: YSTULesson | null = null;
+	let selectedLessonDate = '';
 
 	onMount(async () => {
 		try {
@@ -335,6 +340,22 @@
 		isSubgroupModalOpen = false;
 	}
 
+	function handleLinearModalOpen(lesson: YSTULesson, date: string) {
+		selectedLesson = lesson;
+		selectedLessonDate = date;
+		setTimeout(() => {
+			isLinearModalOpen = true;
+		}, 0);
+	}
+
+	function handleLinearModalClose() {
+		isLinearModalOpen = false;
+		setTimeout(() => {
+			selectedLesson = null;
+			selectedLessonDate = '';
+		}, 300);
+	}
+
 	function isToday(dateString: string): boolean {
 		const date = new Date(dateString);
 		const today = new Date();
@@ -550,6 +571,7 @@
 												{selectedGroup}
 												subgroupSettings={currentSubgroupSettings}
 												teacherSubgroups={currentTeacherSubgroups}
+												onLessonClick={handleLinearModalOpen}
 											/>
 										{/if}
 									{/each}
@@ -568,6 +590,7 @@
 												{selectedGroup}
 												subgroupSettings={currentSubgroupSettings}
 												teacherSubgroups={currentTeacherSubgroups}
+												onLessonClick={handleLinearModalOpen}
 											/>
 										{/if}
 									{/each}
@@ -583,6 +606,7 @@
 									{selectedGroup}
 									subgroupSettings={currentSubgroupSettings}
 									teacherSubgroups={currentTeacherSubgroups}
+									onLessonClick={handleLinearModalOpen}
 								/>
 							{/if}
 						{/each}
@@ -623,6 +647,15 @@
 
 {#if isScheduleLoading && !isViewChanging}
 	<LoadingOverlay />
+{/if}
+
+{#if selectedLesson}
+	<LinearIntegrationModal
+		isOpen={isLinearModalOpen}
+		onClose={handleLinearModalClose}
+		lesson={selectedLesson}
+		date={selectedLessonDate}
+	/>
 {/if}
 
 <style>

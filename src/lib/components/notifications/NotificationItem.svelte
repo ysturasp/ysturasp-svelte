@@ -33,6 +33,7 @@
 	});
 
 	function handleTouchStart(e: TouchEvent) {
+		e.stopPropagation();
 		touchStartX = e.changedTouches[0].screenX;
 		isSwiping = true;
 		notificationElement.style.transition = '';
@@ -40,12 +41,14 @@
 
 	function handleTouchMove(e: TouchEvent) {
 		if (!isSwiping) return;
+		e.stopPropagation();
 		currentX = e.changedTouches[0].screenX;
 		moveX = currentX - touchStartX;
 		notificationElement.style.transform = `translateX(${moveX}px)`;
 	}
 
-	function handleTouchEnd() {
+	function handleTouchEnd(e: TouchEvent) {
+		e.stopPropagation();
 		if (!isSwiping) return;
 		isSwiping = false;
 
@@ -73,6 +76,18 @@
 		hide();
 	}
 
+	function handleClickStop(event: MouseEvent) {
+		event.stopPropagation();
+		handleClick();
+	}
+
+	function handleKeydownStop(event: KeyboardEvent) {
+		if (event.key === 'Enter' || event.key === ' ') {
+			event.stopPropagation();
+			handleClick();
+		}
+	}
+
 	const remove = () => {
 		dispatch('remove', id);
 	};
@@ -86,10 +101,8 @@
 	on:touchstart={handleTouchStart}
 	on:touchmove={handleTouchMove}
 	on:touchend={handleTouchEnd}
-	on:click={handleClick}
-	on:keydown={(e) => {
-		if (e.key === 'Enter' || e.key === ' ') handleClick();
-	}}
+	on:click={handleClickStop}
+	on:keydown={handleKeydownStop}
 	tabindex="0"
 	role="button"
 >

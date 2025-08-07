@@ -1,3 +1,4 @@
+- add support schedule switcher in NotificationsContainer component and item hiding notification in YSTUScheduleDay (ysturasp, 2025-08-06) [7 files changed, 12 insertions(+), 4 deletions(-)]
 - add lock scroll under modal component (ysturasp, 2025-08-05) [3 files changed, 20 insertions(+)]
 - changing page language from English to Russian (ysturasp, 2025-08-05) [3 files changed, 3 insertions(+), 1 deletion(-)]
 - add ScheduleSwitcher component to schedule pages and revert to actual semester with select old schedule (ysturasp, 2025-08-05) [7 files changed, 76 insertions(+), 2 deletions(-)]

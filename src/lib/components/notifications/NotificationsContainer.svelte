@@ -3,16 +3,21 @@
 	import NotificationItem from '$lib/components/notifications/NotificationItem.svelte';
 
 	export let hasScheduleSwitcher = false;
+
+	function handleContainerClick(event: MouseEvent) {
+		event.stopPropagation();
+	}
 </script>
 
 <div
 	id="notifications-container"
-	class="pointer-events-none fixed right-2 left-2 z-100 flex flex-col-reverse gap-3 {hasScheduleSwitcher
+	class="pointer-events-none fixed right-2 left-2 z-110 flex flex-col-reverse gap-3 {hasScheduleSwitcher
 		? 'bottom-18 md:bottom-2'
 		: 'bottom-2'}"
+	on:click={handleContainerClick}
 >
 	{#each $notifications as notification (notification.id)}
-		<div class="pointer-events-auto">
+		<div class="pointer-events-auto" on:click={handleContainerClick}>
 			<NotificationItem
 				message={notification.message}
 				type={notification.type}

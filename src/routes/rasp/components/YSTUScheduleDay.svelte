@@ -8,15 +8,21 @@
 	import { getSubgroupIndicator } from '../stores/subgroups';
 	import type { SubgroupSettings, TeacherSubgroups } from '../stores/subgroups';
 	import { notifications } from '$lib/stores/notifications';
+	import { onDestroy } from 'svelte';
 
 	export let date: string;
 	export let lessons: YSTULesson[];
 	export let selectedGroup: string;
 	export let subgroupSettings: SubgroupSettings = {};
 	export let teacherSubgroups: TeacherSubgroups = {};
+	export let onLessonClick: (lesson: YSTULesson, date: string) => void;
 
 	let previousLessons = lessons;
 	let isHiding = false;
+
+	function handleLessonClick(lesson: YSTULesson) {
+		onLessonClick(lesson, date);
+	}
 
 	$: {
 		if (lessons !== previousLessons) {
@@ -25,7 +31,8 @@
 		}
 	}
 
-	function handleVisibilityToggle(lesson: YSTULesson) {
+	function handleVisibilityToggle(event: Event, lesson: YSTULesson) {
+		event.stopPropagation();
 		notifications.add('Предмет скрыт во всём семестре', 'info');
 		isHiding = true;
 		toggleSubjectVisibility(selectedGroup, {
@@ -166,7 +173,7 @@
 					teacherSubgroups
 				)}
 				<div
-					class="mb-2 flex rounded-2xl bg-slate-800 p-4 last:mb-0"
+					class="mb-2 flex cursor-pointer rounded-2xl bg-slate-800 p-4 transition-all last:mb-0 hover:bg-slate-700"
 					animate:flip={{
 						duration: isHiding ? 500 : 0,
 						easing: quintOut
@@ -175,6 +182,7 @@
 						duration: isHiding ? 500 : 0,
 						easing: quintOut
 					}}
+					on:click={() => handleLessonClick(lesson)}
 				>
 					<div
 						class="mr-2 flex w-14 flex-col items-end justify-between border-r-2 pr-2 {typeInfo.color}"
@@ -241,11 +249,11 @@
 							<p class="text-sm text-gray-400">Группы: {lesson.groups}</p>
 						{/if}
 					</div>
-					<label class="switch ml-auto self-center">
+					<label class="switch ml-auto self-center" on:click|stopPropagation>
 						<input
 							type="checkbox"
 							checked={!isLessonHidden(lesson)}
-							on:change={() => handleVisibilityToggle(lesson)}
+							on:change={(e) => handleVisibilityToggle(e, lesson)}
 						/>
 						<span class="slider round"></span>
 					</label>
