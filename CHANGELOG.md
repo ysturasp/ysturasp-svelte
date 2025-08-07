@@ -1,3 +1,4 @@
+- rewrite integration with linear for create tasks for lesson (ysturasp, 2025-08-07) [14 files changed, 2421 insertions(+), 44 deletions(-)]
 - add support schedule switcher in NotificationsContainer component and item hiding notification in YSTUScheduleDay (ysturasp, 2025-08-06) [7 files changed, 12 insertions(+), 4 deletions(-)]
 - add lock scroll under modal component (ysturasp, 2025-08-05) [3 files changed, 20 insertions(+)]
 - changing page language from English to Russian (ysturasp, 2025-08-05) [3 files changed, 3 insertions(+), 1 deletion(-)]

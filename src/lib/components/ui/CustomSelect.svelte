@@ -119,12 +119,7 @@
 	}
 
 	function handleScroll(event: Event) {
-		const target = event.target as Node;
-		if (!selectTrigger.contains(target) && !popupMenu?.contains(target)) {
-			closePopup();
-		} else {
-			setupPopupPosition();
-		}
+		setupPopupPosition();
 	}
 
 	function setupPopupPosition() {
