@@ -5,6 +5,9 @@
 	export let selectedSemester: SemesterInfo | null = null;
 	export let onSemesterChange: (semester: SemesterInfo) => void;
 	export let currentPage: 'students' | 'teachers' | 'audiences' = 'students';
+	export let university: 'ystu' | 'yspu' = 'ystu';
+
+	$: prefix = university === 'yspu' ? '/yspu' : '';
 </script>
 
 <div class="fixed bottom-4 left-1/2 z-50 -translate-x-1/2">
@@ -27,7 +30,7 @@
 
 			<div class="flex items-center gap-1.5">
 				<a
-					href="/rasp"
+					href="{prefix}/rasp"
 					class="flex items-center gap-1.5 rounded-xl px-2.5 py-1 {currentPage ===
 					'students'
 						? 'bg-blue-500/10 text-white'
@@ -38,7 +41,7 @@
 				</a>
 
 				<a
-					href="/raspprep"
+					href="{prefix}/raspprep"
 					class="flex items-center gap-1.5 rounded-xl px-2.5 py-1 {currentPage ===
 					'teachers'
 						? 'bg-blue-500/10 text-white'
@@ -49,7 +52,7 @@
 				</a>
 
 				<a
-					href="/raspaudience"
+					href="{prefix}/raspaudience"
 					class="flex items-center gap-1.5 rounded-xl px-2.5 py-1 {currentPage ===
 					'audiences'
 						? 'bg-blue-500/10 text-white'

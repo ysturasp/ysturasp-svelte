@@ -1,3 +1,4 @@
+- fix warnings on project after create big feature (ysturasp, 2025-08-07) [14 files changed, 94 insertions(+), 81 deletions(-)]
 - fix close custom select by scroll (ysturasp, 2025-08-07) [3 files changed, 3 insertions(+), 6 deletions(-)]
 - rewrite integration with linear for create tasks for lesson (ysturasp, 2025-08-07) [14 files changed, 2421 insertions(+), 44 deletions(-)]
 - add support schedule switcher in NotificationsContainer component and item hiding notification in YSTUScheduleDay (ysturasp, 2025-08-06) [7 files changed, 12 insertions(+), 4 deletions(-)]

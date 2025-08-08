@@ -13,6 +13,8 @@
 	import type { Teacher } from './api';
 	import GithubParserInfo from '../rasp/components/GithubParserInfo.svelte';
 	import NavigationLinks from '$lib/components/ui/NavigationLinks.svelte';
+	import ScheduleSwitcher from '$lib/components/schedule/ScheduleSwitcher.svelte';
+
 	interface TeacherScheduleData {
 		items: {
 			courseInfo: {
@@ -138,7 +140,7 @@
 	</Header>
 
 	<main class="container mx-auto mt-5 px-3 md:mt-7 md:px-0">
-		<section class="sаm:p-6 mt-8 rounded-2xl bg-slate-800 p-4">
+		<section class="mt-8 rounded-2xl bg-slate-800 p-4 sm:p-6">
 			<div class="relative mb-2 rounded-2xl bg-amber-500 p-4 text-center text-black">
 				<div class="flex items-center justify-center gap-2">
 					<div
@@ -150,14 +152,10 @@
 			</div>
 
 			<div class="mb-4 flex items-center">
-				<h2 class="text-3xl font-semibold text-white">📅</h2>
-				<h2 class="text-md ml-2 font-semibold text-white md:text-4xl">
+				<h2 class="text-4xl font-semibold text-white">👨‍🏫</h2>
+				<h2 class="ml-2 text-2xl font-semibold text-white md:text-4xl">
 					Расписание преподавателей
 				</h2>
-				<span
-					class="mb-6 ml-2 flex rounded-full bg-indigo-500 px-2 py-1 text-xs font-bold uppercase"
-					>Beta</span
-				>
 			</div>
 
 			<TeacherScheduleForm
@@ -201,6 +199,13 @@
 	<Footer />
 	<NotificationsContainer />
 </PageLayout>
+
+<ScheduleSwitcher
+	selectedSemester={null}
+	onSemesterChange={() => {}}
+	currentPage="teachers"
+	university="yspu"
+/>
 
 {#if isScheduleLoading}
 	<LoadingOverlay />

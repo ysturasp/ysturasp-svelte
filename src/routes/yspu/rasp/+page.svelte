@@ -21,6 +21,7 @@
 	import OnlineCounter from '$lib/components/ui/OnlineCounter.svelte';
 	import GithubParserInfo from './components/GithubParserInfo.svelte';
 	import NavigationLinks from '$lib/components/ui/NavigationLinks.svelte';
+	import ScheduleSwitcher from '$lib/components/schedule/ScheduleSwitcher.svelte';
 
 	let isLoading = false;
 	let isScheduleLoading = false;
@@ -337,35 +338,45 @@
 	<NotificationsContainer />
 </PageLayout>
 
+<ScheduleSwitcher
+	selectedSemester={null}
+	onSemesterChange={() => {}}
+	currentPage="students"
+	university="yspu"
+/>
+
 <BetaModal
 	isOpen={isBetaModalOpen}
 	title="Что такое Beta?"
 	onClose={() => (isBetaModalOpen = false)}
 >
-	<p class="mb-4">
-		Это бета-версия расписания ЯГПУ. Мы разработали экосистему для ЯГТУ, настало время
-		расширяться, на одном из факультетов ЯГПУ <a
-			href="https://vk.com/fsyipp"
-			class="text-blue-500 hover:text-blue-600">(Факультет Социального Управления)</a
-		> теперь можно смотреть расписание у нас в удобном виде
-	</p>
-	<p class="mb-4">
-		Больше никакой путаницы с таблицами — только чёткое и понятное расписание. А также широкий
-		выбор где можно посмотреть: браузер, <a
-			class="font-extrabold text-gray-200"
-			href="/installapp">web-приложение на iPhone</a
-		>, или
-		<a class="font-extrabold text-gray-200" href="https://t.me/ysturasp_yspu_bot/ysturasp_yspu"
-			>мини-приложение в телеграме</a
-		>
-	</p>
-	<p class="mb-4">
-		На начальном этапе могут быть некоторые косяки. Если у вас есть предложения по улучшению или
-		вы нашли ошибку, пожалуйста, сообщите об этом <a
-			href="https://t.me/ysturasp_bot"
-			class="text-blue-500 hover:text-blue-600">нам</a
-		>
-	</p>
+	<div class="rounded-lg bg-gray-800 p-4">
+		<p class="mb-4">
+			Это бета-версия расписания ЯГПУ. Мы разработали экосистему для ЯГТУ, настало время
+			расширяться, на одном из факультетов ЯГПУ <a
+				href="https://vk.com/fsyipp"
+				class="text-blue-500 hover:text-blue-600">(Факультет Социального Управления)</a
+			> теперь можно смотреть расписание у нас в удобном виде
+		</p>
+		<p class="mb-4">
+			Больше никакой путаницы с таблицами — только чёткое и понятное расписание. А также
+			широкий выбор где можно посмотреть: браузер, <a
+				class="font-extrabold text-gray-200"
+				href="/installapp">web-приложение на iPhone</a
+			>, или
+			<a
+				class="font-extrabold text-gray-200"
+				href="https://t.me/ysturasp_yspu_bot/ysturasp_yspu">мини-приложение в телеграме</a
+			>
+		</p>
+		<p>
+			На начальном этапе могут быть некоторые косяки. Если у вас есть предложения по улучшению
+			или вы нашли ошибку, пожалуйста, сообщите об этом <a
+				href="https://t.me/ysturasp_bot"
+				class="text-blue-500 hover:text-blue-600">нам</a
+			>
+		</p>
+	</div>
 	<svelte:fragment slot="footer">
 		<button
 			on:click={() => (isBetaModalOpen = false)}

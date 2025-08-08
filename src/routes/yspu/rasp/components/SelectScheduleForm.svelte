@@ -71,9 +71,9 @@
 	}
 </script>
 
-<form class="grid grid-cols-1 gap-2" on:submit|preventDefault={handleSubmit}>
+<form class="grid grid-cols-1 gap-1" on:submit|preventDefault={handleSubmit}>
 	<div>
-		<span class="mb-2 block text-white">Выберите профиль:</span>
+		<span class="mb-1 block text-white">Профиль:</span>
 		<CustomSelect
 			items={directionItems}
 			bind:selectedId={selectedDirection}
@@ -89,7 +89,7 @@
 	</div>
 
 	<div>
-		<span class="mb-2 block text-white">Выберите группу:</span>
+		<span class="mb-1 block text-white">Группа:</span>
 		<div
 			role="button"
 			tabindex="-1"
@@ -120,7 +120,7 @@
 
 	<button
 		type="submit"
-		class="rounded-xl bg-blue-700 p-2 text-white transition-all hover:bg-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
+		class="my-1 rounded-xl bg-blue-700 p-2 text-white transition-all hover:bg-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
 		disabled={isLoading}
 	>
 		{isLoading ? 'Загрузка...' : 'Показать расписание группы'}

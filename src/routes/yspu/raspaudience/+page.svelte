@@ -14,6 +14,7 @@
 	import { notifications } from '$lib/stores/notifications';
 	import GithubParserInfo from '../rasp/components/GithubParserInfo.svelte';
 	import NavigationLinks from '$lib/components/ui/NavigationLinks.svelte';
+	import ScheduleSwitcher from '$lib/components/schedule/ScheduleSwitcher.svelte';
 
 	let isLoading = false;
 	let isScheduleLoading = false;
@@ -109,7 +110,7 @@
 
 	<main class="container mx-auto mt-5 px-3 md:mt-7 md:px-0">
 		<section class="mt-8 rounded-2xl bg-slate-800 p-4 sm:p-6">
-			<div class="mb-4 rounded-2xl bg-amber-500 p-4 text-center text-black">
+			<div class="mb-2 rounded-2xl bg-amber-500 p-4 text-center text-black">
 				<div class="flex items-center justify-center gap-2">
 					<div
 						class="mr-1 h-3 w-3 animate-pulse rounded-full ring-8"
@@ -120,14 +121,10 @@
 			</div>
 
 			<div class="mb-4 flex items-center">
-				<h2 class="text-3xl font-semibold text-white">🏛️</h2>
-				<h2 class="text-md ml-2 font-semibold text-white md:text-4xl">
+				<h2 class="text-4xl font-semibold text-white">🏛️</h2>
+				<h2 class="ml-2 text-2xl font-semibold text-white md:text-4xl">
 					Расписание аудиторий
 				</h2>
-				<span
-					class="mb-6 ml-2 flex rounded-full bg-indigo-500 px-2 py-1 text-xs font-bold uppercase"
-					>Beta</span
-				>
 			</div>
 
 			<AudienceScheduleForm
@@ -168,6 +165,13 @@
 	<Footer />
 	<NotificationsContainer />
 </PageLayout>
+
+<ScheduleSwitcher
+	selectedSemester={null}
+	onSemesterChange={() => {}}
+	currentPage="audiences"
+	university="yspu"
+/>
 
 {#if isScheduleLoading}
 	<LoadingOverlay />

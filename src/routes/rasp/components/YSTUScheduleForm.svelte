@@ -128,7 +128,7 @@
 
 <form class="grid grid-cols-1 gap-1" on:submit|preventDefault={handleSubmit}>
 	<div>
-		<label for="institute-select" class="mb-1 block text-white">Выберите институт:</label>
+		<label for="institute-select" class="mb-1 block text-white">Институт:</label>
 		<CustomSelect
 			items={instituteItems}
 			bind:selectedId={selectedInstitute}
@@ -142,7 +142,7 @@
 	</div>
 
 	<div>
-		<label for="group-select" class="mb-1 block text-white">Выберите группу:</label>
+		<label for="group-select" class="mb-1 block text-white">Группа:</label>
 		<div
 			role="button"
 			tabindex="-1"
@@ -167,7 +167,7 @@
 	</div>
 
 	<div>
-		<label for="week-select" class="mb-1 block text-white">Выберите неделю:</label>
+		<label for="week-select" class="mb-1 block text-white">Неделя:</label>
 		<CustomSelect
 			items={weeks}
 			bind:selectedId={selectedWeek}
