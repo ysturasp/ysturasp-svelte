@@ -2,14 +2,18 @@
 	import { onMount } from 'svelte';
 	import { settings } from '$lib/stores/settings';
 	import '$lib/styles/global.css';
+	import '$lib/styles/fonts.css';
 
 	let isLowercase = false;
+	let isModernFonts = false;
 
 	onMount(() => {
 		const unsubscribe = settings.subscribe((value) => {
 			isLowercase = value.lowercase;
+			isModernFonts = value.modernFonts;
 			if (typeof document !== 'undefined') {
 				document.body.classList.toggle('lowercase', value.lowercase);
+				document.body.classList.toggle('modern-fonts', value.modernFonts);
 			}
 		});
 
@@ -17,6 +21,7 @@
 			unsubscribe();
 			if (typeof document !== 'undefined') {
 				document.body.classList.remove('lowercase');
+				document.body.classList.remove('modern-fonts');
 			}
 		};
 	});
@@ -28,7 +33,7 @@
 
 <style>
 	:global(body) {
-		font-family: 'Inter', sans-serif;
+		font-family: var(--font-family-base, 'Inter'), sans-serif;
 	}
 
 	:global(::selection) {

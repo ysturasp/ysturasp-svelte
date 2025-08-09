@@ -1,0 +1,9 @@
+:root {
+	--font-family-base: 'Inter';
+	--font-family-heading: 'Inter';
+}
+
+body.modern-fonts {
+	--font-family-base: 'Exo 2';
+	--font-family-heading: 'Unbounded';
+}

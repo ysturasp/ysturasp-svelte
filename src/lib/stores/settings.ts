@@ -8,6 +8,7 @@ export interface Settings {
 	linearApiKey: string;
 	linearApiServer: string;
 	showLinearApiKey: boolean;
+	modernFonts: boolean;
 }
 
 const defaultSettings: Settings = {
@@ -17,7 +18,8 @@ const defaultSettings: Settings = {
 	showAPILink: true,
 	linearApiKey: '',
 	linearApiServer: 'https://api-linear-two.vercel.app',
-	showLinearApiKey: false
+	showLinearApiKey: false,
+	modernFonts: true
 };
 
 function createSettingsStore() {

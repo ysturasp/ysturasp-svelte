@@ -95,6 +95,18 @@
 						<span class="slider round"></span>
 					</label>
 				</div>
+				<div class="flex items-center justify-between">
+					<label for="modernFontsToggle" class="text-white">Кастомные шрифты</label>
+					<label class="switch">
+						<input
+							type="checkbox"
+							id="modernFontsToggle"
+							bind:checked={currentSettings.modernFonts}
+							on:change={handleSettingChange}
+						/>
+						<span class="slider round"></span>
+					</label>
+				</div>
 			</div>
 		</div>
 
