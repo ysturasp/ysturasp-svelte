@@ -1,3 +1,4 @@
+- add custom fonts and manage in settings modal window (ysturasp, 2025-08-09) [9 files changed, 421 insertions(+), 168 deletions(-)]
 - add link for support page in footer (ysturasp, 2025-08-09) [3 files changed, 6 insertions(+), 1 deletion(-)]
 - add settings modal window and create logic for manage settings on schedule pages (ysturasp, 2025-08-09) [21 files changed, 634 insertions(+), 28 deletions(-)]
 - add schedule swither on yspu pages and other fixes for improve unifed design (ysturasp, 2025-08-08) [8 files changed, 73 insertions(+), 48 deletions(-)]
