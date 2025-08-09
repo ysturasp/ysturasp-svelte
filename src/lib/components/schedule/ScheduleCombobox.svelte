@@ -217,9 +217,11 @@
 		{submitButtonText}
 	</button>
 
-	<CopyLinkButton disabled={!selectedId} params={copyParams} successMessage={copyLinkMessage}>
-		{copyButtonText}
-	</CopyLinkButton>
+	{#if selectedId}
+		<CopyLinkButton disabled={!selectedId} params={copyParams} successMessage={copyLinkMessage}>
+			{copyButtonText}
+		</CopyLinkButton>
+	{/if}
 </form>
 
 <style>

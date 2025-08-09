@@ -188,13 +188,15 @@
 	</button>
 
 	<div class="flex w-full items-center justify-between">
-		<CopyLinkButton
-			disabled={!selectedInstitute || !selectedGroup || !selectedWeek}
-			params={{ institute: selectedInstitute, group: selectedGroup }}
-			successMessage="Ссылка на расписание скопирована"
-		>
-			{copyButtonText}
-		</CopyLinkButton>
+		{#if selectedInstitute && selectedGroup && selectedWeek}
+			<CopyLinkButton
+				disabled={!selectedInstitute || !selectedGroup || !selectedWeek}
+				params={{ institute: selectedInstitute, group: selectedGroup }}
+				successMessage="Ссылка на расписание скопирована"
+			>
+				{copyButtonText}
+			</CopyLinkButton>
+		{/if}
 
 		{#if showFavoriteButton}
 			<button

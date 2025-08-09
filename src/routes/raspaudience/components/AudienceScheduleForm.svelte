@@ -152,11 +152,13 @@
 		{isLoading ? 'Загрузка...' : submitButtonText}
 	</button>
 
-	<CopyLinkButton
-		disabled={!selectedAudience || !selectedWeek}
-		params={{ audience: selectedAudience }}
-		successMessage="Ссылка на расписание аудитории скопирована"
-	>
-		{copyButtonText}
-	</CopyLinkButton>
+	{#if selectedAudience && selectedWeek}
+		<CopyLinkButton
+			disabled={!selectedAudience || !selectedWeek}
+			params={{ audience: selectedAudience }}
+			successMessage="Ссылка на расписание аудитории скопирована"
+		>
+			{copyButtonText}
+		</CopyLinkButton>
+	{/if}
 </div>
