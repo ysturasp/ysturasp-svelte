@@ -22,7 +22,10 @@
 		<div class="flex flex-wrap items-center justify-between">
 			<div class="w-full text-center md:w-1/3 md:text-left">
 				<h2 class="text-lg font-bold text-white">ystuRASP</h2>
-				<p class="mt-2 text-slate-400">Экосистема для студентов</p>
+				<p class=" text-slate-400">Экосистема для студентов</p>
+				<a href="/support" class="text-slate-300 transition-all hover:text-white">
+					Написать в поддержку
+				</a>
 			</div>
 			<div class="mt-4 w-full text-center md:mt-0 md:w-1/3">
 				<nav class="flex justify-center gap-4">

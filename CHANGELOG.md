@@ -1,3 +1,4 @@
+- add settings modal window and create logic for manage settings on schedule pages (ysturasp, 2025-08-09) [21 files changed, 634 insertions(+), 28 deletions(-)]
 - add schedule swither on yspu pages and other fixes for improve unifed design (ysturasp, 2025-08-08) [8 files changed, 73 insertions(+), 48 deletions(-)]
 - fix warnings on project after create big feature (ysturasp, 2025-08-07) [14 files changed, 94 insertions(+), 81 deletions(-)]
 - fix close custom select by scroll (ysturasp, 2025-08-07) [3 files changed, 3 insertions(+), 6 deletions(-)]
