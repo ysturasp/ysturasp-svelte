@@ -1,15 +1,17 @@
 <script lang="ts">
+	import { createEventDispatcher } from 'svelte';
 	import {
 		linearStore,
 		type LinearTask,
 		type LinearState,
+		type LinearPriority,
 		LINEAR_PRIORITIES,
 		getLessonKey,
 		createLinearTask,
 		updateLinearTask,
 		deleteLinearTask,
 		getAllTasks
-	} from '../stores/linear';
+	} from '$lib/stores/linear';
 	import type { YSTULesson } from '../types';
 	import { notifications } from '$lib/stores/notifications';
 	import LinearDatePicker from './LinearDatePicker.svelte';

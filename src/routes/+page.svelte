@@ -6,6 +6,7 @@
 	import CookieNotification from '$lib/components/notifications/CookieNotification.svelte';
 	import StatsSection from '$lib/components/sections/StatsSection.svelte';
 	import FeaturesSection from '$lib/components/sections/FeatureSection.svelte';
+	import PageLayout from '$lib/components/layout/PageLayout.svelte';
 </script>
 
 <svelte:head>
@@ -17,18 +18,20 @@
 	<link rel="icon" href="images/cat.png" type="image/png" />
 </svelte:head>
 
-<div
-	class="pointer-events-none fixed inset-0 bg-gradient-to-br from-blue-900/20 to-purple-900/20"
-></div>
+<PageLayout>
+	<div
+		class="pointer-events-none fixed inset-0 bg-gradient-to-br from-blue-900/20 to-purple-900/20"
+	></div>
 
-<Header />
+	<Header />
 
-<main class="relative container mx-auto mt-8 px-4">
-	<HeroSection />
-	<SupportSection />
-	<StatsSection />
-	<FeaturesSection />
-</main>
+	<main class="relative container mx-auto mt-8 px-4">
+		<HeroSection />
+		<SupportSection />
+		<StatsSection />
+		<FeaturesSection />
+	</main>
 
-<Footer />
-<CookieNotification />
+	<Footer />
+	<CookieNotification />
+</PageLayout>

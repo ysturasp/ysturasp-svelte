@@ -1,6 +1,7 @@
 import { writable } from 'svelte/store';
 import { browser } from '$app/environment';
-import type { YSTULesson } from '../types';
+import type { YSTULesson } from '../../routes/rasp/types';
+import { settings } from './settings';
 
 export interface LinearState {
 	id: string;
@@ -38,7 +39,11 @@ interface LinearStoreState {
 	teamId: string | null;
 }
 
-const LINEAR_API_URL = 'https://api-linear-two.vercel.app/graphql';
+let LINEAR_API_URL = 'https://api-linear-two.vercel.app/graphql';
+
+settings.subscribe((value) => {
+	LINEAR_API_URL = value.linearApiServer + '/graphql';
+});
 
 export const LINEAR_PRIORITIES: LinearPriority[] = [
 	{

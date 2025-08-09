@@ -1,3 +1,4 @@
+- add schedule swither on yspu pages and other fixes for improve unifed design (ysturasp, 2025-08-08) [8 files changed, 73 insertions(+), 48 deletions(-)]
 - fix warnings on project after create big feature (ysturasp, 2025-08-07) [14 files changed, 94 insertions(+), 81 deletions(-)]
 - fix close custom select by scroll (ysturasp, 2025-08-07) [3 files changed, 3 insertions(+), 6 deletions(-)]
 - rewrite integration with linear for create tasks for lesson (ysturasp, 2025-08-07) [14 files changed, 2421 insertions(+), 44 deletions(-)]

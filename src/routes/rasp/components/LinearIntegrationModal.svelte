@@ -1,6 +1,7 @@
 <script lang="ts">
 	import BottomModal from '$lib/components/ui/BottomModal.svelte';
-	import { linearStore } from '../stores/linear';
+	import { createEventDispatcher } from 'svelte';
+	import { linearStore } from '$lib/stores/linear';
 	import { notifications } from '$lib/stores/notifications';
 	import type { YSTULesson } from '../types';
 	import LinearTaskList from './LinearTaskList.svelte';

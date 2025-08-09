@@ -44,6 +44,8 @@
 	import { fade } from 'svelte/transition';
 	import { quintOut } from 'svelte/easing';
 	import ScheduleSwitcher from '$lib/components/schedule/ScheduleSwitcher.svelte';
+	import type { Settings } from '$lib/stores/settings';
+	import { settings } from '$lib/stores/settings';
 
 	const isMobile = writable(false);
 
@@ -58,6 +60,11 @@
 		return () => {
 			window.removeEventListener('resize', checkMobile);
 		};
+	});
+
+	let currentSettings: Settings;
+	settings.subscribe((value) => {
+		currentSettings = value;
 	});
 
 	const imageChill =
@@ -619,7 +626,7 @@
 			<HiddenSubjects {selectedGroup} />
 		</section>
 
-		{#if scheduleData && selectedSemester && Object.keys(currentTeacherSubgroups).length > 0}
+		{#if scheduleData && selectedSemester && Object.keys(currentTeacherSubgroups).length > 0 && currentSettings.showSubgroups}
 			<section class="mt-4 rounded-2xl bg-slate-800 p-4 sm:p-6">
 				<SubgroupsStatistics
 					teacherSubgroups={currentTeacherSubgroups}
@@ -629,7 +636,9 @@
 			</section>
 		{/if}
 
-		<GithubApiSection />
+		{#if currentSettings.showAPILink}
+			<GithubApiSection />
+		{/if}
 	</main>
 
 	<Footer />

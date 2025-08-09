@@ -1,8 +1,9 @@
 <script lang="ts">
+	import { createEventDispatcher } from 'svelte';
 	import { fade, scale } from 'svelte/transition';
 	import { quintOut } from 'svelte/easing';
-	import { LINEAR_PRIORITIES } from '../stores/linear';
-	import Portal from '../../../lib/components/ui/Portal.svelte';
+	import { LINEAR_PRIORITIES } from '$lib/stores/linear';
+	import Portal from '$lib/components/ui/Portal.svelte';
 
 	export let isOpen = false;
 	export let onClose: () => void;

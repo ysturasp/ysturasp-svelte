@@ -15,6 +15,13 @@
 	import GithubParserInfo from '../rasp/components/GithubParserInfo.svelte';
 	import NavigationLinks from '$lib/components/ui/NavigationLinks.svelte';
 	import ScheduleSwitcher from '$lib/components/schedule/ScheduleSwitcher.svelte';
+	import { settings } from '$lib/stores/settings';
+	import type { Settings } from '$lib/stores/settings';
+
+	let currentSettings: Settings;
+	settings.subscribe((value) => {
+		currentSettings = value;
+	});
 
 	let isLoading = false;
 	let isScheduleLoading = false;
@@ -159,7 +166,9 @@
 			{/if}
 		</section>
 
-		<GithubParserInfo />
+		{#if currentSettings.showAPILink}
+			<GithubParserInfo />
+		{/if}
 	</main>
 
 	<Footer />

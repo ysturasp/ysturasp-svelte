@@ -26,6 +26,15 @@
 	import type { AudienceScheduleData } from './types';
 	import NavigationLinks from '$lib/components/ui/NavigationLinks.svelte';
 	import ScheduleSwitcher from '$lib/components/schedule/ScheduleSwitcher.svelte';
+	import { settings } from '$lib/stores/settings';
+	import GithubApiSection from '$lib/components/sections/GithubApiSection.svelte';
+	import type { Settings } from '$lib/stores/settings';
+
+	let currentSettings: Settings;
+	settings.subscribe((value) => {
+		currentSettings = value;
+	});
+
 	let isLoading = false;
 	let isScheduleLoading = false;
 	let audiences: Audience[] = [];
@@ -296,6 +305,10 @@
 				</div>
 			{/if}
 		</section>
+
+		{#if currentSettings.showAPILink}
+			<GithubApiSection />
+		{/if}
 	</main>
 
 	<Footer />

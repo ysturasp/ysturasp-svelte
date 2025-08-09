@@ -1,8 +1,9 @@
 <script lang="ts">
 	import { fade, scale } from 'svelte/transition';
 	import { quintOut } from 'svelte/easing';
-	import type { LinearState } from '../stores/linear';
-	import { linearStore } from '../stores/linear';
+	import { createEventDispatcher } from 'svelte';
+	import type { LinearState } from '$lib/stores/linear';
+	import { linearStore } from '$lib/stores/linear';
 	import Portal from '$lib/components/ui/Portal.svelte';
 
 	export let isOpen = false;

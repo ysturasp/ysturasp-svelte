@@ -1,0 +1,4 @@
+body.lowercase,
+body.lowercase * {
+	text-transform: lowercase !important;
+}
