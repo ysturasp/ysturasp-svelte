@@ -17,6 +17,7 @@
 	import HiddenSubjects from './components/HiddenSubjects.svelte';
 	import GithubApiSection from '$lib/components/sections/GithubApiSection.svelte';
 	import LinearIntegrationModal from './components/LinearIntegrationModal.svelte';
+	import FormatDocumentPromo from './components/FormatDocumentPromo.svelte';
 	import {
 		SEMESTER_WEEKS_COUNT,
 		getCurrentWeekMessage,
@@ -625,6 +626,8 @@
 
 			<HiddenSubjects {selectedGroup} />
 		</section>
+
+		<FormatDocumentPromo />
 
 		{#if scheduleData && selectedSemester && Object.keys(currentTeacherSubgroups).length > 0 && currentSettings.showSubgroups}
 			<section class="mt-4 rounded-2xl bg-slate-800 p-4 sm:p-6">
