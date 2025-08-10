@@ -1,3 +1,4 @@
+- fix not closed popups with click esc button (ysturasp, 2025-08-10) [6 files changed, 58 insertions(+), 29 deletions(-)]
 - add format document page and promo section in schedule page (ysturasp, 2025-08-10) [10 files changed, 933 insertions(+)]
 - add hide copy button if not selected value in inputs (ysturasp, 2025-08-09) [6 files changed, 34 insertions(+), 24 deletions(-)]
 - delete unused import deleted component (ysturasp, 2025-08-09) [3 files changed, 2 insertions(+), 2 deletions(-)]
