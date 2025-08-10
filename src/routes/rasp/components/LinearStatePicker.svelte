@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { fade, scale } from 'svelte/transition';
 	import { quintOut } from 'svelte/easing';
-	import { createEventDispatcher } from 'svelte';
 	import type { LinearState } from '$lib/stores/linear';
 	import { linearStore } from '$lib/stores/linear';
 	import Portal from '$lib/components/ui/Portal.svelte';
@@ -16,9 +15,29 @@
 		(state) => !state.name.toLowerCase().includes('duplicate')
 	);
 
+	function focus(node: HTMLElement) {
+		node.focus();
+		return {
+			destroy() {}
+		};
+	}
+
+	$: if (isOpen && container) {
+		setTimeout(() => container?.focus(), 0);
+	}
+
 	function handleClickOutside(event: MouseEvent | KeyboardEvent) {
 		if (container && !container.contains(event.target as Node)) {
 			event.stopPropagation();
+			onClose();
+		}
+	}
+
+	function handleKeydown(event: KeyboardEvent) {
+		if (event.key === 'Escape') {
+			event.preventDefault();
+			event.stopPropagation();
+			container?.blur();
 			onClose();
 		}
 	}
@@ -83,9 +102,8 @@
 			class="fixed inset-0 z-120 flex items-center justify-center bg-black/50 px-4"
 			transition:fade={{ duration: 200 }}
 			on:click={handleClickOutside}
-			on:keydown={(e) => e.key === 'Escape' && handleClickOutside(e)}
-			role="button"
-			tabindex="0"
+			on:keydown={handleKeydown}
+			role="presentation"
 			aria-label="Закрыть окно выбора статуса"
 		>
 			<div
@@ -95,9 +113,10 @@
 				on:click={handleContainerClick}
 				on:keydown={(e) => e.key === 'Enter' && handleContainerClick(e)}
 				role="dialog"
-				tabindex="-1"
+				tabindex="0"
 				aria-modal="true"
 				aria-labelledby="dialog-title"
+				use:focus
 			>
 				<div class="mb-4 flex items-center justify-between">
 					<h3 id="dialog-title" class="text-lg font-semibold text-white">

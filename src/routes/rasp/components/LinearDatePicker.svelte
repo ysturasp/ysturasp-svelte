@@ -589,6 +589,19 @@
 		}
 	}
 
+	function handleKeydown(event: KeyboardEvent) {
+		if (event.key === 'Escape') {
+			event.preventDefault();
+			event.stopPropagation();
+			if (showCalendar) {
+				handleBackToPresets();
+			} else {
+				container?.blur();
+				onClose();
+			}
+		}
+	}
+
 	$: if (isOpen && searchInput) {
 		setTimeout(() => searchInput?.focus(), 100);
 	}
@@ -600,15 +613,17 @@
 			class="fixed inset-0 z-120 flex items-center justify-center bg-black/50 px-4"
 			transition:fade={{ duration: 200 }}
 			on:click={handleClickOutside}
-			on:keydown={handleEscape}
-			role="presentation"
+			on:keydown={handleKeydown}
+			role="button"
+			tabindex="0"
+			aria-label="Закрыть окно выбора даты"
 		>
 			<div
 				bind:this={container}
 				class="w-full max-w-md rounded-2xl bg-slate-900 shadow-xl ring-1 ring-blue-500/50"
 				transition:scale={{ duration: 200, easing: quintOut }}
 				on:click={handleContainerClick}
-				on:keydown={handleEscape}
+				on:keydown={handleKeydown}
 				role="dialog"
 				aria-modal="true"
 				aria-label="Выбор даты"

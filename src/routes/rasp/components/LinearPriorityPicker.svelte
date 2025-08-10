@@ -12,6 +12,10 @@
 
 	let container: HTMLElement;
 
+	$: if (isOpen && container) {
+		setTimeout(() => container?.focus(), 0);
+	}
+
 	function handleClickOutside(event: MouseEvent) {
 		if (container && !container.contains(event.target as Node)) {
 			event.stopPropagation();
@@ -19,8 +23,11 @@
 		}
 	}
 
-	function handleEscape(event: KeyboardEvent) {
+	function handleKeydown(event: KeyboardEvent) {
 		if (event.key === 'Escape') {
+			event.preventDefault();
+			event.stopPropagation();
+			container?.blur();
 			onClose();
 		}
 	}
@@ -57,16 +64,18 @@
 		<div
 			class="fixed inset-0 z-120 flex items-center justify-center bg-black/50 px-4"
 			transition:fade={{ duration: 200 }}
-			on:keydown={handleEscape}
 			on:click={handleClickOutside}
-			role="presentation"
+			on:keydown={handleKeydown}
+			role="button"
+			tabindex="0"
+			aria-label="Закрыть окно выбора приоритета"
 		>
 			<div
 				bind:this={container}
 				class="w-full max-w-sm rounded-2xl bg-slate-900 p-4 shadow-xl ring-1 ring-blue-500/50"
 				transition:scale={{ duration: 200, easing: quintOut }}
-				on:click|stopPropagation={handleContainerClick}
-				on:keydown={handleEscape}
+				on:click={handleContainerClick}
+				on:keydown={handleKeydown}
 				role="dialog"
 				aria-modal="true"
 				aria-label="Выбор приоритета"
