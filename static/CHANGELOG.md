@@ -1,3 +1,4 @@
+- add modal for table distibute subgroup and save in excel (ysturasp, 2025-08-11) [6 files changed, 519 insertions(+), 3 deletions(-)]
 - improve header style and slot button with link on personal account (ysturasp, 2025-08-10) [6 files changed, 42 insertions(+), 7 deletions(-)]
 - fix not closed popups with click esc button (ysturasp, 2025-08-10) [6 files changed, 58 insertions(+), 29 deletions(-)]
 - add format document page and promo section in schedule page (ysturasp, 2025-08-10) [10 files changed, 933 insertions(+)]

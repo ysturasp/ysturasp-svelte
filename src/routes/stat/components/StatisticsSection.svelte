@@ -354,15 +354,8 @@
 					class="grade-element cursor-pointer rounded-2xl p-4 text-center"
 					style="border: 2px solid #1245e67d;"
 				>
-					<h3 class="mb-2 text-xl font-bold">Пятерок</h3>
-					<p class="text-2xl text-slate-300">{statistics.count5}</p>
-				</div>
-				<div
-					class="grade-element cursor-pointer rounded-2xl p-4 text-center"
-					style="border: 2px solid #1245e67d;"
-				>
-					<h3 class="mb-2 text-xl font-bold">Четверок</h3>
-					<p class="text-2xl text-slate-300">{statistics.count4}</p>
+					<h3 class="mb-2 text-xl font-bold">Двоек</h3>
+					<p class="text-2xl text-slate-300">{statistics.count2}</p>
 				</div>
 				<div
 					class="grade-element cursor-pointer rounded-2xl p-4 text-center"
@@ -375,8 +368,15 @@
 					class="grade-element cursor-pointer rounded-2xl p-4 text-center"
 					style="border: 2px solid #1245e67d;"
 				>
-					<h3 class="mb-2 text-xl font-bold">Двоек</h3>
-					<p class="text-2xl text-slate-300">{statistics.count2}</p>
+					<h3 class="mb-2 text-xl font-bold">Четверок</h3>
+					<p class="text-2xl text-slate-300">{statistics.count4}</p>
+				</div>
+				<div
+					class="grade-element cursor-pointer rounded-2xl p-4 text-center"
+					style="border: 2px solid #1245e67d;"
+				>
+					<h3 class="mb-2 text-xl font-bold">Пятерок</h3>
+					<p class="text-2xl text-slate-300">{statistics.count5}</p>
 				</div>
 			</div>
 
