@@ -50,6 +50,7 @@
 		"zod": "^3.25.76"
 	},
 	"dependencies": {
+		"@sentry/sveltekit": "^10.4.0",
 		"@types/animejs": "^3.1.13",
 		"@types/mapbox-gl": "^3.4.1",
 		"animejs": "^3.2.2",

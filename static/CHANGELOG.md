@@ -1,3 +1,4 @@
+- add page groups for first course student (ysturasp, 2025-08-12) [15 files changed, 1546 insertions(+)]
 - add google and yandex metrics (ysturasp, 2025-08-11) [3 files changed, 53 insertions(+)]
 - change order grades and update list disciplines (ysturasp, 2025-08-11) [4 files changed, 62 insertions(+), 26 deletions(-)]
 - add modal for table distibute subgroup and save in excel (ysturasp, 2025-08-11) [6 files changed, 519 insertions(+), 3 deletions(-)]
