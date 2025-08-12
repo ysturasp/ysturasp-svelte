@@ -4,6 +4,9 @@
 	import type { SupportRequest } from '$lib/types/support';
 	import { onMount } from 'svelte';
 	import PageLayout from '$lib/components/layout/PageLayout.svelte';
+	import { page } from '$app/stores';
+	import { browser } from '$app/environment';
+
 	let message = '';
 	let replyMessage = '';
 	let isLoading = false;
@@ -12,9 +15,67 @@
 	let requests: SupportRequest[] = [];
 	let isLoadingRequests = true;
 	let selectedRequestId: string | null = null;
+	let isSecurityReport = false;
+	let decryptedMessages: { [key: string]: string } = {};
+
+	let userId = $page.url.searchParams.get('userId');
+	if (!userId && browser) {
+		userId = localStorage.getItem('userId');
+		if (!userId) {
+			userId = crypto.randomUUID();
+			localStorage.setItem('userId', userId);
+		}
+	}
+	if (!userId) {
+		userId = crypto.randomUUID();
+	}
 
 	const SCRIPT_URL =
-		'https://script.google.com/macros/s/AKfycbzUBBED-O4sguawuonirKUPPXl3JF2CakvwhmxAyIF0Ldw8wu_AlbtDP4FzbdvBBedebw/exec';
+		'https://script.google.com/macros/s/AKfycbw-QqacFR3FisIJC9jl0yOgfZaa27CsxDktotciI0UbLj4sSvJTrUEtk9nyPQU5a5diFg/exec';
+
+	async function encryptMessage(msg: string): Promise<string> {
+		const response = await fetch('/api/encrypt', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({ message: msg })
+		});
+
+		if (!response.ok) {
+			throw new Error('Ошибка шифрования');
+		}
+
+		const { encrypted } = await response.json();
+		return encrypted;
+	}
+
+	async function decryptMessage(encryptedMsg: string): Promise<string> {
+		const response = await fetch('/api/decrypt', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({ message: encryptedMsg })
+		});
+
+		if (!response.ok) {
+			throw new Error('Ошибка расшифровки');
+		}
+
+		const { decrypted } = await response.json();
+		return decrypted;
+	}
+
+	async function handleDecrypt(messageId: string, encryptedMsg: string) {
+		try {
+			const encrypted = encryptedMsg.slice('[SECURITY] '.length);
+			const decrypted = await decryptMessage(encrypted);
+			decryptedMessages[messageId] = decrypted;
+		} catch (e) {
+			console.error('Ошибка расшифровки:', e);
+		}
+	}
 
 	onMount(async () => {
 		try {
@@ -25,7 +86,8 @@
 				},
 				body: JSON.stringify({
 					action: 'getRequests',
-					source: 'web'
+					source: 'web',
+					userId
 				})
 			});
 
@@ -51,6 +113,17 @@
 		success = '';
 
 		try {
+			let finalMessage = message;
+			if (isSecurityReport) {
+				try {
+					const encrypted = await encryptMessage(message);
+					finalMessage = `[SECURITY] ${encrypted}`;
+				} catch (e) {
+					error = 'Ошибка шифрования сообщения';
+					return;
+				}
+			}
+
 			const response = await fetch(SCRIPT_URL, {
 				method: 'POST',
 				headers: {
@@ -58,8 +131,10 @@
 				},
 				body: JSON.stringify({
 					action: 'support',
-					message: message,
-					source: 'web'
+					message: finalMessage,
+					source: 'web',
+					isSecurityReport,
+					userId
 				})
 			});
 
@@ -69,6 +144,7 @@
 			requests = [data.request, ...requests];
 			success = 'Сообщение успешно отправлено';
 			message = '';
+			isSecurityReport = false;
 		} catch (e) {
 			error = 'Произошла ошибка при отправке сообщения';
 			console.error(e);
@@ -97,7 +173,8 @@
 					action: 'reply',
 					requestId,
 					message: replyMessage,
-					source: 'web'
+					source: 'web',
+					userId
 				})
 			});
 
@@ -131,14 +208,68 @@
 						нам - мы постараемся ответить как можно быстрее
 					</p>
 
-					<form on:submit|preventDefault={handleSubmit} class="space-y-2">
+					<form on:submit|preventDefault={handleSubmit} class="space-y-4">
 						<div>
 							<textarea
 								bind:value={message}
 								placeholder="Опишите проблему или предложение..."
-								class="h-32 w-full resize-none rounded-xl border border-slate-700 bg-slate-900 p-3 text-white placeholder-slate-400 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+								class="mb-2 h-32 w-full resize-none rounded-xl border border-slate-700 bg-slate-900 p-3 text-white placeholder-slate-400 transition-colors outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
 							></textarea>
+
+							<button
+								type="button"
+								class="flex w-full items-center justify-center gap-2 rounded-lg border border-red-500/20 bg-red-500/5 px-3 py-2 text-sm text-red-400 transition-colors hover:bg-red-500/10 {isSecurityReport
+									? 'border-red-500/40 bg-red-500/10'
+									: ''}"
+								on:click={() => (isSecurityReport = !isSecurityReport)}
+							>
+								<svg
+									xmlns="http://www.w3.org/2000/svg"
+									class="h-4 w-4"
+									fill="none"
+									viewBox="0 0 24 24"
+									stroke="currentColor"
+									stroke-width="2"
+								>
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										d={isSecurityReport
+											? 'M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z'
+											: 'M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z'}
+									/>
+								</svg>
+								{isSecurityReport
+									? 'Режим безопасности включен'
+									: 'Сообщить об уязвимости'}
+							</button>
 						</div>
+
+						{#if isSecurityReport}
+							<div class="rounded-lg border border-red-500/20 bg-red-500/5 p-3">
+								<div class="flex items-start gap-3">
+									<svg
+										xmlns="http://www.w3.org/2000/svg"
+										class="mt-1 h-5 w-5 flex-shrink-0 text-red-400"
+										fill="none"
+										viewBox="0 0 24 24"
+										stroke="currentColor"
+									>
+										<path
+											stroke-linecap="round"
+											stroke-linejoin="round"
+											stroke-width="2"
+											d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+										/>
+									</svg>
+									<p class="text-sm text-red-400">
+										Ваше сообщение будет зашифровано и обработано с повышенным
+										приоритетом. Используйте этот режим только для сообщений о
+										уязвимостях безопасности
+									</p>
+								</div>
+							</div>
+						{/if}
 
 						{#if error}
 							<div class="text-sm text-red-500">{error}</div>
@@ -169,11 +300,49 @@
 							{#each requests as request}
 								<div class="rounded-xl bg-slate-900 p-4">
 									<div class="mb-2 flex items-center justify-between">
-										<span class="text-sm text-slate-400"
-											>Чат по проблеме: {request.id.split('-')[0]}</span
-										>
+										<div class="flex items-center gap-2">
+											<span
+												class="inline-flex items-center gap-1 {request.status ===
+												'answered'
+													? 'text-green-500'
+													: 'text-yellow-500'} sm:hidden"
+											>
+												<svg
+													xmlns="http://www.w3.org/2000/svg"
+													class="h-5 w-5"
+													fill="none"
+													viewBox="0 0 24 24"
+													stroke="currentColor"
+													stroke-width="2"
+												>
+													{#if request.status === 'answered'}
+														<path
+															stroke-linecap="round"
+															stroke-linejoin="round"
+															d="M5 13l4 4L19 7"
+														/>
+													{:else}
+														<path
+															stroke-linecap="round"
+															stroke-linejoin="round"
+															d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+														/>
+													{/if}
+												</svg>
+											</span>
+											<span class="text-sm text-slate-400"
+												>Чат по проблеме: {request.id.split('-')[0]}</span
+											>
+											{#if request.messages[0]?.message.startsWith('[SECURITY]')}
+												<span
+													class="rounded-full bg-red-500/10 px-2 py-1 text-xs text-red-500"
+												>
+													Уязвимость
+												</span>
+											{/if}
+										</div>
 										<span
-											class="rounded-full px-2 py-1 text-xs {request.status ===
+											class="hidden items-center gap-1 rounded-full px-2 py-1 text-xs sm:inline-flex {request.status ===
 											'answered'
 												? 'bg-green-500/10 text-green-500'
 												: 'bg-yellow-500/10 text-yellow-500'}"
@@ -185,7 +354,7 @@
 									</div>
 
 									<div class="space-y-3">
-										{#each request.messages as message}
+										{#each request.messages as message, messageIndex}
 											<div
 												class="rounded-lg {message.isAdmin
 													? 'bg-blue-500/10'
@@ -199,7 +368,42 @@
 														>
 													{/if}
 												</div>
-												<p class="text-slate-300">{message.message}</p>
+												{#if message.message.startsWith('[SECURITY]')}
+													{#if decryptedMessages[`${request.id}-${messageIndex}`]}
+														<p class="text-slate-300">
+															{decryptedMessages[
+																`${request.id}-${messageIndex}`
+															]}
+														</p>
+													{:else}
+														<button
+															class="group relative w-full cursor-pointer rounded-xl border border-red-500/20 bg-red-500/5 p-3 text-left transition-all hover:bg-red-500/10"
+															on:click={() =>
+																handleDecrypt(
+																	`${request.id}-${messageIndex}`,
+																	message.message
+																)}
+														>
+															<div
+																class="break-all text-slate-300 blur-[2px]"
+															>
+																{message.message.slice(
+																	'[SECURITY] '.length
+																)}
+															</div>
+															<div
+																class="absolute inset-0 flex items-center justify-center text-red-500 opacity-0 transition-opacity group-hover:opacity-100"
+															>
+																<span
+																	class="rounded-md bg-slate-800/80 px-3 py-1"
+																	>Нажмите чтобы расшифровать</span
+																>
+															</div>
+														</button>
+													{/if}
+												{:else}
+													<p class="text-slate-300">{message.message}</p>
+												{/if}
 											</div>
 										{/each}
 									</div>

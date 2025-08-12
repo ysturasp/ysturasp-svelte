@@ -1,3 +1,5 @@
+- Create LICENSE (ysturasp, 2025-08-12) [1 file changed, 21 insertions(+)]
+- fix link to icon for pages (ysturasp, 2025-08-12) [3 files changed, 3 insertions(+), 1 deletion(-)]
 - add manifest for work PWA app on iphone (ysturasp, 2025-08-12) [5 files changed, 17 insertions(+), 3 deletions(-)]
 - update metatags for improve understand by search engines (ysturasp, 2025-08-12) [10 files changed, 71 insertions(+), 14 deletions(-)]
 - connect bug tracker sentry (ysturasp, 2025-08-12) [8 files changed, 2527 insertions(+), 216 deletions(-)]
