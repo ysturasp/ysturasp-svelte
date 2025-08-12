@@ -1,13 +1,14 @@
 {
 	"name": "ystuRASP",
 	"short_name": "ystuRASP",
-	"start_url": "/",
+	"start_url": "/rasp",
+	"scope": "/",
 	"display": "standalone",
 	"background_color": "#0F172A",
 	"theme_color": "#0F172A",
 	"icons": [
 		{
-			"src": "images/cat.png",
+			"src": "/images/favicon.png",
 			"sizes": "192x192",
 			"type": "image/png"
 		}
