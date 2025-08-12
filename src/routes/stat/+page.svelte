@@ -50,10 +50,11 @@
 		name="keywords"
 		content="ystuRASP, статистика оценок ЯГТУ, средний балл предметов ЯГТУ, анализ успеваемости ЯГТУ, успеваемость по предметам ЯГТУ, ystuRASP, баллы по предметам ЯГТУ, оценочная статистика ЯГТУ"
 	/>
-	<meta name="geo.region" content="RU-YAR" />
-	<link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" />
-	<script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
-	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+	<meta property="og:title" content="ystuRASP. Оценки по предметам ЯГТУ" />
+	<meta
+		property="og:description"
+		content="Узнайте статистику оценок предметов ЯГТУ, средние баллы и расписание 2024. ysturasp"
+	/>
 </svelte:head>
 
 <PageLayout>
