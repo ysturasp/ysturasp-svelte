@@ -1,3 +1,4 @@
+- add repository contribution recommendations for repository members (ysturasp, 2025-08-13) [3 files changed, 87 insertions(+)]
 - add SECURITY.md and secure messages with encrypt and reqest chat for certain users (ysturasp, 2025-08-12) [8 files changed, 367 insertions(+), 13 deletions(-)]
 - Create LICENSE (ysturasp, 2025-08-12) [1 file changed, 21 insertions(+)]
 - fix link to icon for pages (ysturasp, 2025-08-12) [3 files changed, 3 insertions(+), 1 deletion(-)]
