@@ -51,6 +51,7 @@
 	},
 	"dependencies": {
 		"@sentry/sveltekit": "^10.4.0",
+		"@telegram-apps/sdk-svelte": "^2.0.30",
 		"@types/animejs": "^3.1.13",
 		"@types/crypto-js": "^4.2.2",
 		"@types/mapbox-gl": "^3.4.1",

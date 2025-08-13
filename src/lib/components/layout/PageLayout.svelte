@@ -3,11 +3,22 @@
 	import { settings } from '$lib/stores/settings';
 	import '$lib/styles/global.css';
 	import '$lib/styles/fonts.css';
+	import { haptic } from '$lib/actions/haptic';
+	import { init } from '@telegram-apps/sdk-svelte';
+	import { browser } from '$app/environment';
 
 	let isLowercase = false;
 	let isModernFonts = false;
 
 	onMount(() => {
+		if (browser) {
+			try {
+				init();
+			} catch (error) {
+				console.warn('Not in Telegram Mini App:', error);
+			}
+		}
+
 		const unsubscribe = settings.subscribe((value) => {
 			isLowercase = value.lowercase;
 			isModernFonts = value.modernFonts;
@@ -27,7 +38,7 @@
 	});
 </script>
 
-<div class="min-h-screen bg-slate-900 text-gray-300 antialiased">
+<div class="min-h-screen bg-slate-900 text-gray-300 antialiased" use:haptic>
 	<slot />
 </div>
 

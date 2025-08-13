@@ -9,17 +9,19 @@ export interface Settings {
 	linearApiServer: string;
 	showLinearApiKey: boolean;
 	modernFonts: boolean;
+	hapticFeedback: boolean;
 }
 
 const defaultSettings: Settings = {
 	darkTheme: true,
-	lowercase: true,
+	lowercase: false,
 	showSubgroups: true,
-	showAPILink: true,
+	showAPILink: false,
 	linearApiKey: '',
 	linearApiServer: 'https://api-linear-two.vercel.app',
 	showLinearApiKey: false,
-	modernFonts: true
+	modernFonts: true,
+	hapticFeedback: true
 };
 
 function createSettingsStore() {

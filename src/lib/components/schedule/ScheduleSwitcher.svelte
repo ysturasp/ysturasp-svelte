@@ -2,6 +2,11 @@
 	import type { SemesterInfo } from '$lib/utils/semester';
 	import { getCurrentSemester } from '$lib/utils/semester';
 	import ScheduleSettings from './ScheduleSettings.svelte';
+	import { hapticFeedback, init } from '@telegram-apps/sdk-svelte';
+	import { browser } from '$app/environment';
+	import { onMount } from 'svelte';
+	import { settings } from '$lib/stores/settings';
+	import type { Settings } from '$lib/stores/settings';
 
 	export let selectedSemester: SemesterInfo | null = null;
 	export let onSemesterChange: (semester: SemesterInfo) => void;
@@ -9,6 +14,11 @@
 	export let university: 'ystu' | 'yspu' = 'ystu';
 
 	let isSettingsOpen = false;
+	let currentSettings: Settings;
+
+	settings.subscribe((value) => {
+		currentSettings = value;
+	});
 
 	$: prefix = university === 'yspu' ? '/yspu' : '';
 
@@ -16,6 +26,27 @@
 		const settings = event.detail;
 		console.log('Сохранены настройки:', settings);
 	}
+
+	function handleClick() {
+		if (currentSettings?.hapticFeedback) {
+			hapticFeedback.impactOccurred.ifAvailable('medium');
+		}
+		isSettingsOpen = true;
+	}
+
+	function handleNavClick() {
+		if (currentSettings?.hapticFeedback) {
+			hapticFeedback.impactOccurred.ifAvailable('medium');
+		}
+	}
+
+	onMount(() => {
+		try {
+			init();
+		} catch (error) {
+			console.warn('Not in Telegram Mini App:', error);
+		}
+	});
 </script>
 
 <div class="fixed bottom-4 left-1/2 z-50 -translate-x-1/2">
@@ -43,6 +74,7 @@
 					'students'
 						? 'bg-blue-500/10 text-white'
 						: 'text-white/70 transition-all hover:bg-slate-800 hover:text-white'}"
+					on:click={() => handleNavClick()}
 				>
 					<span class="text-lg">👨‍💻‍</span>
 					<span class="text-xs md:text-sm">Студенты</span>
@@ -54,6 +86,7 @@
 					'teachers'
 						? 'bg-blue-500/10 text-white'
 						: 'text-white/70 transition-all hover:bg-slate-800 hover:text-white'}"
+					on:click={() => handleNavClick()}
 				>
 					<span class="text-lg">👨‍🏫</span>
 					<span class="text-xs md:text-sm">Преподы</span>
@@ -65,6 +98,7 @@
 					'audiences'
 						? 'bg-blue-500/10 text-white'
 						: 'text-white/70 transition-all hover:bg-slate-800 hover:text-white'}"
+					on:click={() => handleNavClick()}
 				>
 					<span class="text-lg">🏛️</span>
 					<span class="text-xs md:text-sm">Аудитории</span>
@@ -75,7 +109,7 @@
 
 			<button
 				class="flex w-full items-center justify-center gap-1.5 rounded-xl text-white/70 transition-all hover:bg-slate-800 hover:text-white md:hidden md:w-auto"
-				on:click={() => (isSettingsOpen = true)}
+				on:click={handleClick}
 			>
 				<span class="text-lg">⚙️</span>
 				<span class="text-xs md:text-sm">Настройки</span>
@@ -86,7 +120,7 @@
 
 <button
 	class="fixed right-4 bottom-4 z-50 hidden items-center gap-1.5 rounded-xl bg-slate-900/95 px-2.5 py-1.5 text-white/70 shadow-lg ring-1 ring-blue-500/30 backdrop-blur-sm transition-all hover:bg-slate-800 hover:text-white md:flex"
-	on:click={() => (isSettingsOpen = true)}
+	on:click={handleClick}
 >
 	<span class="text-lg">⚙️</span>
 	<span class="text-xs md:text-sm">Настройки</span>
