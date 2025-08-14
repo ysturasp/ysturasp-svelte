@@ -6,10 +6,9 @@
 	import LoadingOverlay from '$lib/components/loading/LoadingOverlay.svelte';
 	import ErrorContent from '$lib/components/common/ErrorContent.svelte';
 	import ChangelogItem from '$lib/components/changelog/ChangelogItem.svelte';
-	import OnlineCounter from '$lib/components/ui/OnlineCounter.svelte';
 	import { loadChangelog, translateTexts } from '$lib/utils/changelog';
 	import type { ChangelogItem as ChangelogItemType } from '$lib/types';
-
+	import PageLayout from '$lib/components/layout/PageLayout.svelte';
 	let loading = true;
 	let error = '';
 	let items: ChangelogItemType[] = [];
@@ -86,7 +85,7 @@
 	<link rel="icon" href="/images/cat.png" type="image/png" />
 </svelte:head>
 
-<div class="min-h-screen bg-slate-900 text-gray-300 antialiased">
+<PageLayout>
 	{#if loading}
 		<LoadingOverlay />
 	{/if}
@@ -175,7 +174,7 @@
 	</main>
 
 	<Footer />
-</div>
+</PageLayout>
 
 <style>
 	:global(body) {

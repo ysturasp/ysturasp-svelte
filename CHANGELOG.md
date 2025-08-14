@@ -1,3 +1,4 @@
+- add robots.txt and sitemap.xml for improve seo (ysturasp, 2025-08-14) [4 files changed, 65 insertions(+)]
 - fix rules format with prettier and consitent quotation marks and format all code (ysturasp, 2025-08-14) [10 files changed, 42 insertions(+), 39 deletions(-)]
 - change default settings (ysturasp, 2025-08-14) [3 files changed, 4 insertions(+), 2 deletions(-)]
 - fix margins for unified design right and left part footer (ysturasp, 2025-08-14) [3 files changed, 4 insertions(+), 2 deletions(-)]
