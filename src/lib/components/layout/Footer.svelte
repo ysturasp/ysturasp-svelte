@@ -75,10 +75,10 @@
 						items={legalItems}
 					/>
 				</div>
-				<p class="mt-2 text-slate-400">© 2024 Made with ❤️ by ystuRASP</p>
+				<p class="text-slate-400">© 2024 Made with ❤️ by ystuRASP</p>
 				<a
 					href="/changelog"
-					class="group mt-2 inline-flex items-center text-blue-400 transition-all hover:text-blue-300"
+					class="group inline-flex items-center text-blue-400 transition-all hover:text-blue-300"
 				>
 					<span class="mr-2">История изменений</span>
 					<svg
