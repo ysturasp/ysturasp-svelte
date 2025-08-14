@@ -18,19 +18,21 @@
 	let showGroupError = false;
 	let highlightDirection = false;
 
-	$: directionItems = directions.map((direction) => ({
-		id: direction.id,
-		label: direction.name
-	}));
+	$: directionItems =
+		directions?.map((direction) => ({
+			id: direction.id,
+			label: direction.name
+		})) || [];
 
-	$: groupItems = selectedDirection
-		? Object.entries(directions.find((d) => d.id === selectedDirection)?.courses || {}).map(
-				([key, course]) => ({
-					id: key,
-					label: (course as Course).name
-				})
-			)
-		: [];
+	$: groupItems =
+		selectedDirection && directions
+			? Object.entries(directions.find((d) => d.id === selectedDirection)?.courses || {}).map(
+					([key, course]) => ({
+						id: key,
+						label: (course as Course).name
+					})
+				)
+			: [];
 
 	function handleDirectionSelect(event: CustomEvent) {
 		selectedDirection = event.detail.id;

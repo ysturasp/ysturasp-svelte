@@ -6,6 +6,8 @@ export interface SemesterRange {
 export interface SemesterInfo {
 	id: string;
 	name: string;
+	folderId: string;
+	timestamp: number;
 	year: number;
 	type: 'spring' | 'autumn';
 	range: SemesterRange;
@@ -67,7 +69,9 @@ export function getCurrentSemester(): SemesterInfo {
 			name: `Весенний ${currentYear}`,
 			year: currentYear,
 			type: 'spring',
-			range
+			range,
+			folderId: '',
+			timestamp: 0
 		};
 	} else {
 		const range = getSemesterRange(currentYear, 'autumn');
@@ -76,7 +80,9 @@ export function getCurrentSemester(): SemesterInfo {
 			name: `Осенний ${currentYear}`,
 			year: currentYear,
 			type: 'autumn',
-			range
+			range,
+			folderId: '',
+			timestamp: 0
 		};
 	}
 }
@@ -102,7 +108,9 @@ export function getPreviousSemesters(count: number = 4): SemesterInfo[] {
 			name: type === 'spring' ? `Весенний ${year}` : `Осенний ${year}`,
 			year,
 			type,
-			range
+			range,
+			folderId: '',
+			timestamp: 0
 		});
 	}
 

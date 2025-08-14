@@ -1,60 +1,64 @@
+export interface Course {
+	name: string;
+	number: string;
+	course: number;
+	startDate: string | null;
+}
+
 export interface Direction {
 	id: string;
 	name: string;
 	courses: Record<string, Course>;
 }
 
-export interface Course {
-	name: string;
-	groups: string[];
+export interface DayInfo {
+	type: number;
+	weekNumber: number;
+	date: string;
 }
 
-export interface ScheduleData {
-	items: ScheduleItem[];
-}
-
-export interface ScheduleItem {
-	courseInfo: {
-		name: string;
-		number: string;
-		startDate?: string;
-	};
-	days: ScheduleDay[];
-}
-
-export interface ScheduleDay {
-	info: {
-		type: number;
-	};
-	lessons: Lesson[];
+export interface TimeSlot {
+	number: number;
+	endAt: string;
 }
 
 export interface Lesson {
 	number: number;
-	lessonName: string;
-	type: 'lecture' | 'practice' | 'other';
-	timeRange: string;
 	startAt: string;
 	endAt: string;
+	timeRange: string;
+	originalTimeTitle: string;
+	additionalSlots: TimeSlot[];
+	lessonName: string;
+	type: 'lecture' | 'practice' | 'other';
 	teacherName: string;
-	auditoryName: string;
+	auditoryName: string | null;
 	isDistant: boolean;
 	isStream: boolean;
 	isDivision: boolean;
-	groups: string;
-	direction: string;
-	startDate?: string;
-	endDate?: string;
-	additionalSlots?: {
-		number: number;
-		startAt?: string;
-		endAt: string;
-	}[];
-	originalTimeTitle?: string;
-	timeInfo?: {
-		customStartTime?: string;
-		customEndTime?: string;
-	};
+	startDate: string | null;
+	endDate: string | null;
+	duration: number;
+	durationMinutes: number;
+	isShort: boolean;
+	isLecture: boolean;
+	originalText: string;
+}
+
+export interface ScheduleDay {
+	info: DayInfo;
+	lessons: Lesson[];
+}
+
+export interface ScheduleItem {
+	number: number;
+	courseInfo: Course;
+	days: ScheduleDay[];
+}
+
+export interface ScheduleData {
+	isCache: boolean;
+	items: ScheduleItem[];
 }
 
 export interface TeacherScheduleData {

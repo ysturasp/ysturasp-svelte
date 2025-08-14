@@ -24,6 +24,7 @@
 	import ScheduleSwitcher from '$lib/components/schedule/ScheduleSwitcher.svelte';
 	import { settings } from '$lib/stores/settings';
 	import type { Settings } from '$lib/stores/settings';
+	import type { SemesterInfo } from '$lib/utils/semester';
 
 	let currentSettings: Settings;
 	settings.subscribe((value) => {
@@ -35,6 +36,15 @@
 	let isBetaModalOpen = false;
 	let isViewModeModalOpen = false;
 	let directions: Direction[] = [];
+	let semesters: SemesterInfo[] = [];
+	let schedules: {
+		folderId: string;
+		timestamp: number | null;
+		semester: string | null;
+		year: number | null;
+		directions: Direction[];
+	}[] = [];
+	let selectedSemester: SemesterInfo | null = null;
 	let selectedDirection = '';
 	let selectedGroup = '';
 	let scheduleData: ScheduleData | null = null;
@@ -68,12 +78,31 @@
 	onMount(async () => {
 		try {
 			isLoading = true;
-			directions = await getDirections();
-			viewMode = storage.get('scheduleViewMode', 'all') as 'all' | 'actual';
+			const data = await getDirections();
+			schedules = data.schedules || [];
+			directions = (schedules[0]?.directions as Direction[]) || [];
+			semesters = data.semesters || [];
+
+			const lastSemester = storage.get('lastYspuSemester');
+			if (lastSemester && semesters.length > 0) {
+				selectedSemester =
+					semesters.find((s) => s.folderId === lastSemester) || semesters[0];
+			} else {
+				selectedSemester = semesters[0] || null;
+			}
 
 			const urlParams = new URLSearchParams(window.location.search);
 			const urlDirection = urlParams.get('direction');
 			const urlGroup = urlParams.get('group');
+			const urlSemester = urlParams.get('semester');
+
+			if (urlSemester && semesters.length > 0) {
+				const semesterFromUrl = semesters.find((s) => s.folderId === urlSemester);
+				if (semesterFromUrl) {
+					selectedSemester = semesterFromUrl;
+					storage.set('lastYspuSemester', semesterFromUrl.folderId);
+				}
+			}
 
 			if (urlDirection && urlGroup) {
 				selectedDirection = urlDirection;
@@ -99,10 +128,18 @@
 	});
 
 	async function loadSchedule() {
-		if (!selectedDirection || !selectedGroup) return;
+		if (!selectedDirection || !selectedGroup || !selectedSemester) return;
 
 		try {
 			isScheduleLoading = true;
+
+			const targetSchedule = schedules.find((s) => s.folderId === selectedSemester?.folderId);
+			if (!targetSchedule) {
+				console.error('Schedule not found for semester:', selectedSemester?.folderId);
+				return;
+			}
+
+			directions = (targetSchedule.directions as Direction[]) || [];
 			scheduleData = await getSchedule(selectedDirection);
 
 			const courses = Object.entries(
@@ -120,6 +157,7 @@
 
 			storage.set('lastYspuInstitut', selectedDirection);
 			storage.set('lastYspuGroup', selectedGroup);
+			storage.set('lastYspuSemester', selectedSemester.folderId);
 		} catch (error) {
 			console.error('Error loading schedule:', error);
 		} finally {
@@ -208,6 +246,33 @@
 	}
 
 	$: actualGroupNumber = groupNumbersMap[selectedGroup];
+
+	async function handleSemesterSelect(semester: SemesterInfo) {
+		try {
+			isScheduleLoading = true;
+			selectedSemester = semester;
+			storage.set('lastYspuSemester', semester.folderId);
+
+			const oldDirectionName = directions.find((d) => d.id === selectedDirection)?.name || '';
+			const targetSchedule = schedules.find((s) => s.folderId === semester.folderId);
+			directions = (targetSchedule?.directions as Direction[]) || [];
+			const matched = oldDirectionName
+				? directions.find((d) => d.name === oldDirectionName)
+				: undefined;
+			selectedDirection = matched?.id || '';
+
+			if (selectedDirection && selectedGroup) {
+				await loadSchedule();
+			} else {
+				scheduleData = null;
+				groupNumbersMap = {};
+			}
+		} catch (error) {
+			console.error('Error changing semester:', error);
+		} finally {
+			isScheduleLoading = false;
+		}
+	}
 </script>
 
 <svelte:head>
@@ -317,6 +382,9 @@
 							subtitle={selectedGroupData?.courseInfo.startDate
 								? `Начало обучения с ${selectedGroupData.courseInfo.startDate}`
 								: undefined}
+							availableSemesters={semesters}
+							{selectedSemester}
+							onSemesterSelect={handleSemesterSelect}
 						/>
 
 						<ViewModeToggle
