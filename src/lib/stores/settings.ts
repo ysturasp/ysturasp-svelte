@@ -14,9 +14,9 @@ export interface Settings {
 
 const defaultSettings: Settings = {
 	darkTheme: true,
-	lowercase: false,
+	lowercase: true,
 	showSubgroups: true,
-	showAPILink: false,
+	showAPILink: true,
 	linearApiKey: '',
 	linearApiServer: 'https://api-linear-two.vercel.app',
 	showLinearApiKey: false,
