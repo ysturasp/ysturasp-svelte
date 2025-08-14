@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+Host: ysturasp.netlify.app
+Sitemap: https://ysturasp.netlify.app/sitemap.xml 
