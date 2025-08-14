@@ -24,7 +24,7 @@
 
 		map.on('style.load', () => {
 			map.setFog({
-				color: 'rgb(15, 23, 42)',
+				'color': 'rgb(15, 23, 42)',
 				'high-color': 'rgb(15, 23, 42)',
 				'horizon-blend': 0.1,
 				'space-color': 'rgb(15, 23, 42)',
@@ -34,14 +34,14 @@
 
 		map.on('load', () => {
 			map.addLayer({
-				id: 'building-layer',
-				type: 'fill-extrusion',
-				source: {
+				'id': 'building-layer',
+				'type': 'fill-extrusion',
+				'source': {
 					type: 'vector',
 					url: 'mapbox://mapbox.mapbox-streets-v8'
 				},
 				'source-layer': 'building',
-				paint: {
+				'paint': {
 					'fill-extrusion-color': '#1e293b',
 					'fill-extrusion-height': [
 						'interpolate',

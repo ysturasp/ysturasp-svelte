@@ -41,10 +41,10 @@
 		]}
 		props={{
 			area: {
-				curve: curveNatural,
+				'curve': curveNatural,
 				'fill-opacity': 0.4,
-				line: { class: 'stroke-2' },
-				motion: 'tween'
+				'line': { class: 'stroke-2' },
+				'motion': 'tween'
 			},
 			xAxis: {
 				label: 'Оценка',

@@ -198,7 +198,7 @@ var asm2wasmImports = {
 	'f64-rem': function (x, y) {
 		return x % y;
 	},
-	debugger: function () {}
+	'debugger': function () {}
 };
 var functionPointers = new Array(0);
 var tempRet0 = 0;
@@ -667,11 +667,11 @@ function getBinaryPromise() {
 }
 function createWasm() {
 	var info = {
-		env: asmLibraryArg,
-		wasi_unstable: asmLibraryArg,
-		global: { NaN: NaN, Infinity: Infinity },
+		'env': asmLibraryArg,
+		'wasi_unstable': asmLibraryArg,
+		'global': { NaN: NaN, Infinity: Infinity },
 		'global.Math': Math,
-		asm2wasm: asm2wasmImports
+		'asm2wasm': asm2wasmImports
 	};
 	function receiveInstance(instance, module) {
 		var exports = instance.exports;
@@ -2287,18 +2287,18 @@ var FS = {
 		return (mode & 49152) === 49152;
 	},
 	flagModes: {
-		r: 0,
-		rs: 1052672,
+		'r': 0,
+		'rs': 1052672,
 		'r+': 2,
-		w: 577,
-		wx: 705,
-		xw: 705,
+		'w': 577,
+		'wx': 705,
+		'xw': 705,
 		'w+': 578,
 		'wx+': 706,
 		'xw+': 706,
-		a: 1089,
-		ax: 1217,
-		xa: 1217,
+		'a': 1089,
+		'ax': 1217,
+		'xa': 1217,
 		'a+': 1090,
 		'ax+': 1218,
 		'xa+': 1218

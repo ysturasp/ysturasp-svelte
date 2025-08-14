@@ -96,7 +96,7 @@ async function fetchLinear(apiKey: string, query: string, variables: any = {}) {
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json',
-			Authorization: apiKey
+			'Authorization': apiKey
 		},
 		body: JSON.stringify({
 			query,

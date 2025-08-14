@@ -1,3 +1,4 @@
+- change default settings (ysturasp, 2025-08-14) [3 files changed, 4 insertions(+), 2 deletions(-)]
 - fix margins for unified design right and left part footer (ysturasp, 2025-08-14) [3 files changed, 4 insertions(+), 2 deletions(-)]
 - add api for parser yspu schedule instead of google apps script with auto check actual link on schedule folder from vk posts (ysturasp, 2025-08-14) [9 files changed, 1286 insertions(+), 64 deletions(-)]
 - add haptic feedback for tg mini app (ysturasp, 2025-08-13) [9 files changed, 298 insertions(+), 7 deletions(-)]

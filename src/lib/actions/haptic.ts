@@ -5,13 +5,13 @@ import type { Settings } from '$lib/stores/settings';
 type HapticType = 'light' | 'medium' | 'heavy' | 'selection' | 'success' | 'warning' | 'error';
 
 const elementTypeMap: Record<string, HapticType> = {
-	button: 'medium',
+	'button': 'medium',
 	'a[href]': 'light',
 	'input[type="text"]': 'light',
 	'input[type="checkbox"]': 'selection',
 	'input[type="radio"]': 'selection',
 	'input[type="submit"]': 'medium',
-	select: 'selection',
+	'select': 'selection',
 	'.modal': 'medium',
 	'.dropdown': 'light',
 	'.switch': 'selection',
