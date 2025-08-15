@@ -30,12 +30,10 @@
 			body.style.position = 'fixed';
 			body.style.top = `-${scrollY}px`;
 			body.style.width = '100%';
-			body.style.paddingRight = `${scrollbarWidth}px`;
 		} else {
 			body.style.position = '';
 			body.style.top = '';
 			body.style.width = '';
-			body.style.paddingRight = '';
 			window.scrollTo(0, scrollY);
 		}
 	}

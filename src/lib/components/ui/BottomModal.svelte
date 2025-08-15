@@ -10,8 +10,6 @@
 	export let checkCanClose: (() => boolean) | undefined = undefined;
 
 	let modalContent: HTMLElement;
-	let originalOverflow: string;
-	let originalPaddingRight: string;
 	let originalBodyPosition: string;
 	let originalBodyTop: string;
 	let originalBodyWidth: string;
@@ -58,12 +56,10 @@
 			document.body.style.width = '100%';
 			document.body.style.position = 'fixed';
 			document.body.style.top = `-${scrollPosition}px`;
-			document.body.style.paddingRight = `${scrollbarWidth}px`;
 		} else {
 			document.body.style.position = '';
 			document.body.style.top = '';
 			document.body.style.width = '';
-			document.body.style.paddingRight = '';
 			if (scrollPosition) window.scrollTo(0, scrollPosition);
 		}
 	}
@@ -76,7 +72,6 @@
 				document.body.style.position = '';
 				document.body.style.top = '';
 				document.body.style.width = '';
-				document.body.style.paddingRight = '';
 				if (scrollPosition) window.scrollTo(0, scrollPosition);
 			}
 		}
