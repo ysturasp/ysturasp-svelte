@@ -72,7 +72,6 @@
 	let activeTooltip: HTMLElement | null = null;
 
 	onMount(() => {
-		// Определяем мобильное устройство по размеру экрана
 		const checkMobile = () => {
 			isMobile = window.matchMedia('(max-width: 768px)').matches;
 		};
@@ -81,7 +80,7 @@
 		window.addEventListener('resize', checkMobile);
 
 		const handleDocumentClick = (e: MouseEvent) => {
-			if (!isMobile) return; // Игнорируем клики на десктопе
+			if (!isMobile) return;
 
 			if (activeTooltip && !(e.target as HTMLElement).closest('.group')) {
 				activeTooltip.classList.remove('opacity-100');
@@ -104,11 +103,10 @@
 	});
 
 	function handleClick(e: MouseEvent, element: HTMLElement) {
-		if (!isMobile) return; // Игнорируем клики на десктопе
+		if (!isMobile) return;
 
 		e.stopPropagation();
 
-		// Закрываем все остальные подсказки
 		document.querySelectorAll('[data-tooltip]').forEach((tooltip) => {
 			if (tooltip.parentElement !== element) {
 				const tooltipEl = tooltip as HTMLElement;
@@ -125,7 +123,6 @@
 		const tooltip = element.querySelector('[data-tooltip]') as HTMLElement;
 		if (tooltip) {
 			tooltip.style.display = 'block';
-			// Даем время для применения display: block перед анимацией
 			requestAnimationFrame(() => {
 				if (activeTooltip && activeTooltip !== tooltip) {
 					activeTooltip.classList.remove('opacity-100');
@@ -166,7 +163,6 @@
 	): SubgroupStats[] {
 		if (!schedule || !semester) return [];
 
-		const result: SubgroupStats[] = [];
 		const groupedSubjects = new Map<string, any>();
 
 		for (const [key, teacherData] of Object.entries(data)) {
@@ -177,76 +173,36 @@
 
 			if (!groupedSubjects.has(groupKey)) {
 				groupedSubjects.set(groupKey, {
-					rawDates: [],
-					teachers: new Set(),
-					teacherDates: new Map(),
-					dates: {},
+					teachers: new Set<string>(),
+					dates: {} as Record<string, any>,
 					subgroup1Count: 0,
 					subgroup2Count: 0,
 					vucCount: 0
 				});
 			}
+
 			const group = groupedSubjects.get(groupKey);
 			group.teachers.add(teacherData.teacher);
 
 			for (const [dateTime, info] of Object.entries(teacherData.dates)) {
-				group.rawDates.push({
-					dateTime,
+				const uniqueKey = `${dateTime}_${teacherData.teacher}`;
+				group.dates[uniqueKey] = {
+					subgroup: info.subgroup,
+					isVUC: info.isVUC,
 					teacher: teacherData.teacher,
-					isVUC: info.isVUC
-				});
-
-				if (!group.teacherDates.has(teacherData.teacher)) {
-					group.teacherDates.set(teacherData.teacher, []);
-				}
-				group.teacherDates.get(teacherData.teacher).push({
-					dateTime,
-					isVUC: info.isVUC
-				});
+					originalDateTime: dateTime
+				};
+				if (info.subgroup === 1) group.subgroup1Count++;
+				if (info.subgroup === 2) group.subgroup2Count++;
+				if (info.isVUC) group.vucCount++;
 			}
 		}
 
+		const result: SubgroupStats[] = [];
+
 		for (const [groupKey, subjectData] of groupedSubjects) {
-			const teachers = Array.from(subjectData.teachers) as string[];
-			const canSplitByTeachers =
-				teachers.length === 2 && !subjectData.rawDates.some((d: RawDate) => d.isVUC);
-
-			if (canSplitByTeachers) {
-				const [teacher1, teacher2] = teachers;
-				const teacher1Dates = subjectData.teacherDates.get(teacher1);
-				const teacher2Dates = subjectData.teacherDates.get(teacher2);
-
-				if (teacher1Dates.length === teacher2Dates.length) {
-					for (const dateInfo of teacher1Dates) {
-						const uniqueKey = `${dateInfo.dateTime}_${teacher1}`;
-						subjectData.dates[uniqueKey] = {
-							subgroup: 1,
-							isVUC: false,
-							teacher: teacher1,
-							originalDateTime: dateInfo.dateTime
-						};
-						subjectData.subgroup1Count++;
-					}
-
-					for (const dateInfo of teacher2Dates) {
-						const uniqueKey = `${dateInfo.dateTime}_${teacher2}`;
-						subjectData.dates[uniqueKey] = {
-							subgroup: 2,
-							isVUC: false,
-							teacher: teacher2,
-							originalDateTime: dateInfo.dateTime
-						};
-						subjectData.subgroup2Count++;
-					}
-				} else {
-					distributeRegularly(subjectData);
-				}
-			} else {
-				distributeRegularly(subjectData);
-			}
-
 			const allDates = Object.entries(subjectData.dates)
-				.map(([key, info]: [string, any]) => {
+				.map(([_, info]: [string, any]) => {
 					const [date, time] = info.originalDateTime.split('_');
 					return {
 						...formatDateTime(`${date}_${time}`),
@@ -285,7 +241,7 @@
 
 			result.push({
 				subject: displayName,
-				teachers,
+				teachers: Array.from(subjectData.teachers) as string[],
 				subgroup1Count: subjectData.subgroup1Count,
 				subgroup2Count: subjectData.subgroup2Count,
 				vucCount: subjectData.vucCount,
@@ -297,78 +253,6 @@
 		}
 
 		return result;
-	}
-
-	function distributeRegularly(subjectData: any) {
-		subjectData.rawDates.sort((a: any, b: any) => {
-			const dateA = new Date(a.dateTime.split('_')[0].split('.').reverse().join('-'));
-			const dateB = new Date(b.dateTime.split('_')[0].split('.').reverse().join('-'));
-			return dateA.getTime() - dateB.getTime();
-		});
-
-		const vucDays = subjectData.rawDates.filter((d: RawDate) => d.isVUC);
-		const nonVucDays = subjectData.rawDates.filter((d: RawDate) => !d.isVUC);
-		const assignments = new Map();
-
-		const totalDays = subjectData.rawDates.length;
-		const targetPerGroup = Math.ceil(totalDays / 2);
-		const maxDiff = Math.ceil(totalDays * 0.3);
-
-		let group1NonVUC = [];
-		let group2NonVUC = [];
-		let group1VUC = [];
-		let group2VUC = [];
-
-		for (const dateInfo of vucDays) {
-			const currentDiff = subjectData.subgroup2Count - subjectData.subgroup1Count;
-			if (currentDiff >= maxDiff) {
-				group1VUC.push(dateInfo);
-				subjectData.subgroup1Count++;
-			} else {
-				group2VUC.push(dateInfo);
-				subjectData.subgroup2Count++;
-			}
-			subjectData.vucCount++;
-		}
-
-		for (const dateInfo of nonVucDays) {
-			const assignedSubgroup =
-				subjectData.subgroup1Count <= subjectData.subgroup2Count ? 1 : 2;
-			if (assignedSubgroup === 1) {
-				group1NonVUC.push(dateInfo);
-				subjectData.subgroup1Count++;
-			} else {
-				group2NonVUC.push(dateInfo);
-				subjectData.subgroup2Count++;
-			}
-		}
-
-		for (let i = 0; i < group1VUC.length; i++) {
-			if (group2NonVUC.length > 0) {
-				const vucDate = group1VUC[i];
-				const nonVucDate = group2NonVUC[0];
-				group2VUC.push(vucDate);
-				group1NonVUC.push(nonVucDate);
-				group1VUC.splice(i, 1);
-				group2NonVUC.splice(0, 1);
-				i--;
-			}
-		}
-
-		function addToSubjectData(dateInfo: RawDate, subgroup: number, isVUC: boolean) {
-			const uniqueKey = `${dateInfo.dateTime}_${dateInfo.teacher}`;
-			subjectData.dates[uniqueKey] = {
-				subgroup,
-				isVUC,
-				teacher: dateInfo.teacher,
-				originalDateTime: dateInfo.dateTime
-			};
-		}
-
-		group1VUC.forEach((d) => addToSubjectData(d, 1, true));
-		group2VUC.forEach((d) => addToSubjectData(d, 2, true));
-		group1NonVUC.forEach((d) => addToSubjectData(d, 1, false));
-		group2NonVUC.forEach((d) => addToSubjectData(d, 2, false));
 	}
 
 	function countTotalLessons(

@@ -111,6 +111,32 @@
 	let selectedLesson: YSTULesson | null = null;
 	let selectedLessonDate = '';
 
+	function autoEnableDivisionSubjects() {
+		try {
+			if (!scheduleData || !selectedSemester) return;
+			let changed = false;
+			const newSettings: SubgroupSettings = { ...currentSubgroupSettings };
+			scheduleData.items.forEach((weekItem) => {
+				weekItem.days.forEach((day) => {
+					if (!isDateInSemester(day.info.date, selectedSemester!)) return;
+					day.lessons?.forEach((lesson) => {
+						if (lesson.type === 8 && lesson.isDivision && lesson.lessonName) {
+							if (newSettings[lesson.lessonName] === undefined) {
+								newSettings[lesson.lessonName] = true;
+								changed = true;
+							}
+						}
+					});
+				});
+			});
+			if (changed) {
+				currentSubgroupSettings = newSettings;
+				subgroupSettings.set(currentSubgroupSettings);
+				saveSubgroupSettings(currentSubgroupSettings);
+			}
+		} catch {}
+	}
+
 	onMount(async () => {
 		try {
 			isLoading = true;
@@ -186,6 +212,7 @@
 					currentTeacherSubgroups = newTeacherSubgroups;
 					teacherSubgroups.set(currentTeacherSubgroups);
 					saveTeacherSubgroups(currentTeacherSubgroups);
+					autoEnableDivisionSubjects();
 					updateURL();
 				}
 			} else {
@@ -214,6 +241,7 @@
 									currentTeacherSubgroups = newTeacherSubgroups;
 									teacherSubgroups.set(currentTeacherSubgroups);
 									saveTeacherSubgroups(currentTeacherSubgroups);
+									autoEnableDivisionSubjects();
 									updateURL();
 								}
 							}
@@ -258,6 +286,7 @@
 					currentTeacherSubgroups = newTeacherSubgroups;
 					teacherSubgroups.set(currentTeacherSubgroups);
 					saveTeacherSubgroups(currentTeacherSubgroups);
+					autoEnableDivisionSubjects();
 				}
 			}
 
@@ -316,6 +345,7 @@
 			currentTeacherSubgroups = newTeacherSubgroups;
 			teacherSubgroups.set(currentTeacherSubgroups);
 			saveTeacherSubgroups(currentTeacherSubgroups);
+			autoEnableDivisionSubjects();
 
 			if (!isFullView && $isMobile) {
 				const currentWeekData = scheduleData.items.find(

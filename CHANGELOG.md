@@ -1,3 +1,4 @@
+- add auto words wrapping for lesson name (ysturasp, 2025-08-15) [3 files changed, 3 insertions(+), 1 deletion(-)]
 - add style for focus elements with used keyboard selection (ysturasp, 2025-08-15) [3 files changed, 30 insertions(+)]
 - add support mobile device for view tooltips gor next lesson in subgrops section (ysturasp, 2025-08-15) [3 files changed, 131 insertions(+), 2 deletions(-)]
 - fix static view tooltip for next lesson subgroups (ysturasp, 2025-08-15) [3 files changed, 6 insertions(+), 4 deletions(-)]

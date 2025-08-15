@@ -69,22 +69,41 @@ export function getSubgroupIndicator(
 ): string {
 	if (lesson.type !== 8) return '';
 
-	const key = `${lesson.lessonName}_${lesson.teacherName}`;
-	const isEnabled = settings[lesson.lessonName];
+	const mainKey = `${lesson.lessonName}_${lesson.teacherName}`;
+	const additionalKey = lesson.additionalTeacherName
+		? `${lesson.lessonName}_${lesson.additionalTeacherName}`
+		: null;
+	const candidateKeys = [mainKey, additionalKey].filter(Boolean) as string[];
 
-	if (isEnabled && teacherData[key] && teacherData[key].dates) {
-		const formattedDate = new Date(dayDate).toLocaleDateString('ru-RU');
+	const setting = settings[lesson.lessonName];
+	const allow = setting === true ? true : setting === false ? false : Boolean(lesson.isDivision);
+	if (!allow) return '';
 
-		const timeFormats = [
-			lesson.timeRange,
-			`${lesson.startAt}-${lesson.endAt}`,
-			`${formatTime(lesson.startAt)}-${formatTime(lesson.endAt)}`
-		].filter(Boolean);
+	const formattedDate = new Date(dayDate).toLocaleDateString('ru-RU');
 
-		for (const timeFormat of timeFormats) {
-			const dateTimeKey = `${formattedDate}_${timeFormat}`;
-			const subgroupInfo = teacherData[key].dates[dateTimeKey];
+	const baseTimeFormats = [
+		lesson.timeRange,
+		`${lesson.startAt}-${lesson.endAt}`,
+		`${formatTime(lesson.startAt)}-${formatTime(lesson.endAt)}`
+	].filter(Boolean);
 
+	const timeFormats = Array.from(
+		new Set(
+			baseTimeFormats.flatMap((tf: string) => [
+				tf,
+				tf.replace(/\s*-\s*/g, '-'),
+				tf.replace(/-/g, ' - ')
+			])
+		)
+	);
+
+	for (const key of candidateKeys) {
+		const dates = teacherData[key]?.dates;
+		if (!dates) continue;
+
+		for (const tf of timeFormats) {
+			const dateTimeKey = `${formattedDate}_${tf}`;
+			const subgroupInfo = dates[dateTimeKey];
 			if (subgroupInfo) {
 				return `Подгруппа ${subgroupInfo.subgroup}`;
 			}
@@ -127,7 +146,15 @@ export function generateSubgroupDistribution(scheduleData: any, semester: Semest
 		});
 	});
 
-	const labWorks = new Map<string, any[]>();
+	const subjectLessons = new Map<
+		string,
+		Array<{
+			teacher: string;
+			date: string;
+			timeRange: string;
+			isVUC: boolean;
+		}>
+	>();
 
 	scheduleData.items.forEach((weekItem: any) => {
 		weekItem.days.forEach((day: any) => {
@@ -136,13 +163,13 @@ export function generateSubgroupDistribution(scheduleData: any, semester: Semest
 			day.lessons?.forEach((lesson: any) => {
 				if (lesson.type === 8) {
 					const teacherName = lesson.teacherName || lesson.additionalTeacherName;
-					const key = `${lesson.lessonName}_${teacherName}`;
-					if (!labWorks.has(key)) {
-						labWorks.set(key, []);
-					}
-					labWorks.get(key)!.push({
-						...lesson,
+					if (!teacherName) return;
+					const subjectKey = `${lesson.lessonName}`;
+					if (!subjectLessons.has(subjectKey)) subjectLessons.set(subjectKey, []);
+					subjectLessons.get(subjectKey)!.push({
+						teacher: teacherName,
 						date: day.info.date,
+						timeRange: lesson.timeRange || `${lesson.startAt}-${lesson.endAt}`,
 						isVUC: vucDays.has(day.info.date)
 					});
 				}
@@ -150,31 +177,116 @@ export function generateSubgroupDistribution(scheduleData: any, semester: Semest
 		});
 	});
 
-	labWorks.forEach((lessons, key) => {
-		const [lessonName, teacherName] = key.split('_');
+	subjectLessons.forEach((entries, subject) => {
+		entries.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
-		lessons.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+		const teachers = Array.from(new Set(entries.map((e) => e.teacher)));
+		const teacherToDates = new Map<string, typeof entries>();
+		teachers.forEach((t) =>
+			teacherToDates.set(
+				t,
+				entries.filter((e) => e.teacher === t)
+			)
+		);
 
-		const dates: Record<string, SubgroupInfo> = {};
-		let currentSubgroup: 1 | 2 = 1;
+		const hasAnyVUC = entries.some((e) => e.isVUC);
 
-		lessons.forEach((lesson, index) => {
-			const formattedDate = new Date(lesson.date).toLocaleDateString('ru-RU');
-			const timeRange = lesson.timeRange || `${lesson.startAt}-${lesson.endAt}`;
-			const dateTimeKey = `${formattedDate}_${timeRange}`;
+		const perTeacherDates: Record<string, Record<string, SubgroupInfo>> = {};
 
-			dates[dateTimeKey] = {
-				subgroup: currentSubgroup,
-				isVUC: lesson.isVUC
-			};
+		function assignAllForTeacher(teacher: string, subgroup: 1 | 2) {
+			const arr = teacherToDates.get(teacher) || [];
+			arr.forEach((e) => {
+				const formattedDate = new Date(e.date).toLocaleDateString('ru-RU');
+				const dateTimeKey = `${formattedDate}_${e.timeRange}`;
+				if (!perTeacherDates[teacher]) perTeacherDates[teacher] = {};
+				perTeacherDates[teacher][dateTimeKey] = { subgroup, isVUC: e.isVUC };
+			});
+		}
 
-			currentSubgroup = currentSubgroup === 1 ? 2 : 1;
+		if (teachers.length === 2 && !hasAnyVUC) {
+			const [t1, t2] = teachers;
+			const t1Dates = teacherToDates.get(t1) || [];
+			const t2Dates = teacherToDates.get(t2) || [];
+
+			if (t1Dates.length === t2Dates.length) {
+				assignAllForTeacher(t1, 1);
+				assignAllForTeacher(t2, 2);
+			} else {
+				regularDistribute();
+			}
+		} else {
+			regularDistribute();
+		}
+
+		function regularDistribute() {
+			const vuc = entries.filter((e) => e.isVUC);
+			const nonVuc = entries.filter((e) => !e.isVUC);
+
+			const totalDays = entries.length;
+			const maxDiff = Math.ceil(totalDays * 0.3);
+
+			let subgroup1Count = 0;
+			let subgroup2Count = 0;
+
+			let group1VUC: typeof entries = [];
+			let group2VUC: typeof entries = [];
+			let group1NonVUC: typeof entries = [];
+			let group2NonVUC: typeof entries = [];
+
+			for (const e of vuc) {
+				const currentDiff = subgroup2Count - subgroup1Count;
+				if (currentDiff >= maxDiff) {
+					group1VUC.push(e);
+					subgroup1Count++;
+				} else {
+					group2VUC.push(e);
+					subgroup2Count++;
+				}
+			}
+
+			for (const e of nonVuc) {
+				const assigned = subgroup1Count <= subgroup2Count ? 1 : 2;
+				if (assigned === 1) {
+					group1NonVUC.push(e);
+					subgroup1Count++;
+				} else {
+					group2NonVUC.push(e);
+					subgroup2Count++;
+				}
+			}
+
+			for (let i = 0; i < group1VUC.length; i++) {
+				if (group2NonVUC.length > 0) {
+					const vucDate = group1VUC[i];
+					const nonVucDate = group2NonVUC[0];
+					group2VUC.push(vucDate);
+					group1NonVUC.push(nonVucDate);
+					group1VUC.splice(i, 1);
+					group2NonVUC.splice(0, 1);
+					i--;
+				}
+			}
+
+			function add(
+				entry: { teacher: string; date: string; timeRange: string; isVUC: boolean },
+				subgroup: 1 | 2
+			) {
+				const formattedDate = new Date(entry.date).toLocaleDateString('ru-RU');
+				const dateTimeKey = `${formattedDate}_${entry.timeRange}`;
+				if (!perTeacherDates[entry.teacher]) perTeacherDates[entry.teacher] = {};
+				perTeacherDates[entry.teacher][dateTimeKey] = { subgroup, isVUC: entry.isVUC };
+			}
+
+			group1VUC.forEach((e) => add(e, 1));
+			group2VUC.forEach((e) => add(e, 2));
+			group1NonVUC.forEach((e) => add(e, 1));
+			group2NonVUC.forEach((e) => add(e, 2));
+		}
+
+		Object.entries(perTeacherDates).forEach(([teacher, dates]) => {
+			const key = `${subject}_${teacher}`;
+			teacherSubgroups[key] = { dates, teacher };
 		});
-
-		teacherSubgroups[key] = {
-			dates,
-			teacher: teacherName
-		};
 	});
 
 	return teacherSubgroups;
