@@ -603,7 +603,7 @@
 										<div class="grid gap-2">
 											{#each stat.dates.filter((d) => d.subgroup === 1) as dateInfo}
 												<div
-													class="relative rounded-xl bg-gray-800 p-2 text-sm {dateInfo.isVUC
+													class="group relative rounded-xl bg-gray-800 p-2 text-sm {dateInfo.isVUC
 														? 'border-l-2 border-blue-400'
 														: ''} {dateInfo.isNext
 														? 'border-2 border-green-500'
@@ -648,7 +648,7 @@
 													{/if}
 													{#if dateInfo.isNext}
 														<div
-															class="absolute -top-8 left-1/2 z-10 -translate-x-1/2 transform rounded-xl border border-green-500 bg-gray-900 px-2 py-1 text-xs text-white"
+															class="absolute -top-8 left-1/2 z-10 -translate-x-1/2 transform rounded-lg border border-green-500 bg-gray-900 px-2 py-1 text-xs text-white opacity-0 transition-opacity group-hover:opacity-100"
 														>
 															Следующее занятие
 														</div>
@@ -662,7 +662,7 @@
 										<div class="grid gap-2">
 											{#each stat.dates.filter((d) => d.subgroup === 2) as dateInfo}
 												<div
-													class="relative rounded-xl bg-gray-800 p-2 text-sm {dateInfo.isVUC
+													class="group relative rounded-xl bg-gray-800 p-2 text-sm {dateInfo.isVUC
 														? 'border-l-2 border-blue-400'
 														: ''} {dateInfo.isNext
 														? 'border-2 border-green-500'
@@ -707,7 +707,7 @@
 													{/if}
 													{#if dateInfo.isNext}
 														<div
-															class="absolute -top-8 left-1/2 z-10 -translate-x-1/2 transform rounded-xl border border-green-500 bg-gray-900 px-2 py-1 text-xs text-white"
+															class="absolute -top-8 left-1/2 z-10 -translate-x-1/2 transform rounded-lg border border-green-500 bg-gray-900 px-2 py-1 text-xs text-white opacity-0 transition-opacity group-hover:opacity-100"
 														>
 															Следующее занятие
 														</div>
