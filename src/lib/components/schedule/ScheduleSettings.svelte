@@ -138,6 +138,18 @@
 							<span class="slider round"></span>
 						</label>
 					</div>
+					<div class="flex items-center justify-between">
+						<label for="showWorkload" class="text-white">Статистика нагрузки</label>
+						<label class="switch">
+							<input
+								type="checkbox"
+								id="showWorkload"
+								bind:checked={currentSettings.showWorkload}
+								on:change={handleSettingChange}
+							/>
+							<span class="slider round"></span>
+						</label>
+					</div>
 				{/if}
 				<div class="flex items-center justify-between">
 					<label for="showAPILink" class="text-white">Ссылка на API</label>

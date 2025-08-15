@@ -1,3 +1,5 @@
+- Create CODE_OF_CONDUCT.md (ysturasp, 2025-08-14) [1 file changed, 127 insertions(+)]
+- add PageLayout  in changelog for improve structure page (ysturasp, 2025-08-14) [3 files changed, 5 insertions(+), 4 deletions(-)]
 - add robots.txt and sitemap.xml for improve seo (ysturasp, 2025-08-14) [4 files changed, 65 insertions(+)]
 - fix rules format with prettier and consitent quotation marks and format all code (ysturasp, 2025-08-14) [10 files changed, 42 insertions(+), 39 deletions(-)]
 - change default settings (ysturasp, 2025-08-14) [3 files changed, 4 insertions(+), 2 deletions(-)]

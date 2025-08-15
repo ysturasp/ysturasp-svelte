@@ -10,6 +10,7 @@ export interface Settings {
 	showLinearApiKey: boolean;
 	modernFonts: boolean;
 	hapticFeedback: boolean;
+	showWorkload: boolean;
 }
 
 const defaultSettings: Settings = {
@@ -21,7 +22,8 @@ const defaultSettings: Settings = {
 	linearApiServer: 'https://api-linear-two.vercel.app',
 	showLinearApiKey: false,
 	modernFonts: true,
-	hapticFeedback: true
+	hapticFeedback: true,
+	showWorkload: true
 };
 
 function createSettingsStore() {

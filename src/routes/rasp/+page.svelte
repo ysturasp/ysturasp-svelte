@@ -47,6 +47,7 @@
 	import ScheduleSwitcher from '$lib/components/schedule/ScheduleSwitcher.svelte';
 	import type { Settings } from '$lib/stores/settings';
 	import { settings } from '$lib/stores/settings';
+	import WorkloadStatistics from './components/WorkloadStatistics.svelte';
 
 	const isMobile = writable(false);
 
@@ -660,6 +661,12 @@
 					{scheduleData}
 					{selectedSemester}
 				/>
+			</section>
+		{/if}
+
+		{#if scheduleData && selectedSemester && currentSettings.showWorkload}
+			<section class="mt-4 rounded-2xl bg-slate-800 p-4 sm:p-6">
+				<WorkloadStatistics {scheduleData} {selectedSemester} />
 			</section>
 		{/if}
 
