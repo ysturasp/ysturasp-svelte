@@ -197,7 +197,7 @@
 					<div class="flex-grow">
 						<div class="flex items-center justify-between">
 							<div class="flex flex-wrap items-center gap-2">
-								<p class="font-bold text-white md:text-lg">
+								<p class="font-bold break-words hyphens-auto text-white md:text-lg">
 									{lesson.lessonName || 'Название предмета не указано'}
 								</p>
 								{#if subgroupIndicator}
