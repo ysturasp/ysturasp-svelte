@@ -5,6 +5,7 @@
 	import { isDateInSemester, getWeekNumberByDate } from '$lib/utils/semester';
 	import * as Carousel from '$lib/components/ui/carousel';
 	import SubgroupsTableModal from './SubgroupsTableModal.svelte';
+	import { onMount } from 'svelte';
 
 	interface RawDate {
 		dateTime: string;
@@ -67,6 +68,96 @@
 	});
 
 	let showTableModal = false;
+	let isMobile = false;
+	let activeTooltip: HTMLElement | null = null;
+
+	onMount(() => {
+		// Определяем мобильное устройство по размеру экрана
+		const checkMobile = () => {
+			isMobile = window.matchMedia('(max-width: 768px)').matches;
+		};
+
+		checkMobile();
+		window.addEventListener('resize', checkMobile);
+
+		const handleDocumentClick = (e: MouseEvent) => {
+			if (!isMobile) return; // Игнорируем клики на десктопе
+
+			if (activeTooltip && !(e.target as HTMLElement).closest('.group')) {
+				activeTooltip.classList.remove('opacity-100');
+				activeTooltip.classList.add('opacity-0');
+				setTimeout(() => {
+					if (!activeTooltip?.classList.contains('opacity-100')) {
+						activeTooltip!.style.display = 'none';
+					}
+				}, 200);
+				activeTooltip = null;
+			}
+		};
+
+		document.addEventListener('click', handleDocumentClick);
+
+		return () => {
+			document.removeEventListener('click', handleDocumentClick);
+			window.removeEventListener('resize', checkMobile);
+		};
+	});
+
+	function handleClick(e: MouseEvent, element: HTMLElement) {
+		if (!isMobile) return; // Игнорируем клики на десктопе
+
+		e.stopPropagation();
+
+		// Закрываем все остальные подсказки
+		document.querySelectorAll('[data-tooltip]').forEach((tooltip) => {
+			if (tooltip.parentElement !== element) {
+				const tooltipEl = tooltip as HTMLElement;
+				tooltipEl.classList.remove('opacity-100');
+				tooltipEl.classList.add('opacity-0');
+				setTimeout(() => {
+					if (!tooltipEl.classList.contains('opacity-100')) {
+						tooltipEl.style.display = 'none';
+					}
+				}, 200);
+			}
+		});
+
+		const tooltip = element.querySelector('[data-tooltip]') as HTMLElement;
+		if (tooltip) {
+			tooltip.style.display = 'block';
+			// Даем время для применения display: block перед анимацией
+			requestAnimationFrame(() => {
+				if (activeTooltip && activeTooltip !== tooltip) {
+					activeTooltip.classList.remove('opacity-100');
+					activeTooltip.classList.add('opacity-0');
+					setTimeout(() => {
+						if (!activeTooltip?.classList.contains('opacity-100')) {
+							activeTooltip!.style.display = 'none';
+						}
+					}, 200);
+				}
+				tooltip.classList.toggle('opacity-0');
+				tooltip.classList.toggle('opacity-100');
+				activeTooltip = tooltip.classList.contains('opacity-100') ? tooltip : null;
+			});
+		}
+	}
+
+	function handleKeyDown(e: KeyboardEvent, element: HTMLElement) {
+		if (!isMobile) return;
+		if (e.key === 'Enter' || e.key === ' ') {
+			e.preventDefault();
+			const tooltip = element.querySelector('[data-tooltip]') as HTMLElement;
+			if (tooltip) {
+				tooltip.style.display = 'block';
+				requestAnimationFrame(() => {
+					tooltip.classList.toggle('opacity-0');
+					tooltip.classList.toggle('opacity-100');
+					activeTooltip = tooltip.classList.contains('opacity-100') ? tooltip : null;
+				});
+			}
+		}
+	}
 
 	function calculateStats(
 		data: TeacherSubgroups,
@@ -608,6 +699,18 @@
 														: ''} {dateInfo.isNext
 														? 'border-2 border-green-500'
 														: ''}"
+													role="button"
+													tabindex="0"
+													on:click={(e) =>
+														handleClick(
+															e,
+															e.currentTarget as HTMLElement
+														)}
+													on:keydown={(e) =>
+														handleKeyDown(
+															e,
+															e.currentTarget as HTMLElement
+														)}
 												>
 													<div class="flex items-center gap-2">
 														{#if stat.teachers.length > 1}
@@ -648,7 +751,13 @@
 													{/if}
 													{#if dateInfo.isNext}
 														<div
-															class="absolute -top-8 left-1/2 z-10 -translate-x-1/2 transform rounded-lg border border-green-500 bg-gray-900 px-2 py-1 text-xs text-white opacity-0 transition-opacity group-hover:opacity-100"
+															class="absolute -top-8 left-1/2 z-10 hidden -translate-x-1/2 translate-y-1 transform rounded-lg border border-green-500 bg-gray-900 px-2 py-1 text-xs text-white opacity-0 transition-all duration-200 ease-in-out group-hover:translate-y-0 group-hover:opacity-100 md:block"
+														>
+															Следующее занятие
+														</div>
+														<div
+															class="absolute -top-10 left-1/2 z-10 -translate-x-1/2 translate-y-1 transform rounded-lg border border-green-500 bg-gray-900 px-2 py-1 text-xs text-white opacity-0 transition-all duration-200 ease-in-out md:hidden"
+															data-tooltip
 														>
 															Следующее занятие
 														</div>
@@ -667,6 +776,18 @@
 														: ''} {dateInfo.isNext
 														? 'border-2 border-green-500'
 														: ''}"
+													role="button"
+													tabindex="0"
+													on:click={(e) =>
+														handleClick(
+															e,
+															e.currentTarget as HTMLElement
+														)}
+													on:keydown={(e) =>
+														handleKeyDown(
+															e,
+															e.currentTarget as HTMLElement
+														)}
 												>
 													<div class="flex items-center gap-2">
 														{#if stat.teachers.length > 1}
@@ -707,7 +828,13 @@
 													{/if}
 													{#if dateInfo.isNext}
 														<div
-															class="absolute -top-8 left-1/2 z-10 -translate-x-1/2 transform rounded-lg border border-green-500 bg-gray-900 px-2 py-1 text-xs text-white opacity-0 transition-opacity group-hover:opacity-100"
+															class="absolute -top-8 left-1/2 z-10 hidden -translate-x-1/2 translate-y-1 transform rounded-lg border border-green-500 bg-gray-900 px-2 py-1 text-xs text-white opacity-0 transition-all duration-200 ease-in-out group-hover:translate-y-0 group-hover:opacity-100 md:block"
+														>
+															Следующее занятие
+														</div>
+														<div
+															class="absolute -top-10 left-1/2 z-10 -translate-x-1/2 translate-y-1 transform rounded-lg border border-green-500 bg-gray-900 px-2 py-1 text-xs text-white opacity-0 transition-all duration-200 ease-in-out md:hidden"
+															data-tooltip
 														>
 															Следующее занятие
 														</div>

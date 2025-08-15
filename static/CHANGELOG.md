@@ -1,3 +1,4 @@
+- fix static view tooltip for next lesson subgroups (ysturasp, 2025-08-15) [3 files changed, 6 insertions(+), 4 deletions(-)]
 - format code (ysturasp, 2025-08-15) [3 files changed, 13 insertions(+), 11 deletions(-)]
 - add lesson load on semester and statistics average score for lesson (ysturasp, 2025-08-15) [6 files changed, 534 insertions(+), 1 deletion(-)]
 - Create CODE_OF_CONDUCT.md (ysturasp, 2025-08-14) [1 file changed, 127 insertions(+)]
