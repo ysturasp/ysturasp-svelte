@@ -1,3 +1,4 @@
+- add lesson load on semester and statistics average score for lesson (ysturasp, 2025-08-15) [6 files changed, 534 insertions(+), 1 deletion(-)]
 - Create CODE_OF_CONDUCT.md (ysturasp, 2025-08-14) [1 file changed, 127 insertions(+)]
 - add PageLayout  in changelog for improve structure page (ysturasp, 2025-08-14) [3 files changed, 5 insertions(+), 4 deletions(-)]
 - add robots.txt and sitemap.xml for improve seo (ysturasp, 2025-08-14) [4 files changed, 65 insertions(+)]
