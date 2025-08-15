@@ -1,3 +1,4 @@
+- delete unused style for padding right for modal windows (ysturasp, 2025-08-15) [4 files changed, 2 insertions(+), 7 deletions(-)]
 - refactor subgroup distribute function: improve grouping by subject and teacher and other (ysturasp, 2025-08-15) [3 files changed, 32 insertions(+), 41 deletions(-)]
 - add auto inclusion of division items based in schedule and unifed logic distribute subgroups for schedule and section subgroup (ysturasp, 2025-08-15) [5 files changed, 204 insertions(+), 176 deletions(-)]
 - add auto words wrapping for lesson name (ysturasp, 2025-08-15) [3 files changed, 3 insertions(+), 1 deletion(-)]

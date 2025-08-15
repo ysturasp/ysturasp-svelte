@@ -46,7 +46,7 @@
 
 <div id="authInfoBlock" class="mb-2 flex items-center justify-center px-4 md:mb-4">
 	{#if !$authToken}
-		<div class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl">
+		<!-- <div class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl">
 			<svg
 				class="h-6 w-6 text-blue-400"
 				fill="none"
@@ -64,7 +64,7 @@
 		<p class="text-sm text-slate-400">
 			для безопасности студентов доступ к чатам возможен только после авторизации через ЯГТУ
 			ID
-		</p>
+		</p> -->
 	{:else if userInfo}
 		<div class="flex items-center gap-2 rounded-xl bg-slate-800/80 px-2 py-2 md:gap-3 md:px-4">
 			<img

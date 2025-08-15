@@ -1,7 +1,7 @@
 import type { Group } from './stores';
 
 const GROUPS_API_URL =
-	'https://script.google.com/macros/s/AKfycbwk6ScY1HUfaZJQuYTKlpzhzKVSr1V3QEMe4ldL0F92kewtrTbfSilaMo7BJWvUfZjBbw/exec';
+	'https://script.google.com/macros/s/AKfycbzJIWG-wYgdveSNMeoKtZOwZ1AkdROSU_O0Kq3PEIYRUkhukOykMYuuZMtRGmgdVX1Cdg/exec';
 const AUTH_API_URL = 'https://oauth.ystuty.ru';
 
 export async function getGroups(token: string | null): Promise<Group[]> {
@@ -12,7 +12,7 @@ export async function getGroups(token: string | null): Promise<Group[]> {
 				'Content-Type': 'text/plain;charset=utf-8'
 			},
 			body: JSON.stringify({
-				action: 'get',
+				action: 'get_public',
 				token: token ?? null
 			})
 		});
