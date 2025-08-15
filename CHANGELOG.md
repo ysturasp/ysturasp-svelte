@@ -1,3 +1,4 @@
+- add auto inclusion of division items based in schedule and unifed logic distribute subgroups for schedule and section subgroup (ysturasp, 2025-08-15) [5 files changed, 204 insertions(+), 176 deletions(-)]
 - add auto words wrapping for lesson name (ysturasp, 2025-08-15) [3 files changed, 3 insertions(+), 1 deletion(-)]
 - add style for focus elements with used keyboard selection (ysturasp, 2025-08-15) [3 files changed, 30 insertions(+)]
 - add support mobile device for view tooltips gor next lesson in subgrops section (ysturasp, 2025-08-15) [3 files changed, 131 insertions(+), 2 deletions(-)]

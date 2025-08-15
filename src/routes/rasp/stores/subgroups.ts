@@ -146,50 +146,43 @@ export function generateSubgroupDistribution(scheduleData: any, semester: Semest
 		});
 	});
 
-	const subjectLessons = new Map<
-		string,
-		Array<{
-			teacher: string;
-			date: string;
-			timeRange: string;
-			isVUC: boolean;
-		}>
-	>();
+	type Entry = { teacher: string; date: string; timeRange: string; isVUC: boolean };
+	const groups = new Map<string, { subject: string; items: Entry[] }>();
 
 	scheduleData.items.forEach((weekItem: any) => {
 		weekItem.days.forEach((day: any) => {
 			if (!isDateInCurrentSemester(day.info.date, semester)) return;
 
 			day.lessons?.forEach((lesson: any) => {
-				if (lesson.type === 8) {
-					const teacherName = lesson.teacherName || lesson.additionalTeacherName;
-					if (!teacherName) return;
-					const subjectKey = `${lesson.lessonName}`;
-					if (!subjectLessons.has(subjectKey)) subjectLessons.set(subjectKey, []);
-					subjectLessons.get(subjectKey)!.push({
-						teacher: teacherName,
-						date: day.info.date,
-						timeRange: lesson.timeRange || `${lesson.startAt}-${lesson.endAt}`,
-						isVUC: vucDays.has(day.info.date)
-					});
-				}
+				if (lesson.type !== 8) return;
+				const teacherName = lesson.teacherName || lesson.additionalTeacherName;
+				if (!teacherName) return;
+				const subjectName = `${lesson.lessonName}`;
+				const baseKey =
+					subjectName === 'null' ? `${subjectName}_${teacherName}` : subjectName;
+				if (!groups.has(baseKey)) groups.set(baseKey, { subject: subjectName, items: [] });
+				groups.get(baseKey)!.items.push({
+					teacher: teacherName,
+					date: day.info.date,
+					timeRange: lesson.timeRange || `${lesson.startAt}-${lesson.endAt}`,
+					isVUC: vucDays.has(day.info.date)
+				});
 			});
 		});
 	});
 
-	subjectLessons.forEach((entries, subject) => {
-		entries.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+	groups.forEach(({ subject: subjectName, items }, groupKey) => {
+		items.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
-		const teachers = Array.from(new Set(entries.map((e) => e.teacher)));
-		const teacherToDates = new Map<string, typeof entries>();
+		const teachers = Array.from(new Set(items.map((e) => e.teacher)));
+		const teacherToDates = new Map<string, Entry[]>();
 		teachers.forEach((t) =>
 			teacherToDates.set(
 				t,
-				entries.filter((e) => e.teacher === t)
+				items.filter((e) => e.teacher === t)
 			)
 		);
-
-		const hasAnyVUC = entries.some((e) => e.isVUC);
+		const hasAnyVUC = items.some((e) => e.isVUC);
 
 		const perTeacherDates: Record<string, Record<string, SubgroupInfo>> = {};
 
@@ -207,7 +200,6 @@ export function generateSubgroupDistribution(scheduleData: any, semester: Semest
 			const [t1, t2] = teachers;
 			const t1Dates = teacherToDates.get(t1) || [];
 			const t2Dates = teacherToDates.get(t2) || [];
-
 			if (t1Dates.length === t2Dates.length) {
 				assignAllForTeacher(t1, 1);
 				assignAllForTeacher(t2, 2);
@@ -219,19 +211,19 @@ export function generateSubgroupDistribution(scheduleData: any, semester: Semest
 		}
 
 		function regularDistribute() {
-			const vuc = entries.filter((e) => e.isVUC);
-			const nonVuc = entries.filter((e) => !e.isVUC);
+			const vuc = items.filter((e) => e.isVUC);
+			const nonVuc = items.filter((e) => !e.isVUC);
 
-			const totalDays = entries.length;
+			const totalDays = items.length;
 			const maxDiff = Math.ceil(totalDays * 0.3);
 
 			let subgroup1Count = 0;
 			let subgroup2Count = 0;
 
-			let group1VUC: typeof entries = [];
-			let group2VUC: typeof entries = [];
-			let group1NonVUC: typeof entries = [];
-			let group2NonVUC: typeof entries = [];
+			let group1VUC: Entry[] = [];
+			let group2VUC: Entry[] = [];
+			let group1NonVUC: Entry[] = [];
+			let group2NonVUC: Entry[] = [];
 
 			for (const e of vuc) {
 				const currentDiff = subgroup2Count - subgroup1Count;
@@ -267,10 +259,7 @@ export function generateSubgroupDistribution(scheduleData: any, semester: Semest
 				}
 			}
 
-			function add(
-				entry: { teacher: string; date: string; timeRange: string; isVUC: boolean },
-				subgroup: 1 | 2
-			) {
+			function add(entry: Entry, subgroup: 1 | 2) {
 				const formattedDate = new Date(entry.date).toLocaleDateString('ru-RU');
 				const dateTimeKey = `${formattedDate}_${entry.timeRange}`;
 				if (!perTeacherDates[entry.teacher]) perTeacherDates[entry.teacher] = {};
@@ -284,7 +273,7 @@ export function generateSubgroupDistribution(scheduleData: any, semester: Semest
 		}
 
 		Object.entries(perTeacherDates).forEach(([teacher, dates]) => {
-			const key = `${subject}_${teacher}`;
+			const key = `${subjectName}_${teacher}`;
 			teacherSubgroups[key] = { dates, teacher };
 		});
 	});
