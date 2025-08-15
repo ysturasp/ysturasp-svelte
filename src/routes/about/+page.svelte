@@ -147,7 +147,7 @@
 							</div>
 						{/if}
 						{#if post.image}
-							{@const imageUrl = `https://lnk.su/api/image.get?url=${post.image.split('?')[0]}`}
+							{@const imageUrl = `https://proxy.duckduckgo.com/iu/?u=${post.image.split('?')[0]}`}
 							<div class="mt-5 flex justify-center">
 								<button
 									type="button"
