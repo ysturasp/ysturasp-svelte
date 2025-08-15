@@ -1,3 +1,4 @@
+- comment code temporary for access student first course (ysturasp, 2025-08-16) [3 files changed, 6 insertions(+), 4 deletions(-)]
 - replace proxy url for images /about page (ysturasp, 2025-08-16) [3 files changed, 3 insertions(+), 1 deletion(-)]
 - add temporary access click link for all users (ysturasp, 2025-08-16) [4 files changed, 6 insertions(+), 4 deletions(-)]
 - delete unused style for padding right for modal windows (ysturasp, 2025-08-15) [4 files changed, 2 insertions(+), 7 deletions(-)]
