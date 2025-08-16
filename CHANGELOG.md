@@ -1,3 +1,4 @@
+- rename institutes for better understand student (ysturasp, 2025-08-16) [4 files changed, 13 insertions(+), 12 deletions(-)]
 - improve netlify dependency for good build (ysturasp, 2025-08-16) [6 files changed, 53 insertions(+), 9 deletions(-)]
 - comment code temporary for access student first course (ysturasp, 2025-08-16) [3 files changed, 6 insertions(+), 4 deletions(-)]
 - replace proxy url for images /about page (ysturasp, 2025-08-16) [3 files changed, 3 insertions(+), 1 deletion(-)]

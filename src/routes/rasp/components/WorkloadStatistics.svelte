@@ -43,22 +43,27 @@
 	const apiUrl =
 		'https://script.google.com/macros/s/AKfycbxdL_UC__SmYJiPHmlsD4-T1ZiglPvgnehXed1OR9Qjk_fJ3rPxrVBT5Z0Zh1CiI7sC/exec';
 
-	async function fetchSubjectStats(subject: string): Promise<SubjectStats | null> {
-		if (subject.includes('(')) {
-			subject = subject.split('(')[0].trim();
-		}
+	let statsTick = 0;
 
-		if (statsCache.has(subject)) {
-			return statsCache.get(subject)!;
+	function cleanSubjectName(subject: string): string {
+		return subject.includes('(') ? subject.split('(')[0].trim() : subject;
+	}
+
+	async function fetchSubjectStats(subject: string): Promise<SubjectStats | null> {
+		const key = cleanSubjectName(subject);
+
+		if (statsCache.has(key)) {
+			return statsCache.get(key)!;
 		}
 
 		try {
-			const response = await fetch(`${apiUrl}?discipline=${encodeURIComponent(subject)}`);
+			const response = await fetch(`${apiUrl}?discipline=${encodeURIComponent(key)}`);
 			const data = await response.json();
 
 			if (data.error) return null;
 
-			statsCache.set(subject, data);
+			statsCache.set(key, data);
+			statsTick += 1;
 			return data;
 		} catch (error) {
 			console.error('Error fetching stats:', error);
@@ -348,7 +353,29 @@
 		return 'text-red-400';
 	}
 
+	function sortWorkloads(items: WorkloadStats[], _tick: number): WorkloadStats[] {
+		void _tick;
+		const withAvg: { s: WorkloadStats; avg: number }[] = [];
+		const withoutAvg: WorkloadStats[] = [];
+
+		for (const s of items) {
+			const key = cleanSubjectName(s.subject);
+			const avg = statsCache.get(key)?.average;
+			if (avg !== undefined && avg !== null) {
+				withAvg.push({ s, avg });
+			} else {
+				withoutAvg.push(s);
+			}
+		}
+
+		withAvg.sort((a, b) => b.avg - a.avg);
+		return [...withAvg.map((x) => x.s), ...withoutAvg];
+	}
+
 	let hoveredCard: HTMLElement | null = null;
+
+	let sortedWorkloadStats: WorkloadStats[] = [];
+	$: sortedWorkloadStats = sortWorkloads(workloadStats, statsTick);
 
 	function handleMouseMove(event: MouseEvent, card: HTMLElement) {
 		const rect = card.getBoundingClientRect();
@@ -373,7 +400,7 @@
 		</h3>
 
 		<div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-			{#each workloadStats as stat}
+			{#each sortedWorkloadStats as stat (stat.subject + '|' + stat.teacher)}
 				<div
 					role="button"
 					tabindex="0"
