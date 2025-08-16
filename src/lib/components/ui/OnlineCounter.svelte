@@ -6,8 +6,10 @@
 		onValue,
 		set,
 		remove,
+		onDisconnect,
 		serverTimestamp,
 		get,
+		update,
 		type Database
 	} from 'firebase/database';
 	import { browser } from '$app/environment';
@@ -28,6 +30,7 @@
 	let initialized = false;
 	let lastActivityTimestamp = Date.now();
 	let activityCheckInterval: ReturnType<typeof setInterval>;
+	let heartbeatInterval: ReturnType<typeof setInterval>;
 
 	if (browser && !sessionStorage.getItem('onlineUserId')) {
 		sessionStorage.setItem('onlineUserId', userId);
@@ -58,13 +61,6 @@
 		events.forEach((event) => {
 			window.addEventListener(event, updateLastActivity);
 		});
-
-		activityCheckInterval = setInterval(() => {
-			const now = Date.now();
-			if (now - lastActivityTimestamp > 2 * 60 * 1000) {
-				cleanupUser();
-			}
-		}, 30 * 1000);
 	};
 
 	const removeActivityListeners = () => {
@@ -77,6 +73,22 @@
 
 		if (activityCheckInterval) {
 			clearInterval(activityCheckInterval);
+		}
+	};
+
+	const setupHeartbeat = () => {
+		if (!browser || !database || !userId) return;
+		const userStatusRef = ref(database, '/online/' + userId);
+		heartbeatInterval = setInterval(() => {
+			if (document.visibilityState === 'visible') {
+				update(userStatusRef, { lastActivity: serverTimestamp() }).catch(() => {});
+			}
+		}, 30000);
+	};
+
+	const removeHeartbeat = () => {
+		if (heartbeatInterval) {
+			clearInterval(heartbeatInterval);
 		}
 	};
 
@@ -105,8 +117,12 @@
 						online: true,
 						group,
 						timestamp: serverTimestamp(),
-						lastActivity: Date.now()
+						lastActivity: serverTimestamp()
 					});
+
+					onDisconnect(userStatusRef)
+						.remove()
+						.catch(() => {});
 
 					if (!initialized) {
 						window.addEventListener('beforeunload', () => {
@@ -144,7 +160,7 @@
 			online: true,
 			group,
 			timestamp: serverTimestamp(),
-			lastActivity: Date.now()
+			lastActivity: serverTimestamp()
 		}).catch((error) => console.error('Ошибка обновления группы:', error));
 	};
 
@@ -180,6 +196,7 @@
 
 			await updateUserStatus(true, true);
 			setupActivityListeners();
+			setupHeartbeat();
 		} catch (error) {
 			console.error('Ошибка инициализации Firebase:', error);
 		}
@@ -190,6 +207,7 @@
 			unsubscribeConnected?.();
 			unsubscribeOnline?.();
 			removeActivityListeners();
+			removeHeartbeat();
 			cleanupUser();
 		}
 	});
