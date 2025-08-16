@@ -61,7 +61,7 @@
 					<img
 						src="https://thumb.cloud.mail.ru/weblink/thumb/xw1/TfKk/QGyS93cW7/PNG%20-%20digital/VK%20Logo.png"
 						alt="VK"
-						class="h-6 w-6 rounded-lg ring-1 ring-white"
+						class="h-6 w-6 rounded-md ring-1 ring-white"
 					/>
 					присоединиться
 				</div>

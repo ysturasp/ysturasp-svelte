@@ -9,16 +9,14 @@
 	let selectedInstitute = 'all';
 	const institutes = [
 		{ id: 'all', name: 'все чаты' },
-		{ id: 'ХТФ', name: 'ХТФ' },
-		{ id: 'ЗФО', name: 'ЗФО' },
-		{ id: 'УОП', name: 'УОП' },
-		{ id: 'ИАД', name: 'ИАД' },
-		{ id: 'ИИСТ', name: 'ИИСТ' },
-		{ id: 'ИХХТ', name: 'ИХХТ' },
-		{ id: 'ИЭМ', name: 'ИЭМ' },
-		{ id: 'ИЦС', name: 'ИЦС' },
-		{ id: 'ИИМ', name: 'ИИМ' },
-		{ id: 'ОБЩ', name: 'общежития' }
+		{ id: 'ЗФО', name: 'Заочка' },
+		{ id: 'ИАД', name: 'Институт Архитектуры и Дизайна' },
+		{ id: 'ИИСТ', name: 'Институт Инженеров Строительства и Транспорта' },
+		{ id: 'ИХХТ', name: 'Институт Химии и Химической Технологии' },
+		{ id: 'ИЭМ', name: 'Институт Экономики и Менеджмента' },
+		{ id: 'ИЦС', name: 'Институт Цифровых Систем' },
+		{ id: 'ИИМ', name: 'Институт Инженерии и Машиностроения' },
+		{ id: 'ОБЩ', name: 'Общежития' }
 	];
 
 	let currentToken: string | null = null;
@@ -90,7 +88,8 @@
 		<div class="mb-4 flex flex-wrap justify-center gap-4 md:mb-2">
 			{#each institutes as institute}
 				<button
-					class="institute-button rounded-xl px-6 py-3 {selectedInstitute === institute.id
+					class="institute-button rounded-xl px-3 py-2 md:px-6 md:py-3 {selectedInstitute ===
+					institute.id
 						? 'active'
 						: ''}"
 					on:click={() => (selectedInstitute = institute.id)}
