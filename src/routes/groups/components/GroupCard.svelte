@@ -2,6 +2,7 @@
 	import { createEventDispatcher } from 'svelte';
 	import type { Group } from '../stores';
 	import { deleteGroup } from '../api';
+	import { getFullInstituteName } from '../institutes';
 
 	export let group: Group;
 	const dispatch = createEventDispatcher();
@@ -32,7 +33,7 @@
 	<div class="mb-6 flex items-start justify-between">
 		<div>
 			<h3 class="mb-1 text-xl font-semibold text-white">{group.name}</h3>
-			<p class="text-slate-400">{group.institute}</p>
+			<p class="text-slate-400">{getFullInstituteName(group.institute)}</p>
 		</div>
 		{#if group.verified}
 			<span

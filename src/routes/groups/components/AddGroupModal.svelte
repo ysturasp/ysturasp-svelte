@@ -3,6 +3,7 @@
 	import BottomModal from '$lib/components/ui/BottomModal.svelte';
 	import { groups } from '../stores';
 	import { addGroup } from '../api';
+	import { institutes } from '../institutes';
 
 	const dispatch = createEventDispatcher();
 	let loading = false;
@@ -24,19 +25,6 @@
 			dispatch('close');
 		}, 300);
 	}
-
-	const institutes = [
-		{ value: 'ХТФ', label: 'Химико-технологический факультет' },
-		{ value: 'ЗФО', label: 'Заочная форма обучения' },
-		{ value: 'УОП', label: 'Заочный форма обучения (отделение УОП)' },
-		{ value: 'ИАД', label: 'Институт архитектуры и дизайна' },
-		{ value: 'ИИСТ', label: 'Институт инженеров строительства и транспорта' },
-		{ value: 'ИХХТ', label: 'Институт химии и химической технологии' },
-		{ value: 'ИЭМ', label: 'Институт экономики и менеджмента' },
-		{ value: 'ИЦС', label: 'Институт цифровых систем' },
-		{ value: 'ИИМ', label: 'Институт инженерии и машиностроения' },
-		{ value: 'ОБЩ', label: 'Общежития' }
-	];
 
 	async function generateToken() {
 		const array = new Uint8Array(32);

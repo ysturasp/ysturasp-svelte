@@ -4,20 +4,11 @@
 	import AuthInfo from './AuthInfo.svelte';
 	import GroupCard from './GroupCard.svelte';
 	import { getGroups } from '../api';
+	import { institutes } from '../institutes';
 
 	const dispatch = createEventDispatcher();
 	let selectedInstitute = 'all';
-	const institutes = [
-		{ id: 'all', name: 'все чаты' },
-		{ id: 'ЗФО', name: 'Заочка' },
-		{ id: 'ИАД', name: 'Институт Архитектуры и Дизайна' },
-		{ id: 'ИИСТ', name: 'Институт Инженеров Строительства и Транспорта' },
-		{ id: 'ИХХТ', name: 'Институт Химии и Химической Технологии' },
-		{ id: 'ИЭМ', name: 'Институт Экономики и Менеджмента' },
-		{ id: 'ИЦС', name: 'Институт Цифровых Систем' },
-		{ id: 'ИИМ', name: 'Институт Инженерии и Машиностроения' },
-		{ id: 'ОБЩ', name: 'Общежития' }
-	];
+	const allInstitutes = [{ value: 'all', label: 'все чаты' }, ...institutes];
 
 	let currentToken: string | null = null;
 	let unsubscribe: () => void;
@@ -86,15 +77,15 @@
 		</p>
 
 		<div class="mb-4 flex flex-wrap justify-center gap-4 md:mb-2">
-			{#each institutes as institute}
+			{#each allInstitutes as institute}
 				<button
 					class="institute-button rounded-xl px-3 py-2 md:px-6 md:py-3 {selectedInstitute ===
-					institute.id
+					institute.value
 						? 'active'
 						: ''}"
-					on:click={() => (selectedInstitute = institute.id)}
+					on:click={() => (selectedInstitute = institute.value)}
 				>
-					{institute.name}
+					{institute.label}
 				</button>
 			{/each}
 		</div>
