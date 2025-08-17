@@ -331,7 +331,7 @@
 		{/if}
 	</main>
 
-	<Footer />
+	<Footer class_name="pb-28 md:pb-18" />
 	<NotificationsContainer hasScheduleSwitcher={true} />
 </PageLayout>
 

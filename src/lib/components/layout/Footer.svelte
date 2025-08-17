@@ -1,6 +1,8 @@
 <script lang="ts">
 	import Dropdown from '$lib/components/ui/Dropdown.svelte';
 
+	export let class_name = '';
+
 	const legalItems = [
 		{
 			href: '/legal/terms',
@@ -17,7 +19,7 @@
 	];
 </script>
 
-<footer class="mt-12 bg-slate-800 py-6">
+<footer class="mt-12 bg-slate-800 py-6 {class_name}">
 	<div class="container mx-auto px-4">
 		<div class="flex flex-wrap items-center justify-between">
 			<div class="w-full text-center md:w-1/3 md:text-left">
