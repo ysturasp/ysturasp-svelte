@@ -1,3 +1,4 @@
+- improve rules for remove users in online counter (ysturasp, 2025-08-16) [3 files changed, 29 insertions(+), 9 deletions(-)]
 - add hotjar tracker (ysturasp, 2025-08-16) [3 files changed, 19 insertions(+)]
 - add sorting lesson with average score in work load (ysturasp, 2025-08-16) [3 files changed, 37 insertions(+), 8 deletions(-)]
 - rename institutes for better understand student (ysturasp, 2025-08-16) [4 files changed, 13 insertions(+), 12 deletions(-)]

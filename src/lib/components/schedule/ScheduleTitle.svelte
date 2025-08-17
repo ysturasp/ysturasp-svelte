@@ -3,6 +3,10 @@
 	import { scale } from 'svelte/transition';
 	import type { SemesterInfo } from '$lib/utils/semester';
 
+	function autoFocus(node: HTMLElement) {
+		node.focus();
+	}
+
 	export let title: string;
 	export let subtitle: string | undefined = undefined;
 	export let type: 'group' | 'teacher' | 'audience' = 'group';
@@ -78,12 +82,19 @@
 
 						{#if showSemesterOptions}
 							<div
+								tabindex="0"
+								use:autoFocus
 								class="absolute top-full left-1/2 z-50 mt-2 min-w-48 -translate-x-1/2 transform rounded-xl bg-slate-800 p-3 shadow-2xl ring-1 ring-blue-500/50"
 								transition:scale={{
 									duration: 200,
 									opacity: 0,
 									start: 0.95,
 									easing: quintOut
+								}}
+								on:keydown|stopPropagation={(e) => {
+									if (e.key === 'Escape') {
+										showSemesterOptions = false;
+									}
 								}}
 							>
 								{#each availableSemesters as semester}
@@ -136,7 +147,11 @@
 			showSemesterOptions = false;
 		}
 	}}
-	on:keydown={handleKeydown}
+	on:keydown={(e) => {
+		if (e.key === 'Escape') {
+			showSemesterOptions = false;
+		}
+	}}
 />
 
 <style>
