@@ -7,6 +7,27 @@
 	export let group: Group;
 	const dispatch = createEventDispatcher();
 
+	type PlatformInfo = {
+		name: string;
+		icon: string;
+		text: string;
+	};
+
+	function getPlatformInfo(link: string): PlatformInfo {
+		if (link.includes('t.me') || link.includes('telegram')) {
+			return {
+				name: 'telegram',
+				icon: 'https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg',
+				text: 'присоединиться'
+			};
+		}
+		return {
+			name: 'vk',
+			icon: 'https://thumb.cloud.mail.ru/weblink/thumb/xw1/TfKk/QGyS93cW7/PNG%20-%20digital/VK%20Logo.png',
+			text: 'присоединиться'
+		};
+	}
+
 	async function handleDeleteGroup() {
 		if (!confirm('Вы уверены, что хотите удалить эту группу?')) return;
 
@@ -27,6 +48,7 @@
 	}
 
 	$: hasToken = JSON.parse(localStorage.getItem('groupTokens') || '{}')[group.id];
+	$: platformInfo = group.link ? getPlatformInfo(group.link) : null;
 </script>
 
 <div class="group-card fade-in rounded-xl p-6" data-institute={group.institute} data-id={group.id}>
@@ -59,12 +81,8 @@
 				class="button-primary block rounded-xl py-3 text-center text-white"
 			>
 				<div class="flex items-center justify-center gap-2">
-					<img
-						src="https://thumb.cloud.mail.ru/weblink/thumb/xw1/TfKk/QGyS93cW7/PNG%20-%20digital/VK%20Logo.png"
-						alt="VK"
-						class="h-6 w-6 rounded-md ring-1 ring-white"
-					/>
-					присоединиться
+					<img src={platformInfo?.icon} alt={platformInfo?.name} class="h-6 w-6" />
+					{platformInfo?.text}
 				</div>
 			</a>
 		{:else}

@@ -1,3 +1,4 @@
+- add full name institute for groups page (ysturasp, 2025-08-17) [6 files changed, 26 insertions(+), 29 deletions(-)]
 - add special padding bottom for pages with schedule swither (ysturasp, 2025-08-17) [9 files changed, 11 insertions(+), 7 deletions(-)]
 - fix not close dropdown list by click esc (ysturasp, 2025-08-17) [3 files changed, 18 insertions(+), 1 deletion(-)]
 - improve rules for remove users in online counter (ysturasp, 2025-08-16) [3 files changed, 29 insertions(+), 9 deletions(-)]
