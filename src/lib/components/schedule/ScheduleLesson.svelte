@@ -63,7 +63,9 @@
 <div
 	class="rounded-2xl bg-slate-800 p-4 {!isLastInDay
 		? 'mb-2'
-		: ''} relative flex {timeInfo.isMultiLesson ? 'multi-lesson' : ''}"
+		: ''} relative flex {timeInfo.isMultiLesson
+		? 'multi-lesson'
+		: ''} transition-all hover:bg-slate-700"
 >
 	{#if timeInfo.isMultiLesson}
 		<div
@@ -168,7 +170,6 @@
 		font-weight: 600;
 		font-size: 0.875rem;
 		transition: all 0.3s ease;
-		background: rgba(30, 41, 59, 0.5);
 		backdrop-filter: blur(4px);
 	}
 

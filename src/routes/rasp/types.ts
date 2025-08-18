@@ -19,6 +19,19 @@ export interface YSTUScheduleDay {
 	lessons: YSTULesson[];
 }
 
+export interface TimeInfo {
+	customStartTime: string | null;
+	customEndTime: string | null;
+}
+
+export interface TimeSlot {
+	number: number;
+	startAt: string;
+	endAt: string;
+	timeRange: string;
+	originalTimeTitle: string;
+}
+
 export interface YSTULesson {
 	number: number;
 	lessonName: string;
@@ -36,6 +49,9 @@ export interface YSTULesson {
 	groups?: string;
 	originalTimeTitle?: string;
 	uniqueIndex?: number;
+	originalText?: string;
+	timeInfo?: TimeInfo;
+	additionalSlots?: TimeSlot[];
 }
 
 export const LessonTypes: Record<number, string> = {

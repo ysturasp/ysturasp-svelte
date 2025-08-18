@@ -22,6 +22,11 @@ export interface TimeSlot {
 	endAt: string;
 }
 
+export interface TimeInfo {
+	customStartTime: string | null;
+	customEndTime: string | null;
+}
+
 export interface Lesson {
 	number: number;
 	startAt: string;
@@ -43,6 +48,7 @@ export interface Lesson {
 	isShort: boolean;
 	isLecture: boolean;
 	originalText: string;
+	timeInfo?: TimeInfo;
 }
 
 export interface ScheduleDay {

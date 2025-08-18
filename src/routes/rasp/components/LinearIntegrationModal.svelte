@@ -47,6 +47,18 @@
 		});
 	}
 
+	function getTimeDisplay(lesson: YSTULesson): string {
+		const startTime = lesson.timeInfo?.customStartTime || formatTime(lesson.startAt);
+		let endTime = lesson.timeInfo?.customEndTime || formatTime(lesson.endAt);
+
+		if (lesson.additionalSlots?.length) {
+			const lastSlot = lesson.additionalSlots[lesson.additionalSlots.length - 1];
+			endTime = formatTime(lastSlot.endAt);
+		}
+
+		return `${startTime} — ${endTime}`;
+	}
+
 	function getLessonType(type: number): string {
 		return LessonTypes[type] || 'Занятие';
 	}
@@ -217,7 +229,7 @@
 					<div class="flex-grow">
 						<div class="text-sm text-gray-400">Время</div>
 						<div class="text-white">
-							{formatTime(lesson.startAt)} — {formatTime(lesson.endAt)}
+							{getTimeDisplay(lesson)}
 						</div>
 					</div>
 				</div>
@@ -242,6 +254,33 @@
 						<div class="flex-grow">
 							<div class="text-sm text-gray-400">Аудитория</div>
 							<div class="text-white">{lesson.auditoryName}</div>
+						</div>
+					</div>
+				{/if}
+				{#if lesson.groups}
+					<p class="text-sm text-gray-400">Группы: {lesson.groups}</p>
+				{/if}
+
+				{#if lesson.originalText}
+					<div class="flex items-start gap-3">
+						<div class="mt-1 rounded-lg bg-slate-500/20 p-2">
+							<svg
+								class="h-5 w-5 text-slate-400"
+								fill="none"
+								stroke="currentColor"
+								viewBox="0 0 24 24"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+								/>
+							</svg>
+						</div>
+						<div class="flex-grow">
+							<div class="text-sm text-gray-400">Оригинальный текст</div>
+							<div class="break-words text-white">{lesson.originalText}</div>
 						</div>
 					</div>
 				{/if}

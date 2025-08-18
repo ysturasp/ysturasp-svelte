@@ -25,6 +25,8 @@
 	import { settings } from '$lib/stores/settings';
 	import type { Settings } from '$lib/stores/settings';
 	import type { SemesterInfo } from '$lib/utils/semester';
+	import LinearIntegrationModal from '../../rasp/components/LinearIntegrationModal.svelte';
+	import type { YSTULesson } from '../../rasp/types';
 
 	let currentSettings: Settings;
 	settings.subscribe((value) => {
@@ -50,6 +52,10 @@
 	let scheduleData: ScheduleData | null = null;
 	let viewMode: 'all' | 'actual' = 'all';
 	let groupNumbersMap: Record<string, string> = {};
+
+	let isLinearModalOpen = false;
+	let selectedLesson: YSTULesson | null = null;
+	let selectedLessonDate = '';
 
 	const storage = {
 		get: (key: string, defaultValue: string = '') => {
@@ -273,6 +279,50 @@
 			isScheduleLoading = false;
 		}
 	}
+
+	function openLinearModalFromLesson(lesson: Lesson) {
+		const typeMap: Record<string, number> = { lecture: 2, practice: 4, other: 99 };
+		const adapted: YSTULesson = {
+			number: lesson.number,
+			lessonName: lesson.lessonName,
+			type: typeMap[lesson.type] ?? 99,
+			timeRange: lesson.timeRange,
+			startAt: new Date(`1970-01-01T${lesson.startAt}`).toISOString(),
+			endAt: new Date(`1970-01-01T${lesson.endAt}`).toISOString(),
+			teacherName: lesson.teacherName,
+			teacherId: 0,
+			auditoryName: lesson.auditoryName || '',
+			isDistant: !!lesson.isDistant,
+			isDivision: !!lesson.isDivision,
+			originalTimeTitle: lesson.originalTimeTitle,
+			additionalTeacherName: undefined,
+			additionalTeacherId: undefined,
+			groups: undefined,
+			uniqueIndex: undefined,
+			originalText: lesson.originalText,
+			timeInfo: lesson.timeInfo,
+			additionalSlots: lesson.additionalSlots?.map((slot) => ({
+				number: slot.number,
+				startAt: new Date(`1970-01-01T${slot.endAt}`).toISOString(),
+				endAt: new Date(`1970-01-01T${slot.endAt}`).toISOString(),
+				timeRange: '',
+				originalTimeTitle: ''
+			}))
+		};
+		selectedLesson = adapted;
+		selectedLessonDate = new Date().toISOString().split('T')[0];
+		setTimeout(() => {
+			isLinearModalOpen = true;
+		}, 0);
+	}
+
+	function closeLinearModal() {
+		isLinearModalOpen = false;
+		setTimeout(() => {
+			selectedLesson = null;
+			selectedLessonDate = '';
+		}, 300);
+	}
 </script>
 
 <svelte:head>
@@ -408,7 +458,11 @@
 										)
 								)}
 							{#if dayLessons.length > 0}
-								<ScheduleDay dayName={day} lessons={dayLessons} />
+								<ScheduleDay
+									dayName={day}
+									lessons={dayLessons}
+									on:lessonClick={(e) => openLinearModalFromLesson(e.detail)}
+								/>
 							{/if}
 						{/each}
 					{/if}
@@ -506,4 +560,13 @@
 
 {#if isScheduleLoading}
 	<LoadingOverlay />
+{/if}
+
+{#if selectedLesson}
+	<LinearIntegrationModal
+		isOpen={isLinearModalOpen}
+		onClose={closeLinearModal}
+		lesson={selectedLesson}
+		date={selectedLessonDate}
+	/>
 {/if}
