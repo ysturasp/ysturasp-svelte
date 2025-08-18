@@ -2,7 +2,7 @@
 	import { hiddenSubjects, restoreAllSubjects, toggleSubjectVisibility } from '../stores';
 	import { quintOut } from 'svelte/easing';
 	import { scale } from 'svelte/transition';
-	import { LessonTypes } from '../types';
+	import { LessonTypes } from '$lib/types/schedule';
 
 	export let selectedGroup: string;
 	let showSubjectsList = false;

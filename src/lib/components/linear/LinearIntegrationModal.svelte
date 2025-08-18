@@ -3,10 +3,10 @@
 	import { createEventDispatcher } from 'svelte';
 	import { linearStore } from '$lib/stores/linear';
 	import { notifications } from '$lib/stores/notifications';
-	import type { YSTULesson } from '../types';
+	import type { YSTULesson } from '../../../routes/rasp/types';
 	import LinearTaskList from './LinearTaskList.svelte';
 	import { onDestroy } from 'svelte';
-	import { LessonTypes } from '../types';
+	import { LessonTypes } from '$lib/types/schedule';
 
 	export let isOpen = false;
 	export let onClose: () => void;

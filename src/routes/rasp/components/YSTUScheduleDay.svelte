@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { YSTULesson } from '../types';
-	import { LessonTypes } from '../types';
+	import { LessonTypes } from '$lib/types/schedule';
 	import { hiddenSubjects, toggleSubjectVisibility } from '../stores';
 	import { fade } from 'svelte/transition';
 	import { quintOut } from 'svelte/easing';

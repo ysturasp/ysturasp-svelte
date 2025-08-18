@@ -16,7 +16,7 @@
 	import SubgroupsStatistics from './components/SubgroupsStatistics.svelte';
 	import HiddenSubjects from './components/HiddenSubjects.svelte';
 	import GithubApiSection from '$lib/components/sections/GithubApiSection.svelte';
-	import LinearIntegrationModal from './components/LinearIntegrationModal.svelte';
+	import LinearIntegrationModal from '$lib/components/linear/LinearIntegrationModal.svelte';
 	import FormatDocumentPromo from './components/FormatDocumentPromo.svelte';
 	import {
 		SEMESTER_WEEKS_COUNT,

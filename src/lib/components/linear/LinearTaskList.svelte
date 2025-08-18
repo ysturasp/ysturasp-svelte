@@ -12,7 +12,7 @@
 		deleteLinearTask,
 		getAllTasks
 	} from '$lib/stores/linear';
-	import type { YSTULesson } from '../types';
+	import type { YSTULesson } from '../../../routes/rasp/types';
 	import { notifications } from '$lib/stores/notifications';
 	import LinearDatePicker from './LinearDatePicker.svelte';
 	import LinearPriorityPicker from './LinearPriorityPicker.svelte';

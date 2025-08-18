@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { ScheduleData, YSTULesson } from '../types';
-	import { LessonTypes } from '../types';
+	import { LessonTypes } from '$lib/types/schedule';
 	import type { SemesterInfo } from '$lib/utils/semester';
 	import { isDateInSemester } from '$lib/utils/semester';
 

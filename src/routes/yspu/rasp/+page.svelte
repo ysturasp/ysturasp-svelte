@@ -25,7 +25,7 @@
 	import { settings } from '$lib/stores/settings';
 	import type { Settings } from '$lib/stores/settings';
 	import type { SemesterInfo } from '$lib/utils/semester';
-	import LinearIntegrationModal from '../../rasp/components/LinearIntegrationModal.svelte';
+	import LinearIntegrationModal from '$lib/components/linear/LinearIntegrationModal.svelte';
 	import type { YSTULesson } from '../../rasp/types';
 
 	let currentSettings: Settings;
