@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { AudienceLesson } from '../types';
-	import { LessonTypes } from '../types';
+	import { LessonTypes } from '$lib/types/schedule';
 
 	export let dayName: string;
 	export let date: string;

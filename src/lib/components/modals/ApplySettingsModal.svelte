@@ -2,6 +2,7 @@
 	import { createEventDispatcher } from 'svelte';
 	import Modal from '$lib/components/modals/Modal.svelte';
 	import type { Setting, SubjectType } from '$lib/types';
+	import { LessonTypes } from '$lib/types/schedule';
 
 	export let isOpen = false;
 	export let setting: Setting | null = null;
@@ -18,22 +19,6 @@
 			group = match ? match[1] : '';
 		}
 	}
-
-	const lessonTypes: { [key: number]: string } = {
-		0: 'none',
-		2: 'Лекция',
-		4: 'Практика',
-		8: 'Лабораторная работа',
-		1: 'Курсовой проект',
-		5: 'Консультация',
-		6: 'Лекция + Практика',
-		7: 'Дифференцированный зачет',
-		3: 'Экзамен',
-		9: 'Библиотека',
-		10: 'Лекция + Лабораторная работа',
-		11: 'Организационное собрание',
-		12: 'Не поддерживается'
-	};
 
 	function parseSubjectTypes(types: unknown): SubjectType[] {
 		if (Array.isArray(types)) {
@@ -61,7 +46,7 @@
 								<ul class="ml-4 list-disc">
 									{#each parseSubjectTypes(types) as type}
 										<li>
-											{type.teacher} ({lessonTypes[type.type] ||
+											{type.teacher} ({LessonTypes[type.type] ||
 												'Неизвестный тип'})
 										</li>
 									{/each}
