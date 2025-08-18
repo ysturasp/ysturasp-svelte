@@ -262,7 +262,7 @@
 			0 2px 4px -1px rgba(0, 0, 0, 0.06);
 	}
 
-	.online-users-counter:hover::before {
+	.online-users-counter::before {
 		content: '';
 		position: absolute;
 		top: calc(100% + 3px);
@@ -271,6 +271,20 @@
 		border-left: 5px solid transparent;
 		border-right: 5px solid transparent;
 		border-bottom: 5px solid rgba(59, 130, 246, 0.5);
+		opacity: 0;
+		visibility: hidden;
+		pointer-events: none;
+		transform: translateX(-50%) translateY(5px);
+		transition:
+			opacity 0.2s ease,
+			transform 0.2s ease,
+			visibility 0.2s ease;
+	}
+
+	.online-users-counter:hover::before {
+		opacity: 1;
+		visibility: visible;
+		transform: translateX(-50%) translateY(0);
 	}
 
 	.online-users-counter.mobile {
@@ -339,11 +353,21 @@
 		box-shadow:
 			0 4px 6px -1px rgba(0, 0, 0, 0.1),
 			0 2px 4px -1px rgba(0, 0, 0, 0.06);
-		display: none;
+		opacity: 0;
+		visibility: hidden;
+		pointer-events: none;
+		transform: translateX(-50%) translateY(10px);
+		transition:
+			opacity 0.2s ease,
+			transform 0.2s ease,
+			visibility 0.2s ease;
 	}
 
 	.online-users-counter[data-groups]:hover::after {
-		display: block;
+		opacity: 1;
+		visibility: visible;
+		pointer-events: auto;
+		transform: translateX(-50%) translateY(0);
 	}
 
 	@media (max-width: 768px) {

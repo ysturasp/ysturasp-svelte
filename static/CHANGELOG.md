@@ -1,3 +1,4 @@
+- remove repetitions of LessonTypes and integrate in all places from /lib/types/schedule (ysturasp, 2025-08-18) [7 files changed, 6 insertions(+), 53 deletions(-)]
 - transfer linear modal to global component for improve reuse component in other schedules (ysturasp, 2025-08-18) [14 files changed, 26 insertions(+), 24 deletions(-)]
 - add support for displaying linear modal for yspu and add new field for original text (ysturasp, 2025-08-18) [8 files changed, 143 insertions(+), 5 deletions(-)]
 - add support telegram icon platform for link groups (ysturasp, 2025-08-17) [3 files changed, 26 insertions(+), 6 deletions(-)]
