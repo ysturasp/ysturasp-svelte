@@ -28,6 +28,15 @@
 		};
 	}
 
+	function formatDate(dateString: string) {
+		const date = new Date(dateString);
+		return date.toLocaleDateString('ru-RU', {
+			year: 'numeric',
+			month: 'long',
+			day: 'numeric'
+		});
+	}
+
 	async function handleDeleteGroup() {
 		if (!confirm('Вы уверены, что хотите удалить эту группу?')) return;
 
@@ -105,6 +114,8 @@
 				Удалить чат
 			</button>
 		{/if}
+
+		<p class="text-slate-400">Добавлена {formatDate(group.date)}</p>
 	</div>
 </div>
 
