@@ -1,3 +1,4 @@
+- add check actual semester in schedule swither and add auto load schedule with select direction and group (ysturasp, 2025-08-19) [5 files changed, 94 insertions(+), 10 deletions(-)]
 - add date adding link on group (ysturasp, 2025-08-18) [3 files changed, 13 insertions(+)]
 - add animate for detail info in online counter (ysturasp, 2025-08-18) [3 files changed, 29 insertions(+), 3 deletions(-)]
 - remove repetitions of LessonTypes and integrate in all places from /lib/types/schedule (ysturasp, 2025-08-18) [7 files changed, 6 insertions(+), 53 deletions(-)]

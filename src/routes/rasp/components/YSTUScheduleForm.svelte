@@ -24,10 +24,12 @@
 	let weekError = false;
 	let highlightInstitute = false;
 
-	$: instituteItems = institutes.map((institute) => ({
-		id: institute.name,
-		label: institute.name
-	}));
+	$: instituteItems = institutes
+		.filter((institute) => institute.name !== 'Институт Магии и Игр')
+		.map((institute) => ({
+			id: institute.name,
+			label: institute.name
+		}));
 
 	$: groupItems = selectedInstitute
 		? institutes
