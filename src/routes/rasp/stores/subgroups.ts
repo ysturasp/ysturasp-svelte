@@ -300,11 +300,9 @@ export function generateSubgroupDistribution(scheduleData: any, semester: Semest
 		}
 
 		Object.entries(perTeacherDates).forEach(([teacher, dates]) => {
-			// Используем очищенное имя предмета для ключа
 			const key = `${subjectName}_${teacher}`;
 			teacherSubgroups[key] = { dates, teacher };
 
-			// Добавляем записи для оригинальных имен
 			originalNames.forEach((origName) => {
 				if (origName !== subjectName) {
 					const origKey = `${origName}_${teacher}`;

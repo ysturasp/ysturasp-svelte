@@ -1,3 +1,4 @@
+- fix distribute subgroups with department name in parentheses at end (ysturasp, 2025-08-19) [3 files changed, 45 insertions(+), 7 deletions(-)]
 - add various institutes API stats in workload section (ysturasp, 2025-08-19) [5 files changed, 25 insertions(+), 4 deletions(-)]
 - hide excess institut in list institutes (ysturasp, 2025-08-19) [3 files changed, 3 insertions(+), 1 deletion(-)]
 - hide service table institute magic and game (ysturasp, 2025-08-19) [3 files changed, 8 insertions(+), 4 deletions(-)]
