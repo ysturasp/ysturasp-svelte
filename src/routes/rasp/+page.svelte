@@ -696,7 +696,11 @@
 
 		{#if scheduleData && selectedSemester && currentSettings.showWorkload}
 			<section class="mt-4 rounded-2xl bg-slate-800 p-4 sm:p-6">
-				<WorkloadStatistics {scheduleData} {selectedSemester} />
+				<WorkloadStatistics
+					{scheduleData}
+					{selectedSemester}
+					institute={selectedInstitute}
+				/>
 			</section>
 		{/if}
 

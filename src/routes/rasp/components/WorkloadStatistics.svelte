@@ -6,6 +6,18 @@
 
 	export let scheduleData: ScheduleData | null = null;
 	export let selectedSemester: SemesterInfo | null = null;
+	export let institute: string = '';
+
+	const INSTITUTE_URLS: Record<string, string> = {
+		'Институт цифровых систем':
+			'https://script.google.com/macros/s/AKfycbxdL_UC__SmYJiPHmlsD4-T1ZiglPvgnehXed1OR9Qjk_fJ3rPxrVBT5Z0Zh1CiI7sC/exec',
+		'Институт архитектуры и дизайна':
+			'https://script.google.com/macros/s/AKfycbyN0A6BDc-w1yUVLkn25J_fW7s3wpdaR6SgL6s3uBeUAfrBsxJb0pYKuWr3M03mkzGWrA/exec',
+		'Институт инженеров строительства и транспорта':
+			'https://script.google.com/macros/s/AKfycbzbxLrOI2rA8ZzVfrT6RXIG5ADMl_5NdAQd8NEIYfg-qKkWVe_fGyB5pDolsCOtH14Mxw/exec',
+		'Институт химии и химической технологии':
+			'https://script.google.com/macros/s/AKfycbwF5HYRZ4k2Eg25VjtHgmlEznjyFOBRj2ZOqQch5z7f_mJ5rJ8LmfOzawS7Kwsv3xiZXg/exec'
+	} as const;
 
 	interface ExamInfo {
 		date: string;
@@ -40,8 +52,7 @@
 	}
 
 	const statsCache = new Map<string, SubjectStats>();
-	const apiUrl =
-		'https://script.google.com/macros/s/AKfycbxdL_UC__SmYJiPHmlsD4-T1ZiglPvgnehXed1OR9Qjk_fJ3rPxrVBT5Z0Zh1CiI7sC/exec';
+	const apiUrl = INSTITUTE_URLS[institute] || INSTITUTE_URLS['Институт цифровых систем'];
 
 	let statsTick = 0;
 
