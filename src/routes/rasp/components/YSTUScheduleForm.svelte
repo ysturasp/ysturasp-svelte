@@ -25,7 +25,7 @@
 	let highlightInstitute = false;
 
 	$: instituteItems = institutes
-		.filter((institute) => institute.name !== 'Институт Магии и Игр')
+		.filter((institute) => institute.name !== 'Институт Магии и Игр' && institute.name !== 'Химико-технологический факультет')
 		.map((institute) => ({
 			id: institute.name,
 			label: institute.name
