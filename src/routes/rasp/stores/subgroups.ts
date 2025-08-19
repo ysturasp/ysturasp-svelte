@@ -126,6 +126,10 @@ function formatTime(timeString: string): string {
 	}
 }
 
+export function cleanSubjectName(name: string): string {
+	return name.replace(/\s*\([^)]*\)/g, '').trim();
+}
+
 export function generateSubgroupDistribution(scheduleData: any, semester: SemesterInfo) {
 	const teacherSubgroups: TeacherSubgroups = {};
 	const vucDays = new Set<string>();
@@ -146,8 +150,17 @@ export function generateSubgroupDistribution(scheduleData: any, semester: Semest
 		});
 	});
 
-	type Entry = { teacher: string; date: string; timeRange: string; isVUC: boolean };
-	const groups = new Map<string, { subject: string; items: Entry[] }>();
+	type Entry = {
+		teacher: string;
+		date: string;
+		timeRange: string;
+		isVUC: boolean;
+		originalName: string;
+	};
+	const groups = new Map<
+		string,
+		{ subject: string; originalNames: Set<string>; items: Entry[] }
+	>();
 
 	scheduleData.items.forEach((weekItem: any) => {
 		weekItem.days.forEach((day: any) => {
@@ -157,21 +170,35 @@ export function generateSubgroupDistribution(scheduleData: any, semester: Semest
 				if (lesson.type !== 8) return;
 				const teacherName = lesson.teacherName || lesson.additionalTeacherName;
 				if (!teacherName) return;
-				const subjectName = `${lesson.lessonName}`;
+
+				const originalName = lesson.lessonName;
+				const cleanedName = cleanSubjectName(originalName);
+				const subjectName = cleanedName === 'null' ? originalName : cleanedName;
 				const baseKey =
 					subjectName === 'null' ? `${subjectName}_${teacherName}` : subjectName;
-				if (!groups.has(baseKey)) groups.set(baseKey, { subject: subjectName, items: [] });
-				groups.get(baseKey)!.items.push({
+
+				if (!groups.has(baseKey)) {
+					groups.set(baseKey, {
+						subject: subjectName,
+						originalNames: new Set([originalName]),
+						items: []
+					});
+				}
+
+				const group = groups.get(baseKey)!;
+				group.originalNames.add(originalName);
+				group.items.push({
 					teacher: teacherName,
 					date: day.info.date,
 					timeRange: lesson.timeRange || `${lesson.startAt}-${lesson.endAt}`,
-					isVUC: vucDays.has(day.info.date)
+					isVUC: vucDays.has(day.info.date),
+					originalName
 				});
 			});
 		});
 	});
 
-	groups.forEach(({ subject: subjectName, items }, groupKey) => {
+	groups.forEach(({ subject: subjectName, items, originalNames }, groupKey) => {
 		items.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
 		const teachers = Array.from(new Set(items.map((e) => e.teacher)));
@@ -273,8 +300,17 @@ export function generateSubgroupDistribution(scheduleData: any, semester: Semest
 		}
 
 		Object.entries(perTeacherDates).forEach(([teacher, dates]) => {
+			// Используем очищенное имя предмета для ключа
 			const key = `${subjectName}_${teacher}`;
 			teacherSubgroups[key] = { dates, teacher };
+
+			// Добавляем записи для оригинальных имен
+			originalNames.forEach((origName) => {
+				if (origName !== subjectName) {
+					const origKey = `${origName}_${teacher}`;
+					teacherSubgroups[origKey] = teacherSubgroups[key];
+				}
+			});
 		});
 	});
 
