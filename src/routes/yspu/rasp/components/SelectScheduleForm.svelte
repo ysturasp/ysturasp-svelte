@@ -10,6 +10,7 @@
 	export let onDirectionChange: () => void;
 	export let scheduleShown = false;
 	export let isLoading = false;
+	export let autoLoadOnSelect = false;
 
 	export let selectedDirectionLabel = '';
 	export let selectedGroupLabel = '';
@@ -17,6 +18,7 @@
 	let showErrors = false;
 	let showGroupError = false;
 	let highlightDirection = false;
+	let lastLoadedDirection = '';
 
 	$: directionItems =
 		directions?.map((direction) => ({
@@ -43,6 +45,7 @@
 		showErrors = false;
 		showGroupError = false;
 		highlightDirection = false;
+		lastLoadedDirection = '';
 	}
 
 	function handleGroupSelect(event: CustomEvent) {
@@ -51,6 +54,16 @@
 		showErrors = false;
 		showGroupError = false;
 		highlightDirection = false;
+
+		if (
+			autoLoadOnSelect &&
+			selectedDirection &&
+			selectedGroup &&
+			lastLoadedDirection !== selectedDirection
+		) {
+			lastLoadedDirection = selectedDirection;
+			onSubmit();
+		}
 	}
 
 	function handleGroupClick() {

@@ -1,3 +1,4 @@
+- add date adding link on group (ysturasp, 2025-08-18) [3 files changed, 13 insertions(+)]
 - add animate for detail info in online counter (ysturasp, 2025-08-18) [3 files changed, 29 insertions(+), 3 deletions(-)]
 - remove repetitions of LessonTypes and integrate in all places from /lib/types/schedule (ysturasp, 2025-08-18) [7 files changed, 6 insertions(+), 53 deletions(-)]
 - transfer linear modal to global component for improve reuse component in other schedules (ysturasp, 2025-08-18) [14 files changed, 26 insertions(+), 24 deletions(-)]

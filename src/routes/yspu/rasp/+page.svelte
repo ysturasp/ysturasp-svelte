@@ -8,6 +8,8 @@
 		Course,
 		ScheduleItem
 	} from '$lib/types/schedule';
+	import { notifications } from '$lib/stores/notifications';
+	import TgsSticker from '$lib/components/common/TgsSticker.svelte';
 	import LoadingOverlay from './components/LoadingOverlay.svelte';
 	import PageLayout from '$lib/components/layout/PageLayout.svelte';
 	import Header from '$lib/components/layout/Header.svelte';
@@ -52,6 +54,7 @@
 	let scheduleData: ScheduleData | null = null;
 	let viewMode: 'all' | 'actual' = 'all';
 	let groupNumbersMap: Record<string, string> = {};
+	let wasLoadAttempted = false;
 
 	let isLinearModalOpen = false;
 	let selectedLesson: YSTULesson | null = null;
@@ -134,14 +137,16 @@
 	});
 
 	async function loadSchedule() {
-		if (!selectedDirection || !selectedGroup || !selectedSemester) return;
+		if (!selectedDirection || !selectedSemester) return;
 
 		try {
 			isScheduleLoading = true;
+			wasLoadAttempted = true;
 
 			const targetSchedule = schedules.find((s) => s.folderId === selectedSemester?.folderId);
 			if (!targetSchedule) {
-				console.error('Schedule not found for semester:', selectedSemester?.folderId);
+				scheduleData = null;
+				groupNumbersMap = {};
 				return;
 			}
 
@@ -166,6 +171,7 @@
 			storage.set('lastYspuSemester', selectedSemester.folderId);
 		} catch (error) {
 			console.error('Error loading schedule:', error);
+			notifications.add('Ошибка при загрузке расписания', 'error');
 		} finally {
 			isScheduleLoading = false;
 		}
@@ -259,19 +265,30 @@
 			selectedSemester = semester;
 			storage.set('lastYspuSemester', semester.folderId);
 
-			const oldDirectionName = directions.find((d) => d.id === selectedDirection)?.name || '';
 			const targetSchedule = schedules.find((s) => s.folderId === semester.folderId);
-			directions = (targetSchedule?.directions as Direction[]) || [];
+			if (!targetSchedule) {
+				scheduleData = null;
+				groupNumbersMap = {};
+				return;
+			}
+
+			const oldDirectionName = directions.find((d) => d.id === selectedDirection)?.name || '';
+			directions = (targetSchedule.directions as Direction[]) || [];
 			const matched = oldDirectionName
 				? directions.find((d) => d.name === oldDirectionName)
 				: undefined;
-			selectedDirection = matched?.id || '';
 
-			if (selectedDirection && selectedGroup) {
-				await loadSchedule();
-			} else {
+			if (!matched) {
+				selectedDirection = '';
+				selectedGroup = '';
 				scheduleData = null;
 				groupNumbersMap = {};
+				return;
+			}
+
+			selectedDirection = matched.id;
+			if (selectedDirection) {
+				await loadSchedule();
 			}
 		} catch (error) {
 			console.error('Error changing semester:', error);
@@ -418,6 +435,7 @@
 				onDirectionChange={handleDirectionChange}
 				scheduleShown={!!scheduleData}
 				{isLoading}
+				autoLoadOnSelect={true}
 			/>
 
 			{#if scheduleData}
@@ -467,6 +485,57 @@
 						{/each}
 					{/if}
 				</div>
+			{:else if selectedDirection && selectedGroup && wasLoadAttempted && !isScheduleLoading}
+				<div class="mt-4">
+					<ScheduleTitle
+						type="group"
+						title={(() => {
+							const groupInfo = Object.entries(
+								directions.find((d) => d.id === selectedDirection)?.courses || {}
+							).find(([key]) => key === selectedGroup);
+							return groupInfo?.[1].name || selectedGroup;
+						})()}
+						subtitle={undefined}
+						availableSemesters={semesters}
+						{selectedSemester}
+						onSemesterSelect={handleSemesterSelect}
+					/>
+
+					<div class="flex flex-col items-center justify-center text-center">
+						<div class="h-[200px] w-[200px]">
+							<TgsSticker
+								src="/stickers/face_with_monocle.tgs"
+								autoplay={true}
+								once={false}
+								quality={3}
+								width="100%"
+								height="100%"
+							/>
+						</div>
+						<p class="text-xl font-semibold text-white">
+							Расписание на этот семестр пока не добавлено
+						</p>
+						<div class="relative mt-2">
+							<p class="text-gray-400">
+								Попробуйте выбрать другой семестр или зайдите позже
+							</p>
+							<svg
+								class="absolute -top-[255px] right-[250px] block h-[189px] w-[69px] md:-top-[225px] md:right-[300px] md:h-[189px] md:w-[69px] lg:-top-[225px] lg:right-[300px]"
+								viewBox="0 0 69 189"
+								fill="none"
+								xmlns="http://www.w3.org/2000/svg"
+							>
+								<path
+									fill-rule="evenodd"
+									clip-rule="evenodd"
+									d="M63.1047 0.259298C62.963 0.279533 61.8291 1.11969 60.5742 2.11625C58.3845 3.86603 56.2903 5.4037 54.2216 6.75182C50.4644 9.22039 47.8728 11.0042 44.8223 13.224C42.8998 14.6266 39.8634 16.7929 38.0624 18.0066C29.795 23.6463 25.2165 27.2328 22.8833 29.9014C21.8437 31.1177 21.6132 32.3081 22.1588 33.7829C22.6542 35.0811 24.6631 37.9269 25.1888 38.0642C25.647 38.1838 27.2555 37.3694 27.3514 37.0021C27.3893 36.8567 27.3396 36.5249 27.2323 36.2599C27.0788 35.8029 27.1238 35.6921 28.3801 34.4752C30.0176 32.8428 32.4439 30.7706 34.8517 28.9225C37.3837 26.9679 42.9116 23.0325 42.9688 23.121C43.0023 23.1461 41.8609 24.7526 40.4453 26.6718C32.5072 37.4734 28.2231 44.2347 23.5855 53.364C19.4425 61.5517 16.1848 69.2675 12.6567 79.3404C10.9641 84.1952 6.06864 102.641 5.14721 107.738C2.09844 124.426 0.696702 139.476 0.759557 154.908C0.805773 162.261 1.00898 166.123 1.71661 173.615C2.37217 180.292 2.90682 182.639 4.38479 185.183C5.08942 186.356 6.4852 187.954 6.94335 188.074C7.05601 188.103 6.9075 186.798 6.60006 185.148C2.52914 163.373 3.30139 136.167 8.80047 107.204C9.69913 102.501 14.5355 83.975 15.9541 79.8007C21.6652 63.0556 26.7897 52.0916 34.5174 40.0989C37.1946 35.9588 41.9673 29.1698 43.9548 26.6888C44.4175 26.1148 44.4135 26.1301 43.9273 27.5317C43.426 28.9294 43.4371 28.9486 43.8363 30.1236C44.3705 31.7344 46.5656 35.4952 47.4563 36.3244C48.0494 36.8798 48.2292 36.9594 48.5139 36.8212C48.7171 36.719 48.9287 36.4309 49.0006 36.1554C49.2384 35.2448 51.7558 29.4119 52.7638 27.3945C54.8098 23.3676 57.8174 19.0686 60.9107 15.7319C62.5922 13.9312 63.6724 12.8972 66.1517 10.8062C67.2245 9.89284 68.1751 8.95579 68.229 8.74917C68.4328 7.96863 67.7191 6.00041 66.5203 3.9546C64.8359 1.0954 63.9567 0.130219 63.1087 0.243978L63.1047 0.259298Z"
+									fill="currentColor"
+									class="text-gray-300/50"
+								/>
+							</svg>
+						</div>
+					</div>
+				</div>
 			{/if}
 		</section>
 
@@ -480,8 +549,8 @@
 </PageLayout>
 
 <ScheduleSwitcher
-	selectedSemester={null}
-	onSemesterChange={() => {}}
+	{selectedSemester}
+	onSemesterChange={handleSemesterSelect}
 	currentPage="students"
 	university="yspu"
 />
