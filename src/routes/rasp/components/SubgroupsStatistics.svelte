@@ -80,14 +80,14 @@
 		window.addEventListener('resize', checkMobile);
 
 		const handleDocumentClick = (e: MouseEvent) => {
-			if (!isMobile) return;
+			if (!isMobile || !activeTooltip) return;
 
-			if (activeTooltip && !(e.target as HTMLElement).closest('.group')) {
+			if (!(e.target as HTMLElement).closest('.group')) {
 				activeTooltip.classList.remove('opacity-100');
 				activeTooltip.classList.add('opacity-0');
 				setTimeout(() => {
-					if (!activeTooltip?.classList.contains('opacity-100')) {
-						activeTooltip!.style.display = 'none';
+					if (activeTooltip && !activeTooltip.classList.contains('opacity-100')) {
+						activeTooltip.style.display = 'none';
 					}
 				}, 200);
 				activeTooltip = null;
@@ -113,7 +113,7 @@
 				tooltipEl.classList.remove('opacity-100');
 				tooltipEl.classList.add('opacity-0');
 				setTimeout(() => {
-					if (!tooltipEl.classList.contains('opacity-100')) {
+					if (tooltipEl && !tooltipEl.classList.contains('opacity-100')) {
 						tooltipEl.style.display = 'none';
 					}
 				}, 200);
@@ -128,8 +128,8 @@
 					activeTooltip.classList.remove('opacity-100');
 					activeTooltip.classList.add('opacity-0');
 					setTimeout(() => {
-						if (!activeTooltip?.classList.contains('opacity-100')) {
-							activeTooltip!.style.display = 'none';
+						if (activeTooltip && !activeTooltip.classList.contains('opacity-100')) {
+							activeTooltip.style.display = 'none';
 						}
 					}, 200);
 				}

@@ -125,8 +125,8 @@ function formatTime(timeString: string): string {
 		return timeString;
 	}
 }
-
-export function cleanSubjectName(name: string): string {
+export function cleanSubjectName(name: string | null): string {
+	if (!name) return 'null';
 	return name.replace(/\s*\([^)]*\)/g, '').trim();
 }
 
@@ -171,11 +171,11 @@ export function generateSubgroupDistribution(scheduleData: any, semester: Semest
 				const teacherName = lesson.teacherName || lesson.additionalTeacherName;
 				if (!teacherName) return;
 
-				const originalName = lesson.lessonName;
+				const originalName = lesson.lessonName || 'null';
 				const cleanedName = cleanSubjectName(originalName);
-				const subjectName = cleanedName === 'null' ? originalName : cleanedName;
-				const baseKey =
-					subjectName === 'null' ? `${subjectName}_${teacherName}` : subjectName;
+				const subjectName =
+					cleanedName === 'null' ? `null (преп. ${teacherName})` : cleanedName;
+				const baseKey = `${subjectName}_${teacherName}`;
 
 				if (!groups.has(baseKey)) {
 					groups.set(baseKey, {
@@ -302,13 +302,6 @@ export function generateSubgroupDistribution(scheduleData: any, semester: Semest
 		Object.entries(perTeacherDates).forEach(([teacher, dates]) => {
 			const key = `${subjectName}_${teacher}`;
 			teacherSubgroups[key] = { dates, teacher };
-
-			originalNames.forEach((origName) => {
-				if (origName !== subjectName) {
-					const origKey = `${origName}_${teacher}`;
-					teacherSubgroups[origKey] = teacherSubgroups[key];
-				}
-			});
 		});
 	});
 
