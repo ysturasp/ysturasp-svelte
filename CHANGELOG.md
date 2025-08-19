@@ -1,3 +1,4 @@
+- fix error distribute with null name (ysturasp, 2025-08-19) [4 files changed, 15 insertions(+), 20 deletions(-)]
 - clean comments (ysturasp, 2025-08-19) [3 files changed, 2 insertions(+), 2 deletions(-)]
 - fix distribute subgroups with department name in parentheses at end (ysturasp, 2025-08-19) [3 files changed, 45 insertions(+), 7 deletions(-)]
 - add various institutes API stats in workload section (ysturasp, 2025-08-19) [5 files changed, 25 insertions(+), 4 deletions(-)]

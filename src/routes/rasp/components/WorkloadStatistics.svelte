@@ -206,46 +206,18 @@
 		const stats = new Map<string, WorkloadStats>();
 		const currentDate = new Date();
 
-		console.log('Selected semester:', selectedSemester);
-		console.log('Schedule data:', scheduleData);
-
 		scheduleData.items.forEach((weekItem) => {
 			weekItem.days.forEach((day) => {
 				const lessonDate = new Date(day.info.date);
 				const isInSemester = isDateInSemesterRange(lessonDate, selectedSemester);
 
 				if (!isInSemester) {
-					console.log(
-						'Skipping date:',
-						day.info.date,
-						'semester:',
-						selectedSemester.type,
-						selectedSemester.year
-					);
 					return;
 				}
 
-				console.log(
-					'Including date:',
-					day.info.date,
-					'semester:',
-					selectedSemester.type,
-					selectedSemester.year
-				);
-
 				day.lessons?.forEach((lesson) => {
 					if (shouldSkipLesson(lesson)) {
-						console.log('Skipping lesson:', lesson.lessonName);
 						return;
-					}
-
-					if (lesson.type === 256) {
-						console.log('Found exam:', {
-							date: day.info.date,
-							subject: lesson.lessonName,
-							teacher: lesson.teacherName,
-							type: lesson.type
-						});
 					}
 
 					const key =
@@ -270,11 +242,6 @@
 					subjectStats.totalLessons++;
 
 					if (lesson.type === 256) {
-						console.log('Adding exam to stats:', {
-							subject: subjectStats.subject,
-							date: formatDate(lessonDate),
-							teacher: lesson.teacherName
-						});
 						subjectStats.exams.push({
 							date: formatDate(lessonDate),
 							time: formatTime(lessonDate),
@@ -309,7 +276,6 @@
 
 			return b.totalLessons - a.totalLessons;
 		});
-		console.log('Final stats:', result);
 		return result;
 	}
 
