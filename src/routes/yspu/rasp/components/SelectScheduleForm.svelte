@@ -11,6 +11,7 @@
 	export let scheduleShown = false;
 	export let isLoading = false;
 	export let autoLoadOnSelect = false;
+	export let scheduleData: any = null;
 
 	export let selectedDirectionLabel = '';
 	export let selectedGroupLabel = '';
@@ -55,11 +56,20 @@
 		showGroupError = false;
 		highlightDirection = false;
 
+		const params = new URLSearchParams(window.location.search);
+		if (selectedGroup) {
+			params.set('group', selectedGroup);
+		} else {
+			params.delete('group');
+		}
+		window.history.replaceState({}, '', `${window.location.pathname}?${params}`);
+
 		if (
 			autoLoadOnSelect &&
 			selectedDirection &&
 			selectedGroup &&
-			lastLoadedDirection !== selectedDirection
+			lastLoadedDirection !== selectedDirection &&
+			!scheduleData
 		) {
 			lastLoadedDirection = selectedDirection;
 			onSubmit();

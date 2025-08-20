@@ -143,6 +143,12 @@
 			isScheduleLoading = true;
 			wasLoadAttempted = true;
 
+			const params = new URLSearchParams();
+			if (selectedDirection) params.set('direction', selectedDirection);
+			if (selectedGroup) params.set('group', selectedGroup);
+			if (selectedSemester) params.set('semester', selectedSemester.folderId);
+			window.history.replaceState({}, '', `${window.location.pathname}?${params}`);
+
 			const targetSchedule = schedules.find((s) => s.folderId === selectedSemester?.folderId);
 			if (!targetSchedule) {
 				scheduleData = null;
@@ -181,6 +187,16 @@
 		selectedGroup = '';
 		scheduleData = null;
 		groupNumbersMap = {};
+
+		const params = new URLSearchParams(window.location.search);
+		if (selectedDirection) {
+			params.set('direction', selectedDirection);
+			params.delete('group');
+		} else {
+			params.delete('direction');
+			params.delete('group');
+		}
+		window.history.replaceState({}, '', `${window.location.pathname}?${params}`);
 	}
 
 	function toggleViewMode(mode: 'all' | 'actual') {
@@ -264,6 +280,10 @@
 			isScheduleLoading = true;
 			selectedSemester = semester;
 			storage.set('lastYspuSemester', semester.folderId);
+
+			const params = new URLSearchParams(window.location.search);
+			params.set('semester', semester.folderId);
+			window.history.replaceState({}, '', `${window.location.pathname}?${params}`);
 
 			const targetSchedule = schedules.find((s) => s.folderId === semester.folderId);
 			if (!targetSchedule) {
@@ -436,6 +456,7 @@
 				scheduleShown={!!scheduleData}
 				{isLoading}
 				autoLoadOnSelect={true}
+				{scheduleData}
 			/>
 
 			{#if scheduleData}
