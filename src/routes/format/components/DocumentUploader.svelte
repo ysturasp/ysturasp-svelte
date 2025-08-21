@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { formatDocument } from '../api';
+	import { formatDocument, type FormatParams } from '../api';
 	import { createEventDispatcher } from 'svelte';
 	import ProcessingSteps from './ProcessingSteps.svelte';
 
@@ -9,6 +9,8 @@
 		downloadReady: { base64: string; fileName: string };
 		complete: void;
 	}>();
+
+	export let formatParams: FormatParams | undefined = undefined;
 
 	let dropZone: HTMLDivElement;
 	let fileInput: HTMLInputElement;
@@ -106,7 +108,7 @@
 			dispatch('processing', true);
 
 			const base64 = await readFileAsBase64(file);
-			const formatPromise = formatDocument(base64);
+			const formatPromise = formatDocument(base64, formatParams);
 			const animationPromise = runAnimation();
 
 			const result = await formatPromise;

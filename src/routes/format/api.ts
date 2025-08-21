@@ -1,13 +1,36 @@
 import type { FormatResponse } from '$lib/types/document';
 
-const GOOGLE_SCRIPT_URL =
-	'https://script.google.com/macros/s/AKfycbyC_cSUs-aLUddgdTSWMKqr2-X_oFEQeR6J0O6wgbX2d9Qq6_YqMw5pa87OdUKlFHYVAA/exec';
+export interface FormatParams {
+	margins: {
+		top: number;
+		right: number;
+		bottom: number;
+		left: number;
+	};
+	text: {
+		font: string;
+		size: number;
+		indent: number;
+		lineHeight: number;
+	};
+	headers: {
+		h1: { spacingBefore: number; spacingAfter: number };
+		h2: { spacingBefore: number; spacingAfter: number };
+		h3: { spacingBefore: number; spacingAfter: number };
+	};
+}
 
-export async function formatDocument(base64: string): Promise<FormatResponse> {
+const GOOGLE_SCRIPT_URL =
+	'https://script.google.com/macros/s/AKfycbwSJqjHcNDtqMxqMvhAVBnZgBPN2l-K84hvTe_93YyO97cCRosHSoakNmozUR8XDA4yRg/exec';
+
+export async function formatDocument(
+	base64: string,
+	formatParams?: FormatParams
+): Promise<FormatResponse> {
 	try {
 		const response = await fetch(GOOGLE_SCRIPT_URL, {
 			method: 'POST',
-			body: base64
+			body: formatParams ? JSON.stringify({ file: base64, formatParams }) : base64
 		});
 
 		if (!response.ok) {
