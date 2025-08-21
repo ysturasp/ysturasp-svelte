@@ -57,7 +57,7 @@
 	let statsTick = 0;
 
 	function cleanSubjectName(subject: string): string {
-		return subject.includes('(') ? subject.split('(')[0].trim() : subject;
+		return subject?.includes('(') ? subject.split('(')[0].trim() : subject?.trim() || '';
 	}
 
 	async function fetchSubjectStats(subject: string): Promise<SubjectStats | null> {
@@ -220,17 +220,12 @@
 						return;
 					}
 
-					const key =
-						lesson.lessonName === null || lesson.lessonName === undefined
-							? `null_${lesson.teacherName}`
-							: lesson.lessonName;
+					const cleanName = cleanSubjectName(lesson.lessonName);
+					const key = cleanName || `null_${lesson.teacherName}`;
 
 					if (!stats.has(key)) {
 						stats.set(key, {
-							subject:
-								lesson.lessonName === null || lesson.lessonName === undefined
-									? `Без названия`
-									: lesson.lessonName,
+							subject: cleanName || 'Без названия',
 							teachers: [],
 							totalLessons: 0,
 							typeStats: {},
