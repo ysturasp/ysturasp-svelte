@@ -28,7 +28,7 @@
 
 	interface WorkloadStats {
 		subject: string;
-		teacher: string;
+		teachers: string[];
 		totalLessons: number;
 		typeStats: {
 			[key: number]: {
@@ -231,7 +231,7 @@
 								lesson.lessonName === null || lesson.lessonName === undefined
 									? `Без названия`
 									: lesson.lessonName,
-							teacher: lesson.teacherName || 'Преподаватель не указан',
+							teachers: [],
 							totalLessons: 0,
 							typeStats: {},
 							exams: []
@@ -240,6 +240,10 @@
 
 					const subjectStats = stats.get(key)!;
 					subjectStats.totalLessons++;
+
+					if (lesson.teacherName && !subjectStats.teachers.includes(lesson.teacherName)) {
+						subjectStats.teachers.push(lesson.teacherName);
+					}
 
 					if (lesson.type === 256) {
 						subjectStats.exams.push({
@@ -377,7 +381,7 @@
 		</h3>
 
 		<div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-			{#each sortedWorkloadStats as stat (stat.subject + '|' + stat.teacher)}
+			{#each sortedWorkloadStats as stat (stat.subject + '|' + stat.teachers.join(','))}
 				<div
 					role="button"
 					tabindex="0"
@@ -445,7 +449,7 @@
 							</h2>
 						{/if}
 					{/await}
-					<p class="text-sm break-words text-gray-400">{stat.teacher}</p>
+					<p class="text-sm break-words text-gray-400">{stat.teachers.join(', ')}</p>
 
 					<div class="mt-2">
 						{#each Object.entries(stat.typeStats) as [type, info]}

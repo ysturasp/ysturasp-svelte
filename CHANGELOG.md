@@ -1,3 +1,4 @@
+- add links on schedule ystu and yspu on hero section (ysturasp, 2025-08-20) [3 files changed, 55 insertions(+), 14 deletions(-)]
 - add update parametrs direction group and semester on schedule yspu (ysturasp, 2025-08-20) [4 files changed, 34 insertions(+), 1 deletion(-)]
 - clean debug console logs for workload section (ysturasp, 2025-08-19) [3 files changed, 2 insertions(+), 34 deletions(-)]
 - fix error distribute with null name (ysturasp, 2025-08-19) [4 files changed, 15 insertions(+), 20 deletions(-)]
