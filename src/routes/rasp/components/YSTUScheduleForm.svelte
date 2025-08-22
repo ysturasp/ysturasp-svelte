@@ -51,7 +51,7 @@
 
 	$: weeks = Array.from({ length: SEMESTER_WEEKS_COUNT }, (_, i) => {
 		const weekNum = i + 1;
-		const startDate = formatWeekStartDate(weekNum, selectedSemester);
+		const startDate = formatWeekStartDate(weekNum, selectedSemester || undefined);
 		return {
 			id: weekNum.toString(),
 			label: `${weekNum} - ${startDate}`
