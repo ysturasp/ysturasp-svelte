@@ -1,6 +1,16 @@
-<script>
+<script lang="ts">
+	import { onMount } from 'svelte';
 	let isMobileMenuOpen = false;
 	let isClosing = false;
+	let mobileMenu: HTMLElement;
+	let lastScrollY = 0;
+
+	function handleScroll() {
+		if (window.scrollY > lastScrollY && isMobileMenuOpen) {
+			closeMobileMenu();
+		}
+		lastScrollY = window.scrollY;
+	}
 
 	function toggleMobileMenu() {
 		if (!isMobileMenuOpen && !isClosing) {
@@ -19,10 +29,40 @@
 	}
 
 	function closeMobileMenu() {
-		if (!isClosing) {
+		if (!isClosing && isMobileMenuOpen) {
 			isClosing = true;
 		}
 	}
+
+	function handleClickOutside(e: MouseEvent) {
+		const target = e.target as HTMLElement;
+		const menuButton = target.closest('button');
+		if (
+			isMobileMenuOpen &&
+			mobileMenu &&
+			!mobileMenu.contains(target) &&
+			(!menuButton || !menuButton.getAttribute('aria-label')?.includes('мобильное меню'))
+		) {
+			closeMobileMenu();
+		}
+	}
+
+	function handleKeydown(e: KeyboardEvent) {
+		if (e.key === 'Escape') {
+			closeMobileMenu();
+		}
+	}
+
+	onMount(() => {
+		document.addEventListener('click', handleClickOutside);
+		document.addEventListener('keydown', handleKeydown);
+		document.addEventListener('scroll', handleScroll, { passive: true });
+		return () => {
+			document.removeEventListener('click', handleClickOutside);
+			document.removeEventListener('keydown', handleKeydown);
+			document.removeEventListener('scroll', handleScroll);
+		};
+	});
 </script>
 
 <header class="sticky top-4 z-100 container mx-auto px-3 md:px-0">
@@ -104,6 +144,7 @@
 	<slot name="online-counter-mobile" />
 
 	<div
+		bind:this={mobileMenu}
 		class="mobile-menu absolute right-3 left-3 mt-4 rounded-2xl bg-slate-800 px-3 py-2 shadow-xl ring-1 ring-blue-500/50 md:px-6 md:py-3 lg:hidden {!isMobileMenuOpen
 			? 'hidden'
 			: ''} {isClosing ? 'hide' : 'show'}"
