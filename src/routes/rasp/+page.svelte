@@ -534,6 +534,7 @@
 				bind:favoriteGroups
 				onSubmit={loadSchedule}
 				{isLoading}
+				{selectedSemester}
 			/>
 
 			{#if scheduleData}

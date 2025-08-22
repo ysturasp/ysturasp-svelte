@@ -28,11 +28,7 @@ function getFirstMondayOfMonth(year: number, month: number): Date {
 	const day = date.getDay();
 	const diff = day === 0 ? 6 : day - 1;
 
-	if (month >= 8) {
-		date.setDate(date.getDate() + (diff === 0 ? 1 : 8 - diff));
-	} else {
-		date.setDate(date.getDate() + (diff === 0 ? 0 : 7 - diff));
-	}
+	date.setDate(date.getDate() + (diff === 0 ? 0 : 7 - diff));
 	return date;
 }
 

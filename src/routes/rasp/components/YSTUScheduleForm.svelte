@@ -2,7 +2,11 @@
 	import type { Institute } from '../types';
 	import CustomSelect from '$lib/components/ui/CustomSelect.svelte';
 	import CopyLinkButton from '$lib/components/ui/CopyLinkButton.svelte';
-	import { SEMESTER_WEEKS_COUNT, formatWeekStartDate } from '$lib/utils/semester';
+	import {
+		SEMESTER_WEEKS_COUNT,
+		formatWeekStartDate,
+		type SemesterInfo
+	} from '$lib/utils/semester';
 
 	export let institutes: Institute[] = [];
 	export let selectedInstitute = '';
@@ -15,6 +19,7 @@
 	export let favoriteGroups: string[] = [];
 	export let submitButtonText = 'Показать расписание';
 	export let copyButtonText = 'Скопировать ссылку на расписание';
+	export let selectedSemester: SemesterInfo | null = null;
 
 	let isInitialized = false;
 	let previousGroup = '';
@@ -46,7 +51,7 @@
 
 	$: weeks = Array.from({ length: SEMESTER_WEEKS_COUNT }, (_, i) => {
 		const weekNum = i + 1;
-		const startDate = formatWeekStartDate(weekNum);
+		const startDate = formatWeekStartDate(weekNum, selectedSemester);
 		return {
 			id: weekNum.toString(),
 			label: `${weekNum} - ${startDate}`
