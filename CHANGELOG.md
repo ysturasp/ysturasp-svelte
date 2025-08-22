@@ -1,3 +1,4 @@
+- add bazi params for format documents (ysturasp, 2025-08-21) [6 files changed, 378 insertions(+), 69 deletions(-)]
 - improve merge card subject with same name and same name with postfix (ysturasp, 2025-08-21) [3 files changed, 6 insertions(+), 9 deletions(-)]
 - add array teachers for workload statistics (ysturasp, 2025-08-21) [3 files changed, 10 insertions(+), 4 deletions(-)]
 - add links on schedule ystu and yspu on hero section (ysturasp, 2025-08-20) [3 files changed, 55 insertions(+), 14 deletions(-)]

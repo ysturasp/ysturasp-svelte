@@ -6,12 +6,13 @@
 	import Footer from '$lib/components/layout/Footer.svelte';
 	import PageLayout from '$lib/components/layout/PageLayout.svelte';
 	import type { FormatParams } from './api';
+	import { defaultFormatParams } from './constants';
 
 	let isProcessing = false;
 	let errorMessage = '';
 	let downloadData: { base64: string; fileName: string } | null = null;
 	let isComplete = false;
-	let formatParams: FormatParams;
+	let formatParams: FormatParams = JSON.parse(JSON.stringify(defaultFormatParams));
 	let isSettingsOpen = false;
 
 	function handleError(event: CustomEvent<string>) {
@@ -64,12 +65,6 @@
 		document.body.removeChild(a);
 		URL.revokeObjectURL(url);
 	}
-
-	function resetState() {
-		downloadData = null;
-		errorMessage = '';
-		isComplete = false;
-	}
 </script>
 
 <svelte:head>
@@ -108,7 +103,11 @@
 				</div>
 
 				<div class="mt-4">
-					<FormatSettings isOpen={isSettingsOpen} on:change={handleFormatParamsChange} />
+					<FormatSettings
+						{formatParams}
+						isOpen={isSettingsOpen}
+						on:change={handleFormatParamsChange}
+					/>
 				</div>
 
 				<div class="mt-4">
