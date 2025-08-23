@@ -2,6 +2,7 @@
 	import { formatDocument, type FormatParams } from '../api';
 	import { createEventDispatcher } from 'svelte';
 	import ProcessingSteps from './ProcessingSteps.svelte';
+	import { formattingComplete } from '../stores';
 
 	const dispatch = createEventDispatcher<{
 		error: string;
@@ -67,6 +68,7 @@
 		isComplete = true;
 		isProcessing = false;
 		dispatch('complete');
+		formattingComplete.set(true);
 	}
 
 	async function runAnimation() {
@@ -108,7 +110,7 @@
 			dispatch('processing', true);
 
 			const base64 = await readFileAsBase64(file);
-			const formatPromise = formatDocument(base64, formatParams);
+			const formatPromise = formatDocument(base64, formatParams, file.name);
 			const animationPromise = runAnimation();
 
 			const result = await formatPromise;

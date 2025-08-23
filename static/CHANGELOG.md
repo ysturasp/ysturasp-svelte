@@ -1,3 +1,4 @@
+- add hide mobile header with click outside of it and esc keydown (ysturasp, 2025-08-22) [3 files changed, 45 insertions(+), 2 deletions(-)]
 - fix date format for start week when no semester is selected (ysturasp, 2025-08-22) [3 files changed, 3 insertions(+), 1 deletion(-)]
 - fix update hints for week custom select (ysturasp, 2025-08-22) [5 files changed, 11 insertions(+), 7 deletions(-)]
 - add button for reset params if user edit one or more and improve structure (ysturasp, 2025-08-22) [5 files changed, 137 insertions(+), 68 deletions(-)]

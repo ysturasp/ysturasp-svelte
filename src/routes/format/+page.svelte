@@ -2,6 +2,7 @@
 	import DocumentUploader from './components/DocumentUploader.svelte';
 	import FormatRules from './components/FormatRules.svelte';
 	import FormatSettings from './components/FormatSettings.svelte';
+	import FormattingHistory from './components/FormattingHistory.svelte';
 	import Header from '$lib/components/layout/Header.svelte';
 	import Footer from '$lib/components/layout/Footer.svelte';
 	import PageLayout from '$lib/components/layout/PageLayout.svelte';
@@ -176,6 +177,7 @@
 			</div>
 
 			<FormatRules />
+			<FormattingHistory />
 		</div>
 	</main>
 
