@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { Audience } from '../api';
 	import ScheduleCombobox from '$lib/components/schedule/ScheduleCombobox.svelte';
+	import { replaceState } from '$app/navigation';
 
 	export let audiences: Audience[] = [];
 	export let selectedAudience = '';
@@ -14,6 +15,15 @@
 			return;
 		}
 		error = false;
+
+		const params = new URLSearchParams(window.location.search);
+		if (selectedAudience) {
+			params.set('audience', selectedAudience);
+		} else {
+			params.delete('audience');
+		}
+		replaceState(`${window.location.pathname}?${params}`, {});
+
 		onSubmit();
 	}
 

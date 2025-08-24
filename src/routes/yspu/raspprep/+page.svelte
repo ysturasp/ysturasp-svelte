@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { replaceState } from '$app/navigation';
 	import PageLayout from '$lib/components/layout/PageLayout.svelte';
 	import Header from '$lib/components/layout/Header.svelte';
 	import Footer from '$lib/components/layout/Footer.svelte';
@@ -80,13 +81,21 @@
 			const urlParams = new URLSearchParams(window.location.search);
 			const teacherFromURL = urlParams.get('teacher');
 			if (teacherFromURL) {
-				selectedTeacher = teacherFromURL;
-				await loadSchedule();
+				const teacher = teachers.find((t) => t.name === teacherFromURL);
+				if (teacher) {
+					selectedTeacher = teacherFromURL;
+					await loadSchedule();
+				} else {
+					notifications.add('Преподаватель не найден', 'error');
+				}
 			} else {
 				const lastTeacher = localStorage.getItem('lastTeacher');
 				if (lastTeacher) {
-					selectedTeacher = lastTeacher;
-					await loadSchedule();
+					const teacher = teachers.find((t) => t.name === lastTeacher);
+					if (teacher) {
+						selectedTeacher = lastTeacher;
+						await loadSchedule();
+					}
 				}
 			}
 		} catch (error) {
@@ -103,6 +112,15 @@
 
 		try {
 			isScheduleLoading = true;
+
+			const params = new URLSearchParams(window.location.search);
+			if (selectedTeacher) {
+				params.set('teacher', selectedTeacher);
+			} else {
+				params.delete('teacher');
+			}
+			replaceState(`${window.location.pathname}?${params}`, {});
+
 			scheduleData = await getTeacherSchedule(teacher.id);
 			localStorage.setItem('lastTeacher', selectedTeacher);
 		} catch (error) {

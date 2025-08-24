@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { getAudiences, getSchedule } from './api';
+	import { replaceState } from '$app/navigation';
 	import type { AudienceScheduleData } from '$lib/types/schedule';
 	import type { Audience } from './api';
 	import LoadingOverlay from '$lib/components/loading/LoadingOverlay.svelte';
@@ -47,13 +48,21 @@
 			const urlParams = new URLSearchParams(window.location.search);
 			const audienceFromURL = urlParams.get('audience');
 			if (audienceFromURL) {
-				selectedAudience = audienceFromURL;
-				await loadSchedule();
+				const audience = audiences.find((a) => a.id === audienceFromURL);
+				if (audience) {
+					selectedAudience = audienceFromURL;
+					await loadSchedule();
+				} else {
+					notifications.add('Аудитория не найдена', 'error');
+				}
 			} else {
 				const lastAudience = localStorage.getItem('lastAudience');
 				if (lastAudience) {
-					selectedAudience = lastAudience;
-					await loadSchedule();
+					const audience = audiences.find((a) => a.id === lastAudience);
+					if (audience) {
+						selectedAudience = lastAudience;
+						await loadSchedule();
+					}
 				}
 			}
 		} catch (error) {
@@ -67,6 +76,15 @@
 	async function loadSchedule() {
 		try {
 			isScheduleLoading = true;
+
+			const params = new URLSearchParams(window.location.search);
+			if (selectedAudience) {
+				params.set('audience', selectedAudience);
+			} else {
+				params.delete('audience');
+			}
+			replaceState(`${window.location.pathname}?${params}`, {});
+
 			scheduleData = await getSchedule(selectedAudience);
 			localStorage.setItem('lastAudience', selectedAudience);
 		} catch (error) {
