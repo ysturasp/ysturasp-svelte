@@ -89,7 +89,7 @@
 					notifications.add('Преподаватель не найден', 'error');
 				}
 			} else {
-				const lastTeacher = localStorage.getItem('lastTeacher');
+				const lastTeacher = localStorage.getItem('lastYspuTeacher');
 				if (lastTeacher) {
 					const teacher = teachers.find((t) => t.name === lastTeacher);
 					if (teacher) {
@@ -122,7 +122,7 @@
 			replaceState(`${window.location.pathname}?${params}`, {});
 
 			scheduleData = await getTeacherSchedule(teacher.id);
-			localStorage.setItem('lastTeacher', selectedTeacher);
+			localStorage.setItem('lastYspuTeacher', selectedTeacher);
 		} catch (error) {
 			if (error instanceof Response && error.status === 429) {
 				notifications.add('Превышено количество запросов. Попробуйте позже.', 'error');

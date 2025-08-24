@@ -56,7 +56,7 @@
 					notifications.add('Аудитория не найдена', 'error');
 				}
 			} else {
-				const lastAudience = localStorage.getItem('lastAudience');
+				const lastAudience = localStorage.getItem('lastYspuAudience');
 				if (lastAudience) {
 					const audience = audiences.find((a) => a.id === lastAudience);
 					if (audience) {
@@ -86,7 +86,7 @@
 			replaceState(`${window.location.pathname}?${params}`, {});
 
 			scheduleData = await getSchedule(selectedAudience);
-			localStorage.setItem('lastAudience', selectedAudience);
+			localStorage.setItem('lastYspuAudience', selectedAudience);
 		} catch (error) {
 			if (error instanceof Response && error.status === 429) {
 				notifications.add('Превышено количество запросов. Попробуйте позже.', 'error');
