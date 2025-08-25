@@ -123,6 +123,9 @@
 
 	$: filteredLessons = lessons
 		.filter((lesson) => {
+			if (!lesson.lessonName && !lesson.teacherName && !lesson.auditoryName) {
+				return false;
+			}
 			if (!selectedGroup || !$hiddenSubjects[selectedGroup]) return true;
 			return !$hiddenSubjects[selectedGroup].some(
 				(s) =>
