@@ -1,3 +1,4 @@
+- update subgroup processing logic, improve settings storage structure and fix lesson statistics display (ysturasp, 2025-08-25) [7 files changed, 154 insertions(+), 77 deletions(-)]
 - fix name local storage variables for uniq ystu and yspu schedule (ysturasp, 2025-08-24) [4 files changed, 6 insertions(+), 4 deletions(-)]
 - add update state URL with select teacher and audience yspu schedule (ysturasp, 2025-08-24) [6 files changed, 66 insertions(+), 8 deletions(-)]
 - add history format documents (ysturasp, 2025-08-23) [7 files changed, 157 insertions(+), 4 deletions(-)]

@@ -51,7 +51,8 @@
 		emptyCount: number;
 	}
 
-	const statsCache = new Map<string, SubjectStats>();
+	const statsCache = new Map<string, SubjectStats | null>();
+	const pendingRequests = new Set<string>();
 	const apiUrl = INSTITUTE_URLS[institute] || INSTITUTE_URLS['Институт цифровых систем'];
 
 	let statsTick = 0;
@@ -63,22 +64,41 @@
 	async function fetchSubjectStats(subject: string): Promise<SubjectStats | null> {
 		const key = cleanSubjectName(subject);
 
-		if (statsCache.has(key)) {
-			return statsCache.get(key)!;
+		if (key === 'Без названия') {
+			return null;
 		}
+
+		if (statsCache.has(key)) {
+			return statsCache.get(key) ?? null;
+		}
+
+		if (pendingRequests.has(key)) {
+			while (pendingRequests.has(key)) {
+				await new Promise((resolve) => setTimeout(resolve, 50));
+			}
+			return statsCache.get(key) || null;
+		}
+
+		pendingRequests.add(key);
 
 		try {
 			const response = await fetch(`${apiUrl}?discipline=${encodeURIComponent(key)}`);
 			const data = await response.json();
 
-			if (data.error) return null;
+			if (data.error) {
+				statsCache.set(key, null);
+				return null;
+			}
 
 			statsCache.set(key, data);
 			statsTick += 1;
 			return data;
 		} catch (error) {
 			console.error('Error fetching stats:', error);
+			statsCache.set(key, null);
 			return null;
+		} finally {
+			pendingRequests.delete(key);
 		}
 	}
 
