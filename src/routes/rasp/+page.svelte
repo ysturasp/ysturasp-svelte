@@ -116,19 +116,25 @@
 			if (!scheduleData || !selectedSemester) return;
 			let changed = false;
 			const newSettings: SubgroupSettings = { ...currentSubgroupSettings };
+
 			scheduleData.items.forEach((weekItem) => {
 				weekItem.days.forEach((day) => {
 					if (!isDateInSemester(day.info.date, selectedSemester!)) return;
 					day.lessons?.forEach((lesson) => {
-						if (lesson.type === 8 && lesson.isDivision && lesson.lessonName) {
-							if (newSettings[lesson.lessonName] === undefined) {
-								newSettings[lesson.lessonName] = true;
+						if (lesson.type === 8) {
+							const lessonName = lesson.lessonName || 'null';
+							const settingKey =
+								lessonName === 'null' ? `null_${lesson.teacherName}` : lessonName;
+
+							if (newSettings[settingKey] === undefined) {
+								newSettings[settingKey] = lesson.isDivision || false;
 								changed = true;
 							}
 						}
 					});
 				});
 			});
+
 			if (changed) {
 				currentSubgroupSettings = newSettings;
 				subgroupSettings.set(currentSubgroupSettings);
@@ -716,9 +722,8 @@
 
 <SubgroupSettingsModal
 	isOpen={isSubgroupModalOpen}
-	{scheduleData}
-	{selectedSemester}
 	settings={currentSubgroupSettings}
+	teacherSubgroups={currentTeacherSubgroups}
 	onSave={handleSubgroupSettingsSave}
 	onClose={closeSubgroupModal}
 />

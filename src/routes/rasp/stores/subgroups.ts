@@ -10,6 +10,8 @@ export interface SubgroupInfo {
 export interface TeacherSubgroupData {
 	dates: Record<string, SubgroupInfo>;
 	teacher: string;
+	isDivision: boolean;
+	displayName: string;
 }
 
 export interface SubgroupSettings {
@@ -26,13 +28,43 @@ export const teacherSubgroups = writable<TeacherSubgroups>({});
 export function loadSubgroupSettings(): SubgroupSettings {
 	if (!browser) return {};
 	const stored = localStorage.getItem('subgroupSettings');
-	return stored ? JSON.parse(stored) : {};
+	const settings = stored ? JSON.parse(stored) : {};
+
+	const cleanedSettings = cleanupSubgroupSettings(settings);
+
+	if (JSON.stringify(settings) !== JSON.stringify(cleanedSettings)) {
+		localStorage.setItem('subgroupSettings', JSON.stringify(cleanedSettings));
+	}
+
+	return cleanedSettings;
 }
 
 export function saveSubgroupSettings(settings: SubgroupSettings) {
 	if (!browser) return;
-	localStorage.setItem('subgroupSettings', JSON.stringify(settings));
-	subgroupSettings.set(settings);
+
+	const cleanedSettings = cleanupSubgroupSettings(settings);
+
+	localStorage.setItem('subgroupSettings', JSON.stringify(cleanedSettings));
+	subgroupSettings.set(cleanedSettings);
+}
+
+function cleanupSubgroupSettings(settings: SubgroupSettings): SubgroupSettings {
+	const cleaned: SubgroupSettings = {};
+
+	for (const [key, value] of Object.entries(settings)) {
+		if (key.startsWith('null (преп.') && key.includes('_')) {
+			const parts = key.split('_');
+			if (parts.length >= 2) {
+				const teacher = parts[parts.length - 1];
+				const newKey = `null_${teacher}`;
+				cleaned[newKey] = value;
+			}
+		} else {
+			cleaned[key] = value;
+		}
+	}
+
+	return cleaned;
 }
 
 export function loadTeacherSubgroups(): TeacherSubgroups {
@@ -54,11 +86,16 @@ export function shouldShowLabWork(
 ): boolean {
 	if (lesson.type !== 8) return true;
 
-	const key = `${lesson.lessonName}_${lesson.teacherName}`;
+	const lessonName = lesson.lessonName || 'null';
+	const settingKey = lessonName === 'null' ? `null_${lesson.teacherName}` : lessonName;
+	if (!settings[settingKey]) return true;
 
-	if (!settings[lesson.lessonName]) return true;
+	const teacherKey =
+		lessonName === 'null'
+			? `null (преп. ${lesson.teacherName})_${lesson.teacherName}`
+			: `${lessonName}_${lesson.teacherName}`;
 
-	return teacherData[key] !== undefined;
+	return teacherData[teacherKey] !== undefined;
 }
 
 export function getSubgroupIndicator(
@@ -69,13 +106,21 @@ export function getSubgroupIndicator(
 ): string {
 	if (lesson.type !== 8) return '';
 
-	const mainKey = `${lesson.lessonName}_${lesson.teacherName}`;
-	const additionalKey = lesson.additionalTeacherName
-		? `${lesson.lessonName}_${lesson.additionalTeacherName}`
-		: null;
-	const candidateKeys = [mainKey, additionalKey].filter(Boolean) as string[];
+	const lessonName = lesson.lessonName || 'null';
 
-	const setting = settings[lesson.lessonName];
+	const mainTeacherKey =
+		lessonName === 'null'
+			? `null (преп. ${lesson.teacherName})_${lesson.teacherName}`
+			: `${lessonName}_${lesson.teacherName}`;
+	const additionalTeacherKey = lesson.additionalTeacherName
+		? lessonName === 'null'
+			? `null (преп. ${lesson.additionalTeacherName})_${lesson.additionalTeacherName}`
+			: `${lessonName}_${lesson.additionalTeacherName}`
+		: null;
+	const candidateKeys = [mainTeacherKey, additionalTeacherKey].filter(Boolean) as string[];
+
+	const settingKey = lessonName === 'null' ? `null_${lesson.teacherName}` : lessonName;
+	const setting = settings[settingKey];
 	const allow = setting === true ? true : setting === false ? false : Boolean(lesson.isDivision);
 	if (!allow) return '';
 
@@ -172,9 +217,8 @@ export function generateSubgroupDistribution(scheduleData: any, semester: Semest
 				if (!teacherName) return;
 
 				const originalName = lesson.lessonName || 'null';
-				const cleanedName = cleanSubjectName(originalName);
 				const subjectName =
-					cleanedName === 'null' ? `null (преп. ${teacherName})` : cleanedName;
+					originalName === 'null' ? `null (преп. ${teacherName})` : originalName;
 				const baseKey = `${subjectName}_${teacherName}`;
 
 				if (!groups.has(baseKey)) {
@@ -301,7 +345,38 @@ export function generateSubgroupDistribution(scheduleData: any, semester: Semest
 
 		Object.entries(perTeacherDates).forEach(([teacher, dates]) => {
 			const key = `${subjectName}_${teacher}`;
-			teacherSubgroups[key] = { dates, teacher };
+
+			let isDivision = false;
+			let found = false;
+			for (const item of items) {
+				if (item.teacher === teacher) {
+					for (const weekItem of scheduleData.items) {
+						for (const day of weekItem.days) {
+							const lesson = day.lessons?.find((l) => {
+								if (l.type !== 8) return false;
+								const lessonName = l.lessonName || 'null';
+								return (
+									lessonName === item.originalName && l.teacherName === teacher
+								);
+							});
+							if (lesson) {
+								isDivision = lesson.isDivision;
+								found = true;
+								break;
+							}
+						}
+						if (found) break;
+					}
+					break;
+				}
+			}
+
+			teacherSubgroups[key] = {
+				dates,
+				teacher,
+				isDivision,
+				displayName: subjectName
+			};
 		});
 	});
 

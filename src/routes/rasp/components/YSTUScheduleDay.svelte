@@ -209,7 +209,12 @@
 								{/if}
 							</div>
 						</div>
-						<p class="text-sm {typeInfo.text}">{typeInfo.label}</p>
+						<p class="text-sm {typeInfo.text}">
+							{typeInfo.label}
+							{#if !lesson.isDivision && lesson.type === 8}
+								<span class="text-xs text-gray-400"> (всей группой)</span>
+							{/if}
+						</p>
 
 						{#if lesson.isDistant}
 							<p class="text-sm text-red-400">Дистанционно</p>

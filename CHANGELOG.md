@@ -1,3 +1,4 @@
+- fix name local storage variables for uniq ystu and yspu schedule (ysturasp, 2025-08-24) [4 files changed, 6 insertions(+), 4 deletions(-)]
 - add update state URL with select teacher and audience yspu schedule (ysturasp, 2025-08-24) [6 files changed, 66 insertions(+), 8 deletions(-)]
 - add history format documents (ysturasp, 2025-08-23) [7 files changed, 157 insertions(+), 4 deletions(-)]
 - add hide mobile header with click outside of it and esc keydown (ysturasp, 2025-08-22) [3 files changed, 45 insertions(+), 2 deletions(-)]

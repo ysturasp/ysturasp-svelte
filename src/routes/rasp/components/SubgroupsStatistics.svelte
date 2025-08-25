@@ -25,7 +25,7 @@
 		vucCount: number;
 		totalLessons: number;
 		distributedLessons: number;
-		isStreamLesson: boolean;
+		isDivision: boolean;
 		dates: {
 			date: string;
 			time: string;
@@ -38,7 +38,7 @@
 	}
 
 	$: stats = calculateStats(teacherSubgroups, scheduleData, selectedSemester);
-	$: sortedStats = stats.sort((a, b) => (a.isStreamLesson ? 1 : -1));
+	$: sortedStats = stats.sort((a, b) => (a.isDivision ? -1 : 1));
 	$: {
 		console.log(
 			'Stats:',
@@ -177,7 +177,9 @@
 					dates: {} as Record<string, any>,
 					subgroup1Count: 0,
 					subgroup2Count: 0,
-					vucCount: 0
+					vucCount: 0,
+					isDivision: teacherData.isDivision,
+					displayName: teacherData.displayName
 				});
 			}
 
@@ -234,20 +236,16 @@
 
 			const totalLessons = countTotalLessons(schedule, groupKey.split('_')[0], semester);
 			const distributedLessons = subjectData.subgroup1Count + subjectData.subgroup2Count;
-			const isStreamLesson = checkIfStreamLesson(schedule, groupKey.split('_')[0]);
-
-			const [subject, teacher] = groupKey.split('_');
-			const displayName = subject === 'null' ? `${subject} (${teacher})` : subject;
 
 			result.push({
-				subject: displayName,
+				subject: subjectData.displayName,
 				teachers: Array.from(subjectData.teachers) as string[],
 				subgroup1Count: subjectData.subgroup1Count,
 				subgroup2Count: subjectData.subgroup2Count,
 				vucCount: subjectData.vucCount,
 				totalLessons,
 				distributedLessons,
-				isStreamLesson,
+				isDivision: subjectData.isDivision,
 				dates: allDates
 			});
 		}
@@ -261,30 +259,23 @@
 		semester: SemesterInfo
 	): number {
 		let count = 0;
+		const isNullSubject = subject.startsWith('null (преп.');
 		schedule.items.forEach((weekItem) => {
 			weekItem.days.forEach((day) => {
 				if (!isDateInSemester(day.info.date, semester)) return;
 
 				if (day.lessons) {
-					count += day.lessons.filter(
-						(l) => l.lessonName === subject && l.type === 8
-					).length;
+					count += day.lessons.filter((l) => {
+						if (l.type !== 8) return false;
+						if (isNullSubject) {
+							return l.lessonName === null || l.lessonName === 'null';
+						}
+						return l.lessonName === subject;
+					}).length;
 				}
 			});
 		});
 		return count;
-	}
-
-	function checkIfStreamLesson(schedule: ScheduleData, subject: string): boolean {
-		for (const weekItem of schedule.items) {
-			for (const day of weekItem.days) {
-				const lesson = day.lessons?.find((l) => l.lessonName === subject && l.type === 8);
-				if (lesson) {
-					return !lesson.isDivision;
-				}
-			}
-		}
-		return false;
 	}
 
 	function formatDateTime(dateTimeStr: string) {
@@ -461,22 +452,22 @@
 							>
 								<div class="mb-2">
 									<div
-										class="{stat.isStreamLesson
-											? 'bg-yellow-600/20'
-											: 'bg-green-600/20'} -mx-4 -mt-4 rounded-t-2xl px-4 py-2"
+										class="{stat.isDivision
+											? 'bg-green-600/20'
+											: 'bg-yellow-600/20'} -mx-4 -mt-4 rounded-t-2xl px-4 py-2"
 									>
 										<div class="flex justify-center text-center">
 											<div class="text-sm">
 												<span
-													class={stat.isStreamLesson
-														? 'text-yellow-400'
-														: 'text-green-400'}
+													class={stat.isDivision
+														? 'text-green-400'
+														: 'text-yellow-400'}
 												>
-													{stat.isStreamLesson
-														? 'Всей группой'
-														: 'По подгруппам'}
+													{stat.isDivision
+														? 'По подгруппам'
+														: 'Всей группой'}
 												</span>
-												{#if stat.isStreamLesson}
+												{#if !stat.isDivision}
 													<div class="mt-1 text-xs text-yellow-400/70">
 														но.. мы всё равно рассчитываем, мало ли
 														пригодится

@@ -1,14 +1,10 @@
 <script lang="ts">
 	import BottomModal from '$lib/components/ui/BottomModal.svelte';
-	import type { ScheduleData } from '../types';
-	import type { SemesterInfo } from '$lib/utils/semester';
-	import { isDateInSemester } from '$lib/utils/semester';
-	import type { SubgroupSettings } from '../stores/subgroups';
+	import type { SubgroupSettings, TeacherSubgroups } from '../stores/subgroups';
 
 	export let isOpen = false;
-	export let scheduleData: ScheduleData | null = null;
-	export let selectedSemester: SemesterInfo | null = null;
 	export let settings: SubgroupSettings = {};
+	export let teacherSubgroups: TeacherSubgroups = {};
 	export let onSave: (settings: SubgroupSettings) => void;
 	export let onClose: () => void;
 
@@ -19,33 +15,36 @@
 		updateLabWorksList();
 	}
 
+	$: if (teacherSubgroups) {
+		updateLabWorksList();
+	}
+
 	interface LabWorkInfo {
 		name: string;
 		isDivision: boolean;
+		key: string;
+		teacherName?: string;
 	}
 
 	let uniqueLabWorks: LabWorkInfo[] = [];
 
 	function updateLabWorksList() {
-		if (!scheduleData || !selectedSemester) {
+		if (!teacherSubgroups || Object.keys(teacherSubgroups).length === 0) {
 			uniqueLabWorks = [];
 			return;
 		}
 
 		const labWorksMap = new Map<string, LabWorkInfo>();
 
-		scheduleData.items.forEach((weekItem) => {
-			weekItem.days.forEach((day) => {
-				if (!isDateInSemester(day.info.date, selectedSemester)) return;
+		Object.entries(teacherSubgroups).forEach(([key, data]) => {
+			const [subject, teacher] = key.split('_');
+			const settingKey = subject.startsWith('null (преп.') ? `null_${teacher}` : subject;
 
-				day.lessons?.forEach((lesson) => {
-					if (lesson.type === 8) {
-						labWorksMap.set(lesson.lessonName, {
-							name: lesson.lessonName,
-							isDivision: lesson.isDivision || false
-						});
-					}
-				});
+			labWorksMap.set(settingKey, {
+				name: data.displayName,
+				isDivision: data.isDivision,
+				key: settingKey,
+				teacherName: data.teacher
 			});
 		});
 
@@ -57,8 +56,8 @@
 		onClose();
 	}
 
-	function toggleLabWork(labName: string) {
-		localSettings[labName] = !localSettings[labName];
+	function toggleLabWork(key: string) {
+		localSettings[key] = !localSettings[key];
 		localSettings = { ...localSettings };
 	}
 </script>
@@ -103,8 +102,8 @@
 					<label class="switch">
 						<input
 							type="checkbox"
-							checked={localSettings[labWork.name] || false}
-							on:change={() => toggleLabWork(labWork.name)}
+							checked={localSettings[labWork.key] || false}
+							on:change={() => toggleLabWork(labWork.key)}
 						/>
 						<span class="slider round"></span>
 					</label>
