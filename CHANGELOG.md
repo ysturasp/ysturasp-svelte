@@ -1,3 +1,4 @@
+- hide lesson without name, teacher and auditory (ysturasp, 2025-08-25) [3 files changed, 5 insertions(+)]
 - fix endless requests on api stats from workloads statistics and skip lesson without name (ysturasp, 2025-08-25) [3 files changed, 25 insertions(+), 3 deletions(-)]
 - update subgroup processing logic, improve settings storage structure and fix lesson statistics display (ysturasp, 2025-08-25) [7 files changed, 154 insertions(+), 77 deletions(-)]
 - fix name local storage variables for uniq ystu and yspu schedule (ysturasp, 2025-08-24) [4 files changed, 6 insertions(+), 4 deletions(-)]
