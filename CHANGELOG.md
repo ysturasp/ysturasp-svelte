@@ -1,3 +1,4 @@
+- add dynamic metatags for schedule ystu teachers (ysturasp, 2025-08-26) [3 files changed, 33 insertions(+), 5 deletions(-)]
 - add dynamic metatags for schedule ystu student (ysturasp, 2025-08-26) [3 files changed, 30 insertions(+), 5 deletions(-)]
 - hide lesson without name, teacher and auditory (ysturasp, 2025-08-25) [3 files changed, 5 insertions(+)]
 - fix endless requests on api stats from workloads statistics and skip lesson without name (ysturasp, 2025-08-25) [3 files changed, 25 insertions(+), 3 deletions(-)]

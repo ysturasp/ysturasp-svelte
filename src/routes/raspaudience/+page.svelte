@@ -188,21 +188,47 @@
 </script>
 
 <svelte:head>
-	<title>Расписание аудиторий ЯГТУ | ystuRASP</title>
+	<title>
+		{selectedAudience
+			? `Расписание аудитории ${selectedAudience} ЯГТУ`
+			: 'Расписание аудиторий ЯГТУ | Поиск по аудиториям'}
+	</title>
 	<meta
 		name="description"
-		content="Актуальное расписание занятий в аудиториях ЯГТУ. Удобный поиск и просмотр расписания по конкретным аудиториям"
+		content={selectedAudience
+			? `Актуальное расписание занятий в аудитории ${selectedAudience} ЯГТУ. Полное расписание лекций, практик и лабораторных работ.`
+			: 'Актуальное расписание занятий в аудиториях ЯГТУ. Удобный поиск и просмотр расписания по конкретным аудиториям, информация о занятости аудиторий.'}
 	/>
 	<meta
 		name="keywords"
-		content="ystuRASP, расписание аудиторий ЯГТУ, ЯГТУ, просмотр расписания аудиторий, расписание, ягту расписание по аудиториям, занятость аудиторий, свободные аудитории"
+		content={`расписание аудиторий ЯГТУ, ${
+			selectedAudience
+				? `расписание ${selectedAudience}, аудитория ${selectedAudience}, `
+				: ''
+		}ЯГТУ аудитории расписание, поиск аудиторий ЯГТУ, расписание пар в аудиториях, занятость аудиторий ЯГТУ, свободные аудитории ЯГТУ`}
 	/>
 
-	<meta property="og:title" content="Расписание аудиторий ЯГТУ | ystuRASP" />
+	<meta
+		property="og:title"
+		content={selectedAudience
+			? `Расписание аудитории ${selectedAudience} ЯГТУ`
+			: 'Расписание аудиторий ЯГТУ | Поиск по аудиториям'}
+	/>
 	<meta
 		property="og:description"
-		content="Актуальное расписание занятий в аудиториях ЯГТУ. Удобный поиск и просмотр расписания по конкретным аудиториям."
+		content={selectedAudience
+			? `Актуальное расписание занятий в аудитории ${selectedAudience} ЯГТУ. Полное расписание лекций, практик и лабораторных работ.`
+			: 'Актуальное расписание занятий в аудиториях ЯГТУ. Удобный поиск и просмотр расписания по конкретным аудиториям, информация о занятости аудиторий.'}
 	/>
+	<meta property="og:type" content="website" />
+	<meta property="og:locale" content="ru_RU" />
+	{#if selectedAudience}
+		<meta name="robots" content="index, follow" />
+		<link
+			rel="canonical"
+			href={`https://ystu.ru/raspaudience?audience=${encodeURIComponent(selectedAudience)}`}
+		/>
+	{/if}
 </svelte:head>
 
 <PageLayout>
