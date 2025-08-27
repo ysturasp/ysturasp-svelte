@@ -103,23 +103,51 @@
 		const audience = audiences.find((a) => a.id === id);
 		return audience ? audience.number : id;
 	}
+
+	$: audienceInfo = selectedAudience ? audiences.find((a) => a.id === selectedAudience) : null;
+	$: audienceName = audienceInfo?.number || selectedAudience;
 </script>
 
 <svelte:head>
-	<title>Расписание аудиторий ЯГПУ | ystuRASP</title>
+	<title>
+		{selectedAudience
+			? `Расписание аудитории ${audienceName} ФСУ ЯГПУ`
+			: 'Расписание аудиторий ФСУ ЯГПУ | Поиск по аудиториям'}
+	</title>
 	<meta
 		name="description"
-		content="Актуальное расписание занятий в аудиториях ЯГПУ. Удобный поиск и просмотр расписания по конкретным аудиториям"
+		content={selectedAudience
+			? `Актуальное расписание занятий в аудитории ${audienceName} факультета социального управления ЯГПУ. Полное расписание лекций, практик и семинаров`
+			: 'Актуальное расписание занятий в аудиториях факультета социального управления ЯГПУ. Удобный поиск и просмотр расписания по конкретным аудиториям, информация о занятости аудиторий'}
 	/>
 	<meta
 		name="keywords"
-		content="ystuRASP, расписание аудиторий ЯГПУ, ЯГПУ, просмотр расписания аудиторий, расписание, ягпу расписание по аудиториям, занятость аудиторий, свободные аудитории"
+		content={`расписание аудиторий ЯГПУ, ${
+			selectedAudience ? `расписание ${audienceName}, аудитория ${audienceName}, ` : ''
+		}ягпу им ушинского, ФСУ ЯГПУ, факультет социального управления, расписание занятий ЯГПУ, ягпу расписание аудиторий, занятость аудиторий ФСУ, свободные аудитории ФСУ`}
 	/>
-	<meta property="og:title" content="Расписание аудиторий ЯГПУ | ystuRASP" />
+
+	<meta
+		property="og:title"
+		content={selectedAudience
+			? `Расписание аудитории ${audienceName} ФСУ ЯГПУ`
+			: 'Расписание аудиторий ФСУ ЯГПУ | Поиск по аудиториям'}
+	/>
 	<meta
 		property="og:description"
-		content="Актуальное расписание занятий в аудиториях ЯГПУ. Удобный поиск и просмотр расписания по аудиториям"
+		content={selectedAudience
+			? `Актуальное расписание занятий в аудитории ${audienceName} факультета социального управления ЯГПУ. Полное расписание лекций, практик и семинаров`
+			: 'Актуальное расписание занятий в аудиториях факультета социального управления ЯГПУ. Удобный поиск и просмотр расписания по конкретным аудиториям, информация о занятости аудиторий'}
 	/>
+	<meta property="og:type" content="website" />
+	<meta property="og:locale" content="ru_RU" />
+	{#if selectedAudience}
+		<meta name="robots" content="index, follow" />
+		<link
+			rel="canonical"
+			href={`https://ysturasp.netlify.app/yspu/raspaudience?audience=${encodeURIComponent(selectedAudience)}`}
+		/>
+	{/if}
 </svelte:head>
 
 <PageLayout>
