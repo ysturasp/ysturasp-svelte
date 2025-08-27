@@ -226,7 +226,7 @@
 		<meta name="robots" content="index, follow" />
 		<link
 			rel="canonical"
-			href={`https://ystu.ru/raspaudience?audience=${encodeURIComponent(selectedAudience)}`}
+			href={`https://ysturasp.netlify.app/raspaudience?audience=${encodeURIComponent(selectedAudience)}`}
 		/>
 	{/if}
 </svelte:head>

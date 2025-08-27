@@ -1,3 +1,4 @@
+- add dynamic metatags for schedule yspu audience (ysturasp, 2025-08-27) [3 files changed, 35 insertions(+), 5 deletions(-)]
 - add dynamic metatags for schedule yspu teachers (ysturasp, 2025-08-27) [3 files changed, 35 insertions(+), 5 deletions(-)]
 - add dynamic metatags for schedule yspu students (ysturasp, 2025-08-27) [3 files changed, 42 insertions(+), 5 deletions(-)]
 - add dynamic metatags for schedule ystu audience (ysturasp, 2025-08-26) [3 files changed, 33 insertions(+), 5 deletions(-)]

@@ -229,7 +229,7 @@
 		<meta name="robots" content="index, follow" />
 		<link
 			rel="canonical"
-			href={`https://ystu.ru/raspprep?teacher=${encodeURIComponent(selectedTeacher)}`}
+			href={`https://ysturasp.netlify.app/raspprep?teacher=${encodeURIComponent(selectedTeacher)}`}
 		/>
 	{/if}
 </svelte:head>

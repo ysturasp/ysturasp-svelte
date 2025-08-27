@@ -486,7 +486,7 @@
 		<meta name="robots" content="index, follow" />
 		<link
 			rel="canonical"
-			href={`https://ystu.ru/rasp?institute=${encodeURIComponent(selectedInstitute)}&group=${encodeURIComponent(selectedGroup)}`}
+			href={`https://ysturasp.netlify.app/rasp?institute=${encodeURIComponent(selectedInstitute)}&group=${encodeURIComponent(selectedGroup)}`}
 		/>
 	{/if}
 </svelte:head>
