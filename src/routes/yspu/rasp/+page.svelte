@@ -360,24 +360,59 @@
 			selectedLessonDate = '';
 		}, 300);
 	}
+
+	$: groupInfo = selectedGroup
+		? Object.entries(directions.find((d) => d.id === selectedDirection)?.courses || {}).find(
+				([key]) => key === selectedGroup
+			)?.[1]
+		: null;
+
+	$: groupName = groupInfo?.name || selectedGroup;
+	$: directionName = directions.find((d) => d.id === selectedDirection)?.name || '';
 </script>
 
 <svelte:head>
-	<title>Расписание занятий ЯГПУ | ystuRASP</title>
+	<title>
+		{selectedGroup
+			? `Расписание группы ${groupName} ФСУ ЯГПУ`
+			: 'Расписание занятий ФСУ ЯГПУ | Поиск по группам'}
+	</title>
 	<meta
 		name="description"
-		content="Актуальное расписание занятий ЯГПУ. Найдите свои занятия по группе"
+		content={selectedGroup
+			? `Актуальное расписание занятий группы ${groupName} ${directionName} факультета социального управления ЯГПУ. Полное расписание лекций, семинаров и практических занятий`
+			: 'Актуальное расписание занятий факультета социального управления ЯГПУ. Удобный поиск расписания по группам, просмотр лекций, семинаров и практических занятий'}
 	/>
 	<meta
 		name="keywords"
-		content="ystuRASP, ягпу им ушинского, расписание ЯГПУ, ЯГПУ, ягпу расписание занятий, ФСУ, факультет социального управления, расписание, ягпу расписание по группам, расписание занятий, расписание студентов"
+		content={`расписание ЯГПУ, ${
+			selectedGroup ? `расписание ${groupName}, группа ${groupName}, ` : ''
+		}${
+			directionName ? `${directionName}, ` : ''
+		}ягпу им ушинского, ФСУ ЯГПУ, факультет социального управления, расписание занятий ЯГПУ, ягпу расписание по группам, расписание студентов ФСУ`}
 	/>
 
-	<meta property="og:title" content="Расписание занятий ЯГПУ | ystuRASP" />
+	<meta
+		property="og:title"
+		content={selectedGroup
+			? `Расписание группы ${groupName} ФСУ ЯГПУ`
+			: 'Расписание занятий ФСУ ЯГПУ | Поиск по группам'}
+	/>
 	<meta
 		property="og:description"
-		content="Актуальное расписание занятий ЯГПУ. Найдите свои занятия по группе"
+		content={selectedGroup
+			? `Актуальное расписание занятий группы ${groupName} факультета социального управления ЯГПУ. Полное расписание лекций, семинаров и практических занятий`
+			: 'Актуальное расписание занятий факультета социального управления ЯГПУ. Удобный поиск расписания по группам, просмотр лекций, семинаров и практических занятий'}
 	/>
+	<meta property="og:type" content="website" />
+	<meta property="og:locale" content="ru_RU" />
+	{#if selectedGroup}
+		<meta name="robots" content="index, follow" />
+		<link
+			rel="canonical"
+			href={`https://ysturasp.netlify.app/yspu/rasp?direction=${encodeURIComponent(selectedDirection)}&group=${encodeURIComponent(selectedGroup)}`}
+		/>
+	{/if}
 </svelte:head>
 
 <PageLayout>
