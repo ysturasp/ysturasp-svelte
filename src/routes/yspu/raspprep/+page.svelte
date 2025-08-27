@@ -134,23 +134,51 @@
 			isScheduleLoading = false;
 		}
 	}
+
+	$: teacherInfo = selectedTeacher ? teachers.find((t) => t.name === selectedTeacher) : null;
+	$: teacherName = teacherInfo?.name || selectedTeacher;
 </script>
 
 <svelte:head>
-	<title>Расписание преподавателей ЯГПУ | ystuRASP</title>
+	<title>
+		{selectedTeacher
+			? `Расписание преподавателя ${teacherName} ФСУ ЯГПУ`
+			: 'Расписание преподавателей ФСУ ЯГПУ | Поиск по преподавателям'}
+	</title>
 	<meta
 		name="description"
-		content="Актуальное расписание занятий преподавателей ЯГПУ. Удобный поиск расписания по преподавателям, просмотр лекций, практик и лабораторных работ"
+		content={selectedTeacher
+			? `Актуальное расписание занятий преподавателя ${teacherName} факультета социального управления ЯГПУ. Полное расписание лекций, практик и семинаров`
+			: 'Актуальное расписание занятий преподавателей факультета социального управления ЯГПУ. Удобный поиск расписания по преподавателям, просмотр лекций, практик и семинаров'}
 	/>
 	<meta
 		name="keywords"
-		content="расписание преподавателей ЯГПУ, ЯГПУ преподаватели расписание, поиск преподавателей ЯГПУ, расписание пар преподавателей"
+		content={`расписание преподавателей ЯГПУ, ${
+			selectedTeacher ? `расписание ${teacherName}, преподаватель ${teacherName}, ` : ''
+		}ягпу им ушинского, ФСУ ЯГПУ, факультет социального управления, расписание занятий ЯГПУ, ягпу расписание преподавателей, расписание пар преподавателей ФСУ`}
 	/>
-	<meta property="og:title" content="Расписание преподавателей ЯГПУ | ystuRASP" />
+
+	<meta
+		property="og:title"
+		content={selectedTeacher
+			? `Расписание преподавателя ${teacherName} ФСУ ЯГПУ`
+			: 'Расписание преподавателей ФСУ ЯГПУ | Поиск по преподавателям'}
+	/>
 	<meta
 		property="og:description"
-		content="Актуальное расписание занятий преподавателей ЯГПУ. Удобный поиск расписания по преподавателям, просмотр лекций, практик и лабораторных работ."
+		content={selectedTeacher
+			? `Актуальное расписание занятий преподавателя ${teacherName} факультета социального управления ЯГПУ. Полное расписание лекций, практик и семинаров`
+			: 'Актуальное расписание занятий преподавателей факультета социального управления ЯГПУ. Удобный поиск расписания по преподавателям, просмотр лекций, практик и семинаров'}
 	/>
+	<meta property="og:type" content="website" />
+	<meta property="og:locale" content="ru_RU" />
+	{#if selectedTeacher}
+		<meta name="robots" content="index, follow" />
+		<link
+			rel="canonical"
+			href={`https://ysturasp.netlify.app/yspu/raspprep?teacher=${encodeURIComponent(selectedTeacher)}`}
+		/>
+	{/if}
 </svelte:head>
 
 <PageLayout>
