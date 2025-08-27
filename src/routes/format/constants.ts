@@ -11,7 +11,10 @@ export const defaultFormatParams: FormatParams = {
 		font: 'Times New Roman',
 		size: 14,
 		indent: 1.25,
-		lineHeight: 1
+		lineHeight: 1,
+		removeBold: true,
+		removeItalic: true,
+		removeUnderline: true
 	},
 	headers: {
 		h1: { spacingBefore: 0, spacingAfter: 36 },

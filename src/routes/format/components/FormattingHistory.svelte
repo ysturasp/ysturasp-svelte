@@ -80,9 +80,8 @@
 							<div class="mt-1 text-sm text-slate-400">
 								{new Date(file.timestamp).toLocaleString()}
 							</div>
-							<div class="mt-2 flex gap-4 text-sm text-slate-300">
+							<div class="mt-1 flex gap-4 text-sm text-slate-300">
 								<span>Размер: {(file.formattedSize / 1024).toFixed(1)} КБ</span>
-								<span>Изменение: {file.sizeChange}</span>
 							</div>
 						</div>
 						<button

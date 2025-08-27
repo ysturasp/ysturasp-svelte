@@ -221,6 +221,35 @@
 								<option value={2}>Двойной</option>
 							</select>
 						</label>
+						<div class="grid grid-cols-3 gap-2">
+							<label class="flex items-center justify-between gap-3 rounded p-2">
+								<span class="text-sm text-slate-300">Убрать жирный</span>
+								<input
+									type="checkbox"
+									bind:checked={localParams.text.removeBold}
+									on:change={handleChange}
+									class="h-4 w-4 rounded border-slate-600 bg-slate-600/50 text-blue-500"
+								/>
+							</label>
+							<label class="flex items-center justify-between gap-3 rounded p-2">
+								<span class="text-sm text-slate-300">Убрать курсив</span>
+								<input
+									type="checkbox"
+									bind:checked={localParams.text.removeItalic}
+									on:change={handleChange}
+									class="h-4 w-4 rounded border-slate-600 bg-slate-600/50 text-blue-500"
+								/>
+							</label>
+							<label class="flex items-center justify-between gap-3 rounded p-2">
+								<span class="text-sm text-slate-300">Убрать подчеркивание</span>
+								<input
+									type="checkbox"
+									bind:checked={localParams.text.removeUnderline}
+									on:change={handleChange}
+									class="h-4 w-4 rounded border-slate-600 bg-slate-600/50 text-blue-500"
+								/>
+							</label>
+						</div>
 					</div>
 				</div>
 

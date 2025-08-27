@@ -53,6 +53,9 @@ export interface FormatParams {
 		size: number;
 		indent: number;
 		lineHeight: number;
+		removeBold: boolean;
+		removeItalic: boolean;
+		removeUnderline: boolean;
 	};
 	headers: {
 		h1: { spacingBefore: number; spacingAfter: number };
@@ -62,7 +65,7 @@ export interface FormatParams {
 }
 
 const GOOGLE_SCRIPT_URL =
-	'https://script.google.com/macros/s/AKfycbwxghJ_mDSQpozD5aDOrhCCpLK-Z9Q07i7NgUYFwOPddi23L2kthzOsvbCM8zaKubvVGQ/exec';
+	'https://script.google.com/macros/s/AKfycbxVeLxRLHqSPENida1cOnkfGpxzLazY2f4Z0mYU0eHZ_fj4H2RkKBE1YX7N2FrOjU1CaA/exec';
 
 export async function formatDocument(
 	base64: string,
