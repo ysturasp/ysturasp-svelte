@@ -24,6 +24,7 @@
 	let isInitialized = false;
 	let previousGroup = '';
 	let previousInstitute = '';
+	let previousWeek = '';
 	let instituteError = false;
 	let groupError = false;
 	let weekError = false;
@@ -83,7 +84,9 @@
 				return;
 			}
 
-			onSubmit();
+			if (selectedInstitute !== previousInstitute || selectedGroup !== previousGroup) {
+				onSubmit();
+			}
 		}, 10);
 	}
 
@@ -102,12 +105,17 @@
 					onSubmit();
 				}
 			}
+
+			if (selectedWeek !== previousWeek) {
+				previousWeek = selectedWeek;
+			}
 		}
 
 		if (institutes.length > 0 && !isInitialized) {
 			isInitialized = true;
 			previousGroup = selectedGroup;
 			previousInstitute = selectedInstitute;
+			previousWeek = selectedWeek;
 		}
 	}
 
