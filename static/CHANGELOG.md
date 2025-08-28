@@ -1,3 +1,4 @@
+- add settings for format bold italic underline and imrpove identification start page (ysturasp, 2025-08-27) [6 files changed, 40 insertions(+), 4 deletions(-)]
 - fix host for canonical link in metatags schedue ystu (ysturasp, 2025-08-27) [5 files changed, 5 insertions(+), 3 deletions(-)]
 - add dynamic metatags for schedule yspu audience (ysturasp, 2025-08-27) [3 files changed, 35 insertions(+), 5 deletions(-)]
 - add dynamic metatags for schedule yspu teachers (ysturasp, 2025-08-27) [3 files changed, 35 insertions(+), 5 deletions(-)]

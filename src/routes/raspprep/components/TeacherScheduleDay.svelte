@@ -68,7 +68,9 @@
 			</div>
 
 			<div class="flex-grow">
-				<p class="text-lg font-bold text-white">{lesson.lessonName}</p>
+				<p class="text-lg font-bold text-white">
+					{lesson.lessonName || 'Название предмета не указано'}
+				</p>
 				<p class="text-sm {typeInfo.text}">{typeInfo.label}</p>
 
 				{#if lesson.isDistant}
