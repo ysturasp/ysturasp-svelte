@@ -255,7 +255,7 @@ export async function GET() {
 					'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko)',
 				'x-requested-with': 'XMLHttpRequest'
 			},
-			body: 'act=s&al=1&inline=1&offset=0&owner_id=-21173074&owners_only=1&q=расписание%20подъехало&search=1'
+			body: 'act=s&al=1&inline=1&offset=0&owner_id=-21173074&owners_only=1&q=drive.google.com&search=1'
 		});
 
 		if (!response.ok) {

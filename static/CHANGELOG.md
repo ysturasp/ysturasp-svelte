@@ -1,3 +1,4 @@
+- remove sending requests when only week changes (ysturasp, 2025-08-28) [3 files changed, 11 insertions(+), 1 deletion(-)]
 - add processing label without name in schedule teachers ystu (ysturasp, 2025-08-28) [3 files changed, 5 insertions(+), 1 deletion(-)]
 - add settings for format bold italic underline and imrpove identification start page (ysturasp, 2025-08-27) [6 files changed, 40 insertions(+), 4 deletions(-)]
 - fix host for canonical link in metatags schedue ystu (ysturasp, 2025-08-27) [5 files changed, 5 insertions(+), 3 deletions(-)]
