@@ -65,7 +65,7 @@ export interface FormatParams {
 }
 
 const GOOGLE_SCRIPT_URL =
-	'https://script.google.com/macros/s/AKfycbxVeLxRLHqSPENida1cOnkfGpxzLazY2f4Z0mYU0eHZ_fj4H2RkKBE1YX7N2FrOjU1CaA/exec';
+	'https://script.google.com/macros/s/AKfycbx7SpWceIctsEnwn213Z4qsndqZdBMg_JgJaFR1a0m-TpMiSAgLbsg1OHTgpTs9ZvxfeA/exec';
 
 export async function formatDocument(
 	base64: string,
@@ -88,9 +88,12 @@ export async function formatDocument(
 		const responseText = await response.text();
 
 		try {
-			const errorResponse = JSON.parse(responseText);
-			if (errorResponse.error) {
-				return { success: false, error: errorResponse.error };
+			const parsed = JSON.parse(responseText);
+			if (parsed && parsed.error) {
+				const type = parsed.type ? String(parsed.type) : 'Error';
+				const message = parsed.message ? String(parsed.message) : 'Неизвестная ошибка';
+				const at = parsed.at ? ` @ ${parsed.at}` : '';
+				return { success: false, error: `${type}: ${message}${at}` };
 			}
 		} catch {
 			return { success: true, formattedBase64: responseText };

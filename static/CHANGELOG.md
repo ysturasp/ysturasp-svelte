@@ -1,3 +1,4 @@
+- improve server for return only 3 latest semester for fast request (ysturasp, 2025-08-30) [3 files changed, 18 insertions(+), 12 deletions(-)]
 - fix query for improve search schedule on new semester (ysturasp, 2025-08-29) [3 files changed, 3 insertions(+), 1 deletion(-)]
 - remove sending requests when only week changes (ysturasp, 2025-08-28) [3 files changed, 11 insertions(+), 1 deletion(-)]
 - add processing label without name in schedule teachers ystu (ysturasp, 2025-08-28) [3 files changed, 5 insertions(+), 1 deletion(-)]
