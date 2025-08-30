@@ -31,6 +31,7 @@
 	let popupMenu: HTMLDivElement;
 	let searchInput: HTMLInputElement;
 	let searchQuery = '';
+	let isAndroid = false;
 	let selectedItem = items.find((item) => item.id === selectedId);
 
 	$: selectedItem = items.find((item) => item.id === selectedId);
@@ -84,7 +85,7 @@
 		await tick();
 		setupPopupPosition();
 
-		if (searchable) {
+		if (searchable && !isAndroid) {
 			setTimeout(() => {
 				searchInput?.focus();
 			}, 0);
@@ -262,6 +263,7 @@
 	}
 
 	onMount(() => {
+		isAndroid = typeof navigator !== 'undefined' && /Android/i.test(navigator.userAgent);
 		document.addEventListener('keydown', handleGlobalKeydown);
 
 		return () => {
