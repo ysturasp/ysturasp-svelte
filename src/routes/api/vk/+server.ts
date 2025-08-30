@@ -268,23 +268,29 @@ export async function GET() {
 		const folderMatches = [...payload.matchAll(/folders\\\/([a-zA-Z0-9_-]+)/g)];
 		const dateMatches = [...payload.matchAll(/PostDateBlock__root.*?date&quot;:(\d+)/g)];
 
-		const semesters: SemesterInfo[] = [];
-		const schedules = await Promise.all(
-			folderMatches.map(async (match, index) => {
+		const semesterData = folderMatches
+			.map((match, index) => {
 				const folderId = match[1];
 				const timestamp = dateMatches[index] ? parseInt(dateMatches[index][1]) : null;
 				const date = timestamp ? new Date(timestamp * 1000) : null;
 				const month = date ? date.getMonth() + 1 : null;
 				const year = date ? date.getFullYear() : null;
 				const semester = month ? (month >= 1 && month <= 6 ? 'spring' : 'autumn') : null;
-
 				const semesterInfo = timestamp ? getSemesterInfo(timestamp) : null;
 				if (semesterInfo) {
 					semesterInfo.folderId = folderId;
-					semesters.push(semesterInfo);
 				}
+				return { folderId, timestamp, semester, year, semesterInfo };
+			})
+			.filter((data) => data.timestamp && data.semester && data.year && data.semesterInfo);
 
-				const files = await getFolderContents(folderId);
+		semesterData.sort((a, b) => b.timestamp! - a.timestamp!);
+		const latestSemesterData = semesterData.slice(0, 3);
+
+		const semesters = latestSemesterData.map((data) => data.semesterInfo!);
+		const schedules = await Promise.all(
+			latestSemesterData.map(async (data) => {
+				const files = await getFolderContents(data.folderId);
 				const directions: Direction[] = await Promise.all(
 					files.map(async (file) => {
 						const courses = await getCoursesFromFile(file.id);
@@ -299,16 +305,14 @@ export async function GET() {
 				directions.sort((a, b) => a.name.localeCompare(b.name, 'ru'));
 
 				return {
-					folderId,
-					timestamp,
-					semester,
-					year,
+					folderId: data.folderId,
+					timestamp: data.timestamp,
+					semester: data.semester,
+					year: data.year,
 					directions
 				};
 			})
 		);
-
-		semesters.sort((a, b) => b.timestamp - a.timestamp);
 
 		const result = {
 			schedules,
