@@ -1,3 +1,4 @@
+- fix auto open keyboard in android device (ysturasp, 2025-08-30) [3 files changed, 5 insertions(+), 1 deletion(-)]
 - update link server: improve formating with error paragraph and log error in sheet (ysturasp, 2025-08-30) [3 files changed, 9 insertions(+), 4 deletions(-)]
 - improve server for return only 3 latest semester for fast request (ysturasp, 2025-08-30) [3 files changed, 18 insertions(+), 12 deletions(-)]
 - fix query for improve search schedule on new semester (ysturasp, 2025-08-29) [3 files changed, 3 insertions(+), 1 deletion(-)]
