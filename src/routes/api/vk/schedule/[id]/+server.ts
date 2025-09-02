@@ -33,6 +33,7 @@ interface ParsedSubject {
 	timeInfo: { customStartTime: string | null; customEndTime: string | null };
 	unparsedText: string;
 	isPartOfComposite?: boolean;
+	weekType: 'numerator' | 'denominator' | null;
 }
 
 const API_URL = 'https://drive.google.com/uc';
@@ -282,6 +283,15 @@ function parseSubject(
 	const isStream = lowerSubject.includes('поток');
 	const isDivision = lowerSubject.includes('подгруппа');
 
+	let weekType: 'numerator' | 'denominator' | null = null;
+	if (lowerSubject.includes('числитель')) {
+		weekType = 'numerator';
+		remainingText = remainingText.replace(/\s*\(числитель\)/gi, '');
+	} else if (lowerSubject.includes('знаменатель')) {
+		weekType = 'denominator';
+		remainingText = remainingText.replace(/\s*\(знаменатель\)/gi, '');
+	}
+
 	const isPhysicalEducation =
 		name.toLowerCase().includes('физ') ||
 		name.toLowerCase().includes('фк') ||
@@ -427,7 +437,8 @@ function parseSubject(
 		lessonNumber: lessonNumber,
 		defaultTime: defaultTime,
 		timeInfo: timeInfo,
-		unparsedText: Array.from(unparsedText).join('; ')
+		unparsedText: Array.from(unparsedText).join('; '),
+		weekType
 	};
 }
 

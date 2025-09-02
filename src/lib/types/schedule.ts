@@ -49,6 +49,7 @@ export interface Lesson {
 	isLecture: boolean;
 	originalText: string;
 	timeInfo?: TimeInfo;
+	weekType?: 'numerator' | 'denominator' | null;
 }
 
 export interface ScheduleDay {

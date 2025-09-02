@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { Lesson } from '$lib/types/schedule';
+	import WeekTypeIndicator from './WeekTypeIndicator.svelte';
 
 	export let lesson: Lesson;
 	export let isLastInDay = false;
@@ -112,6 +113,7 @@
 					на {timeInfo.duration} пары</span
 				>
 			{/if}
+			<WeekTypeIndicator weekType={lesson.weekType ?? null} />
 		</p>
 		{#if lesson.teacherName}
 			<p class="text-sm text-slate-400">

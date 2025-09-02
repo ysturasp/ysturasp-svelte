@@ -27,6 +27,7 @@
 	import { settings } from '$lib/stores/settings';
 	import type { Settings } from '$lib/stores/settings';
 	import type { SemesterInfo } from '$lib/utils/semester';
+	import { getCurrentWeek } from '$lib/utils/semester';
 	import LinearIntegrationModal from '$lib/components/linear/LinearIntegrationModal.svelte';
 	import type { YSTULesson } from '../../rasp/types';
 
@@ -204,30 +205,42 @@
 		storage.set('scheduleViewMode', mode);
 	}
 
+	function getCurrentWeekType(): 'numerator' | 'denominator' {
+		const currentWeek = getCurrentWeek();
+		return currentWeek % 2 === 1 ? 'numerator' : 'denominator';
+	}
+
 	function isLessonInDate(lesson: Lesson) {
-		if (!lesson.startDate && !lesson.endDate) return true;
+		if (!lesson.startDate && !lesson.endDate && !lesson.weekType) return true;
 
 		const today = new Date();
 		const todayStr = today.toISOString().split('T')[0];
+		let isInDate = true;
 
-		if (lesson.startDate && lesson.endDate) {
-			const startParts = lesson.startDate.split('.');
-			const endParts = lesson.endDate.split('.');
-			const startDate = new Date(`${startParts[2]}-${startParts[1]}-${startParts[0]}`);
-			const endDate = new Date(`${endParts[2]}-${endParts[1]}-${endParts[0]}`);
-
-			return today >= startDate && today <= endDate;
-		} else if (lesson.startDate) {
-			const startParts = lesson.startDate.split('.');
-			const startDate = new Date(`${startParts[2]}-${startParts[1]}-${startParts[0]}`);
-			return today >= startDate;
-		} else if (lesson.endDate) {
-			const endParts = lesson.endDate.split('.');
-			const endDate = new Date(`${endParts[2]}-${endParts[1]}-${endParts[0]}`);
-			return today <= endDate;
+		if (lesson.startDate || lesson.endDate) {
+			if (lesson.startDate && lesson.endDate) {
+				const startParts = lesson.startDate.split('.');
+				const endParts = lesson.endDate.split('.');
+				const startDate = new Date(`${startParts[2]}-${startParts[1]}-${startParts[0]}`);
+				const endDate = new Date(`${endParts[2]}-${endParts[1]}-${endParts[0]}`);
+				isInDate = today >= startDate && today <= endDate;
+			} else if (lesson.startDate) {
+				const startParts = lesson.startDate.split('.');
+				const startDate = new Date(`${startParts[2]}-${startParts[1]}-${startParts[0]}`);
+				isInDate = today >= startDate;
+			} else if (lesson.endDate) {
+				const endParts = lesson.endDate.split('.');
+				const endDate = new Date(`${endParts[2]}-${endParts[1]}-${endParts[0]}`);
+				isInDate = today <= endDate;
+			}
 		}
 
-		return true;
+		if (lesson.weekType) {
+			const currentWeekType = getCurrentWeekType();
+			return isInDate && lesson.weekType === currentWeekType;
+		}
+
+		return isInDate;
 	}
 
 	function processLessons(lessons: Lesson[]): Lesson[] {
@@ -246,7 +259,8 @@
 					nextLesson.lessonName === currentLesson.lessonName &&
 					nextLesson.teacherName === currentLesson.teacherName &&
 					nextLesson.auditoryName === currentLesson.auditoryName &&
-					nextLesson.type === currentLesson.type
+					nextLesson.type === currentLesson.type &&
+					nextLesson.weekType === currentLesson.weekType
 				) {
 					consecutiveLessons.push(nextLesson);
 					skipLessons.add(j);
