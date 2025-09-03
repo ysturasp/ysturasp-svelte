@@ -8,6 +8,7 @@
 	import { getSubgroupIndicator } from '../stores/subgroups';
 	import type { SubgroupSettings, TeacherSubgroups } from '../stores/subgroups';
 	import { notifications } from '$lib/stores/notifications';
+	import TgsSticker from '$lib/components/common/TgsSticker.svelte';
 
 	export let date: string;
 	export let lessons: YSTULesson[];
@@ -166,113 +167,131 @@
 		</h3>
 
 		<div class="relative">
-			{#each filteredLessons as lesson, i (lesson.lessonName + lesson.type + lesson.teacherName + lesson.startAt + lesson.endAt + (lesson.uniqueIndex ?? ''))}
-				{@const typeInfo = getLessonTypeInfo(lesson.type)}
-				{@const subgroupIndicator = getSubgroupIndicator(
-					lesson,
-					date,
-					subgroupSettings,
-					teacherSubgroups
-				)}
-				<div
-					class="mb-2 flex w-full cursor-pointer rounded-2xl bg-slate-800 p-4 transition-all last:mb-0 hover:bg-slate-700"
-					animate:flip={{
-						duration: isHiding ? 500 : 0,
-						easing: quintOut
-					}}
-					out:fade|local={{
-						duration: isHiding ? 500 : 0,
-						easing: quintOut
-					}}
-					on:click={() => handleLessonClick(lesson)}
-					on:keydown={(e) => e.key === 'Enter' && handleLessonClick(lesson)}
-					role="button"
-					tabindex="0"
-					aria-label="Информация о занятии {lesson.lessonName}"
-				>
-					<div
-						class="mr-2 flex w-14 flex-col items-end justify-between border-r-2 pr-2 {typeInfo.color}"
-					>
-						<span class="text-sm font-bold">{formatTime(lesson.startAt)}</span>
-						<span class="text-sm font-bold">{formatTime(lesson.endAt)}</span>
+			{#if lessons.length > 0 && filteredLessons.length === 0}
+				<div class="flex flex-col items-center justify-center text-center">
+					<div class="h-20 w-20">
+						<TgsSticker
+							src="/stickers/eyes.tgs"
+							autoplay={true}
+							once={false}
+							quality={3}
+							width="100%"
+							height="100%"
+						/>
 					</div>
-
-					<div class="flex-grow">
-						<div class="flex items-center justify-between">
-							<div class="flex flex-wrap items-center gap-2">
-								<p class="font-bold break-words hyphens-auto text-white md:text-lg">
-									{lesson.lessonName || 'Название предмета не указано'}
-								</p>
-								{#if subgroupIndicator}
-									<span
-										class="rounded-full bg-yellow-900/30 px-2 py-1 text-xs text-yellow-500"
-									>
-										{subgroupIndicator}
-									</span>
-								{/if}
-							</div>
-						</div>
-						<p class="text-sm {typeInfo.text}">
-							{typeInfo.label}
-							{#if !lesson.isDivision && lesson.type === 8}
-								<span class="text-xs text-gray-400"> (всей группой)</span>
-							{/if}
-						</p>
-
-						{#if lesson.isDistant}
-							<p class="text-sm text-red-400">Дистанционно</p>
-						{:else}
-							<p class="text-sm text-slate-400">
-								<a
-									href="/raspaudience?audience={encodeURIComponent(
-										lesson.auditoryName
-									)}"
-									class="text-sm text-slate-400 transition-all hover:text-blue-400"
-								>
-									{lesson.auditoryName}
-								</a>
-							</p>
-						{/if}
-
-						{#if lesson.teacherName}
-							<p class="text-sm text-gray-400">
-								<a
-									href="/raspprep?id={lesson.teacherId}"
-									class="text-sm text-gray-400 transition-all hover:text-blue-400"
-								>
-									{lesson.teacherName}
-								</a>
-							</p>
-						{/if}
-
-						{#if lesson.additionalTeacherName}
-							<p class="text-sm text-gray-400">
-								<a
-									href="/raspprep?id={lesson.additionalTeacherId}"
-									class="text-sm text-gray-400 transition-all hover:text-blue-400"
-								>
-									{lesson.additionalTeacherName}
-								</a>
-							</p>
-						{/if}
-
-						{#if lesson.groups}
-							<p class="text-sm text-gray-400">Группы: {lesson.groups}</p>
-						{/if}
-					</div>
-					<button
-						type="button"
-						class="switch ml-auto self-center"
-						aria-label="Переключить видимость предмета"
-						on:click|stopPropagation={(e) => handleVisibilityToggle(e, lesson)}
-						on:keydown|stopPropagation={(e) =>
-							e.key === 'Enter' && handleVisibilityToggle(e, lesson)}
-					>
-						<input type="checkbox" checked={!isLessonHidden(lesson)} />
-						<span class="slider round"></span>
-					</button>
+					<p class="text-lg font-medium text-gray-400">В этот день все занятия скрыты</p>
 				</div>
-			{/each}
+			{:else}
+				{#each filteredLessons as lesson, i (lesson.lessonName + lesson.type + lesson.teacherName + lesson.startAt + lesson.endAt + (lesson.uniqueIndex ?? ''))}
+					{@const typeInfo = getLessonTypeInfo(lesson.type)}
+					{@const subgroupIndicator = getSubgroupIndicator(
+						lesson,
+						date,
+						subgroupSettings,
+						teacherSubgroups
+					)}
+					<div
+						class="mb-2 flex w-full cursor-pointer rounded-2xl bg-slate-800 p-4 transition-all last:mb-0 hover:bg-slate-700"
+						animate:flip={{
+							duration: isHiding ? 500 : 0,
+							easing: quintOut
+						}}
+						out:fade|local={{
+							duration: isHiding ? 500 : 0,
+							easing: quintOut
+						}}
+						on:click={() => handleLessonClick(lesson)}
+						on:keydown={(e) => e.key === 'Enter' && handleLessonClick(lesson)}
+						role="button"
+						tabindex="0"
+						aria-label="Информация о занятии {lesson.lessonName}"
+					>
+						<div
+							class="mr-2 flex w-14 flex-col items-end justify-between border-r-2 pr-2 {typeInfo.color}"
+						>
+							<span class="text-sm font-bold">{formatTime(lesson.startAt)}</span>
+							<span class="text-sm font-bold">{formatTime(lesson.endAt)}</span>
+						</div>
+
+						<div class="flex-grow">
+							<div class="flex items-center justify-between">
+								<div class="flex flex-wrap items-center gap-2">
+									<p
+										class="font-bold break-words hyphens-auto text-white md:text-lg"
+									>
+										{lesson.lessonName || 'Название предмета не указано'}
+									</p>
+									{#if subgroupIndicator}
+										<span
+											class="rounded-full bg-yellow-900/30 px-2 py-1 text-xs text-yellow-500"
+										>
+											{subgroupIndicator}
+										</span>
+									{/if}
+								</div>
+							</div>
+							<p class="text-sm {typeInfo.text}">
+								{typeInfo.label}
+								{#if !lesson.isDivision && lesson.type === 8}
+									<span class="text-xs text-gray-400"> (всей группой)</span>
+								{/if}
+							</p>
+
+							{#if lesson.isDistant}
+								<p class="text-sm text-red-400">Дистанционно</p>
+							{:else}
+								<p class="text-sm text-slate-400">
+									<a
+										href="/raspaudience?audience={encodeURIComponent(
+											lesson.auditoryName
+										)}"
+										class="text-sm text-slate-400 transition-all hover:text-blue-400"
+									>
+										{lesson.auditoryName}
+									</a>
+								</p>
+							{/if}
+
+							{#if lesson.teacherName}
+								<p class="text-sm text-gray-400">
+									<a
+										href="/raspprep?id={lesson.teacherId}"
+										class="text-sm text-gray-400 transition-all hover:text-blue-400"
+									>
+										{lesson.teacherName}
+									</a>
+								</p>
+							{/if}
+
+							{#if lesson.additionalTeacherName}
+								<p class="text-sm text-gray-400">
+									<a
+										href="/raspprep?id={lesson.additionalTeacherId}"
+										class="text-sm text-gray-400 transition-all hover:text-blue-400"
+									>
+										{lesson.additionalTeacherName}
+									</a>
+								</p>
+							{/if}
+
+							{#if lesson.groups}
+								<p class="text-sm text-gray-400">Группы: {lesson.groups}</p>
+							{/if}
+						</div>
+						<button
+							type="button"
+							class="switch ml-auto self-center"
+							aria-label="Переключить видимость предмета"
+							on:click|stopPropagation={(e) => handleVisibilityToggle(e, lesson)}
+							on:keydown|stopPropagation={(e) =>
+								e.key === 'Enter' && handleVisibilityToggle(e, lesson)}
+						>
+							<input type="checkbox" checked={!isLessonHidden(lesson)} />
+							<span class="slider round"></span>
+						</button>
+					</div>
+				{/each}
+			{/if}
 		</div>
 	</div>
 </div>
