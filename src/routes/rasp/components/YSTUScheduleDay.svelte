@@ -19,6 +19,11 @@
 
 	let previousLessons = lessons;
 	let isHiding = false;
+	let currentTime = new Date();
+
+	setInterval(() => {
+		currentTime = new Date();
+	}, 1000);
 
 	function handleLessonClick(lesson: YSTULesson) {
 		onLessonClick(lesson, date);
@@ -47,25 +52,75 @@
 
 		switch (type) {
 			case 2:
-				return { color: 'border-green-500', text: 'text-green-400', label };
+				return {
+					color: 'border-green-500',
+					text: 'text-green-400',
+					label,
+					cssColor: 'rgb(34 197 94)'
+				};
 			case 4:
-				return { color: 'border-yellow-500', text: 'text-yellow-400', label };
+				return {
+					color: 'border-yellow-500',
+					text: 'text-yellow-400',
+					label,
+					cssColor: 'rgb(234 179 8)'
+				};
 			case 8:
-				return { color: 'border-blue-500', text: 'text-blue-400', label };
+				return {
+					color: 'border-blue-500',
+					text: 'text-blue-400',
+					label,
+					cssColor: 'rgb(59 130 246)'
+				};
 			case 1:
-				return { color: 'border-purple-500', text: 'text-purple-400', label };
+				return {
+					color: 'border-purple-500',
+					text: 'text-purple-400',
+					label,
+					cssColor: 'rgb(168 85 247)'
+				};
 			case 5:
-				return { color: 'border-pink-500', text: 'text-pink-400', label };
+				return {
+					color: 'border-pink-500',
+					text: 'text-pink-400',
+					label,
+					cssColor: 'rgb(236 72 153)'
+				};
 			case 6:
-				return { color: 'border-indigo-500', text: 'text-indigo-400', label };
+				return {
+					color: 'border-indigo-500',
+					text: 'text-indigo-400',
+					label,
+					cssColor: 'rgb(99 102 241)'
+				};
 			case 7:
-				return { color: 'border-orange-500', text: 'text-orange-400', label };
+				return {
+					color: 'border-orange-500',
+					text: 'text-orange-400',
+					label,
+					cssColor: 'rgb(249 115 22)'
+				};
 			case 3:
-				return { color: 'border-red-500', text: 'text-red-400', label };
+				return {
+					color: 'border-red-500',
+					text: 'text-red-400',
+					label,
+					cssColor: 'rgb(239 68 68)'
+				};
 			case 9:
-				return { color: 'border-gray-500', text: 'text-gray-400', label };
+				return {
+					color: 'border-gray-500',
+					text: 'text-gray-400',
+					label,
+					cssColor: 'rgb(107 114 128)'
+				};
 			default:
-				return { color: 'border-slate-300', text: 'text-slate-400', label };
+				return {
+					color: 'border-slate-300',
+					text: 'text-slate-400',
+					label,
+					cssColor: 'rgb(203 213 225)'
+				};
 		}
 	}
 
@@ -101,10 +156,37 @@
 
 	function isToday(dateString: string): boolean {
 		const lessonDate = new Date(dateString);
-		const today = new Date();
+		const today = new Date(currentTime);
 		lessonDate.setHours(0, 0, 0, 0);
 		today.setHours(0, 0, 0, 0);
 		return lessonDate.getTime() === today.getTime();
+	}
+
+	function isCurrentLesson(startAt: string, endAt: string): boolean {
+		const start = new Date(startAt);
+		const end = new Date(endAt);
+		return currentTime >= start && currentTime <= end;
+	}
+
+	function getLessonProgress(startAt: string, endAt: string): number {
+		const start = new Date(startAt);
+		const end = new Date(endAt);
+		const total = end.getTime() - start.getTime();
+		const current = currentTime.getTime() - start.getTime();
+		return Math.min(Math.max((current / total) * 100, 0), 100);
+	}
+
+	function getTimeLeft(endAt: string): string {
+		const end = new Date(endAt);
+		const diff = end.getTime() - currentTime.getTime();
+		const minutes = Math.floor(diff / 1000 / 60);
+		const hours = Math.floor(minutes / 60);
+		const remainingMinutes = (minutes % 60) + 1;
+
+		if (hours > 0) {
+			return `${hours}ч ${remainingMinutes}м`;
+		}
+		return `${remainingMinutes}м`;
 	}
 
 	function isLessonHidden(lesson: YSTULesson): boolean {
@@ -122,7 +204,21 @@
 	$: dayOfWeek = getDayName(lessonDate.getDay());
 	$: isCurrentDay = isToday(date);
 
-	$: filteredLessons = lessons
+	$: currentLessons = lessons.map((lesson) => {
+		currentTime;
+		return {
+			...lesson,
+			isCurrent: isCurrentLesson(lesson.startAt, lesson.endAt),
+			timeLeft: isCurrentLesson(lesson.startAt, lesson.endAt)
+				? getTimeLeft(lesson.endAt)
+				: '',
+			progress: isCurrentLesson(lesson.startAt, lesson.endAt)
+				? getLessonProgress(lesson.startAt, lesson.endAt)
+				: 0
+		};
+	});
+
+	$: filteredLessons = currentLessons
 		.filter((lesson) => {
 			if (!lesson.lessonName && !lesson.teacherName && !lesson.auditoryName) {
 				return false;
@@ -191,7 +287,10 @@
 						teacherSubgroups
 					)}
 					<div
-						class="mb-2 flex w-full cursor-pointer rounded-2xl bg-slate-800 p-4 transition-all last:mb-0 hover:bg-slate-700"
+						class="relative mb-2 flex w-full cursor-pointer rounded-2xl p-4 transition-all last:mb-0"
+						class:bg-slate-800={!lesson.isCurrent}
+						class:hover:bg-slate-700={!lesson.isCurrent}
+						class:current-lesson={lesson.isCurrent}
 						animate:flip={{
 							duration: isHiding ? 500 : 0,
 							easing: quintOut
@@ -206,12 +305,29 @@
 						tabindex="0"
 						aria-label="Информация о занятии {lesson.lessonName}"
 					>
-						<div
-							class="mr-2 flex w-14 flex-col items-end justify-between border-r-2 pr-2 {typeInfo.color}"
-						>
-							<span class="text-sm font-bold">{formatTime(lesson.startAt)}</span>
-							<span class="text-sm font-bold">{formatTime(lesson.endAt)}</span>
-						</div>
+						{#if lesson.isCurrent}
+							<div
+								class="current-time-column mr-2 flex w-14 flex-col items-end justify-between pr-2"
+								style="--lesson-color: {typeInfo.cssColor}"
+							>
+								<span class="current-time text-sm font-bold"
+									>{formatTime(lesson.startAt)}</span
+								>
+								<div class="time-center">
+									<div class="remaining-time">{lesson.timeLeft}</div>
+								</div>
+								<span class="current-time text-sm font-bold"
+									>{formatTime(lesson.endAt)}</span
+								>
+							</div>
+						{:else}
+							<div
+								class="mr-2 flex w-14 flex-col items-end justify-between border-r-2 pr-2 {typeInfo.color}"
+							>
+								<span class="text-sm font-bold">{formatTime(lesson.startAt)}</span>
+								<span class="text-sm font-bold">{formatTime(lesson.endAt)}</span>
+							</div>
+						{/if}
 
 						<div class="flex-grow">
 							<div class="flex items-center justify-between">
@@ -357,5 +473,72 @@
 
 	.relative {
 		position: relative;
+	}
+
+	.current-lesson {
+		background: linear-gradient(
+			135deg,
+			var(--lesson-color, rgba(59, 130, 246, 0.1)) 0%,
+			rgba(30, 41, 59, 0.9) 50%,
+			var(--lesson-color, rgba(59, 130, 246, 0.1)) 100%
+		);
+		border: 1px solid var(--lesson-color, rgba(59, 130, 246, 0.3));
+		box-shadow: 0 0 20px var(--lesson-color, rgba(59, 130, 246, 0.15));
+	}
+
+	.current-lesson:hover {
+		background: linear-gradient(
+			135deg,
+			var(--lesson-color, rgba(59, 130, 246, 0.15)) 0%,
+			rgba(30, 41, 59, 0.95) 50%,
+			var(--lesson-color, rgba(59, 130, 246, 0.15)) 100%
+		);
+		box-shadow: 0 0 25px var(--lesson-color, rgba(59, 130, 246, 0.2));
+	}
+
+	.current-time-column {
+		position: relative;
+	}
+
+	.current-time-column::after {
+		content: '';
+		position: absolute;
+		right: -2px;
+		top: 0;
+		bottom: 0;
+		width: 2px;
+		background: linear-gradient(
+			180deg,
+			transparent 0%,
+			var(--lesson-color, rgba(59, 130, 246, 0.8)) 20%,
+			var(--lesson-color, rgba(59, 130, 246, 1)) 50%,
+			var(--lesson-color, rgba(59, 130, 246, 0.8)) 80%,
+			transparent 100%
+		);
+		animation: pulse-border 2s ease-in-out infinite;
+	}
+
+	.current-time {
+		color: #60a5fa;
+		text-shadow: 0 0 6px rgba(96, 165, 250, 0.4);
+	}
+
+	.time-center {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 2px;
+	}
+
+	.remaining-time {
+		font-size: 0.6rem;
+		color: #60a5fa;
+		background: rgba(30, 41, 59, 0.9);
+		padding: 1px 4px;
+		border-radius: 4px;
+		border: 1px solid rgba(59, 130, 246, 0.3);
+		text-shadow: 0 0 3px rgba(96, 165, 250, 0.4);
+		white-space: nowrap;
+		line-height: 1.1;
 	}
 </style>
