@@ -1,3 +1,4 @@
+- add custom card for active lesson and time to left (ysturasp, 2025-09-04) [3 files changed, 204 insertions(+), 19 deletions(-)]
 - integrate with TgsSticker component to display message if all lesson in day are hidden (ysturasp, 2025-09-03) [4 files changed, 118 insertions(+), 97 deletions(-)]
 - improve parsing numerator and denominator lesson (ysturasp, 2025-09-02) [7 files changed, 63 insertions(+), 19 deletions(-)]
 - update robots.txt (ysturasp, 2025-09-01) [3 files changed, 3 insertions(+), 2 deletions(-)]

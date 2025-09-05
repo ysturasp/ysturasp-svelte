@@ -27,7 +27,7 @@
 	import { settings } from '$lib/stores/settings';
 	import type { Settings } from '$lib/stores/settings';
 	import type { SemesterInfo } from '$lib/utils/semester';
-	import { getCurrentWeek } from '$lib/utils/semester';
+	import { getCurrentWeek, getCurrentWeekMessage } from '$lib/utils/semester';
 	import LinearIntegrationModal from '$lib/components/linear/LinearIntegrationModal.svelte';
 	import type { YSTULesson } from '../../rasp/types';
 
@@ -487,6 +487,12 @@
 					></div>
 					<p class="mb-1 font-semibold">Расписание актуально</p>
 				</div>
+				<p class="text-md text-black">
+					{getCurrentWeekMessage()},
+					<span class="rounded-lg bg-black px-2 py-1 font-bold text-gray-100 shadow-sm">
+						{getCurrentWeekType() === 'numerator' ? 'числитель' : 'знаменатель'}
+					</span>
+				</p>
 			</div>
 
 			<div class="mb-4 flex items-center">
