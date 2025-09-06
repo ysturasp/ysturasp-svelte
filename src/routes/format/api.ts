@@ -65,7 +65,7 @@ export interface FormatParams {
 }
 
 const GOOGLE_SCRIPT_URL =
-	'https://script.google.com/macros/s/AKfycbx7SpWceIctsEnwn213Z4qsndqZdBMg_JgJaFR1a0m-TpMiSAgLbsg1OHTgpTs9ZvxfeA/exec';
+	'https://script.google.com/macros/s/AKfycbyPkfyon0XnNzdfvHSr3XyZfjF9FzZ-jEhBp6x9nDzR-jhvMd9hi27sUwVXPC3ReKQxrA/exec';
 
 export async function formatDocument(
 	base64: string,
