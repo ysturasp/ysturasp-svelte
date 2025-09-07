@@ -1,6 +1,7 @@
 import { writable } from 'svelte/store';
 import { browser } from '$app/environment';
 import type { SemesterInfo } from '$lib/utils/semester';
+import { getWeekNumberByDate } from '$lib/utils/semester';
 
 export interface SubgroupInfo {
 	subgroup: 1 | 2;
@@ -87,14 +88,25 @@ export function shouldShowLabWork(
 	if (lesson.type !== 8) return true;
 
 	const lessonName = lesson.lessonName || 'null';
-	const settingKey = lessonName === 'null' ? `null_${lesson.teacherName}` : lessonName;
+	const teacherName = lesson.teacherName || lesson.additionalTeacherName;
+	const baseNullKey = `null (преп. ${teacherName})_${teacherName}`;
+	const teacherKeys = Object.keys(teacherData).filter((k) => k.endsWith(`_${teacherName}`));
+	const mergedKey = teacherKeys.find((k) => !k.startsWith(`null (преп.`));
+	const mergedDisplay = mergedKey ? teacherData[mergedKey].displayName : null;
+
+	let settingKey = lessonName === 'null' ? `null_${teacherName}` : lessonName;
+	if (lessonName === 'null' && mergedDisplay && settings[mergedDisplay] !== undefined) {
+		settingKey = mergedDisplay;
+	}
+
 	if (!settings[settingKey]) return true;
 
-	const teacherKey =
-		lessonName === 'null'
-			? `null (преп. ${lesson.teacherName})_${lesson.teacherName}`
-			: `${lessonName}_${lesson.teacherName}`;
+	if (lessonName === 'null') {
+		if (mergedKey && teacherData[mergedKey]) return true;
+		return teacherData[baseNullKey] !== undefined;
+	}
 
+	const teacherKey = `${lessonName}_${teacherName}`;
 	return teacherData[teacherKey] !== undefined;
 }
 
@@ -108,16 +120,21 @@ export function getSubgroupIndicator(
 
 	const lessonName = lesson.lessonName || 'null';
 
-	const mainTeacherKey =
-		lessonName === 'null'
-			? `null (преп. ${lesson.teacherName})_${lesson.teacherName}`
-			: `${lessonName}_${lesson.teacherName}`;
-	const additionalTeacherKey = lesson.additionalTeacherName
-		? lessonName === 'null'
-			? `null (преп. ${lesson.additionalTeacherName})_${lesson.additionalTeacherName}`
-			: `${lessonName}_${lesson.additionalTeacherName}`
-		: null;
-	const candidateKeys = [mainTeacherKey, additionalTeacherKey].filter(Boolean) as string[];
+	function keysForTeacher(name: string | undefined | null): string[] {
+		if (!name) return [];
+		const baseNull = `null (преп. ${name})_${name}`;
+		const keys = Object.keys(teacherData).filter((k) => k.endsWith(`_${name}`));
+		const merged = keys.filter((k) => !k.startsWith('null (преп. '));
+		if (lessonName === 'null') {
+			return [baseNull, ...merged];
+		}
+		return [`${lessonName}_${name}`];
+	}
+
+	const candidateKeys = [
+		...keysForTeacher(lesson.teacherName),
+		...keysForTeacher(lesson.additionalTeacherName)
+	];
 
 	const settingKey = lessonName === 'null' ? `null_${lesson.teacherName}` : lessonName;
 	const setting = settings[settingKey];
@@ -179,6 +196,49 @@ export function generateSubgroupDistribution(scheduleData: any, semester: Semest
 	const teacherSubgroups: TeacherSubgroups = {};
 	const vucDays = new Set<string>();
 
+	const teacherSubjectCounts = new Map<
+		string,
+		{ namedSubjects: Map<string, number>; nullCount: number }
+	>();
+
+	scheduleData.items.forEach((weekItem: any) => {
+		weekItem.days.forEach((day: any) => {
+			if (!isDateInCurrentSemester(day.info.date, semester)) return;
+			day.lessons?.forEach((lesson: any) => {
+				if (lesson.type !== 8) return;
+				const teacherName = lesson.teacherName || lesson.additionalTeacherName;
+				if (!teacherName) return;
+				const originalName = lesson.lessonName || 'null';
+				if (!teacherSubjectCounts.has(teacherName)) {
+					teacherSubjectCounts.set(teacherName, {
+						namedSubjects: new Map<string, number>(),
+						nullCount: 0
+					});
+				}
+				const info = teacherSubjectCounts.get(teacherName)!;
+				if (originalName === 'null') {
+					info.nullCount++;
+				} else {
+					info.namedSubjects.set(
+						originalName,
+						(info.namedSubjects.get(originalName) || 0) + 1
+					);
+				}
+			});
+		});
+	});
+
+	const teacherMergeTarget = new Map<string, string>();
+	for (const [teacher, info] of teacherSubjectCounts.entries()) {
+		if (info.namedSubjects.size === 1) {
+			const [[onlyName, onlyCount]] = Array.from(info.namedSubjects.entries());
+			const nullCount = info.nullCount;
+			if (onlyCount <= 8 && nullCount > 0 && nullCount <= 8) {
+				teacherMergeTarget.set(teacher, onlyName);
+			}
+		}
+	}
+
 	scheduleData.items.forEach((weekItem: any) => {
 		weekItem.days.forEach((day: any) => {
 			if (!isDateInCurrentSemester(day.info.date, semester)) return;
@@ -217,8 +277,13 @@ export function generateSubgroupDistribution(scheduleData: any, semester: Semest
 				if (!teacherName) return;
 
 				const originalName = lesson.lessonName || 'null';
-				const subjectName =
-					originalName === 'null' ? `null (преп. ${teacherName})` : originalName;
+				let subjectName: string;
+				if (originalName === 'null') {
+					const merged = teacherMergeTarget.get(teacherName);
+					subjectName = merged ? merged : `null (преп. ${teacherName})`;
+				} else {
+					subjectName = originalName;
+				}
 				const baseKey = `${subjectName}_${teacherName}`;
 
 				if (!groups.has(baseKey)) {
@@ -352,7 +417,7 @@ export function generateSubgroupDistribution(scheduleData: any, semester: Semest
 				if (item.teacher === teacher) {
 					for (const weekItem of scheduleData.items) {
 						for (const day of weekItem.days) {
-							const lesson = day.lessons?.find((l) => {
+							const lesson = day.lessons?.find((l: any) => {
 								if (l.type !== 8) return false;
 								const lessonName = l.lessonName || 'null';
 								return (
@@ -378,6 +443,225 @@ export function generateSubgroupDistribution(scheduleData: any, semester: Semest
 				displayName: subjectName
 			};
 		});
+	});
+
+	function parseDateFromRU(dateStr: string): Date | null {
+		const m = dateStr.match(/^(\d{2})\.(\d{2})\.(\d{4})$/);
+		if (!m) return null;
+		const dd = parseInt(m[1]);
+		const mm = parseInt(m[2]);
+		const yyyy = parseInt(m[3]);
+		return new Date(yyyy, mm - 1, dd);
+	}
+
+	function canonicalizeDateTimeKey(key: string): {
+		dateKey: string;
+		timeKey: string;
+		canonical: string;
+		dateObj: Date | null;
+	} {
+		const idx = key.indexOf('_');
+		if (idx === -1) return { dateKey: key, timeKey: '', canonical: key, dateObj: null };
+		const dateKey = key.slice(0, idx);
+		const timeKeyRaw = key.slice(idx + 1);
+		const normalizedDash = timeKeyRaw.replace(/[\u2010-\u2015\u2212\-]/g, '-');
+		const timeKey = normalizedDash.replace(/\s+/g, '');
+		const canonical = `${dateKey}_${timeKey}`;
+		const dateObj = parseDateFromRU(dateKey);
+		return { dateKey, timeKey, canonical, dateObj };
+	}
+
+	const groupCounts = new Map<string, { s1: number; s2: number }>();
+	Object.entries(teacherSubgroups).forEach(([gKey, data]) => {
+		let s1 = 0;
+		let s2 = 0;
+		Object.values(data.dates).forEach((info) => {
+			if (info.subgroup === 1) s1++;
+			else if (info.subgroup === 2) s2++;
+		});
+		groupCounts.set(gKey, { s1, s2 });
+	});
+
+	const slotMap = new Map<
+		string,
+		Array<{ groupKey: string; dateTimeKey: string; subgroup: 1 | 2; week: number }>
+	>();
+	Object.entries(teacherSubgroups).forEach(([gKey, data]) => {
+		Object.entries(data.dates).forEach(([dtKey, info]) => {
+			const { canonical, dateObj } = canonicalizeDateTimeKey(dtKey);
+			if (!dateObj) return;
+			const week = getWeekNumberByDate(dateObj, semester);
+			if (!slotMap.has(canonical)) slotMap.set(canonical, []);
+			slotMap
+				.get(canonical)!
+				.push({ groupKey: gKey, dateTimeKey: dtKey, subgroup: info.subgroup, week });
+		});
+	});
+
+	slotMap.forEach((entries) => {
+		if (entries.length < 2) return;
+		entries.sort((a, b) => (a.groupKey < b.groupKey ? -1 : a.groupKey > b.groupKey ? 1 : 0));
+		const used = new Set<number>();
+		used.add(entries[0].subgroup);
+
+		function tryCompensate(
+			groupKey: string,
+			current: 1 | 2,
+			desired: 1 | 2,
+			currentWeek: number,
+			currentDtKey: string
+		): boolean {
+			const dates = teacherSubgroups[groupKey]?.dates || {};
+			for (const [dtKey, info] of Object.entries(dates)) {
+				const { dateObj, canonical } = canonicalizeDateTimeKey(dtKey);
+				if (!dateObj) continue;
+				const week = getWeekNumberByDate(dateObj, semester);
+				if (dtKey === currentDtKey) continue;
+				if (week > currentWeek && info.subgroup === desired) {
+					const entries = slotMap.get(canonical) || [];
+					let has1 = false;
+					let has2 = false;
+					for (const ent of entries) {
+						let sg = teacherSubgroups[ent.groupKey]?.dates?.[ent.dateTimeKey]?.subgroup;
+						if (ent.groupKey === groupKey && ent.dateTimeKey === dtKey) sg = current;
+						if (sg === 1) has1 = true;
+						if (sg === 2) has2 = true;
+					}
+					if (entries.length >= 2 && !(has1 && has2)) continue;
+					const cnt = groupCounts.get(groupKey)!;
+					if (desired === 1) {
+						cnt.s1--;
+						cnt.s2++;
+					} else {
+						cnt.s2--;
+						cnt.s1++;
+					}
+					teacherSubgroups[groupKey].dates[dtKey].subgroup = current;
+					return true;
+				}
+			}
+			for (const [dtKey, info] of Object.entries(dates)) {
+				if (dtKey === currentDtKey) continue;
+				if (info.subgroup === desired) {
+					const { canonical } = canonicalizeDateTimeKey(dtKey);
+					const entries = slotMap.get(canonical) || [];
+					let has1 = false;
+					let has2 = false;
+					for (const ent of entries) {
+						let sg = teacherSubgroups[ent.groupKey]?.dates?.[ent.dateTimeKey]?.subgroup;
+						if (ent.groupKey === groupKey && ent.dateTimeKey === dtKey) sg = current;
+						if (sg === 1) has1 = true;
+						if (sg === 2) has2 = true;
+					}
+					if (entries.length >= 2 && !(has1 && has2)) continue;
+					const cnt = groupCounts.get(groupKey)!;
+					if (desired === 1) {
+						cnt.s1--;
+						cnt.s2++;
+					} else {
+						cnt.s2--;
+						cnt.s1++;
+					}
+					teacherSubgroups[groupKey].dates[dtKey].subgroup = current;
+					return true;
+				}
+			}
+			return false;
+		}
+		for (let i = 1; i < entries.length; i++) {
+			const e = entries[i];
+			const desired: 1 | 2 =
+				used.has(1) && !used.has(2)
+					? 2
+					: used.has(2) && !used.has(1)
+						? 1
+						: e.subgroup === 1
+							? 2
+							: 1;
+			if (e.subgroup !== desired) {
+				const counts = groupCounts.get(e.groupKey)!;
+				const afterS1 = counts.s1 + (desired === 1 ? 1 : 0) - (e.subgroup === 1 ? 1 : 0);
+				const afterS2 = counts.s2 + (desired === 2 ? 1 : 0) - (e.subgroup === 2 ? 1 : 0);
+				if (Math.abs(afterS1 - afterS2) <= 1) {
+					teacherSubgroups[e.groupKey].dates[e.dateTimeKey].subgroup = desired;
+					counts.s1 = afterS1;
+					counts.s2 = afterS2;
+					e.subgroup = desired;
+				} else {
+					if (tryCompensate(e.groupKey, e.subgroup, desired, e.week, e.dateTimeKey)) {
+						teacherSubgroups[e.groupKey].dates[e.dateTimeKey].subgroup = desired;
+						const cnt = groupCounts.get(e.groupKey)!;
+						if (desired === 1) {
+							cnt.s1++;
+							cnt.s2--;
+						} else {
+							cnt.s2++;
+							cnt.s1--;
+						}
+						e.subgroup = desired;
+					}
+				}
+			}
+			used.add(e.subgroup);
+		}
+	});
+
+	function canFlipWithoutSlotConflict(
+		groupKey: string,
+		dtKey: string,
+		newSubgroup: 1 | 2
+	): boolean {
+		const { canonical } = canonicalizeDateTimeKey(dtKey);
+		const entries = slotMap.get(canonical) || [];
+		if (entries.length < 2) return true;
+		let has1 = false;
+		let has2 = false;
+		for (const ent of entries) {
+			let sg = teacherSubgroups[ent.groupKey]?.dates?.[ent.dateTimeKey]?.subgroup;
+			if (ent.groupKey === groupKey && ent.dateTimeKey === dtKey) sg = newSubgroup;
+			if (sg === 1) has1 = true;
+			if (sg === 2) has2 = true;
+		}
+		return has1 && has2;
+	}
+
+	Object.keys(teacherSubgroups).forEach((gKey) => {
+		const dates = teacherSubgroups[gKey].dates;
+		const counts = { s1: 0, s2: 0 };
+		Object.values(dates).forEach((info) => {
+			if (info.subgroup === 1) counts.s1++;
+			else if (info.subgroup === 2) counts.s2++;
+		});
+		while (Math.abs(counts.s1 - counts.s2) > 1) {
+			const flipFrom: 1 | 2 = counts.s1 > counts.s2 ? 1 : 2;
+			const flipTo: 1 | 2 = flipFrom === 1 ? 2 : 1;
+			let flipped = false;
+			const dateEntries = Object.keys(dates)
+				.map((k) => ({
+					k,
+					week: (() => {
+						const { dateObj } = canonicalizeDateTimeKey(k);
+						return dateObj ? getWeekNumberByDate(dateObj, semester) : 0;
+					})()
+				}))
+				.sort((a, b) => b.week - a.week);
+			for (const d of dateEntries) {
+				const info = dates[d.k];
+				if (!info || info.subgroup !== flipFrom) continue;
+				if (!canFlipWithoutSlotConflict(gKey, d.k, flipTo)) continue;
+				dates[d.k].subgroup = flipTo;
+				if (flipFrom === 1) {
+					counts.s1--;
+					counts.s2++;
+				} else {
+					counts.s2--;
+					counts.s1++;
+				}
+				flipped = true;
+				break;
+			}
+			if (!flipped) break;
+		}
 	});
 
 	return teacherSubgroups;

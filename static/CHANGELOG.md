@@ -1,3 +1,4 @@
+- for tg mini app make back button instead of close button when navigate to other pages (ysturasp, 2025-09-07) [3 files changed, 39 insertions(+)]
 - imrove server link: remove bug table of content (ysturasp, 2025-09-06) [3 files changed, 3 insertions(+), 1 deletion(-)]
 - add week message and type numerator or denominator on yspu schedule (ysturasp, 2025-09-05) [3 files changed, 9 insertions(+), 1 deletion(-)]
 - add custom card for active lesson and time to left (ysturasp, 2025-09-04) [3 files changed, 204 insertions(+), 19 deletions(-)]
