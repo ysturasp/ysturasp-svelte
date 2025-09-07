@@ -141,9 +141,7 @@
 				const row = [dateIdx === 0 ? `${weekGroup.week}-я` : '', date];
 
 				Array.from(subjects).forEach((subject) => {
-					let time = '';
-					let subgroup = '';
-
+					const items: { time: string; subgroup: string }[] = [];
 					Object.entries(teacherSubgroups).forEach(([key, data]) => {
 						const [subjectName, teacher] = key.split('_');
 						const displaySubject =
@@ -152,14 +150,18 @@
 							Object.entries(data.dates || {}).forEach(([dateTime, info]) => {
 								const [cellDate, timeValue] = dateTime.split('_');
 								if (cellDate === date) {
-									time = timeValue?.replace('-', ' - ') || '';
-									subgroup = `${info.subgroup}-я${info.isVUC ? ' (ВУЦ)' : ''}`;
+									items.push({
+										time: timeValue?.replace('-', ' - ') || '',
+										subgroup: `${info.subgroup}-я${info.isVUC ? ' (ВУЦ)' : ''}`
+									});
 								}
 							});
 						}
 					});
-
-					row.push(time, subgroup);
+					row.push(
+						items.map((i) => i.time).join('\n'),
+						items.map((i) => i.subgroup).join('\n')
+					);
 				});
 
 				data.push(row);
@@ -299,9 +301,11 @@
 											{/if}
 											<td class="px-2 py-1.5">{date}</td>
 											{#each Array.from(subjects) as subject}
-												{@const cellData = (() => {
-													let time = '';
-													let subgroup = '';
+												{@const entries = (() => {
+													const items: {
+														time: string;
+														subgroup: string;
+													}[] = [];
 													Object.entries(teacherSubgroups).forEach(
 														([key, data]) => {
 															const [subjectName, teacher] =
@@ -317,27 +321,33 @@
 																	const [cellDate, timeValue] =
 																		dateTime.split('_');
 																	if (cellDate === date) {
-																		time =
-																			timeValue?.replace(
-																				'-',
-																				' - '
-																			) || '';
-																		subgroup = `${info.subgroup}-я${info.isVUC ? ' (ВУЦ)' : ''}`;
+																		items.push({
+																			time:
+																				timeValue?.replace(
+																					'-',
+																					' - '
+																				) || '',
+																			subgroup: `${info.subgroup}-я${info.isVUC ? ' (ВУЦ)' : ''}`
+																		});
 																	}
 																});
 															}
 														}
 													);
-													return { time, subgroup };
+													return items;
 												})()}
 												<td
 													class="border-l border-slate-600 px-2 py-1.5 text-center"
 												>
-													{cellData.time}
+													{#each entries as e}
+														<div>{e.time}</div>
+													{/each}
 												</td>
-												<td class="px-2 py-1.5 text-center"
-													>{cellData.subgroup}</td
-												>
+												<td class="px-2 py-1.5 text-center">
+													{#each entries as e}
+														<div>{e.subgroup}</div>
+													{/each}
+												</td>
 											{/each}
 										</tr>
 									{/each}
