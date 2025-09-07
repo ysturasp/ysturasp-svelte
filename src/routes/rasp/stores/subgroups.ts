@@ -622,8 +622,70 @@ export function generateSubgroupDistribution(scheduleData: any, semester: Semest
 			if (sg === 1) has1 = true;
 			if (sg === 2) has2 = true;
 		}
-		return has1 && has2;
+		if (!(has1 && has2)) return false;
+		return hasBothSubgroupsAfterFlip(groupKey, dtKey, newSubgroup);
 	}
+
+	function hasBothSubgroupsAfterFlip(
+		groupKey: string,
+		dtKey: string,
+		newSubgroup: 1 | 2
+	): boolean {
+		const dates = teacherSubgroups[groupKey]?.dates || {};
+		const { dateKey } = canonicalizeDateTimeKey(dtKey);
+		const subgroups: Array<1 | 2> = [];
+		Object.entries(dates).forEach(([k, info]) => {
+			const dk = canonicalizeDateTimeKey(k).dateKey;
+			if (dk !== dateKey) return;
+			const sg = k === dtKey ? newSubgroup : info.subgroup;
+			if (sg === 1 || sg === 2) subgroups.push(sg);
+		});
+		if (subgroups.length < 2) return true;
+		const set = new Set(subgroups);
+		return set.has(1) && set.has(2);
+	}
+
+	function enforcePerDayBothSubgroups() {
+		Object.keys(teacherSubgroups).forEach((gKey) => {
+			const dates = teacherSubgroups[gKey].dates;
+			const byDate = new Map<string, string[]>();
+			Object.keys(dates).forEach((dtKey) => {
+				const { dateKey } = canonicalizeDateTimeKey(dtKey);
+				if (!byDate.has(dateKey)) byDate.set(dateKey, []);
+				byDate.get(dateKey)!.push(dtKey);
+			});
+			byDate.forEach((arr) => {
+				if (arr.length < 2) return;
+				arr.sort();
+				const keys = arr.map((k) => k);
+				const subs = keys.map((k) => teacherSubgroups[gKey].dates[k]?.subgroup);
+				const set = new Set(subs.filter((x) => x === 1 || x === 2));
+				if (set.size >= 2) return;
+				const current = subs[0] === 1 ? 1 : 2;
+				const target: 1 | 2 = current === 1 ? 2 : 1;
+				for (let i = keys.length - 1; i >= 0; i--) {
+					const keyToFlip = keys[i];
+					if (!teacherSubgroups[gKey].dates[keyToFlip]) continue;
+					if (teacherSubgroups[gKey].dates[keyToFlip].subgroup === target) return;
+					if (!canFlipWithoutSlotConflict(gKey, keyToFlip, target)) continue;
+					teacherSubgroups[gKey].dates[keyToFlip].subgroup = target;
+					const cnt = groupCounts.get(gKey);
+					if (cnt) {
+						if (target === 1) {
+							cnt.s1++;
+							cnt.s2--;
+						} else {
+							cnt.s2++;
+							cnt.s1--;
+						}
+					}
+					break;
+				}
+			});
+		});
+	}
+
+	enforcePerDayBothSubgroups();
 
 	Object.keys(teacherSubgroups).forEach((gKey) => {
 		const dates = teacherSubgroups[gKey].dates;
