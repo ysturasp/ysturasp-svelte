@@ -1,3 +1,4 @@
+- fix display of subgroups in table and export xlsx when 2 lesson per day (ysturasp, 2025-09-07) [3 files changed, 33 insertions(+), 21 deletions(-)]
 - improve logic distribute subgroup when 2 lab work lesson in day one and same subgroup was set (ysturasp, 2025-09-07) [3 files changed, 65 insertions(+), 1 deletion(-)]
 - imrpove distibute lessons with same day and time lab work (ysturasp, 2025-09-07) [3 files changed, 304 insertions(+), 18 deletions(-)]
 - for tg mini app make back button instead of close button when navigate to other pages (ysturasp, 2025-09-07) [3 files changed, 39 insertions(+)]

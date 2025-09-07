@@ -6,6 +6,7 @@ import { getWeekNumberByDate } from '$lib/utils/semester';
 export interface SubgroupInfo {
 	subgroup: 1 | 2;
 	isVUC: boolean;
+	lessonIndex: number;
 }
 
 export interface TeacherSubgroupData {
@@ -328,7 +329,16 @@ export function generateSubgroupDistribution(scheduleData: any, semester: Semest
 				const formattedDate = new Date(e.date).toLocaleDateString('ru-RU');
 				const dateTimeKey = `${formattedDate}_${e.timeRange}`;
 				if (!perTeacherDates[teacher]) perTeacherDates[teacher] = {};
-				perTeacherDates[teacher][dateTimeKey] = { subgroup, isVUC: e.isVUC };
+				const lessonIndex = findLessonIndex(
+					e.date,
+					e.timeRange,
+					`${subjectName}_${teacher}`
+				);
+				perTeacherDates[teacher][dateTimeKey] = {
+					subgroup,
+					isVUC: e.isVUC,
+					lessonIndex
+				};
 			});
 		}
 
@@ -399,7 +409,16 @@ export function generateSubgroupDistribution(scheduleData: any, semester: Semest
 				const formattedDate = new Date(entry.date).toLocaleDateString('ru-RU');
 				const dateTimeKey = `${formattedDate}_${entry.timeRange}`;
 				if (!perTeacherDates[entry.teacher]) perTeacherDates[entry.teacher] = {};
-				perTeacherDates[entry.teacher][dateTimeKey] = { subgroup, isVUC: entry.isVUC };
+				const lessonIndex = findLessonIndex(
+					entry.date,
+					entry.timeRange,
+					`${subjectName}_${entry.teacher}`
+				);
+				perTeacherDates[entry.teacher][dateTimeKey] = {
+					subgroup,
+					isVUC: entry.isVUC,
+					lessonIndex
+				};
 			}
 
 			group1VUC.forEach((e) => add(e, 1));
@@ -484,23 +503,73 @@ export function generateSubgroupDistribution(scheduleData: any, semester: Semest
 
 	const slotMap = new Map<
 		string,
-		Array<{ groupKey: string; dateTimeKey: string; subgroup: 1 | 2; week: number }>
+		Array<{
+			groupKey: string;
+			dateTimeKey: string;
+			subgroup: 1 | 2;
+			week: number;
+			lessonIndex: number;
+		}>
 	>();
+
+	function findLessonIndex(date: string, timeRange: string, groupKey: string): number {
+		for (const weekItem of scheduleData.items) {
+			for (const day of weekItem.days) {
+				if (day.info.date === date) {
+					const lessons = day.lessons || [];
+					const sameDayLessons = lessons.filter((l) => {
+						if (l.type !== 8) return false;
+						const lessonTimeRange = l.timeRange || `${l.startAt}-${l.endAt}`;
+						const normalizedTimeRange = lessonTimeRange.replace(/\s+/g, '');
+						const normalizedInputTimeRange = timeRange.replace(/\s+/g, '');
+						return normalizedTimeRange === normalizedInputTimeRange;
+					});
+
+					const sortedLessons = [...sameDayLessons].sort((a, b) => {
+						const aIndex = lessons.indexOf(a);
+						const bIndex = lessons.indexOf(b);
+						return aIndex - bIndex;
+					});
+
+					for (let i = 0; i < sortedLessons.length; i++) {
+						const lesson = sortedLessons[i];
+						const teacherName = lesson.teacherName || lesson.additionalTeacherName;
+						const lessonName = lesson.lessonName || 'null';
+						const currentKey = `${lessonName}_${teacherName}`;
+						if (currentKey === groupKey) {
+							return sortedLessons.length >= 2 ? i : 0;
+						}
+					}
+				}
+			}
+		}
+		return 0;
+	}
+
 	Object.entries(teacherSubgroups).forEach(([gKey, data]) => {
 		Object.entries(data.dates).forEach(([dtKey, info]) => {
-			const { canonical, dateObj } = canonicalizeDateTimeKey(dtKey);
+			const { canonical, dateObj, dateKey, timeKey } = canonicalizeDateTimeKey(dtKey);
 			if (!dateObj) return;
 			const week = getWeekNumberByDate(dateObj, semester);
+			const lessonIndex = findLessonIndex(
+				dateKey.split('.').reverse().join('-'),
+				timeKey,
+				gKey
+			);
 			if (!slotMap.has(canonical)) slotMap.set(canonical, []);
-			slotMap
-				.get(canonical)!
-				.push({ groupKey: gKey, dateTimeKey: dtKey, subgroup: info.subgroup, week });
+			slotMap.get(canonical)!.push({
+				groupKey: gKey,
+				dateTimeKey: dtKey,
+				subgroup: info.subgroup,
+				week,
+				lessonIndex
+			});
 		});
 	});
 
 	slotMap.forEach((entries) => {
 		if (entries.length < 2) return;
-		entries.sort((a, b) => (a.groupKey < b.groupKey ? -1 : a.groupKey > b.groupKey ? 1 : 0));
+		entries.sort((a, b) => a.lessonIndex - b.lessonIndex);
 		const used = new Set<number>();
 		used.add(entries[0].subgroup);
 
