@@ -30,6 +30,57 @@
 	let statisticsSection: HTMLElement;
 	let error = false;
 
+	function transliterateName(name: string): string {
+		const translitMap: { [key: string]: string } = {
+			а: 'a',
+			б: 'b',
+			в: 'v',
+			г: 'g',
+			д: 'd',
+			е: 'e',
+			ё: 'e',
+			ж: 'zh',
+			з: 'z',
+			и: 'i',
+			й: 'y',
+			к: 'k',
+			л: 'l',
+			м: 'm',
+			н: 'n',
+			о: 'o',
+			п: 'p',
+			р: 'r',
+			с: 's',
+			т: 't',
+			у: 'u',
+			ф: 'f',
+			х: 'h',
+			ц: 'ts',
+			ч: 'ch',
+			ш: 'sh',
+			щ: 'sch',
+			ъ: '',
+			ы: 'y',
+			ь: '',
+			э: 'e',
+			ю: 'yu',
+			я: 'ya'
+		};
+
+		const cleanName = name
+			.replace(/^(проф\.|доц\.|ст\.преп\.|ассист\.|преп\.?)\s*/i, '')
+			.trim();
+
+		return (
+			cleanName
+				.toLowerCase()
+				.split('')
+				.map((char) => translitMap[char] || char)
+				.join('')
+				.replace(/[^a-z0-9]/g, '') + '@edu.ystu.ru'
+		);
+	}
+
 	$: items = currentDisciplines.map((discipline) => ({
 		id: discipline,
 		displayValue: discipline
@@ -319,79 +370,208 @@
 
 	{#if statistics}
 		<div class="result mt-4" bind:this={statisticsSection}>
-			<div style="text-align: center;">
-				<h3 class="mb-4 text-2xl font-bold md:text-3xl">
-					Статистика по предмету "{displayedDiscipline}"
-				</h3>
-			</div>
+			<div class="flex flex-col gap-3">
+				<div class="flex flex-col items-start gap-2">
+					<h3 class="text-xl font-semibold text-white sm:text-2xl">
+						📊 Статистика по предмету
+					</h3>
+					<div class="w-full rounded-lg bg-slate-900 px-3 py-2">
+						<h1 class="text-xl font-medium text-slate-300">{displayedDiscipline}</h1>
+					</div>
+				</div>
 
-			{#if statistics.count5 + statistics.count4 + statistics.count3 + statistics.count2 < 25}
-				<div class="mb-4 rounded-2xl bg-red-500 p-2 font-bold text-white">
-					⚠️⚠️⚠️ Данных недостаточно, статистика может быть неточна ⚠️⚠️⚠️
-				</div>
-			{/if}
+				{#if statistics.count5 + statistics.count4 + statistics.count3 + statistics.count2 < 25}
+					<div class="flex items-center gap-2 rounded-lg bg-red-900/50 px-3 py-2">
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							class="h-4 w-4 text-red-400"
+							viewBox="0 0 20 20"
+							fill="currentColor"
+						>
+							<path
+								fill-rule="evenodd"
+								d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+								clip-rule="evenodd"
+							/>
+						</svg>
+						<p class="text-xs font-medium text-red-400">
+							Данных недостаточно, статистика может быть неточна
+						</p>
+					</div>
+				{/if}
 
-			<div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-				<div class="rounded-2xl p-4 text-center" style="border: 2px solid #1245e67d;">
-					<h2 class="mb-2 text-2xl font-bold">
-						Средний балл {statistics.average >= 4 ? '😍' : '😭'}
-					</h2>
-					<p class="text-2xl text-slate-300">{statistics.average.toFixed(2)}</p>
-				</div>
-				<div class="rounded-2xl p-4 text-center" style="border: 2px solid #1245e67d;">
-					<h2 class="mb-2 text-2xl font-bold">Всего оценок проанализировано</h2>
-					<p class="text-2xl text-slate-300">
-						{statistics.count5 +
-							statistics.count4 +
-							statistics.count3 +
-							statistics.count2}
-					</p>
-				</div>
-			</div>
+				<div class="grid grid-cols-2 gap-2">
+					<div class="relative overflow-hidden rounded-lg bg-slate-900 p-3">
+						<div class="flex items-center justify-between">
+							<div>
+								<p class="text-xs font-medium text-slate-400">Средний балл</p>
+								<div class="mt-1 flex items-baseline gap-1">
+									<h3 class="text-xl font-bold text-white">
+										{statistics.average.toFixed(2)}
+									</h3>
+									<span class="text-lg"
+										>{statistics.average >= 4 ? '😍' : '😭'}</span
+									>
+								</div>
+							</div>
+							<div
+								class="flex h-8 w-8 items-center justify-center rounded-full bg-blue-500/20"
+							>
+								<svg
+									xmlns="http://www.w3.org/2000/svg"
+									class="h-4 w-4 text-blue-500"
+									viewBox="0 0 20 20"
+									fill="currentColor"
+								>
+									<path
+										d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
+									/>
+								</svg>
+							</div>
+						</div>
+					</div>
 
-			<div class="mt-4 grid grid-cols-1 gap-4 md:grid-cols-4">
-				<div
-					class="grade-element cursor-pointer rounded-2xl p-4 text-center"
-					style="border: 2px solid #1245e67d;"
-				>
-					<h3 class="mb-2 text-xl font-bold">Двоек</h3>
-					<p class="text-2xl text-slate-300">{statistics.count2}</p>
+					<div class="relative overflow-hidden rounded-lg bg-slate-900 p-3">
+						<div class="flex items-center justify-between">
+							<div>
+								<p class="text-xs font-medium text-slate-400">Всего оценок</p>
+								<div class="mt-1 flex items-baseline">
+									<h3 class="text-xl font-bold text-white">
+										{statistics.count5 +
+											statistics.count4 +
+											statistics.count3 +
+											statistics.count2}
+									</h3>
+								</div>
+							</div>
+							<div
+								class="flex h-8 w-8 items-center justify-center rounded-full bg-purple-500/20"
+							>
+								<svg
+									xmlns="http://www.w3.org/2000/svg"
+									class="h-4 w-4 text-purple-500"
+									viewBox="0 0 20 20"
+									fill="currentColor"
+								>
+									<path
+										d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z"
+									/>
+								</svg>
+							</div>
+						</div>
+					</div>
 				</div>
-				<div
-					class="grade-element cursor-pointer rounded-2xl p-4 text-center"
-					style="border: 2px solid #1245e67d;"
-				>
-					<h3 class="mb-2 text-xl font-bold">Троек</h3>
-					<p class="text-2xl text-slate-300">{statistics.count3}</p>
-				</div>
-				<div
-					class="grade-element cursor-pointer rounded-2xl p-4 text-center"
-					style="border: 2px solid #1245e67d;"
-				>
-					<h3 class="mb-2 text-xl font-bold">Четверок</h3>
-					<p class="text-2xl text-slate-300">{statistics.count4}</p>
-				</div>
-				<div
-					class="grade-element cursor-pointer rounded-2xl p-4 text-center"
-					style="border: 2px solid #1245e67d;"
-				>
-					<h3 class="mb-2 text-xl font-bold">Пятерок</h3>
-					<p class="text-2xl text-slate-300">{statistics.count5}</p>
-				</div>
-			</div>
 
-			<div class="mt-8">
+				<div class="flex flex-col gap-2">
+					<div class="relative overflow-hidden rounded-lg bg-slate-900 p-3">
+						<div class="flex justify-between gap-1 sm:gap-2">
+							<div
+								class="flex flex-col items-center sm:flex-row sm:items-center sm:gap-2"
+							>
+								<div
+									class="hidden h-8 w-8 items-center justify-center rounded-full bg-red-500/20 sm:flex"
+								>
+									<span class="text-sm text-red-500">2</span>
+								</div>
+								<div class="text-center sm:text-left">
+									<p class="text-[10px] font-medium text-red-400 sm:text-xs">
+										Двоек
+									</p>
+									<p class="text-base font-bold text-white sm:text-lg">
+										{statistics.count2}
+									</p>
+								</div>
+							</div>
+
+							<div
+								class="flex flex-col items-center sm:flex-row sm:items-center sm:gap-2"
+							>
+								<div
+									class="hidden h-8 w-8 items-center justify-center rounded-full bg-orange-500/20 sm:flex"
+								>
+									<span class="text-sm text-orange-500">3</span>
+								</div>
+								<div class="text-center sm:text-left">
+									<p class="text-[10px] font-medium text-orange-400 sm:text-xs">
+										Троек
+									</p>
+									<p class="text-base font-bold text-white sm:text-lg">
+										{statistics.count3}
+									</p>
+								</div>
+							</div>
+
+							<div
+								class="flex flex-col items-center sm:flex-row sm:items-center sm:gap-2"
+							>
+								<div
+									class="hidden h-8 w-8 items-center justify-center rounded-full bg-blue-500/20 sm:flex"
+								>
+									<span class="text-sm text-blue-500">4</span>
+								</div>
+								<div class="text-center sm:text-left">
+									<p class="text-[10px] font-medium text-blue-400 sm:text-xs">
+										Четверок
+									</p>
+									<p class="text-base font-bold text-white sm:text-lg">
+										{statistics.count4}
+									</p>
+								</div>
+							</div>
+
+							<div
+								class="flex flex-col items-center sm:flex-row sm:items-center sm:gap-2"
+							>
+								<div
+									class="hidden h-8 w-8 items-center justify-center rounded-full bg-green-500/20 sm:flex"
+								>
+									<span class="text-sm text-green-500">5</span>
+								</div>
+								<div class="text-center sm:text-left">
+									<p class="text-[10px] font-medium text-green-400 sm:text-xs">
+										Пятерок
+									</p>
+									<p class="text-base font-bold text-white sm:text-lg">
+										{statistics.count5}
+									</p>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
 				<StatisticsChart stats={statistics} />
 			</div>
 		</div>
 	{/if}
 
 	{#if instructors}
-		<div class="result mt-4">
-			<h3 class="mb-2 text-xl font-bold">
-				<span>Преподаватели:</span>
-				<span class="text-sm">{instructors.teachers[0].split(',').join(', ')}</span>
-			</h3>
+		<div class="mt-4">
+			<div class="flex flex-col gap-2">
+				<h3 class="text-lg font-semibold text-white">👨‍🏫 Преподаватели</h3>
+				<div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
+					{#each instructors.teachers[0].split(',') as teacher}
+						<div
+							class="flex items-center justify-between rounded-lg bg-slate-900 px-3 py-2"
+						>
+							<span class="text-sm font-medium text-slate-300">{teacher.trim()}</span>
+							<a
+								href="https://teams.microsoft.com/l/chat/0/0?users={transliterateName(
+									teacher.trim()
+								)}"
+								target="_blank"
+								class="flex h-7 w-7 items-center justify-center rounded-full bg-blue-500/20 text-blue-500 hover:bg-blue-500/30"
+							>
+								<img
+									src="https://1.bp.blogspot.com/-tZ96Uvd516Y/Xc1nRonJtoI/AAAAAAAAJOo/M5DQUKUBjKADfMIzD-0oUrfzn4fZsK1SwCLcBGAsYHQ/s1600/Teams.png"
+									alt="Связаться с преподавателем"
+									class="h-4 w-4"
+								/>
+							</a>
+						</div>
+					{/each}
+				</div>
+			</div>
 		</div>
 	{/if}
 </section>

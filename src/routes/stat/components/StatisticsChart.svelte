@@ -16,7 +16,7 @@
 	const chartConfig = {
 		value: {
 			label: 'Количество',
-			color: '#60A5FA'
+			color: '#3B82F6'
 		}
 	} satisfies Chart.ChartConfig;
 
@@ -27,7 +27,10 @@
 	};
 </script>
 
-<Chart.Container config={chartConfig} class="aspect-auto h-[250px] w-full">
+<Chart.Container
+	config={chartConfig}
+	class="aspect-auto h-[200px] w-full rounded-lg bg-slate-900 p-3 sm:h-[250px] sm:p-4"
+>
 	<AreaChart
 		data={chartData}
 		x="grade"
@@ -36,7 +39,7 @@
 			{
 				key: 'count',
 				label: 'Количество',
-				color: '#60A5FA'
+				color: '#3B82F6'
 			}
 		]}
 		props={{
@@ -59,8 +62,8 @@
 		{#snippet marks({ series, getAreaProps }: { series: any[]; getAreaProps: any })}
 			<defs>
 				<linearGradient id="fillValue" x1="0" y1="0" x2="0" y2="1">
-					<stop offset="5%" stop-color="#60A5FA" stop-opacity={0.8} />
-					<stop offset="95%" stop-color="#60A5FA" stop-opacity={0.1} />
+					<stop offset="5%" stop-color="#3B82F6" stop-opacity={0.8} />
+					<stop offset="95%" stop-color="#3B82F6" stop-opacity={0.1} />
 				</linearGradient>
 			</defs>
 			{#each series as s, i (s.key)}
