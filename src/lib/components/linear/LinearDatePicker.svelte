@@ -3,11 +3,17 @@
 	import { quintOut } from 'svelte/easing';
 	import Portal from '$lib/components/ui/Portal.svelte';
 	import { onMount } from 'svelte';
+	import type { YSTULesson, ScheduleData } from '../../../routes/rasp/types';
+	import type { TeacherSubgroups } from '../../../routes/rasp/stores/subgroups';
 
 	export let isOpen = false;
 	export let onClose: () => void;
 	export let onSelect: (date: string | undefined) => void;
 	export let currentDate: string | undefined = undefined;
+	export let lesson: YSTULesson | null = null;
+	export let scheduleData: ScheduleData | null = null;
+	export let baseDate: string | undefined = undefined;
+	export let teacherSubgroups: TeacherSubgroups = {};
 
 	let searchQuery = '';
 	let showCalendar = false;
@@ -90,7 +96,7 @@
 		const nextWeek = new Date(today);
 		nextWeek.setDate(today.getDate() + 7);
 
-		return [
+		const base: DatePreset[] = [
 			{
 				id: 'custom',
 				label: 'Календарь...',
@@ -116,6 +122,35 @@
 				description: 'Без срока'
 			}
 		];
+
+		const nextPresets: DatePreset[] = [];
+		try {
+			const computed = computeNextLessonDates();
+			if (computed.any) {
+				nextPresets.push({
+					id: 'next-any',
+					label: 'До следующего занятия',
+					value: computed.any,
+					description: formatDateDescription(new Date(computed.any))
+				});
+			}
+			for (const [typeStr, dateIso] of Object.entries(computed.byType)) {
+				const typeNum = parseInt(typeStr);
+				nextPresets.push({
+					id: `next-type-${typeNum}`,
+					label: getNextTypeLabel(typeNum),
+					value: dateIso,
+					description: formatDateDescription(new Date(dateIso))
+				});
+			}
+		} catch {}
+
+		if (nextPresets.length > 0) {
+			const insertIndex = 2;
+			base.splice(insertIndex, 0, ...nextPresets);
+		}
+
+		return base;
 	}
 
 	function filterPresets(query: string): DatePreset[] {
@@ -541,6 +576,133 @@
 			day: 'numeric',
 			month: 'short'
 		});
+	}
+
+	function toISODateOnly(d: Date): string {
+		const year = d.getFullYear();
+		const month = String(d.getMonth() + 1).padStart(2, '0');
+		const day = String(d.getDate()).padStart(2, '0');
+		return `${year}-${month}-${day}`;
+	}
+
+	function computeNextLessonDates(): { any?: string; byType: Record<number, string> } {
+		const result: { any?: string; byType: Record<number, string> } = { byType: {} };
+		if (!lesson || !scheduleData) return result;
+
+		const baseIso = baseDate || toISODateOnly(new Date());
+		const subjectName = lesson.lessonName ?? null;
+		const teacherName = lesson.teacherName ?? null;
+
+		let requiredSubgroup: 1 | 2 | null = null;
+		if (lesson.type === 8 && teacherName) {
+			const key = `${subjectName ?? 'null'}_${teacherName}`;
+			const data = teacherSubgroups[key];
+			const isDivided = (data && data.isDivision === true) || lesson.isDivision === true;
+			if (isDivided && data && data.dates) {
+				const baseRu = (() => {
+					try {
+						const d = new Date(baseIso);
+						return d.toLocaleDateString('ru-RU');
+					} catch {
+						return '';
+					}
+				})();
+				for (const [dtKey, info] of Object.entries(data.dates)) {
+					if (dtKey.startsWith(baseRu + '_')) {
+						requiredSubgroup = info.subgroup as 1 | 2;
+						break;
+					}
+				}
+			}
+		}
+
+		const allDays: { date: string; lessons: any[] }[] = [];
+		for (const week of scheduleData.items || []) {
+			for (const day of week.days || []) {
+				allDays.push({ date: day.info?.date, lessons: day.lessons || [] });
+			}
+		}
+		allDays.sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0));
+
+		function matchesSubject(l: any): boolean {
+			const lName = l?.lessonName ?? null;
+			if (subjectName === null) {
+				if (teacherName)
+					return (
+						(l?.teacherName ?? null) === teacherName &&
+						(lName === null || lName === 'null')
+					);
+				return lName === null || lName === 'null';
+			}
+			return lName === subjectName;
+		}
+
+		function matchesSubgroupIfRequired(dayIso: string, l: any): boolean {
+			if (requiredSubgroup === null || l?.type !== 8 || !teacherName) return true;
+			const key = `${l.lessonName ?? 'null'}_${teacherName}`;
+			const data = teacherSubgroups[key];
+			if (!data || !data.dates) return true;
+			const ru = (() => {
+				try {
+					return new Date(dayIso).toLocaleDateString('ru-RU');
+				} catch {
+					return '';
+				}
+			})();
+			for (const [dtKey, info] of Object.entries(data.dates)) {
+				if (dtKey.startsWith(ru + '_')) {
+					return (info.subgroup as 1 | 2) === requiredSubgroup;
+				}
+			}
+			return true;
+		}
+
+		for (const day of allDays) {
+			if (!day.date || day.date <= baseIso) continue;
+			for (const l of day.lessons) {
+				if (!matchesSubject(l)) continue;
+				if (!matchesSubgroupIfRequired(day.date, l)) continue;
+				const type: number = l.type;
+				const isoOnly = toISODateOnly(new Date(day.date));
+				if (!result.any) result.any = isoOnly;
+				if (result.byType[type] === undefined) {
+					result.byType[type] = isoOnly;
+				}
+			}
+		}
+
+		return result;
+	}
+
+	function getNextTypeLabel(type: number): string {
+		switch (type) {
+			case 2:
+				return 'До следующей лекции';
+			case 4:
+				return 'До следующей практики';
+			case 8:
+				return 'До следующей лабораторной работы';
+			case 1:
+				return 'До следующего курсового проекта';
+			case 5:
+				return 'До следующей консультации';
+			case 6:
+				return 'До следующей лекции или практики';
+			case 7:
+				return 'До следующего дифференцированного зачета';
+			case 3:
+				return 'До следующего экзамена';
+			case 9:
+				return 'До следующего посещения библиотеки';
+			case 10:
+				return 'До следующей лекции или лабораторной работы';
+			case 11:
+				return 'До следующего организационного собрания';
+			case 12:
+				return 'До следующего занятия';
+			default:
+				return 'До следующего занятия';
+		}
 	}
 
 	function handleClickOutside(event: MouseEvent) {

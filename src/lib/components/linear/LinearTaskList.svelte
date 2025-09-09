@@ -13,14 +13,18 @@
 		getAllTasks
 	} from '$lib/stores/linear';
 	import type { YSTULesson } from '../../../routes/rasp/types';
+	import type { ScheduleData } from '../../../routes/rasp/types';
 	import { notifications } from '$lib/stores/notifications';
 	import LinearDatePicker from './LinearDatePicker.svelte';
 	import LinearPriorityPicker from './LinearPriorityPicker.svelte';
 	import LinearStatePicker from './LinearStatePicker.svelte';
 	import { onMount } from 'svelte';
+	import type { TeacherSubgroups } from '../../../routes/rasp/stores/subgroups';
 
 	export let lesson: YSTULesson;
 	export let date: string;
+	export let scheduleData: ScheduleData | null = null;
+	export let teacherSubgroups: TeacherSubgroups = {};
 
 	let newTaskTitle = '';
 	let isCreating = false;
@@ -366,7 +370,7 @@
 			{#each tasks as task}
 				<div class="flex items-center justify-between rounded-lg bg-slate-700 p-3">
 					<div class="flex-grow">
-						<div class="flex items-center gap-2">
+						<div class="mr-2 flex items-center gap-2">
 							<span class="text-sm text-white">{task.title}</span>
 							<button
 								class="rounded px-2 py-0.5 text-xs {getStateColor(task.state)}"
@@ -438,6 +442,10 @@
 		}
 	}}
 	currentDate={activeTask?.dueDate || selectedDueDate}
+	{lesson}
+	{scheduleData}
+	baseDate={date}
+	{teacherSubgroups}
 />
 
 <LinearPriorityPicker

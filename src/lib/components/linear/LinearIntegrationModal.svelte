@@ -4,6 +4,8 @@
 	import { linearStore } from '$lib/stores/linear';
 	import { notifications } from '$lib/stores/notifications';
 	import type { YSTULesson } from '../../../routes/rasp/types';
+	import type { ScheduleData } from '../../../routes/rasp/types';
+	import type { TeacherSubgroups } from '../../../routes/rasp/stores/subgroups';
 	import LinearTaskList from './LinearTaskList.svelte';
 	import { onDestroy } from 'svelte';
 	import { LessonTypes } from '$lib/types/schedule';
@@ -12,6 +14,8 @@
 	export let onClose: () => void;
 	export let lesson: YSTULesson;
 	export let date: string;
+	export let scheduleData: ScheduleData | null = null;
+	export let teacherSubgroups: TeacherSubgroups = {};
 
 	let apiKey = '';
 	let isLoading = false;
@@ -317,7 +321,13 @@
 		{:else}
 			<div class="rounded-xl bg-slate-800 p-4">
 				<h3 class="mb-4 text-lg font-semibold text-white">Задачи</h3>
-				<LinearTaskList bind:this={taskListComponent} {lesson} {date} />
+				<LinearTaskList
+					bind:this={taskListComponent}
+					{lesson}
+					{date}
+					{scheduleData}
+					{teacherSubgroups}
+				/>
 			</div>
 
 			<div class="mt-4 rounded-lg bg-slate-800 p-2">

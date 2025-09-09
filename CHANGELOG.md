@@ -1,3 +1,4 @@
+- replace boosty money support on cloudtips (ysturasp, 2025-09-09) [5 files changed, 5 insertions(+), 3 deletions(-)]
 - improve statistics page style section for unified design site (ysturasp, 2025-09-08) [4 files changed, 252 insertions(+), 67 deletions(-)]
 - fix start distibute lessons with lesson index in schedule for 2 lab works in day (ysturasp, 2025-09-07) [3 files changed, 79 insertions(+), 8 deletions(-)]
 - fix display of subgroups in table and export xlsx when 2 lesson per day (ysturasp, 2025-09-07) [3 files changed, 33 insertions(+), 21 deletions(-)]

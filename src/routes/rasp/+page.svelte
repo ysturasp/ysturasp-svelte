@@ -763,6 +763,8 @@
 		onClose={handleLinearModalClose}
 		lesson={selectedLesson}
 		date={selectedLessonDate}
+		{scheduleData}
+		teacherSubgroups={currentTeacherSubgroups}
 	/>
 {/if}
 
