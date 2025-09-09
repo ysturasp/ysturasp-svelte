@@ -84,7 +84,7 @@
 			</h2>
 			<div class="mb-8 text-center md:mt-0 md:mb-6">
 				<a
-					href="https://boosty.to/ysturasp.me/donate"
+					href="https://pay.cloudtips.ru/p/582d48d6"
 					target="_blank"
 					class="rounded-full bg-blue-700 px-6 py-3 font-bold text-white transition duration-300 hover:bg-blue-600"
 				>

@@ -1,6 +1,6 @@
 <section class="support-section my-8 md:my-16">
 	<div class="group relative cursor-pointer">
-		<a href="https://boosty.to/ysturasp.me/donate" class="block">
+		<a href="https://pay.cloudtips.ru/p/582d48d6" class="block">
 			<div
 				class="support-card relative transform overflow-hidden rounded-2xl p-8 transition-all duration-500 hover:scale-[1.02]"
 			>
