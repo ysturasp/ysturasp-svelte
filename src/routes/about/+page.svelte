@@ -205,7 +205,7 @@
 {#if showModal}
 	<div
 		id="image-modal"
-		class="bg-opacity-50 fixed inset-0 z-50 flex items-center justify-center bg-black {modalTransitioning
+		class="bg-opacity-50 fixed inset-0 z-100 flex items-center justify-center bg-black/50 {modalTransitioning
 			? 'modal-closing'
 			: 'modal-opening'}"
 		on:click={handleModalClick}
