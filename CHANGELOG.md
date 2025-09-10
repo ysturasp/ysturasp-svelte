@@ -1,3 +1,4 @@
+- move yandex metrica to special component and remove from index.html (ysturasp, 2025-09-10) [5 files changed, 80 insertions(+), 38 deletions(-)]
 - add quick date picker options to linear modal based on schedule type (ysturasp, 2025-09-09) [6 files changed, 187 insertions(+), 3 deletions(-)]
 - replace boosty money support on cloudtips (ysturasp, 2025-09-09) [5 files changed, 5 insertions(+), 3 deletions(-)]
 - improve statistics page style section for unified design site (ysturasp, 2025-09-08) [4 files changed, 252 insertions(+), 67 deletions(-)]

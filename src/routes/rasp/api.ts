@@ -1,4 +1,5 @@
 import type { Institute, ScheduleData } from './types';
+import { reachGoal } from '$lib/utils/metrika';
 
 const API_BASE = 'https://api-ochre-eta-11.vercel.app/s/schedule/v1/schedule';
 
@@ -23,6 +24,10 @@ export async function getSchedule(group: string): Promise<ScheduleData> {
 			throw new Error(`HTTP error! status: ${response.status}`);
 		}
 		const data = await response.json();
+		try {
+			reachGoal('ystu_schedule_loaded_group', { group });
+			reachGoal('ystu_schedule_loaded');
+		} catch {}
 		return data;
 	} catch (error) {
 		console.error('Error fetching schedule:', error);

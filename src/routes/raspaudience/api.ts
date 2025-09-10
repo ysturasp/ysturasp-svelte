@@ -1,4 +1,5 @@
 import type { AudienceScheduleData } from './types';
+import { reachGoal } from '$lib/utils/metrika';
 
 const API_URL = 'https://api-ochre-eta-11.vercel.app/s/schedule/v1/schedule';
 
@@ -31,6 +32,10 @@ export async function getAudienceSchedule(audienceId: string): Promise<AudienceS
 			throw new Error(`HTTP error! status: ${response.status}`);
 		}
 		const data = await response.json();
+		try {
+			reachGoal('ystu_schedule_loaded_audience', { audienceId });
+			reachGoal('ystu_schedule_loaded');
+		} catch {}
 		return data;
 	} catch (error) {
 		console.error('Error fetching audience schedule:', error);
