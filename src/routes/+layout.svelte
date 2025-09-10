@@ -1,6 +1,7 @@
 <script lang="ts">
 	import '../app.css';
 	import Preloader from '$lib/components/Preloader.svelte';
+	import YandexMetrica from '$lib/components/common/YandexMetrica.svelte';
 	import { onMount } from 'svelte';
 	import { afterNavigate } from '$app/navigation';
 	import { init } from '@telegram-apps/sdk-svelte';
@@ -43,4 +44,5 @@
 </script>
 
 <Preloader />
+<YandexMetrica id={97705826} />
 {@render children()}
