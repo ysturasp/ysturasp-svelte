@@ -27,6 +27,11 @@ export interface TeacherSubgroups {
 export const subgroupSettings = writable<SubgroupSettings>({});
 export const teacherSubgroups = writable<TeacherSubgroups>({});
 
+const SUBGROUP_TYPES = new Set<number>([8, 4]);
+function isSubgroupType(type: number): boolean {
+	return SUBGROUP_TYPES.has(type);
+}
+
 export function loadSubgroupSettings(): SubgroupSettings {
 	if (!browser) return {};
 	const stored = localStorage.getItem('subgroupSettings');
@@ -86,7 +91,7 @@ export function shouldShowLabWork(
 	settings: SubgroupSettings,
 	teacherData: TeacherSubgroups
 ): boolean {
-	if (lesson.type !== 8) return true;
+	if (!isSubgroupType(lesson.type)) return true;
 
 	const lessonName = lesson.lessonName || 'null';
 	const teacherName = lesson.teacherName || lesson.additionalTeacherName;
@@ -117,7 +122,7 @@ export function getSubgroupIndicator(
 	settings: SubgroupSettings,
 	teacherData: TeacherSubgroups
 ): string {
-	if (lesson.type !== 8) return '';
+	if (!isSubgroupType(lesson.type)) return '';
 
 	const lessonName = lesson.lessonName || 'null';
 
@@ -206,7 +211,7 @@ export function generateSubgroupDistribution(scheduleData: any, semester: Semest
 		weekItem.days.forEach((day: any) => {
 			if (!isDateInCurrentSemester(day.info.date, semester)) return;
 			day.lessons?.forEach((lesson: any) => {
-				if (lesson.type !== 8) return;
+				if (!isSubgroupType(lesson.type)) return;
 				const teacherName = lesson.teacherName || lesson.additionalTeacherName;
 				if (!teacherName) return;
 				const originalName = lesson.lessonName || 'null';
@@ -273,7 +278,7 @@ export function generateSubgroupDistribution(scheduleData: any, semester: Semest
 			if (!isDateInCurrentSemester(day.info.date, semester)) return;
 
 			day.lessons?.forEach((lesson: any) => {
-				if (lesson.type !== 8) return;
+				if (!isSubgroupType(lesson.type)) return;
 				const teacherName = lesson.teacherName || lesson.additionalTeacherName;
 				if (!teacherName) return;
 
@@ -437,7 +442,7 @@ export function generateSubgroupDistribution(scheduleData: any, semester: Semest
 					for (const weekItem of scheduleData.items) {
 						for (const day of weekItem.days) {
 							const lesson = day.lessons?.find((l: any) => {
-								if (l.type !== 8) return false;
+								if (!isSubgroupType(l.type)) return false;
 								const lessonName = l.lessonName || 'null';
 								return (
 									lessonName === item.originalName && l.teacherName === teacher
@@ -518,7 +523,7 @@ export function generateSubgroupDistribution(scheduleData: any, semester: Semest
 				if (day.info.date === date) {
 					const lessons = day.lessons || [];
 					const sameDayLessons = lessons.filter((l) => {
-						if (l.type !== 8) return false;
+						if (!isSubgroupType(l.type)) return false;
 						const lessonTimeRange = l.timeRange || `${l.startAt}-${l.endAt}`;
 						const normalizedTimeRange = lessonTimeRange.replace(/\s+/g, '');
 						const normalizedInputTimeRange = timeRange.replace(/\s+/g, '');

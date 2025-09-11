@@ -348,7 +348,7 @@
 							</div>
 							<p class="text-sm {typeInfo.text}">
 								{typeInfo.label}
-								{#if !lesson.isDivision && lesson.type === 8}
+								{#if !lesson.isDivision && (lesson.type === 8 || lesson.type === 4)}
 									<span class="text-xs text-gray-400"> (всей группой)</span>
 								{/if}
 							</p>

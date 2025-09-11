@@ -121,7 +121,7 @@
 				weekItem.days.forEach((day) => {
 					if (!isDateInSemester(day.info.date, selectedSemester!)) return;
 					day.lessons?.forEach((lesson) => {
-						if (lesson.type === 8) {
+						if (lesson.type === 8 || lesson.type === 4) {
 							const lessonName = lesson.lessonName || 'null';
 							const settingKey =
 								lessonName === 'null' ? `null_${lesson.teacherName}` : lessonName;

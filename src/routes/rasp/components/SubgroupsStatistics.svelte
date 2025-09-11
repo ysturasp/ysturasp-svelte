@@ -35,10 +35,17 @@
 			isNext: boolean;
 			teacher: string;
 		}[];
+		typePriority: number;
 	}
 
 	$: stats = calculateStats(teacherSubgroups, scheduleData, selectedSemester);
-	$: sortedStats = stats.sort((a, b) => (a.isDivision ? -1 : 1));
+	$: sortedStats = stats.sort((a, b) => {
+		const ap = a.typePriority ?? 2;
+		const bp = b.typePriority ?? 2;
+		if (ap !== bp) return ap - bp;
+		if (a.isDivision !== b.isDivision) return a.isDivision ? -1 : 1;
+		return 0;
+	});
 	$: {
 		console.log(
 			'Stats:',
@@ -235,6 +242,12 @@
 			}
 
 			const totalLessons = countTotalLessons(schedule, groupKey.split('_')[0], semester);
+			const subjectNameForPriority = subjectData.displayName as string;
+			const labsCount = countLessonsByTypes(schedule, subjectNameForPriority, semester, [8]);
+			const practicesCount = countLessonsByTypes(schedule, subjectNameForPriority, semester, [
+				4
+			]);
+			const typePriority = labsCount > 0 ? 0 : practicesCount > 0 ? 1 : 2;
 			const distributedLessons = subjectData.subgroup1Count + subjectData.subgroup2Count;
 
 			result.push({
@@ -246,7 +259,8 @@
 				totalLessons,
 				distributedLessons,
 				isDivision: subjectData.isDivision,
-				dates: allDates
+				dates: allDates,
+				typePriority
 			});
 		}
 
@@ -266,13 +280,37 @@
 
 				if (day.lessons) {
 					count += day.lessons.filter((l) => {
-						if (l.type !== 8) return false;
+						if (!(l.type === 8 || l.type === 4)) return false;
 						if (isNullSubject) {
 							return l.lessonName === null || l.lessonName === 'null';
 						}
 						return l.lessonName === subject;
 					}).length;
 				}
+			});
+		});
+		return count;
+	}
+
+	function countLessonsByTypes(
+		schedule: ScheduleData,
+		subject: string,
+		semester: SemesterInfo,
+		types: number[]
+	): number {
+		let count = 0;
+		const isNullSubject = subject.startsWith('null (преп.');
+		schedule.items.forEach((weekItem) => {
+			weekItem.days.forEach((day) => {
+				if (!isDateInSemester(day.info.date, semester)) return;
+				day.lessons?.forEach((l) => {
+					if (!types.includes(l.type)) return;
+					if (isNullSubject) {
+						if (l.lessonName === null || l.lessonName === 'null') count++;
+					} else if (l.lessonName === subject) {
+						count++;
+					}
+				});
 			});
 		});
 		return count;
