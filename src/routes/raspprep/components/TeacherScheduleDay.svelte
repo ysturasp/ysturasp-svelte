@@ -45,7 +45,7 @@
 	}
 </script>
 
-<div class="mb-4 rounded-2xl bg-slate-900 p-4">
+<div class="mb-4 rounded-2xl bg-slate-900 p-4 last:mb-0">
 	<h3 class="mb-2 text-2xl font-semibold text-white">
 		{dayName} ({formatDate(date)})
 	</h3>

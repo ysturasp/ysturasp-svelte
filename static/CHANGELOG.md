@@ -1,3 +1,4 @@
+- add lesson distribute with type 4 - practice (ysturasp, 2025-09-11) [6 files changed, 56 insertions(+), 11 deletions(-)]
 - fixed full-screen image above header (ysturasp, 2025-09-10) [3 files changed, 3 insertions(+), 1 deletion(-)]
 - add reach goal for get schedule by group audience teacher, and get all schedule (ysturasp, 2025-09-10) [6 files changed, 27 insertions(+)]
 - move yandex metrica to special component and remove from index.html (ysturasp, 2025-09-10) [5 files changed, 80 insertions(+), 38 deletions(-)]
