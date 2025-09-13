@@ -43,6 +43,8 @@
 	let scheduleData: TeacherScheduleData | null = null;
 	let availableSemesters: SemesterInfo[] = [];
 	let selectedSemester: SemesterInfo | null = null;
+	let lastLoadedTeacherId: number | null = null;
+	let lastLoadedWeek: number | null = null;
 
 	const days = [
 		'Понедельник',
@@ -120,6 +122,10 @@
 		const teacher = teachers.find((t) => t.name === selectedTeacher);
 		if (!teacher) return;
 
+		if (lastLoadedTeacherId === teacher.id) {
+			return;
+		}
+
 		try {
 			isScheduleLoading = true;
 			scheduleData = await getTeacherSchedule(teacher.id);
@@ -134,6 +140,8 @@
 
 			localStorage.setItem('lastTeacher', selectedTeacher);
 			localStorage.setItem('lastWeek', selectedWeek.toString());
+			lastLoadedTeacherId = teacher.id;
+			lastLoadedWeek = selectedWeek;
 
 			updateURL();
 		} catch (error) {
@@ -208,7 +216,8 @@
 			selectedTeacher
 				? `расписание ${selectedTeacher}, преподаватель ${selectedTeacher}, `
 				: ''
-		}ЯГТУ преподаватели расписание, поиск преподавателей ЯГТУ, расписание пар преподавателей, расписание занятий преподавателей ЯГТУ`}
+		}
+		ЯГТУ преподаватели расписание, поиск преподавателей ЯГТУ, расписание пар преподавателей, расписание занятий преподавателей ЯГТУ`}
 	/>
 
 	<meta

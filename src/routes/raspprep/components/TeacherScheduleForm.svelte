@@ -18,7 +18,7 @@
 	let copied = false;
 
 	$: if (selectedTeacher) teacherError = false;
-	$: if (selectedWeekString) weekError = false;
+	$: if (selectedWeek) weekError = false;
 
 	function copyScheduleLink() {
 		const url = new URL(window.location.href);
@@ -36,9 +36,9 @@
 
 		setTimeout(() => {
 			teacherError = !selectedTeacher;
-			weekError = !selectedWeekString;
+			weekError = !selectedWeek;
 
-			if (!selectedTeacher || !selectedWeekString) {
+			if (!selectedTeacher || !selectedWeek) {
 				return;
 			}
 
