@@ -1,7 +1,7 @@
 import type { Institute, ScheduleData } from './types';
 import { reachGoal } from '$lib/utils/metrika';
 
-const API_BASE = 'https://api-ochre-eta-11.vercel.app/s/schedule/v1/schedule';
+const API_BASE = 'https://gg-api.ystuty.ru/s/schedule/v1/schedule';
 
 export async function getInstitutes(): Promise<Institute[]> {
 	try {
