@@ -1,3 +1,4 @@
+- fix multiple requests without changing teacher and/or week on page schedule teachers ystu (ysturasp, 2025-09-13) [4 files changed, 15 insertions(+), 4 deletions(-)]
 - add class last:mb-0 for turn off bottom margin for latest element in schedule (ysturasp, 2025-09-12) [4 files changed, 4 insertions(+), 2 deletions(-)]
 - add lesson distribute with type 4 - practice (ysturasp, 2025-09-11) [6 files changed, 56 insertions(+), 11 deletions(-)]
 - fixed full-screen image above header (ysturasp, 2025-09-10) [3 files changed, 3 insertions(+), 1 deletion(-)]
