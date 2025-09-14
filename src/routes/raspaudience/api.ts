@@ -1,7 +1,7 @@
 import type { AudienceScheduleData } from './types';
 import { reachGoal } from '$lib/utils/metrika';
 
-const API_URL = 'https://gg-api.ystuty.ru/s/schedule/v1/schedule';
+const API_URL = 'https://api-ochre-eta-11.vercel.app/s/schedule/v1/schedule';
 
 export interface Audience {
 	id: string;
