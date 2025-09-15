@@ -1,3 +1,4 @@
+- restore working proxy api (ysturasp, 2025-09-14) [5 files changed, 5 insertions(+), 3 deletions(-)]
 - temporary hot fix not working proxy api (ysturasp, 2025-09-14) [5 files changed, 5 insertions(+), 3 deletions(-)]
 - add goal for track click on ystu lk button (ysturasp, 2025-09-14) [5 files changed, 8 insertions(+)]
 - fix multiple requests without changing teacher and/or week on page schedule teachers ystu (ysturasp, 2025-09-13) [4 files changed, 15 insertions(+), 4 deletions(-)]

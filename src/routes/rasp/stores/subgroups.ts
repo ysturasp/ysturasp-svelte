@@ -7,6 +7,7 @@ export interface SubgroupInfo {
 	subgroup: 1 | 2;
 	isVUC: boolean;
 	lessonIndex: number;
+	type?: number;
 }
 
 export interface TeacherSubgroupData {
@@ -267,6 +268,7 @@ export function generateSubgroupDistribution(scheduleData: any, semester: Semest
 		timeRange: string;
 		isVUC: boolean;
 		originalName: string;
+		type: number;
 	};
 	const groups = new Map<
 		string,
@@ -307,7 +309,8 @@ export function generateSubgroupDistribution(scheduleData: any, semester: Semest
 					date: day.info.date,
 					timeRange: lesson.timeRange || `${lesson.startAt}-${lesson.endAt}`,
 					isVUC: vucDays.has(day.info.date),
-					originalName
+					originalName,
+					type: lesson.type
 				});
 			});
 		});
@@ -342,7 +345,8 @@ export function generateSubgroupDistribution(scheduleData: any, semester: Semest
 				perTeacherDates[teacher][dateTimeKey] = {
 					subgroup,
 					isVUC: e.isVUC,
-					lessonIndex
+					lessonIndex,
+					type: e.type
 				};
 			});
 		}
@@ -422,7 +426,8 @@ export function generateSubgroupDistribution(scheduleData: any, semester: Semest
 				perTeacherDates[entry.teacher][dateTimeKey] = {
 					subgroup,
 					isVUC: entry.isVUC,
-					lessonIndex
+					lessonIndex,
+					type: entry.type
 				};
 			}
 
@@ -514,6 +519,7 @@ export function generateSubgroupDistribution(scheduleData: any, semester: Semest
 			subgroup: 1 | 2;
 			week: number;
 			lessonIndex: number;
+			type?: number;
 		}>
 	>();
 
@@ -567,13 +573,16 @@ export function generateSubgroupDistribution(scheduleData: any, semester: Semest
 				dateTimeKey: dtKey,
 				subgroup: info.subgroup,
 				week,
-				lessonIndex
+				lessonIndex,
+				type: info.type
 			});
 		});
 	});
 
 	slotMap.forEach((entries) => {
 		if (entries.length < 2) return;
+		const allLabs = entries.every((e) => e.type === 8);
+		if (!allLabs) return;
 		entries.sort((a, b) => a.lessonIndex - b.lessonIndex);
 		const used = new Set<number>();
 		used.add(entries[0].subgroup);
@@ -685,6 +694,8 @@ export function generateSubgroupDistribution(scheduleData: any, semester: Semest
 		dtKey: string,
 		newSubgroup: 1 | 2
 	): boolean {
+		const currentInfo = teacherSubgroups[groupKey]?.dates?.[dtKey];
+		if (!currentInfo || currentInfo.type !== 8) return true;
 		const { canonical } = canonicalizeDateTimeKey(dtKey);
 		const entries = slotMap.get(canonical) || [];
 		if (entries.length < 2) return true;
@@ -732,6 +743,10 @@ export function generateSubgroupDistribution(scheduleData: any, semester: Semest
 				if (arr.length < 2) return;
 				arr.sort();
 				const keys = arr.map((k) => k);
+				const allLabs = keys
+					.map((k) => teacherSubgroups[gKey].dates[k]?.type)
+					.every((t) => t === 8);
+				if (!allLabs) return;
 				const subs = keys.map((k) => teacherSubgroups[gKey].dates[k]?.subgroup);
 				const set = new Set(subs.filter((x) => x === 1 || x === 2));
 				if (set.size >= 2) return;
