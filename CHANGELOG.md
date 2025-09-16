@@ -1,3 +1,4 @@
+- add mobile view with by days/by week schedule for schedule groups YSPU (ysturasp, 2025-09-16) [3 files changed, 349 insertions(+), 76 deletions(-)]
 - fix distribution of subgroups for practices on same day and same time (ysturasp, 2025-09-15) [3 files changed, 21 insertions(+), 4 deletions(-)]
 - restore working proxy api (ysturasp, 2025-09-14) [5 files changed, 5 insertions(+), 3 deletions(-)]
 - temporary hot fix not working proxy api (ysturasp, 2025-09-14) [5 files changed, 5 insertions(+), 3 deletions(-)]
