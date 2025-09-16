@@ -10,7 +10,7 @@
 	} from '$lib/types/schedule';
 	import { notifications } from '$lib/stores/notifications';
 	import TgsSticker from '$lib/components/common/TgsSticker.svelte';
-	import LoadingOverlay from './components/LoadingOverlay.svelte';
+	import LoadingOverlay from '$lib/components/loading/LoadingOverlay.svelte';
 	import PageLayout from '$lib/components/layout/PageLayout.svelte';
 	import Header from '$lib/components/layout/Header.svelte';
 	import Footer from '$lib/components/layout/Footer.svelte';

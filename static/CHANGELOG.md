@@ -1,3 +1,4 @@
+- add keyboard control support for clicking on classes in yspu schedule (ysturasp, 2025-09-16) [3 files changed, 17 insertions(+), 1 deletion(-)]
 - improve margin for latest card day in schedule on yspu schedule (ysturasp, 2025-09-16) [3 files changed, 3 insertions(+), 1 deletion(-)]
 - add mobile view with by days/by week schedule for schedule groups YSPU (ysturasp, 2025-09-16) [3 files changed, 349 insertions(+), 76 deletions(-)]
 - fix distribution of subgroups for practices on same day and same time (ysturasp, 2025-09-15) [3 files changed, 21 insertions(+), 4 deletions(-)]
