@@ -1,3 +1,4 @@
+- fix distribution of subgroups for practices on same day and same time (ysturasp, 2025-09-15) [3 files changed, 21 insertions(+), 4 deletions(-)]
 - restore working proxy api (ysturasp, 2025-09-14) [5 files changed, 5 insertions(+), 3 deletions(-)]
 - temporary hot fix not working proxy api (ysturasp, 2025-09-14) [5 files changed, 5 insertions(+), 3 deletions(-)]
 - add goal for track click on ystu lk button (ysturasp, 2025-09-14) [5 files changed, 8 insertions(+)]

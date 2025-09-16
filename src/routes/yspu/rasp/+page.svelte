@@ -30,11 +30,16 @@
 	import { getCurrentWeek, getCurrentWeekMessage } from '$lib/utils/semester';
 	import LinearIntegrationModal from '$lib/components/linear/LinearIntegrationModal.svelte';
 	import type { YSTULesson } from '../../rasp/types';
+	import { writable } from 'svelte/store';
+	import { fade } from 'svelte/transition';
+	import { quintOut } from 'svelte/easing';
 
 	let currentSettings: Settings;
 	settings.subscribe((value) => {
 		currentSettings = value;
 	});
+
+	const isMobile = writable(false);
 
 	let isLoading = false;
 	let isScheduleLoading = false;
@@ -56,6 +61,9 @@
 	let viewMode: 'all' | 'actual' = 'all';
 	let groupNumbersMap: Record<string, string> = {};
 	let wasLoadAttempted = false;
+	let isFullView = false;
+	let selectedDay = 0;
+	let isViewChanging = false;
 
 	let isLinearModalOpen = false;
 	let selectedLesson: YSTULesson | null = null;
@@ -85,56 +93,74 @@
 		'Воскресенье'
 	];
 
-	onMount(async () => {
-		try {
-			isLoading = true;
-			const data = await getDirections();
-			schedules = data.schedules || [];
-			directions = (schedules[0]?.directions as Direction[]) || [];
-			semesters = data.semesters || [];
+	onMount(() => {
+		const checkMobile = () => {
+			isMobile.set(window.innerWidth <= 768);
+		};
 
-			const lastSemester = storage.get('lastYspuSemester');
-			if (lastSemester && semesters.length > 0) {
-				selectedSemester =
-					semesters.find((s) => s.folderId === lastSemester) || semesters[0];
-			} else {
-				selectedSemester = semesters[0] || null;
-			}
+		checkMobile();
+		window.addEventListener('resize', checkMobile);
 
-			const urlParams = new URLSearchParams(window.location.search);
-			const urlDirection = urlParams.get('direction');
-			const urlGroup = urlParams.get('group');
-			const urlSemester = urlParams.get('semester');
+		isFullView = localStorage.getItem('isFullViewYspu') === 'true';
+		selectedDay = parseInt(localStorage.getItem('lastSelectedDayYspu') || '0', 10);
 
-			if (urlSemester && semesters.length > 0) {
-				const semesterFromUrl = semesters.find((s) => s.folderId === urlSemester);
-				if (semesterFromUrl) {
-					selectedSemester = semesterFromUrl;
-					storage.set('lastYspuSemester', semesterFromUrl.folderId);
+		const loadData = async () => {
+			try {
+				isLoading = true;
+				const data = await getDirections();
+				schedules = data.schedules || [];
+				directions = (schedules[0]?.directions as Direction[]) || [];
+				semesters = data.semesters || [];
+
+				const lastSemester = storage.get('lastYspuSemester');
+				if (lastSemester && semesters.length > 0) {
+					selectedSemester =
+						semesters.find((s) => s.folderId === lastSemester) || semesters[0];
+				} else {
+					selectedSemester = semesters[0] || null;
 				}
-			}
 
-			if (urlDirection && urlGroup) {
-				selectedDirection = urlDirection;
-				selectedGroup = urlGroup;
-				await loadSchedule();
-			} else {
-				const lastDirection = storage.get('lastYspuInstitut');
-				const lastGroup = storage.get('lastYspuGroup');
+				const urlParams = new URLSearchParams(window.location.search);
+				const urlDirection = urlParams.get('direction');
+				const urlGroup = urlParams.get('group');
+				const urlSemester = urlParams.get('semester');
 
-				if (lastDirection) {
-					selectedDirection = lastDirection;
-					if (lastGroup) {
-						selectedGroup = lastGroup;
-						await loadSchedule();
+				if (urlSemester && semesters.length > 0) {
+					const semesterFromUrl = semesters.find((s) => s.folderId === urlSemester);
+					if (semesterFromUrl) {
+						selectedSemester = semesterFromUrl;
+						storage.set('lastYspuSemester', semesterFromUrl.folderId);
 					}
 				}
+
+				if (urlDirection && urlGroup) {
+					selectedDirection = urlDirection;
+					selectedGroup = urlGroup;
+					await loadSchedule();
+				} else {
+					const lastDirection = storage.get('lastYspuInstitut');
+					const lastGroup = storage.get('lastYspuGroup');
+
+					if (lastDirection) {
+						selectedDirection = lastDirection;
+						if (lastGroup) {
+							selectedGroup = lastGroup;
+							await loadSchedule();
+						}
+					}
+				}
+			} catch (error) {
+				console.error('Error loading initial data:', error);
+			} finally {
+				isLoading = false;
 			}
-		} catch (error) {
-			console.error('Error loading initial data:', error);
-		} finally {
-			isLoading = false;
-		}
+		};
+
+		loadData();
+
+		return () => {
+			window.removeEventListener('resize', checkMobile);
+		};
 	});
 
 	async function loadSchedule() {
@@ -287,7 +313,63 @@
 		return processedLessons;
 	}
 
+	function handleViewChange() {
+		isViewChanging = true;
+		localStorage.setItem('isFullViewYspu', isFullView.toString());
+		if (!isFullView && daysWithLessons.length > 0) {
+			selectedDay = daysWithLessons[0];
+			localStorage.setItem('lastSelectedDayYspu', selectedDay.toString());
+		} else {
+			localStorage.removeItem('lastSelectedDayYspu');
+		}
+		setTimeout(() => {
+			isViewChanging = false;
+		}, 500);
+	}
+
+	function getDayName(dayIndex: number): string {
+		const days = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
+		return days[dayIndex];
+	}
+
+	function isToday(dayIndex: number): boolean {
+		const today = new Date();
+		const currentDay = today.getDay();
+		const normalizedCurrentDay = currentDay === 0 ? 6 : currentDay - 1;
+		return normalizedCurrentDay === dayIndex;
+	}
+
 	$: actualGroupNumber = groupNumbersMap[selectedGroup];
+
+	$: daysWithLessons =
+		scheduleData && actualGroupNumber
+			? (days
+					.map((_, dayIndex) => {
+						const dayLessons = scheduleData!.items
+							.filter(
+								(item: ScheduleItem) => item.courseInfo.number === actualGroupNumber
+							)
+							.flatMap((item) =>
+								item.days
+									.filter((d) => d.info.type === dayIndex)
+									.flatMap((d) => processLessons(d.lessons))
+									.filter(
+										(lesson) => viewMode === 'all' || isLessonInDate(lesson)
+									)
+							);
+						return dayLessons.length > 0 ? dayIndex : null;
+					})
+					.filter((day) => day !== null) as number[])
+			: [];
+
+	$: {
+		if ($isMobile && !isFullView && daysWithLessons.length > 0) {
+			if (!daysWithLessons.includes(selectedDay)) {
+				selectedDay = daysWithLessons[0];
+				localStorage.setItem('lastSelectedDayYspu', selectedDay.toString());
+			}
+		}
+	}
 
 	async function handleSemesterSelect(semester: SemesterInfo) {
 		try {
@@ -376,13 +458,14 @@
 	}
 
 	$: groupInfo = selectedGroup
-		? Object.entries(directions.find((d) => d.id === selectedDirection)?.courses || {}).find(
-				([key]) => key === selectedGroup
-			)?.[1]
+		? (Object.entries(
+				(directions.find((d) => d.id === selectedDirection) as Direction)?.courses || {}
+			).find(([key]) => key === selectedGroup)?.[1] as Course)
 		: null;
 
-	$: groupName = groupInfo?.name || selectedGroup;
-	$: directionName = directions.find((d) => d.id === selectedDirection)?.name || '';
+	$: groupName = (groupInfo as Course)?.name || selectedGroup;
+	$: directionName =
+		(directions.find((d) => d.id === selectedDirection) as Direction)?.name || '';
 </script>
 
 <svelte:head>
@@ -453,12 +536,13 @@
 			variant="mobile"
 			slot="online-counter-mobile"
 			selectedDirectionLabel={selectedDirection
-				? directions.find((d) => d.id === selectedDirection)?.name || ''
+				? (directions.find((d) => d.id === selectedDirection) as Direction)?.name || ''
 				: ''}
 			selectedGroupLabel={selectedGroup
-				? Object.entries(
-						directions.find((d) => d.id === selectedDirection)?.courses || {}
-					).find(([key]) => key === selectedGroup)?.[1].name || ''
+				? (Object.entries(
+						(directions.find((d) => d.id === selectedDirection) as Direction)
+							?.courses || {}
+					).find(([key]) => key === selectedGroup)?.[1]?.name as string) || ''
 				: ''}
 		/>
 	</Header>
@@ -537,28 +621,144 @@
 							onInfoClick={() => (isViewModeModalOpen = true)}
 						/>
 
-						{#each days as day, dayIndex}
-							{@const dayLessons = scheduleData.items
-								.filter(
-									(item: ScheduleItem) =>
-										item.courseInfo.number === actualGroupNumber
-								)
-								.flatMap((item) =>
-									item.days
-										.filter((d) => d.info.type === dayIndex)
-										.flatMap((d) => processLessons(d.lessons))
-										.filter(
-											(lesson) => viewMode === 'all' || isLessonInDate(lesson)
-										)
-								)}
-							{#if dayLessons.length > 0}
-								<ScheduleDay
-									dayName={day}
-									lessons={dayLessons}
-									on:lessonClick={(e) => openLinearModalFromLesson(e.detail)}
-								/>
-							{/if}
-						{/each}
+						{#if $isMobile}
+							<div class="mb-2 flex items-center justify-end">
+								<span class="mr-2 text-white">По дням</span>
+								<label class="switch flex items-center">
+									<input
+										type="checkbox"
+										bind:checked={isFullView}
+										on:change={handleViewChange}
+									/>
+									<span class="slider round"></span>
+								</label>
+								<span class="ml-2 text-white">На неделю</span>
+							</div>
+						{/if}
+
+						{#if $isMobile}
+							<div class="relative">
+								{#if !isFullView}
+									<div
+										class="w-full"
+										in:fade={{ duration: 500, easing: quintOut }}
+										out:fade={{ duration: 500, easing: quintOut }}
+									>
+										<div
+											class="mb-2 grid gap-1"
+											style="grid-template-columns: repeat({daysWithLessons.length}, 1fr)"
+										>
+											{#each daysWithLessons as dayIndex}
+												<button
+													class="day-button flex flex-col items-center rounded-lg p-2 transition-all {dayIndex ===
+													selectedDay
+														? 'bg-blue-600'
+														: 'bg-gray-700'} {isToday(dayIndex)
+														? 'border-2 border-blue-300'
+														: ''}"
+													on:click={() => {
+														selectedDay = dayIndex;
+														localStorage.setItem(
+															'lastSelectedDayYspu',
+															selectedDay.toString()
+														);
+													}}
+												>
+													<span class="text-sm"
+														>{getDayName(dayIndex)}</span
+													>
+													<span class="text-lg font-bold"
+														>{dayIndex + 1}</span
+													>
+												</button>
+											{/each}
+										</div>
+
+										{#if scheduleData}
+											{@const dayLessons = scheduleData.items
+												.filter(
+													(item: ScheduleItem) =>
+														item.courseInfo.number === actualGroupNumber
+												)
+												.flatMap((item) =>
+													item.days
+														.filter((d) => d.info.type === selectedDay)
+														.flatMap((d) => processLessons(d.lessons))
+														.filter(
+															(lesson) =>
+																viewMode === 'all' ||
+																isLessonInDate(lesson)
+														)
+												)}
+											{#if dayLessons.length > 0}
+												<ScheduleDay
+													dayName={days[selectedDay]}
+													lessons={dayLessons}
+													on:lessonClick={(e) =>
+														openLinearModalFromLesson(e.detail)}
+												/>
+											{/if}
+										{/if}
+									</div>
+								{:else}
+									<div
+										class="w-full"
+										in:fade={{ duration: 500, easing: quintOut }}
+										out:fade={{ duration: 500, easing: quintOut }}
+									>
+										{#each days as day, dayIndex}
+											{@const dayLessons = scheduleData.items
+												.filter(
+													(item: ScheduleItem) =>
+														item.courseInfo.number === actualGroupNumber
+												)
+												.flatMap((item) =>
+													item.days
+														.filter((d) => d.info.type === dayIndex)
+														.flatMap((d) => processLessons(d.lessons))
+														.filter(
+															(lesson) =>
+																viewMode === 'all' ||
+																isLessonInDate(lesson)
+														)
+												)}
+											{#if dayLessons.length > 0}
+												<ScheduleDay
+													dayName={day}
+													lessons={dayLessons}
+													on:lessonClick={(e) =>
+														openLinearModalFromLesson(e.detail)}
+												/>
+											{/if}
+										{/each}
+									</div>
+								{/if}
+							</div>
+						{:else}
+							{#each days as day, dayIndex}
+								{@const dayLessons = scheduleData.items
+									.filter(
+										(item: ScheduleItem) =>
+											item.courseInfo.number === actualGroupNumber
+									)
+									.flatMap((item) =>
+										item.days
+											.filter((d) => d.info.type === dayIndex)
+											.flatMap((d) => processLessons(d.lessons))
+											.filter(
+												(lesson) =>
+													viewMode === 'all' || isLessonInDate(lesson)
+											)
+									)}
+								{#if dayLessons.length > 0}
+									<ScheduleDay
+										dayName={day}
+										lessons={dayLessons}
+										on:lessonClick={(e) => openLinearModalFromLesson(e.detail)}
+									/>
+								{/if}
+							{/each}
+						{/if}
 					{/if}
 				</div>
 			{:else if selectedDirection && selectedGroup && wasLoadAttempted && !isScheduleLoading}
@@ -567,9 +767,10 @@
 						type="group"
 						title={(() => {
 							const groupInfo = Object.entries(
-								directions.find((d) => d.id === selectedDirection)?.courses || {}
+								(directions.find((d) => d.id === selectedDirection) as Direction)
+									?.courses || {}
 							).find(([key]) => key === selectedGroup);
-							return groupInfo?.[1].name || selectedGroup;
+							return (groupInfo?.[1] as Course)?.name || selectedGroup;
 						})()}
 						subtitle={undefined}
 						availableSemesters={semesters}
@@ -715,3 +916,73 @@
 		date={selectedLessonDate}
 	/>
 {/if}
+
+<style>
+	:global(.grid) {
+		transition: height 500ms cubic-bezier(0.4, 0, 0.2, 1);
+	}
+
+	.switch {
+		position: relative;
+		display: inline-block;
+		width: 34px;
+		height: 20px;
+		flex-shrink: 0;
+	}
+
+	.switch input {
+		opacity: 0;
+		width: 0;
+		height: 0;
+	}
+
+	.slider {
+		position: absolute;
+		cursor: pointer;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		background-color: #ccc;
+		transition: 0.4s;
+		border-radius: 34px;
+	}
+
+	.slider:before {
+		position: absolute;
+		content: '';
+		height: 14px;
+		width: 14px;
+		left: 3px;
+		bottom: 3px;
+		background-color: white;
+		transition: 0.4s;
+		border-radius: 50%;
+	}
+
+	input:checked + .slider {
+		background-color: #2196f3;
+	}
+
+	input:checked + .slider:before {
+		transform: translateX(14px);
+	}
+
+	.slider.round {
+		border-radius: 34px;
+	}
+
+	.slider.round:before {
+		border-radius: 50%;
+	}
+
+	@media (max-width: 768px) {
+		.day-button {
+			transition: all 0.3s ease;
+		}
+
+		.day-button:active {
+			transform: scale(0.95);
+		}
+	}
+</style>
