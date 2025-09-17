@@ -1,3 +1,4 @@
+- use unifed loading overlay for yspu schedule page (ysturasp, 2025-09-16) [4 files changed, 3 insertions(+), 35 deletions(-)]
 - add keyboard control support for clicking on classes in yspu schedule (ysturasp, 2025-09-16) [3 files changed, 17 insertions(+), 1 deletion(-)]
 - improve margin for latest card day in schedule on yspu schedule (ysturasp, 2025-09-16) [3 files changed, 3 insertions(+), 1 deletion(-)]
 - add mobile view with by days/by week schedule for schedule groups YSPU (ysturasp, 2025-09-16) [3 files changed, 349 insertions(+), 76 deletions(-)]
