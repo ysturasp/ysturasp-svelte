@@ -1,3 +1,4 @@
+- add mobile view with by days/by week for schedule audience YSTU (ysturasp, 2025-09-17) [3 files changed, 274 insertions(+), 55 deletions(-)]
 - add mobile view with by days/by week for schedule teachers YSTU (ysturasp, 2025-09-17) [3 files changed, 275 insertions(+), 56 deletions(-)]
 - use unifed loading overlay for yspu schedule page (ysturasp, 2025-09-16) [4 files changed, 3 insertions(+), 35 deletions(-)]
 - add keyboard control support for clicking on classes in yspu schedule (ysturasp, 2025-09-16) [3 files changed, 17 insertions(+), 1 deletion(-)]
