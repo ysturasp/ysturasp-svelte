@@ -5,6 +5,7 @@ export interface Institute {
 
 export interface ScheduleData {
 	items: YSTUScheduleWeek[];
+	isSWCache?: boolean;
 }
 
 export interface YSTUScheduleWeek {

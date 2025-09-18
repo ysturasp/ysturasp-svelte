@@ -14,6 +14,7 @@
 	} from 'firebase/database';
 	import { browser } from '$app/environment';
 	import { database as defaultDatabase } from '$lib/config/firebase';
+	import { isOnline, offlineStore } from '$lib/stores/offline';
 
 	export let variant: 'desktop' | 'mobile' = 'desktop';
 	export let selectedDirectionLabel = '';
@@ -223,10 +224,22 @@
 		.join('\n')}`;
 </script>
 
-<div class="online-users-counter {variant}" data-groups={groupInfo}>
-	<div class="online-indicator"></div>
-	<span>{count}</span> онлайн
-</div>
+{#if $isOnline}
+	<div class="online-users-counter {variant}" data-groups={groupInfo}>
+		<div class="online-indicator"></div>
+		<span>{count}</span> онлайн
+	</div>
+{:else}
+	<div
+		class="online-users-counter {variant} offline"
+		on:click={() => offlineStore.openOfflineModal()}
+		role="button"
+		tabindex="0"
+	>
+		<div class="offline-indicator"></div>
+		<span>Офлайн</span>
+	</div>
+{/if}
 
 <style>
 	.online-users-counter {
@@ -244,7 +257,7 @@
 		position: relative;
 	}
 
-	.online-users-counter:hover::after {
+	.online-users-counter:not(.offline):hover::after {
 		content: 'Количество пользователей на сайте прямо сейчас';
 		position: absolute;
 		top: calc(100% + 8px);
@@ -281,7 +294,7 @@
 			visibility 0.2s ease;
 	}
 
-	.online-users-counter:hover::before {
+	.online-users-counter:not(.offline):hover::before {
 		opacity: 1;
 		visibility: visible;
 		transform: translateX(-50%) translateY(0);
@@ -322,6 +335,19 @@
 		background: #22c55e;
 		border-radius: 50%;
 		animation: pulse 2s infinite;
+	}
+
+	.offline-indicator {
+		width: 6px;
+		height: 6px;
+		background: #ef4444;
+		border-radius: 50%;
+		animation: pulse 2s infinite;
+	}
+
+	.offline {
+		border-color: rgba(239, 68, 68, 0.5);
+		cursor: pointer;
 	}
 
 	@keyframes pulse {
