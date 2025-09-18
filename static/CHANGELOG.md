@@ -1,3 +1,4 @@
+- add offline mode for cashe viewed page and schedule by api (ysturasp, 2025-09-18) [14 files changed, 977 insertions(+), 7 deletions(-)]
 - add mobile view with by days/by week for schedule audience YSPU (ysturasp, 2025-09-17) [4 files changed, 266 insertions(+), 35 deletions(-)]
 - add mobile view with by days/by week for schedule teachers YSPU (ysturasp, 2025-09-17) [4 files changed, 266 insertions(+), 35 deletions(-)]
 - add mobile view with by days/by week for schedule audience YSTU (ysturasp, 2025-09-17) [3 files changed, 274 insertions(+), 55 deletions(-)]

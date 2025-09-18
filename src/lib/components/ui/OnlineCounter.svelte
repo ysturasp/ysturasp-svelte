@@ -257,7 +257,7 @@
 		position: relative;
 	}
 
-	.online-users-counter:not(.offline):hover::after {
+	.online-users-counter:not(.offline):not([data-groups]):hover::after {
 		content: 'Количество пользователей на сайте прямо сейчас';
 		position: absolute;
 		top: calc(100% + 8px);
@@ -294,7 +294,7 @@
 			visibility 0.2s ease;
 	}
 
-	.online-users-counter:not(.offline):hover::before {
+	.online-users-counter:not(.offline):not([data-groups]):hover::before {
 		opacity: 1;
 		visibility: visible;
 		transform: translateX(-50%) translateY(0);
