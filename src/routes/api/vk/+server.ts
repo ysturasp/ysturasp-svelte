@@ -52,6 +52,24 @@ function getSemesterInfo(timestamp: number): SemesterInfo {
 
 async function getFolderContents(folderId: string): Promise<FileInfo[]> {
 	try {
+		const embedded = await fetch(`${API_URL}/embeddedfolderview?id=${folderId}#list`, {
+			headers: {
+				'User-Agent':
+					'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko)'
+			}
+		});
+		if (embedded.ok) {
+			const embeddedHtml = await embedded.text();
+			const files: FileInfo[] = [];
+			const reEmbedded =
+				/href=\"https:\/\/drive\.google\.com\/uc\?id=([A-Za-z0-9_-]+)&export=download\"[^>]*>([^<]+\.xlsx)/g;
+			let m1;
+			while ((m1 = reEmbedded.exec(embeddedHtml)) !== null) {
+				files.push({ id: m1[1], name: m1[2].replace(/\.xlsx$/, '') });
+			}
+			if (files.length > 0) return files;
+		}
+
 		const response = await fetch(`${API_URL}/drive/folders/${folderId}`, {
 			headers: {
 				'User-Agent':
@@ -69,16 +87,18 @@ async function getFolderContents(folderId: string): Promise<FileInfo[]> {
 		const html = await response.text();
 
 		const files: FileInfo[] = [];
-		const regex = /data-id="([^"]+)".*?KL4NAf.*?>([^<]+)\.xlsx/g;
-		let match;
-
-		while ((match = regex.exec(html)) !== null) {
-			files.push({
-				id: match[1],
-				name: match[2]
-			});
+		const reGeneral = /data-id=\"([^\"]+)\"[^>]*aria-label=\"([^\"]+?\.xlsx)\"/g;
+		let m2;
+		while ((m2 = reGeneral.exec(html)) !== null) {
+			files.push({ id: m2[1], name: m2[2].replace(/\.xlsx$/, '') });
 		}
+		if (files.length > 0) return files;
 
+		const reLegacy = /data-id=\"([^\"]+)\"[\s\S]*?>\s*([^<]+)\.xlsx/gi;
+		let m3;
+		while ((m3 = reLegacy.exec(html)) !== null) {
+			files.push({ id: m3[1], name: m3[2] });
+		}
 		return files;
 	} catch (error) {
 		console.error(`Ошибка при получении содержимого папки ${folderId}:`, error);
@@ -313,6 +333,30 @@ export async function GET() {
 				};
 			})
 		);
+
+		if (schedules.some((s) => s.directions.length === 0)) {
+			if (cache && Array.isArray(cache.data?.schedules)) {
+				const cachedSchedules: any[] = cache.data.schedules;
+				schedules.forEach((s) => {
+					if (s.directions.length === 0) {
+						const cachedMatch = cachedSchedules.find(
+							(cs) => cs.folderId === s.folderId
+						);
+						if (
+							cachedMatch &&
+							Array.isArray(cachedMatch.directions) &&
+							cachedMatch.directions.length > 0
+						) {
+							(s as any).directions = cachedMatch.directions;
+						}
+					}
+				});
+			}
+		}
+
+		if (schedules.some((s) => s.directions.length === 0)) {
+			throw new Error('Получены пустые направления, повторите получение через кэш');
+		}
 
 		const result = {
 			schedules,
