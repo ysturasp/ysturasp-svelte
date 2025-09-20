@@ -116,6 +116,11 @@
 		}
 	}
 
+	function clearAndClose() {
+		clearSelection();
+		closeDropdown();
+	}
+
 	onMount(() => {
 		overlay = document.createElement('div');
 		overlay.classList.add('ambient-overlay', 'hidden');
@@ -135,39 +140,96 @@
 </script>
 
 <form class="grid grid-cols-1 gap-2" on:submit|preventDefault={onSubmit}>
-	<div class="relative">
-		<input
-			bind:this={inputElement}
-			id="combobox-input"
-			type="text"
-			class={isLoading
-				? 'pulse-loading block w-full rounded-2xl border border-gray-600 bg-slate-900 p-2.5 text-gray-300 focus:border-blue-500 focus:ring-blue-500'
-				: 'block w-full rounded-2xl border border-gray-600 bg-slate-900 p-2.5 text-gray-300 focus:border-blue-500 focus:ring-blue-500'}
-			class:ambient-focuss={showOptions}
-			class:error={showErrorAnimation}
-			{placeholder}
-			bind:value={searchQuery}
-			on:focus={handleFocus}
-			autocomplete="off"
-			autocorrect="off"
-			autocapitalize="off"
-			disabled={isLoading}
-		/>
+	<div class="flex items-center gap-2">
+		<div class="relative flex-1">
+			<input
+				bind:this={inputElement}
+				id="combobox-input"
+				type="text"
+				class={isLoading
+					? 'pulse-loading block w-full rounded-2xl border border-gray-600 bg-slate-900 p-2.5 text-gray-300 focus:border-blue-500 focus:ring-blue-500'
+					: 'block w-full rounded-2xl border border-gray-600 bg-slate-900 p-2.5 text-gray-300 focus:border-blue-500 focus:ring-blue-500'}
+				class:ambient-focuss={showOptions}
+				class:error={showErrorAnimation}
+				{placeholder}
+				bind:value={searchQuery}
+				on:focus={handleFocus}
+				autocomplete="off"
+				autocorrect="off"
+				autocapitalize="off"
+				disabled={isLoading}
+			/>
 
-		{#if searchQuery.length > 0}
+			{#if searchQuery.length > 0}
+				<button
+					type="button"
+					class="clear-button"
+					on:click|stopPropagation={clearSelection}
+					aria-label="Очистить"
+				>
+					<svg
+						width="16"
+						height="16"
+						viewBox="0 0 22 22"
+						fill="none"
+						xmlns="http://www.w3.org/2000/svg"
+						class="clear-icon"
+					>
+						<path
+							d="M6 6L16 16M16 6L6 16"
+							stroke="currentColor"
+							stroke-width="2"
+							stroke-linecap="round"
+						/>
+					</svg>
+				</button>
+			{/if}
+
+			{#if showOptions}
+				<ul
+					id="combobox-options"
+					class="combobox-options absolute left-0 mt-2 w-full overflow-hidden rounded-2xl border border-gray-600 bg-slate-900 p-2"
+					style="width: calc(100% + 52px)"
+					class:active={showOptions}
+					class:ambient-focus={showOptions}
+					transition:scale={{
+						duration: 200,
+						opacity: 0,
+						start: 0.95,
+						easing: quintOut
+					}}
+				>
+					{#each filteredItems as item}
+						<li
+							class="cursor-pointer rounded-lg p-2 hover:bg-gray-700"
+							on:mousedown={() => selectItem(item)}
+							role="option"
+							aria-selected={item.id === selectedId}
+							tabindex="0"
+							on:keydown={(e) => {
+								if (e.key === 'Enter' || e.key === ' ') selectItem(item);
+							}}
+						>
+							{item.displayValue}
+						</li>
+					{/each}
+				</ul>
+			{/if}
+		</div>
+
+		{#if showOptions}
 			<button
 				type="button"
-				class="clear-button"
-				on:click|stopPropagation={clearSelection}
-				aria-label="Очистить"
+				class="close-circle-button"
+				on:click|stopPropagation={clearAndClose}
+				aria-label="Закрыть"
 			>
 				<svg
-					width="22"
-					height="22"
+					width="20"
+					height="20"
 					viewBox="0 0 22 22"
 					fill="none"
 					xmlns="http://www.w3.org/2000/svg"
-					class="clear-icon"
 				>
 					<path
 						d="M6 6L16 16M16 6L6 16"
@@ -177,36 +239,6 @@
 					/>
 				</svg>
 			</button>
-		{/if}
-
-		{#if showOptions}
-			<ul
-				id="combobox-options"
-				class="combobox-options absolute mt-1 w-full overflow-hidden rounded-2xl border border-gray-600 bg-slate-900 p-2"
-				class:active={showOptions}
-				class:ambient-focus={showOptions}
-				transition:scale={{
-					duration: 200,
-					opacity: 0,
-					start: 0.95,
-					easing: quintOut
-				}}
-			>
-				{#each filteredItems as item}
-					<li
-						class="cursor-pointer rounded-lg p-2 hover:bg-gray-700"
-						on:mousedown={() => selectItem(item)}
-						role="option"
-						aria-selected={item.id === selectedId}
-						tabindex="0"
-						on:keydown={(e) => {
-							if (e.key === 'Enter' || e.key === ' ') selectItem(item);
-						}}
-					>
-						{item.displayValue}
-					</li>
-				{/each}
-			</ul>
 		{/if}
 	</div>
 
@@ -303,7 +335,7 @@
 		border: none;
 		background: none;
 		color: #888;
-		font-size: 2rem;
+		font-size: 1rem;
 		cursor: pointer;
 		z-index: 65;
 		padding: 0;
@@ -344,6 +376,27 @@
 
 	.combobox-options li:hover {
 		background-color: #0072e461;
+	}
+
+	.close-circle-button {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 44px;
+		height: 44px;
+		border-radius: 9999px;
+		border: 1px solid #475569;
+		background: #0f172a;
+		color: #888;
+		cursor: pointer;
+		transition: all 0.2s ease-in-out;
+		z-index: 65;
+	}
+
+	.close-circle-button:hover {
+		color: #ef4444;
+		background: #0b1220;
+		box-shadow: 0 0 8px rgba(59, 130, 246, 0.25);
 	}
 
 	@keyframes pulse-loading {

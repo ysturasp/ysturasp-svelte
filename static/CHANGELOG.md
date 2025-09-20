@@ -1,3 +1,4 @@
+- improve google drive folder parsing and prevent empty directions in schedule (ysturasp, 2025-09-19) [3 files changed, 54 insertions(+), 8 deletions(-)]
 - fix view groups online for css selector (ysturasp, 2025-09-18) [3 files changed, 4 insertions(+), 2 deletions(-)]
 - add offline mode for cashe viewed page and schedule by api (ysturasp, 2025-09-18) [14 files changed, 977 insertions(+), 7 deletions(-)]
 - add mobile view with by days/by week for schedule audience YSPU (ysturasp, 2025-09-17) [4 files changed, 266 insertions(+), 35 deletions(-)]
