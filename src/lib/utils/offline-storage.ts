@@ -56,9 +56,21 @@ export function getOfflineData<T = any>(key: string): T | null {
 
 		try {
 			parsedData = JSON.parse(storedData);
-		} catch {
-			const decompressed = decompressString(storedData);
-			parsedData = JSON.parse(decompressed);
+		} catch (parseError) {
+			try {
+				const decompressed = decompressString(storedData);
+				parsedData = JSON.parse(decompressed);
+			} catch (decompressError) {
+				console.warn(`Corrupted data in localStorage for key: ${key}, removing...`);
+				removeOfflineData(key);
+				return null;
+			}
+		}
+
+		if (!parsedData || typeof parsedData !== 'object') {
+			console.warn(`Invalid data structure for key: ${key}, removing...`);
+			removeOfflineData(key);
+			return null;
 		}
 
 		if (parsedData.expiry && Date.now() - parsedData.timestamp > parsedData.expiry) {
@@ -68,7 +80,7 @@ export function getOfflineData<T = any>(key: string): T | null {
 
 		return parsedData.data as T;
 	} catch (error) {
-		console.error('Failed to retrieve offline data:', error);
+		console.warn(`Failed to retrieve offline data for key: ${key}:`, error);
 		removeOfflineData(key);
 		return null;
 	}
@@ -185,6 +197,28 @@ export function cleanupExpiredData(): number {
 	return cleaned;
 }
 
+export function cleanupCorruptedData(): number {
+	if (!browser) return 0;
+
+	let cleaned = 0;
+	const keys = getAllOfflineDataKeys();
+
+	keys.forEach((key) => {
+		try {
+			const data = getOfflineData(key);
+			if (data === null) {
+				cleaned++;
+			}
+		} catch (error) {
+			console.warn(`Removing corrupted data for key: ${key}`);
+			removeOfflineData(key);
+			cleaned++;
+		}
+	});
+
+	return cleaned;
+}
+
 function compressString(str: string): string {
 	let compressed = '';
 	let count = 1;
@@ -234,7 +268,12 @@ export function storeScheduleData(groupOrDirection: string, data: any): boolean 
 }
 
 export function getCachedScheduleData<T = any>(groupOrDirection: string): T | null {
-	return getOfflineData<T>(`schedule_${groupOrDirection}`);
+	try {
+		return getOfflineData<T>(`schedule_${groupOrDirection}`);
+	} catch (error) {
+		console.warn(`Failed to get cached schedule data for ${groupOrDirection}:`, error);
+		return null;
+	}
 }
 
 export function storeInstitutesData(data: any): boolean {
@@ -245,7 +284,12 @@ export function storeInstitutesData(data: any): boolean {
 }
 
 export function getCachedInstitutesData<T = any>(): T | null {
-	return getOfflineData<T>('institutes');
+	try {
+		return getOfflineData<T>('institutes');
+	} catch (error) {
+		console.warn('Failed to get cached institutes data:', error);
+		return null;
+	}
 }
 
 export function storeTeachersData(data: any): boolean {
