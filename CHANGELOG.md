@@ -1,3 +1,4 @@
+- add service worker cache fallback when API fails (ysturasp, 2025-09-21) [4 files changed, 138 insertions(+), 7 deletions(-)]
 - add close button to combobox and extend dropdown width (ysturasp, 2025-09-20) [4 files changed, 224 insertions(+), 116 deletions(-)]
 - improve google drive folder parsing and prevent empty directions in schedule (ysturasp, 2025-09-19) [3 files changed, 54 insertions(+), 8 deletions(-)]
 - fix view groups online for css selector (ysturasp, 2025-09-18) [3 files changed, 4 insertions(+), 2 deletions(-)]
