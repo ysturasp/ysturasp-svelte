@@ -4,10 +4,67 @@ import {
 	storeInstitutesData,
 	getCachedInstitutesData,
 	storeScheduleData,
-	getCachedScheduleData
+	getCachedScheduleData,
+	cleanupCorruptedData
 } from '$lib/utils/offline-storage';
+import { browser } from '$app/environment';
 
 const API_URL = '/api/vk';
+
+async function getFromServiceWorkerCache(url: string): Promise<any | null> {
+	if (!browser || !('caches' in window)) {
+		console.log('Service worker cache not available');
+		return null;
+	}
+
+	try {
+		const cacheNames = await caches.keys();
+		console.log('Available caches:', cacheNames);
+
+		const apiCacheName = cacheNames.find(
+			(name) => name.includes('ysturasp') && name.includes('api')
+		);
+		if (!apiCacheName) {
+			console.log('No API cache found');
+			return null;
+		}
+
+		console.log('Using cache:', apiCacheName);
+		const cache = await caches.open(apiCacheName);
+		const response = await cache.match(url);
+
+		if (response) {
+			console.log('Found cached response for:', url);
+			return await response.json();
+		} else {
+			console.log('No cached response found for:', url);
+		}
+	} catch (error) {
+		console.error('Error getting from service worker cache:', error);
+	}
+
+	return null;
+}
+
+async function getFromServiceWorkerViaFetch(url: string): Promise<any | null> {
+	if (!browser) return null;
+
+	try {
+		const response = await fetch(url, {
+			cache: 'force-cache',
+			mode: 'cors'
+		});
+
+		if (response.ok) {
+			console.log('Got response from service worker via fetch for:', url);
+			return await response.json();
+		}
+	} catch (error) {
+		console.log('Service worker fetch failed for:', url, error);
+	}
+
+	return null;
+}
 
 export interface DirectionsResponse {
 	schedules: Array<{
@@ -21,6 +78,7 @@ export interface DirectionsResponse {
 }
 
 export async function getDirections(): Promise<DirectionsResponse> {
+	cleanupCorruptedData();
 	const cached = getCachedInstitutesData<DirectionsResponse>();
 
 	try {
@@ -38,11 +96,25 @@ export async function getDirections(): Promise<DirectionsResponse> {
 			return cached;
 		}
 
+		const swCached = await getFromServiceWorkerCache(API_URL);
+		if (swCached) {
+			console.log('Using service worker cached directions data');
+			return swCached as DirectionsResponse;
+		}
+
+		const swFetchCached = await getFromServiceWorkerViaFetch(API_URL);
+		if (swFetchCached) {
+			console.log('Using service worker fetch cached directions data');
+			return swFetchCached as DirectionsResponse;
+		}
+
+		console.error('No cached data available for directions');
 		throw error;
 	}
 }
 
 export async function getSchedule(directionId: string, semesterId?: string): Promise<ScheduleData> {
+	cleanupCorruptedData();
 	const cacheKey = semesterId ? `${directionId}_${semesterId}` : directionId;
 	const cached = getCachedScheduleData<ScheduleData>(cacheKey);
 
@@ -51,9 +123,8 @@ export async function getSchedule(directionId: string, semesterId?: string): Pro
 		if (semesterId) {
 			params.append('semester', semesterId);
 		}
-		const response = await fetch(
-			`${API_URL}/schedule/${directionId}${params.toString() ? `?${params}` : ''}`
-		);
+		const url = `${API_URL}/schedule/${directionId}${params.toString() ? `?${params}` : ''}`;
+		const response = await fetch(url);
 		const data = await response.json();
 
 		storeScheduleData(cacheKey, data);
@@ -64,9 +135,31 @@ export async function getSchedule(directionId: string, semesterId?: string): Pro
 
 		if (cached) {
 			console.log('Using cached schedule data for direction:', directionId);
-			return { ...cached, isCache: true };
+			return { ...cached, isSWCache: true } as ScheduleData;
 		}
 
+		const params = new URLSearchParams();
+		if (semesterId) {
+			params.append('semester', semesterId);
+		}
+		const url = `${API_URL}/schedule/${directionId}${params.toString() ? `?${params}` : ''}`;
+
+		const swCached = await getFromServiceWorkerCache(url);
+		if (swCached) {
+			console.log('Using service worker cached schedule data for direction:', directionId);
+			return { ...swCached, isSWCache: true } as ScheduleData;
+		}
+
+		const swFetchCached = await getFromServiceWorkerViaFetch(url);
+		if (swFetchCached) {
+			console.log(
+				'Using service worker fetch cached schedule data for direction:',
+				directionId
+			);
+			return { ...swFetchCached, isSWCache: true } as ScheduleData;
+		}
+
+		console.error('No cached data available for schedule direction:', directionId);
 		throw error;
 	}
 }
