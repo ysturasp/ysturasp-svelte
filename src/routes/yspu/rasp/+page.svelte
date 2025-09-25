@@ -68,6 +68,8 @@
 	let isLinearModalOpen = false;
 	let selectedLesson: YSTULesson | null = null;
 	let selectedLessonDate = '';
+	let lastLoadedDirection = '';
+	let lastLoadedSemester = '';
 
 	const storage = {
 		get: (key: string, defaultValue: string = '') => {
@@ -166,9 +168,18 @@
 	async function loadSchedule() {
 		if (!selectedDirection || !selectedSemester) return;
 
+		const currentDirection = selectedDirection;
+		const currentSemester = selectedSemester.folderId;
+
+		if (lastLoadedDirection === currentDirection && lastLoadedSemester === currentSemester) {
+			return;
+		}
+
 		try {
 			isScheduleLoading = true;
 			wasLoadAttempted = true;
+			lastLoadedDirection = currentDirection;
+			lastLoadedSemester = currentSemester;
 
 			const params = new URLSearchParams();
 			if (selectedDirection) params.set('direction', selectedDirection);
@@ -214,6 +225,8 @@
 		selectedGroup = '';
 		scheduleData = null;
 		groupNumbersMap = {};
+		lastLoadedDirection = '';
+		lastLoadedSemester = '';
 
 		const params = new URLSearchParams(window.location.search);
 		if (selectedDirection) {
@@ -375,6 +388,8 @@
 		try {
 			isScheduleLoading = true;
 			selectedSemester = semester;
+			lastLoadedDirection = '';
+			lastLoadedSemester = '';
 			storage.set('lastYspuSemester', semester.folderId);
 
 			const params = new URLSearchParams(window.location.search);
