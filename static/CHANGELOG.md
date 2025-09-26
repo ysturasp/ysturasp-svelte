@@ -1,3 +1,4 @@
+- fix prevent duplicate API requests for same parameters (ysturasp, 2025-09-25) [3 files changed, 17 insertions(+)]
 - add service worker cache fallback when API fails for student schedule yspu (ysturasp, 2025-09-25) [3 files changed, 100 insertions(+), 5 deletions(-)]
 - add offline detection and custom error page styling (ysturasp, 2025-09-24) [3 files changed, 81 insertions(+), 8 deletions(-)]
 - add service worker cache fallback for audience schedule APIs (ysturasp, 2025-09-23) [3 files changed, 124 insertions(+)]
