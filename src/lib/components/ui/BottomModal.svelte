@@ -10,22 +10,16 @@
 	export let checkCanClose: (() => boolean) | undefined = undefined;
 
 	let modalContent: HTMLElement;
-	let originalBodyPosition: string;
-	let originalBodyTop: string;
-	let originalBodyWidth: string;
-	let scrollPosition = 0;
+	let overlay: HTMLElement;
+	let isClosing = false;
+	let shouldRender = false;
 
-	function handleClickOutside(event: MouseEvent) {
-		if (isOpen && modalContent && !modalContent.contains(event.target as Node)) {
-			const target = event.target as Element;
-			if (target.closest('#notifications-container') || target.closest('.notification')) {
-				return;
-			}
-
+	function handleOverlayClick(event: MouseEvent) {
+		if (event.target === overlay) {
 			if (checkCanClose && !checkCanClose()) {
 				return;
 			}
-			onClose();
+			closeModal();
 		}
 	}
 
@@ -34,96 +28,238 @@
 			if (checkCanClose && !checkCanClose()) {
 				return;
 			}
+			closeModal();
+		}
+	}
+
+	function closeModal() {
+		if (!isClosing && shouldRender) {
+			isClosing = true;
+		}
+	}
+
+	function handleAnimationEnd() {
+		if (isClosing) {
+			shouldRender = false;
+			isClosing = false;
 			onClose();
+		}
+	}
+
+	$: {
+		if (isOpen && !shouldRender) {
+			shouldRender = true;
+			isClosing = false;
+		} else if (!isOpen && shouldRender && !isClosing) {
+			closeModal();
 		}
 	}
 
 	onMount(() => {
 		if (browser) {
-			document.addEventListener('mousedown', handleClickOutside);
 			document.addEventListener('keydown', handleKeydown);
 		}
 	});
 
-	$: if (browser) {
-		if (isOpen) {
-			scrollPosition = window.scrollY;
-			originalBodyPosition = document.body.style.position;
-			originalBodyTop = document.body.style.top;
-			originalBodyWidth = document.body.style.width;
-
-			const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
-			document.body.style.width = '100%';
-			document.body.style.position = 'fixed';
-			document.body.style.top = `-${scrollPosition}px`;
-		} else {
-			document.body.style.position = '';
-			document.body.style.top = '';
-			document.body.style.width = '';
-			if (scrollPosition) window.scrollTo(0, scrollPosition);
-		}
-	}
-
 	onDestroy(() => {
 		if (browser) {
-			document.removeEventListener('mousedown', handleClickOutside);
 			document.removeEventListener('keydown', handleKeydown);
-			if (isOpen) {
-				document.body.style.position = '';
-				document.body.style.top = '';
-				document.body.style.width = '';
-				if (scrollPosition) window.scrollTo(0, scrollPosition);
-			}
 		}
 	});
 </script>
 
-<div
-	class="modal-portal fixed inset-0 z-101 bg-black/50 transition-opacity duration-300"
-	class:opacity-0={!isOpen}
-	class:opacity-100={isOpen}
-	class:pointer-events-none={!isOpen}
->
+{#if shouldRender}
 	<div
-		class="fixed inset-x-0 bottom-0 transform px-4 transition-transform duration-300 ease-in-out md:px-0"
-		class:translate-y-full={!isOpen}
-		class:translate-y-0={isOpen}
+		bind:this={overlay}
+		class="overlay {isClosing ? 'hide-overlay' : 'show-overlay'}"
+		on:click={handleOverlayClick}
+		role="presentation"
+	></div>
+
+	<div
+		class="dialog {isClosing ? 'hide' : 'show'}"
+		bind:this={modalContent}
+		on:animationend={handleAnimationEnd}
 	>
-		<div
-			bind:this={modalContent}
-			class="mx-auto flex w-full max-w-lg flex-col rounded-t-2xl bg-slate-900 shadow-xl ring-1 ring-blue-500/50"
-			style="max-height: calc(100vh - 5rem);"
-		>
-			<div class="flex flex-col p-4 pb-2">
-				<div class="flex items-center justify-between">
-					<h3 class="text-xl font-bold text-white">{title}</h3>
-					<button
-						on:click={onClose}
-						class="text-gray-400 hover:text-white"
-						aria-label="Закрыть"
-					>
-						<svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M6 18L18 6M6 6l12 12"
-							></path>
-						</svg>
-					</button>
-				</div>
-				{#if subtitle}
-					<div class="text-sm {subtitleClass}">{subtitle}</div>
-				{/if}
+		<div class="dialog-header">
+			<div class="dialog-title-section">
+				<h3 class="dialog-title">{title}</h3>
+				<button on:click={closeModal} class="dialog-close-btn" aria-label="Закрыть">
+					<svg class="close-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M6 18L18 6M6 6l12 12"
+						></path>
+					</svg>
+				</button>
 			</div>
-			<div class="flex-1 overflow-y-auto px-4">
-				<div class="text-gray-300">
-					<slot />
-				</div>
-			</div>
-			<div class="p-4">
-				<slot name="footer" />
-			</div>
+			{#if subtitle}
+				<div class="dialog-subtitle {subtitleClass}">{subtitle}</div>
+			{/if}
+		</div>
+		<div class="dialog-content">
+			<slot />
+		</div>
+		<div class="dialog-footer">
+			<slot name="footer" />
 		</div>
 	</div>
-</div>
+{/if}
+
+<style>
+	.overlay {
+		position: fixed;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		width: 100vw;
+		height: 100vh;
+		min-height: 100dvh;
+		background: rgba(0, 0, 0, 0.5);
+		box-sizing: border-box;
+		z-index: 101;
+		-webkit-transform: translateZ(0);
+		transform: translateZ(0);
+		-webkit-backface-visibility: hidden;
+		backface-visibility: hidden;
+		padding-top: env(safe-area-inset-top);
+		padding-bottom: env(safe-area-inset-bottom);
+		margin-top: calc(-1 * env(safe-area-inset-top));
+		margin-bottom: calc(-1 * env(safe-area-inset-bottom));
+	}
+
+	.dialog {
+		position: fixed;
+		inset: 0;
+		width: 95vw;
+		height: auto;
+		max-width: 600px;
+		max-height: 85vh;
+		min-height: 400px;
+		background: rgb(15 23 42);
+		border-radius: 16px;
+		box-shadow:
+			0 25px 50px -12px rgba(0, 0, 0, 0.5),
+			0 0 0 1px rgba(59, 130, 246, 0.5);
+		z-index: 102;
+		margin: auto;
+		display: flex;
+		flex-direction: column;
+		min-width: 320px;
+	}
+
+	.dialog-header {
+		display: flex;
+		flex-direction: column;
+		padding: 16px;
+		padding-bottom: 8px;
+	}
+
+	.dialog-title-section {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+	}
+
+	.dialog-title {
+		font-size: 1.25rem;
+		font-weight: 700;
+		color: white;
+		margin: 0;
+	}
+
+	.dialog-close-btn {
+		color: rgb(156 163 175);
+		background: none;
+		border: none;
+		cursor: pointer;
+		padding: 4px;
+		border-radius: 4px;
+		transition: color 0.2s;
+	}
+
+	.dialog-close-btn:hover {
+		color: white;
+	}
+
+	.close-icon {
+		width: 24px;
+		height: 24px;
+	}
+
+	.dialog-subtitle {
+		font-size: 0.875rem;
+		margin-top: 4px;
+	}
+
+	.dialog-content {
+		flex: 1;
+		overflow-y: auto;
+		padding: 16px;
+		min-height: 250px;
+		color: rgb(209 213 219);
+	}
+
+	.dialog-footer {
+		padding: 16px;
+	}
+
+	.show-overlay {
+		animation: fadeIn 0.5s linear forwards;
+	}
+
+	.hide-overlay {
+		animation: fadeOut 0.25s linear forwards;
+	}
+
+	.show {
+		animation: modalFadeInScale 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55) forwards;
+	}
+
+	.hide {
+		animation: modalFadeOutScale 0.25s ease-out forwards;
+	}
+
+	@keyframes fadeIn {
+		from {
+			opacity: 0;
+		}
+		to {
+			opacity: 1;
+		}
+	}
+
+	@keyframes fadeOut {
+		from {
+			opacity: 1;
+		}
+		to {
+			opacity: 0;
+		}
+	}
+
+	@keyframes modalFadeInScale {
+		0% {
+			transform: translateY(-30%) scale(0.8);
+			opacity: 0;
+		}
+		100% {
+			transform: translateY(0) scale(1);
+			opacity: 1;
+		}
+	}
+
+	@keyframes modalFadeOutScale {
+		0% {
+			transform: translateY(0) scale(1);
+			opacity: 1;
+		}
+		100% {
+			transform: translateY(-30%) scale(0.8);
+			opacity: 0;
+		}
+	}
+</style>
