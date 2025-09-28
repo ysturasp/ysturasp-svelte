@@ -1,3 +1,4 @@
+- update BottomModal with sibling architecture and smooth animations for +- normal work on iOS 26 (ysturasp, 2025-09-27) [3 files changed, 221 insertions(+), 83 deletions(-)]
 - add calendar export functionality with ical export and small update design buttons (ysturasp, 2025-09-26) [5 files changed, 156 insertions(+), 33 deletions(-)]
 - fix prevent duplicate API requests for same parameters (ysturasp, 2025-09-25) [3 files changed, 17 insertions(+)]
 - add service worker cache fallback when API fails for student schedule yspu (ysturasp, 2025-09-25) [3 files changed, 100 insertions(+), 5 deletions(-)]

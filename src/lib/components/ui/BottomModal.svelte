@@ -243,7 +243,7 @@
 
 	@keyframes modalFadeInScale {
 		0% {
-			transform: translateY(-30%) scale(0.8);
+			transform: translateY(30%) scale(0.8);
 			opacity: 0;
 		}
 		100% {
@@ -258,7 +258,7 @@
 			opacity: 1;
 		}
 		100% {
-			transform: translateY(-30%) scale(0.8);
+			transform: translateY(30%) scale(0.8);
 			opacity: 0;
 		}
 	}
