@@ -7,7 +7,7 @@
 	import Header from '$lib/components/layout/Header.svelte';
 	import Footer from '$lib/components/layout/Footer.svelte';
 	import NotificationsContainer from '$lib/components/notifications/NotificationsContainer.svelte';
-	import LoadingOverlay from '$lib/components/loading/LoadingOverlay.svelte';
+	import ScheduleLoadingSkeleton from '$lib/components/loading/ScheduleLoadingSkeleton.svelte';
 	import ScheduleTitle from '$lib/components/schedule/ScheduleTitle.svelte';
 	import OnlineCounter from '$lib/components/ui/OnlineCounter.svelte';
 	import YSTUScheduleDay from './components/YSTUScheduleDay.svelte';
@@ -568,7 +568,7 @@
 				{selectedSemester}
 			/>
 
-			{#if scheduleData}
+			{#if scheduleData && !isScheduleLoading}
 				<div class="mt-4">
 					<div class="mb-2 flex justify-center md:items-center">
 						<button
@@ -709,6 +709,14 @@
 						{/each}
 					{/if}
 				</div>
+			{:else if isScheduleLoading && selectedGroup}
+				<div class="mt-4">
+					<ScheduleLoadingSkeleton
+						{isFullView}
+						isMobile={$isMobile}
+						daysCount={filteredDays.length || 5}
+					/>
+				</div>
 			{/if}
 
 			<HiddenSubjects {selectedGroup} />
@@ -716,7 +724,7 @@
 
 		<FormatDocumentPromo />
 
-		{#if scheduleData && selectedSemester && Object.keys(currentTeacherSubgroups).length > 0 && currentSettings.showSubgroups}
+		{#if scheduleData && selectedSemester && Object.keys(currentTeacherSubgroups).length > 0 && currentSettings.showSubgroups && !isScheduleLoading}
 			<section class="mt-4 rounded-2xl bg-slate-800 p-4 sm:p-6">
 				<SubgroupsStatistics
 					teacherSubgroups={currentTeacherSubgroups}
@@ -724,15 +732,41 @@
 					{selectedSemester}
 				/>
 			</section>
+		{:else if isScheduleLoading && selectedGroup && currentSettings.showSubgroups}
+			<section class="mt-4 rounded-2xl bg-slate-800 p-4 sm:p-6">
+				<div class="space-y-4">
+					<div class="flex items-center justify-between">
+						<div class="h-8 w-64 animate-pulse rounded bg-slate-700"></div>
+						<div class="h-10 w-40 animate-pulse rounded bg-slate-700"></div>
+					</div>
+					<div class="grid grid-cols-1 gap-4">
+						{#each Array(3) as _}
+							<div class="h-48 animate-pulse rounded-2xl bg-slate-700"></div>
+						{/each}
+					</div>
+				</div>
+			</section>
 		{/if}
 
-		{#if scheduleData && selectedSemester && currentSettings.showWorkload}
+		{#if scheduleData && selectedSemester && currentSettings.showWorkload && !isScheduleLoading}
 			<section class="mt-4 rounded-2xl bg-slate-800 p-4 sm:p-6">
 				<WorkloadStatistics
 					{scheduleData}
 					{selectedSemester}
 					institute={selectedInstitute}
 				/>
+			</section>
+		{:else if isScheduleLoading && selectedGroup && currentSettings.showWorkload}
+			<section class="mt-4 rounded-2xl bg-slate-800 p-4 sm:p-6">
+				<div class="space-y-4">
+					<div class="h-8 w-48 animate-pulse rounded bg-slate-700"></div>
+					<div class="h-6 w-80 animate-pulse rounded bg-slate-700"></div>
+					<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+						{#each Array(6) as _}
+							<div class="h-64 animate-pulse rounded-lg bg-slate-700"></div>
+						{/each}
+					</div>
+				</div>
 			</section>
 		{/if}
 
@@ -754,10 +788,6 @@
 />
 
 <ScheduleSwitcher {selectedSemester} onSemesterChange={changeSemester} currentPage="students" />
-
-{#if isScheduleLoading && !isViewChanging}
-	<LoadingOverlay />
-{/if}
 
 {#if selectedLesson}
 	<LinearIntegrationModal
