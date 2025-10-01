@@ -4,7 +4,7 @@
 	import PageLayout from '$lib/components/layout/PageLayout.svelte';
 	import Header from '$lib/components/layout/Header.svelte';
 	import Footer from '$lib/components/layout/Footer.svelte';
-	import LoadingOverlay from '$lib/components/loading/LoadingOverlay.svelte';
+	import ScheduleLoadingSkeleton from '$lib/components/loading/ScheduleLoadingSkeleton.svelte';
 	import NotificationsContainer from '$lib/components/notifications/NotificationsContainer.svelte';
 	import TeacherScheduleForm from './components/TeacherScheduleForm.svelte';
 	import TeacherScheduleDay from './components/TeacherScheduleDay.svelte';
@@ -370,7 +370,7 @@
 				copyButtonText="Скопировать ссылку на расписание"
 			/>
 
-			{#if scheduleData && selectedTeacher}
+			{#if scheduleData && selectedTeacher && !isScheduleLoading}
 				<div class="mt-4">
 					<div class="mb-2 flex justify-center md:items-center">
 						<button
@@ -507,6 +507,14 @@
 						</div>
 					{/if}
 				</div>
+			{:else if isScheduleLoading && selectedTeacher}
+				<div class="mt-4">
+					<ScheduleLoadingSkeleton
+						{isFullView}
+						isMobile={$isMobile}
+						daysCount={daysWithLessons.length || 5}
+					/>
+				</div>
 			{/if}
 		</section>
 
@@ -520,10 +528,6 @@
 </PageLayout>
 
 <ScheduleSwitcher {selectedSemester} onSemesterChange={changeSemester} currentPage="teachers" />
-
-{#if isScheduleLoading}
-	<LoadingOverlay />
-{/if}
 
 <style>
 	:global(.grid) {

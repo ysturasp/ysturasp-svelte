@@ -4,6 +4,7 @@
 	export let isFullView = false;
 	export let isMobile = false;
 	export let daysCount = 5;
+	export let showSubgroups = false;
 </script>
 
 <div class="mt-4" in:fade={{ duration: 300 }} out:fade={{ duration: 300 }}>
@@ -21,17 +22,19 @@
 			>
 				<div class="mx-auto mb-2 h-12 w-48 rounded bg-slate-600 md:h-7 md:w-139"></div>
 
-				<div class="mb-2 flex items-center justify-center gap-2">
+				<div class="{showSubgroups ? 'mb-2' : 'mb-1'} flex items-center justify-center gap-2">
 					<div class="h-4 w-16 rounded bg-slate-600 md:w-18"></div>
 					<div class="h-2 w-2 rounded-full bg-slate-600"></div>
 					<div class="h-4 w-20 rounded bg-slate-600 md:w-24"></div>
 					<div class="h-4 w-4 rounded bg-slate-600"></div>
 				</div>
 
-				<div class="mt-2 flex items-center justify-center gap-1">
-					<div class="h-4 w-4 rounded bg-slate-600"></div>
-					<div class="h-4 w-32 rounded bg-slate-600"></div>
-				</div>
+				{#if showSubgroups}
+					<div class="mt-2 flex items-center justify-center gap-1">
+						<div class="h-4 w-4 rounded bg-slate-600"></div>
+						<div class="h-4 w-32 rounded bg-slate-600"></div>
+					</div>
+				{/if}
 			</div>
 		</div>
 
@@ -50,7 +53,9 @@
 			</div>
 			<div class="h-4 w-20 animate-pulse rounded bg-slate-700"></div>
 		</div>
+	{/if}
 
+	{#if isMobile}
 		<div class="relative">
 			{#if !isFullView}
 				<div class="w-full">

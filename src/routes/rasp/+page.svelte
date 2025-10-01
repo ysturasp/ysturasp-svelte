@@ -715,6 +715,7 @@
 						{isFullView}
 						isMobile={$isMobile}
 						daysCount={filteredDays.length || 5}
+						showSubgroups={true}
 					/>
 				</div>
 			{/if}
