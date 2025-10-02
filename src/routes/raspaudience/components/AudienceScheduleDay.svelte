@@ -65,51 +65,57 @@
 	}
 </script>
 
-<div class="mb-4 rounded-2xl bg-slate-900 p-4 last:mb-0">
-	<h3 class="mb-2 text-2xl font-semibold text-white">
-		{dayName} ({formatDate(date)})
-	</h3>
+<div class="mt-3">
+	<div class="mb-4 rounded-2xl bg-slate-900 p-4 last:mb-0">
+		<h3 class="mb-2 text-2xl font-semibold text-white">
+			{dayName} ({formatDate(date)})
+		</h3>
 
-	{#each lessons as lesson, index}
-		{@const typeInfo = getLessonTypeInfo(lesson.type)}
-		<div class="rounded-2xl bg-slate-800 p-4 {index !== lessons.length - 1 ? 'mb-2' : ''} flex">
+		{#each lessons as lesson, index}
+			{@const typeInfo = getLessonTypeInfo(lesson.type)}
 			<div
-				class="mr-2 flex w-14 flex-col items-end justify-between border-r-2 py-2 pr-2 {typeInfo.color}"
+				class="rounded-2xl bg-slate-800 p-4 {index !== lessons.length - 1
+					? 'mb-2'
+					: ''} flex"
 			>
-				{#if lesson.timeRange}
-					{@const [startTime, endTime] = lesson.timeRange.split('-')}
-					<span class="text-sm font-bold">{startTime?.trim()}</span>
-					<span class="text-sm font-bold">{endTime?.trim()}</span>
-				{:else}
-					<div class="flex h-full w-full items-center justify-center">
-						<span class="text-2xl">❓</span>
-					</div>
-				{/if}
+				<div
+					class="mr-2 flex w-14 flex-col items-end justify-between border-r-2 py-2 pr-2 {typeInfo.color}"
+				>
+					{#if lesson.timeRange}
+						{@const [startTime, endTime] = lesson.timeRange.split('-')}
+						<span class="text-sm font-bold">{startTime?.trim()}</span>
+						<span class="text-sm font-bold">{endTime?.trim()}</span>
+					{:else}
+						<div class="flex h-full w-full items-center justify-center">
+							<span class="text-2xl">❓</span>
+						</div>
+					{/if}
+				</div>
+
+				<div class="flex-grow">
+					<p class="text-lg font-bold text-white">{lesson.lessonName}</p>
+					<p class="text-sm {typeInfo.text}">{typeInfo.label}</p>
+
+					{#if lesson.isDistant}
+						<p class="text-sm text-red-500">Дистанционно</p>
+					{/if}
+
+					{#if lesson.teacherName}
+						<p class="text-sm text-slate-400">
+							<a
+								href="/raspprep?id={lesson.teacherId}"
+								class="transition-all hover:text-blue-400"
+							>
+								{lesson.teacherName}
+							</a>
+						</p>
+					{/if}
+
+					{#if lesson.groups && lesson.groups.length > 0}
+						<p class="text-sm text-gray-400">{lesson.groups.join(', ')}</p>
+					{/if}
+				</div>
 			</div>
-
-			<div class="flex-grow">
-				<p class="text-lg font-bold text-white">{lesson.lessonName}</p>
-				<p class="text-sm {typeInfo.text}">{typeInfo.label}</p>
-
-				{#if lesson.isDistant}
-					<p class="text-sm text-red-500">Дистанционно</p>
-				{/if}
-
-				{#if lesson.teacherName}
-					<p class="text-sm text-slate-400">
-						<a
-							href="/raspprep?id={lesson.teacherId}"
-							class="transition-all hover:text-blue-400"
-						>
-							{lesson.teacherName}
-						</a>
-					</p>
-				{/if}
-
-				{#if lesson.groups && lesson.groups.length > 0}
-					<p class="text-sm text-gray-400">{lesson.groups.join(', ')}</p>
-				{/if}
-			</div>
-		</div>
-	{/each}
+		{/each}
+	</div>
 </div>
