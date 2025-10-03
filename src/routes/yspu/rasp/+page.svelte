@@ -784,6 +784,7 @@
 						isMobile={$isMobile}
 						daysCount={daysWithLessons.length || 7}
 						showViewModeToggle={true}
+						showWeekSwitcher={false}
 					/>
 				</div>
 			{:else if selectedDirection && selectedGroup && wasLoadAttempted && !isScheduleLoading}

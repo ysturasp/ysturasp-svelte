@@ -6,15 +6,18 @@
 	export let daysCount = 5;
 	export let showSubgroups = false;
 	export let showViewModeToggle = false;
+	export let showWeekSwitcher = true;
 </script>
 
 <div class="mt-4" in:fade={{ duration: 300 }} out:fade={{ duration: 300 }}>
 	<div class="mb-2 flex justify-center md:items-center">
-		<div
-			class="mr-2 flex w-12 animate-pulse items-center justify-center self-stretch rounded-lg bg-slate-700 md:h-12 md:self-auto"
-		>
-			<div class="text-2xl opacity-50 md:text-3xl">👈</div>
-		</div>
+		{#if showWeekSwitcher}
+			<div
+				class="mr-2 flex w-12 animate-pulse items-center justify-center self-stretch rounded-lg bg-slate-700 md:h-12 md:self-auto"
+			>
+				<div class="text-2xl opacity-50 md:text-3xl">👈</div>
+			</div>
+		{/if}
 
 		<div class="flex flex-col justify-center md:items-center">
 			<div
@@ -41,11 +44,13 @@
 			</div>
 		</div>
 
-		<div
-			class="ml-2 flex w-12 animate-pulse items-center justify-center self-stretch rounded-lg bg-slate-700 md:h-12 md:self-auto"
-		>
-			<div class="text-2xl opacity-50 md:text-3xl">👉</div>
-		</div>
+		{#if showWeekSwitcher}
+			<div
+				class="ml-2 flex w-12 animate-pulse items-center justify-center self-stretch rounded-lg bg-slate-700 md:h-12 md:self-auto"
+			>
+				<div class="text-2xl opacity-50 md:text-3xl">👉</div>
+			</div>
+		{/if}
 	</div>
 
 	{#if showViewModeToggle}
