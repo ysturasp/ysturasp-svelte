@@ -166,7 +166,7 @@
 			</div>
 		</div>
 
-		{#if currentPage === 'students' && university === 'ystu'}
+		{#if currentPage === 'students'}
 			<div class="rounded-lg bg-slate-800 p-4">
 				<h3 class="mb-2 text-lg font-semibold text-white">Linear</h3>
 				<div class="space-y-2">

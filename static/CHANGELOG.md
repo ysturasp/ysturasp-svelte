@@ -1,3 +1,4 @@
+- replace LoadingOverlay on ScheduleLoadingSkeleton in yspu student schedule (ysturasp, 2025-10-03) [5 files changed, 26 insertions(+), 3 deletions(-)]
 - renaming all ystuRASP --> ysturasp (ysturasp, 2025-10-03) [9 files changed, 12 insertions(+), 10 deletions(-)]
 - replace LoadingOverlay on ScheduleLoadingSkeleton in ystu audience schedule (ysturasp, 2025-10-02) [5 files changed, 60 insertions(+), 46 deletions(-)]
 - add ScheduleLoadingSkeleton to teacher ystu schedule page (ysturasp, 2025-10-01) [7 files changed, 74 insertions(+), 54 deletions(-)]
