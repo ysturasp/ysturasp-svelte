@@ -153,12 +153,14 @@
 	</button>
 
 	{#if selectedAudience && selectedWeek}
-		<CopyLinkButton
-			disabled={!selectedAudience || !selectedWeek}
-			params={{ audience: selectedAudience }}
-			successMessage="Ссылка на расписание аудитории скопирована"
-		>
-			{copyButtonText}
-		</CopyLinkButton>
+		<div class="flex w-full items-center justify-between">
+			<CopyLinkButton
+				disabled={!selectedAudience || !selectedWeek}
+				params={{ audience: selectedAudience }}
+				successMessage="Ссылка на расписание аудитории скопирована"
+			>
+				{copyButtonText}
+			</CopyLinkButton>
+		</div>
 	{/if}
 </div>

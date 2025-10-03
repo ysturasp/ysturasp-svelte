@@ -1,3 +1,4 @@
+- make copy link button not full width in teacher ystu schedule (ysturasp, 2025-10-03) [3 files changed, 11 insertions(+), 7 deletions(-)]
 - hide week switcher buttons in yspu schedule skeleton (ysturasp, 2025-10-03) [4 files changed, 18 insertions(+), 10 deletions(-)]
 - remove extra space in bottom modal by adjusting positioning and removing fixed heights (ysturasp, 2025-10-03) [3 files changed, 9 insertions(+), 9 deletions(-)]
 - add display linear block in settings modal on all student pages (ystu and yspu) (ysturasp, 2025-10-03) [3 files changed, 3 insertions(+), 1 deletion(-)]
