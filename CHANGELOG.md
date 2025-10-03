@@ -1,3 +1,4 @@
+- add display linear block in settings modal on all student pages (ystu and yspu) (ysturasp, 2025-10-03) [3 files changed, 3 insertions(+), 1 deletion(-)]
 - replace LoadingOverlay on ScheduleLoadingSkeleton in yspu student schedule (ysturasp, 2025-10-03) [5 files changed, 26 insertions(+), 3 deletions(-)]
 - renaming all ystuRASP --> ysturasp (ysturasp, 2025-10-03) [9 files changed, 12 insertions(+), 10 deletions(-)]
 - replace LoadingOverlay on ScheduleLoadingSkeleton in ystu audience schedule (ysturasp, 2025-10-02) [5 files changed, 60 insertions(+), 46 deletions(-)]

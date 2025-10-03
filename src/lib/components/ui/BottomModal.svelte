@@ -133,19 +133,19 @@
 
 	.dialog {
 		position: fixed;
-		inset: 0;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
 		width: 95vw;
 		height: auto;
 		max-width: 600px;
 		max-height: 85vh;
-		min-height: 400px;
 		background: rgb(15 23 42);
 		border-radius: 16px;
 		box-shadow:
 			0 25px 50px -12px rgba(0, 0, 0, 0.5),
 			0 0 0 1px rgba(59, 130, 246, 0.5);
 		z-index: 102;
-		margin: auto;
 		display: flex;
 		flex-direction: column;
 		min-width: 320px;
@@ -196,10 +196,8 @@
 	}
 
 	.dialog-content {
-		flex: 1;
 		overflow-y: auto;
 		padding: 16px;
-		min-height: 250px;
 		color: rgb(209 213 219);
 	}
 
@@ -243,22 +241,22 @@
 
 	@keyframes modalFadeInScale {
 		0% {
-			transform: translateY(30%) scale(0.8);
+			transform: translate(-50%, -20%) scale(0.8);
 			opacity: 0;
 		}
 		100% {
-			transform: translateY(0) scale(1);
+			transform: translate(-50%, -50%) scale(1);
 			opacity: 1;
 		}
 	}
 
 	@keyframes modalFadeOutScale {
 		0% {
-			transform: translateY(0) scale(1);
+			transform: translate(-50%, -50%) scale(1);
 			opacity: 1;
 		}
 		100% {
-			transform: translateY(30%) scale(0.8);
+			transform: translate(-50%, -20%) scale(0.8);
 			opacity: 0;
 		}
 	}
