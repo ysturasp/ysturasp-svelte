@@ -163,12 +163,14 @@
 	</button>
 
 	{#if selectedTeacher && selectedWeek}
-		<CopyLinkButton
-			disabled={!selectedTeacher || !selectedWeek}
-			params={{ teacher: selectedTeacher }}
-			successMessage="Ссылка на расписание преподавателя скопирована"
-		>
-			{copyButtonText}
-		</CopyLinkButton>
+		<div class="flex w-full items-center justify-between">
+			<CopyLinkButton
+				disabled={!selectedTeacher || !selectedWeek}
+				params={{ teacher: selectedTeacher }}
+				successMessage="Ссылка на расписание преподавателя скопирована"
+			>
+				{copyButtonText}
+			</CopyLinkButton>
+		</div>
 	{/if}
 </div>
