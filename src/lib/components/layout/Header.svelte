@@ -77,7 +77,7 @@
 				class="flex items-center text-sm font-semibold text-blue-500 transition-all hover:text-blue-400 md:text-base"
 			>
 				<img src="/images/cat.png" alt="Logo" class="mr-2 h-10 w-10" />
-				<span class="text-sm md:text-base">ystuRASP</span>
+				<span class="text-sm md:text-base">ysturasp</span>
 			</a>
 			<a
 				href="/stat"
@@ -154,7 +154,7 @@
 		<a
 			href="/"
 			class="block py-2 text-sm font-semibold text-blue-500 md:text-base"
-			on:click={closeMobileMenu}>ystuRASP Главная</a
+			on:click={closeMobileMenu}>ysturasp Главная</a
 		>
 		<a
 			href="/stat"

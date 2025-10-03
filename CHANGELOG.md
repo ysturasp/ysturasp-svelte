@@ -1,3 +1,4 @@
+- replace LoadingOverlay on ScheduleLoadingSkeleton in ystu audience schedule (ysturasp, 2025-10-02) [5 files changed, 60 insertions(+), 46 deletions(-)]
 - add ScheduleLoadingSkeleton to teacher ystu schedule page (ysturasp, 2025-10-01) [7 files changed, 74 insertions(+), 54 deletions(-)]
 - create skeleton component for loading schedule and integrate on ystu schedule page (ysturasp, 2025-09-29) [6 files changed, 373 insertions(+), 8 deletions(-)]
 - change modal animation to slide from bottom (ysturasp, 2025-09-28) [3 files changed, 4 insertions(+), 2 deletions(-)]

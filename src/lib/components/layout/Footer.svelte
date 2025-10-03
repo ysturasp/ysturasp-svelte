@@ -23,7 +23,7 @@
 	<div class="container mx-auto px-4">
 		<div class="flex flex-wrap items-center justify-between">
 			<div class="w-full text-center md:w-1/3 md:text-left">
-				<h2 class="text-lg font-bold text-white">ystuRASP</h2>
+				<h2 class="text-lg font-bold text-white">ysturasp</h2>
 				<p class=" text-slate-400">Экосистема для студентов</p>
 				<a href="/support" class="text-slate-300 transition-all hover:text-white">
 					Написать в поддержку
@@ -77,7 +77,7 @@
 						items={legalItems}
 					/>
 				</div>
-				<p class="text-slate-400">© 2024 Made with ❤️ by ystuRASP</p>
+				<p class="text-slate-400">© 2024 Made with ❤️ by ysturasp</p>
 				<a
 					href="/changelog"
 					class="group inline-flex items-center text-blue-400 transition-all hover:text-blue-300"

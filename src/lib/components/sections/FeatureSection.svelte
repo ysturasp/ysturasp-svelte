@@ -364,7 +364,7 @@
 		},
 		{
 			title: 'Мобильное приложение',
-			description: 'Установите ystuRASP как приложение на ваш телефон для быстрого доступа',
+			description: 'Установите ysturasp как приложение на ваш телефон для быстрого доступа',
 			link: '/installapp',
 			linkText: 'Установить приложение',
 			svg: `<svg class="vector-graphic" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">

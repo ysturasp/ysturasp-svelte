@@ -75,7 +75,7 @@
 		class="absolute inset-0 animate-pulse bg-gradient-to-r from-blue-600/10 to-purple-600/10"
 	></div>
 	<h1 class="hero-title pb-2 text-3xl font-bold md:pb-6 md:text-5xl">
-		Добро пожаловать в ystuRASP
+		Добро пожаловать в ysturasp
 	</h1>
 	<p class="text-md mx-auto mb-2 max-w-2xl text-slate-300 md:mb-6 md:text-xl">
 		Ваш универсальный помощник для учебы

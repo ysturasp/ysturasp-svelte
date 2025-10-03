@@ -69,7 +69,7 @@
 </script>
 
 <svelte:head>
-	<title>Форматирование отчётов | ystuRASP</title>
+	<title>Форматирование отчётов | ysturasp</title>
 	<meta name="description" content="Форматирование отчётов по стандартам оформления работ" />
 	<meta
 		name="keywords"
