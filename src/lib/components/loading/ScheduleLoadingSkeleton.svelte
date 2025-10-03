@@ -5,6 +5,7 @@
 	export let isMobile = false;
 	export let daysCount = 5;
 	export let showSubgroups = false;
+	export let showViewModeToggle = false;
 </script>
 
 <div class="mt-4" in:fade={{ duration: 300 }} out:fade={{ duration: 300 }}>
@@ -46,6 +47,16 @@
 			<div class="text-2xl opacity-50 md:text-3xl">👉</div>
 		</div>
 	</div>
+
+	{#if showViewModeToggle}
+		<div class="mb-1 flex items-center justify-center md:mb-2">
+			<div class="flex animate-pulse items-center rounded-2xl bg-slate-800">
+				<div class="mr-2 h-10 w-24 rounded-2xl bg-slate-600 md:w-36"></div>
+				<div class="mr-2 h-10 w-20 rounded-2xl bg-slate-700 md:w-40"></div>
+				<div class="h-10 w-10 rounded bg-slate-700"></div>
+			</div>
+		</div>
+	{/if}
 
 	{#if isMobile}
 		<div class="mb-2 flex items-center justify-end">

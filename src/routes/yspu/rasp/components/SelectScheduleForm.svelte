@@ -151,7 +151,7 @@
 		{isLoading ? 'Загрузка...' : 'Показать расписание группы'}
 	</button>
 
-	{#if scheduleShown && selectedDirection && selectedGroup}
+	{#if selectedDirection && selectedGroup}
 		<div class="flex w-full items-center justify-between">
 			<CopyLinkButton
 				params={{

@@ -11,6 +11,7 @@
 	import { notifications } from '$lib/stores/notifications';
 	import TgsSticker from '$lib/components/common/TgsSticker.svelte';
 	import LoadingOverlay from '$lib/components/loading/LoadingOverlay.svelte';
+	import ScheduleLoadingSkeleton from '$lib/components/loading/ScheduleLoadingSkeleton.svelte';
 	import PageLayout from '$lib/components/layout/PageLayout.svelte';
 	import Header from '$lib/components/layout/Header.svelte';
 	import Footer from '$lib/components/layout/Footer.svelte';
@@ -613,7 +614,7 @@
 				{scheduleData}
 			/>
 
-			{#if scheduleData}
+			{#if scheduleData && !isScheduleLoading}
 				<div class="mt-2">
 					{#if scheduleData.items.length > 0}
 						{@const selectedGroupData = scheduleData.items.find(
@@ -776,6 +777,15 @@
 						{/if}
 					{/if}
 				</div>
+			{:else if isScheduleLoading && selectedDirection && selectedGroup}
+				<div class="mt-2">
+					<ScheduleLoadingSkeleton
+						{isFullView}
+						isMobile={$isMobile}
+						daysCount={daysWithLessons.length || 7}
+						showViewModeToggle={true}
+					/>
+				</div>
 			{:else if selectedDirection && selectedGroup && wasLoadAttempted && !isScheduleLoading}
 				<div class="mt-4">
 					<ScheduleTitle
@@ -919,7 +929,7 @@
 	</svelte:fragment>
 </BetaModal>
 
-{#if isScheduleLoading}
+{#if isScheduleLoading && !selectedDirection && !selectedGroup}
 	<LoadingOverlay />
 {/if}
 
