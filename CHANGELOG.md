@@ -1,3 +1,4 @@
+- make copy link button not full width in teacher and audience yspu schedule (ysturasp, 2025-10-04) [3 files changed, 11 insertions(+), 3 deletions(-)]
 - delete unused variable (ysturasp, 2025-10-04) [3 files changed, 2 insertions(+), 1 deletion(-)]
 - make copy link button not full width in audience ystu schedule (ysturasp, 2025-10-03) [3 files changed, 11 insertions(+), 7 deletions(-)]
 - make copy link button not full width in teacher ystu schedule (ysturasp, 2025-10-03) [3 files changed, 11 insertions(+), 7 deletions(-)]

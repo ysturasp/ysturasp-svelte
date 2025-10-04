@@ -608,7 +608,6 @@
 				bind:selectedGroup
 				onSubmit={loadSchedule}
 				onDirectionChange={handleDirectionChange}
-				scheduleShown={!!scheduleData}
 				{isLoading}
 				autoLoadOnSelect={true}
 				{scheduleData}
