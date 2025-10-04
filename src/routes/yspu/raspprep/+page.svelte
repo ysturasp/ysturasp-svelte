@@ -4,7 +4,7 @@
 	import PageLayout from '$lib/components/layout/PageLayout.svelte';
 	import Header from '$lib/components/layout/Header.svelte';
 	import Footer from '$lib/components/layout/Footer.svelte';
-	import LoadingOverlay from '$lib/components/loading/LoadingOverlay.svelte';
+	import ScheduleLoadingSkeleton from '$lib/components/loading/ScheduleLoadingSkeleton.svelte';
 	import NotificationsContainer from '$lib/components/notifications/NotificationsContainer.svelte';
 	import TeacherScheduleForm from './components/TeacherScheduleForm.svelte';
 	import TeacherScheduleDay from './components/TeacherScheduleDay.svelte';
@@ -295,7 +295,7 @@
 				{isLoading}
 			/>
 
-			{#if scheduleData}
+			{#if scheduleData && !isScheduleLoading}
 				<div class="mt-2">
 					{#if scheduleData.items.length > 0}
 						<ScheduleTitle
@@ -409,6 +409,15 @@
 						</div>
 					{/if}
 				</div>
+			{:else if isScheduleLoading && selectedTeacher}
+				<div class="mt-2">
+					<ScheduleLoadingSkeleton
+						{isFullView}
+						isMobile={$isMobile}
+						daysCount={daysWithLessons.length || 7}
+						showWeekSwitcher={false}
+					/>
+				</div>
 			{/if}
 		</section>
 
@@ -427,10 +436,6 @@
 	currentPage="teachers"
 	university="yspu"
 />
-
-{#if isScheduleLoading}
-	<LoadingOverlay />
-{/if}
 
 <style>
 	:global(.grid) {
