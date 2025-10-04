@@ -1,3 +1,4 @@
+- make copy link button not full width in audience ystu schedule (ysturasp, 2025-10-03) [3 files changed, 11 insertions(+), 7 deletions(-)]
 - make copy link button not full width in teacher ystu schedule (ysturasp, 2025-10-03) [3 files changed, 11 insertions(+), 7 deletions(-)]
 - hide week switcher buttons in yspu schedule skeleton (ysturasp, 2025-10-03) [4 files changed, 18 insertions(+), 10 deletions(-)]
 - remove extra space in bottom modal by adjusting positioning and removing fixed heights (ysturasp, 2025-10-03) [3 files changed, 9 insertions(+), 9 deletions(-)]

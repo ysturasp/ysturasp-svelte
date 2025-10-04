@@ -8,7 +8,6 @@
 	export let selectedGroup = '';
 	export let onSubmit: () => void;
 	export let onDirectionChange: () => void;
-	export let scheduleShown = false;
 	export let isLoading = false;
 	export let autoLoadOnSelect = false;
 	export let scheduleData: any = null;
