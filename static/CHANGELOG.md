@@ -1,3 +1,4 @@
+- replace LoadingOverlay on ScheduleLoadingSkeleton in yspu teachers schedule (ysturasp, 2025-10-04) [3 files changed, 13 insertions(+), 6 deletions(-)]
 - delete excess params (scheduleShown) for select schedule form (ysturasp, 2025-10-04) [3 files changed, 2 insertions(+), 1 deletion(-)]
 - make copy link button not full width in teacher and audience yspu schedule (ysturasp, 2025-10-04) [3 files changed, 11 insertions(+), 3 deletions(-)]
 - delete unused variable (ysturasp, 2025-10-04) [3 files changed, 2 insertions(+), 1 deletion(-)]
