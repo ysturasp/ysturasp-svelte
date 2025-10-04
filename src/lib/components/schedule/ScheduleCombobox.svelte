@@ -250,9 +250,15 @@
 	</button>
 
 	{#if selectedId}
-		<CopyLinkButton disabled={!selectedId} params={copyParams} successMessage={copyLinkMessage}>
-			{copyButtonText}
-		</CopyLinkButton>
+		<div class="flex w-full items-center justify-between">
+			<CopyLinkButton
+				disabled={!selectedId}
+				params={copyParams}
+				successMessage={copyLinkMessage}
+			>
+				{copyButtonText}
+			</CopyLinkButton>
+		</div>
 	{/if}
 </form>
 
