@@ -4,7 +4,7 @@
 	import { replaceState } from '$app/navigation';
 	import type { AudienceScheduleData } from '$lib/types/schedule';
 	import type { Audience } from './api';
-	import LoadingOverlay from '$lib/components/loading/LoadingOverlay.svelte';
+	import ScheduleLoadingSkeleton from '$lib/components/loading/ScheduleLoadingSkeleton.svelte';
 	import PageLayout from '$lib/components/layout/PageLayout.svelte';
 	import Header from '$lib/components/layout/Header.svelte';
 	import Footer from '$lib/components/layout/Footer.svelte';
@@ -264,7 +264,7 @@
 				{isLoading}
 			/>
 
-			{#if scheduleData}
+			{#if scheduleData && !isScheduleLoading}
 				<div class="mt-4">
 					{#if scheduleData.items.length > 0}
 						<ScheduleTitle
@@ -373,6 +373,16 @@
 						</div>
 					{/if}
 				</div>
+			{:else if isScheduleLoading && selectedAudience}
+				<div class="mt-4">
+					<ScheduleLoadingSkeleton
+						{isFullView}
+						isMobile={$isMobile}
+						daysCount={daysWithLessons.length || 7}
+						showViewModeToggle={false}
+						showWeekSwitcher={false}
+					/>
+				</div>
 			{/if}
 		</section>
 
@@ -391,10 +401,6 @@
 	currentPage="audiences"
 	university="yspu"
 />
-
-{#if isScheduleLoading}
-	<LoadingOverlay />
-{/if}
 
 <style>
 	:global(.grid) {

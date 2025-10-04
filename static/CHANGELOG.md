@@ -1,3 +1,4 @@
+- fix margins for yspu audience schedule for unifed style (ysturasp, 2025-10-04) [4 files changed, 70 insertions(+), 66 deletions(-)]
 - fix margins for yspu schedule for teachers (ysturasp, 2025-10-04) [4 files changed, 76 insertions(+), 72 deletions(-)]
 - replace LoadingOverlay on ScheduleLoadingSkeleton in yspu teachers schedule (ysturasp, 2025-10-04) [3 files changed, 13 insertions(+), 6 deletions(-)]
 - delete excess params (scheduleShown) for select schedule form (ysturasp, 2025-10-04) [3 files changed, 2 insertions(+), 1 deletion(-)]
