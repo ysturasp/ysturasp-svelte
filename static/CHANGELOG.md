@@ -1,3 +1,4 @@
+- improve favorite groups section design with responsive layout (ysturasp, 2025-10-05) [3 files changed, 28 insertions(+), 16 deletions(-)]
 - replace loading overlay on skeleton component in yspu audience schedule (ysturasp, 2025-10-04) [3 files changed, 14 insertions(+), 6 deletions(-)]
 - fix margins for yspu audience schedule for unifed style (ysturasp, 2025-10-04) [4 files changed, 70 insertions(+), 66 deletions(-)]
 - fix margins for yspu schedule for teachers (ysturasp, 2025-10-04) [4 files changed, 76 insertions(+), 72 deletions(-)]

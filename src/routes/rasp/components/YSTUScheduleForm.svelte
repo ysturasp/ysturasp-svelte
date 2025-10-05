@@ -141,9 +141,12 @@
 	function selectFavoriteGroup(group: string) {
 		const institute = institutes.find((inst) => inst.groups.includes(group));
 		if (institute) {
+			const currentWeek = selectedWeek;
 			selectedInstitute = institute.name;
-			selectedGroup = group;
-			onSubmit();
+			setTimeout(() => {
+				selectedGroup = group;
+				selectedWeek = currentWeek;
+			}, 0);
 		}
 	}
 </script>
