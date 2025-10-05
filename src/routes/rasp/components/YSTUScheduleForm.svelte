@@ -270,22 +270,32 @@
 	/>
 
 	{#if favoriteGroups.length > 0}
-		<section class="mt-2 rounded-lg bg-slate-800">
-			<div class="flex items-center">
-				<h2 class="text-2xl font-semibold text-white">❤️ Избранные группы</h2>
-				<button type="button" class="ml-2 rounded-lg border-2 border-slate-600 text-3xl">
-					❓
-				</button>
-			</div>
-			<div class="mt-2 flex flex-wrap gap-2">
-				{#each favoriteGroups as group}
-					<button
-						on:click={() => selectFavoriteGroup(group)}
-						class="rounded bg-blue-600 px-3 py-1 text-sm text-white transition-all hover:bg-blue-700"
-					>
-						{group}
-					</button>
-				{/each}
+		<section class="mt-3 rounded-2xl bg-slate-900/40 p-3 ring-1 ring-slate-700/50">
+			<div class="flex flex-col gap-3 md:flex-row md:items-center md:gap-3">
+				<div class="flex items-center gap-2">
+					<div class="rounded-lg bg-red-500/20 p-1.5">
+						<svg class="h-4 w-4 text-red-400" fill="currentColor" viewBox="0 0 24 24">
+							<path
+								d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+							/>
+						</svg>
+					</div>
+					<span class="text-sm font-medium text-white">Избранные</span>
+					<span class="text-xs text-gray-400">({favoriteGroups.length})</span>
+				</div>
+				<div class="flex flex-wrap gap-1.5">
+					{#each favoriteGroups as group}
+						<button
+							on:click={() => selectFavoriteGroup(group)}
+							class="group relative rounded-xl bg-slate-700 px-3 py-1.5 text-xs text-white transition-all hover:bg-blue-600 hover:shadow-md"
+						>
+							<span class="relative z-10">{group}</span>
+							<div
+								class="absolute inset-0 rounded-xl bg-gradient-to-r from-blue-500/0 to-blue-500/0 transition-all group-hover:from-blue-500/10 group-hover:to-blue-500/20"
+							></div>
+						</button>
+					{/each}
+				</div>
 			</div>
 		</section>
 	{/if}
