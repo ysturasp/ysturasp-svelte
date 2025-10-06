@@ -1,6 +1,7 @@
 import { hapticFeedback } from '@telegram-apps/sdk-svelte';
 import { settings } from '$lib/stores/settings';
 import type { Settings } from '$lib/stores/settings';
+import { checkIsTelegramMiniApp } from '$lib/utils/telegram';
 
 type HapticType = 'light' | 'medium' | 'heavy' | 'selection' | 'success' | 'warning' | 'error';
 
@@ -66,6 +67,7 @@ function getHapticType(element: HTMLElement): HapticType {
 }
 
 export function haptic(node: HTMLElement) {
+	const isTelegram = checkIsTelegramMiniApp();
 	let currentSettings: Settings;
 
 	const unsubscribe = settings.subscribe((value) => {
@@ -73,7 +75,7 @@ export function haptic(node: HTMLElement) {
 	});
 
 	function handleInteraction(event: Event) {
-		if (!currentSettings?.hapticFeedback) return;
+		if (!isTelegram || !currentSettings?.hapticFeedback) return;
 
 		const type = getHapticType(node);
 

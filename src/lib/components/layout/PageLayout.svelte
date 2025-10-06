@@ -5,13 +5,14 @@
 	import '$lib/styles/fonts.css';
 	import { haptic } from '$lib/actions/haptic';
 	import { init } from '@telegram-apps/sdk-svelte';
-	import { browser } from '$app/environment';
+	import { checkIsTelegramMiniApp } from '$lib/utils/telegram';
 
 	let isLowercase = false;
 	let isModernFonts = false;
 
 	onMount(() => {
-		if (browser) {
+		const isTelegram = checkIsTelegramMiniApp();
+		if (isTelegram) {
 			try {
 				init();
 			} catch (error) {

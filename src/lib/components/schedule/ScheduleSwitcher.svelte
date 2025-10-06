@@ -3,10 +3,10 @@
 	import { getCurrentSemester } from '$lib/utils/semester';
 	import ScheduleSettings from './ScheduleSettings.svelte';
 	import { hapticFeedback, init } from '@telegram-apps/sdk-svelte';
-	import { browser } from '$app/environment';
 	import { onMount } from 'svelte';
 	import { settings } from '$lib/stores/settings';
 	import type { Settings } from '$lib/stores/settings';
+	import { checkIsTelegramMiniApp } from '$lib/utils/telegram';
 
 	export let selectedSemester: SemesterInfo | null = null;
 	export let onSemesterChange: (semester: SemesterInfo) => void;
@@ -15,6 +15,7 @@
 
 	let isSettingsOpen = false;
 	let currentSettings: Settings;
+	let isTelegram = false;
 
 	settings.subscribe((value) => {
 		currentSettings = value;
@@ -28,23 +29,26 @@
 	}
 
 	function handleClick() {
-		if (currentSettings?.hapticFeedback) {
+		if (isTelegram && currentSettings?.hapticFeedback) {
 			hapticFeedback.impactOccurred.ifAvailable('medium');
 		}
 		isSettingsOpen = true;
 	}
 
 	function handleNavClick() {
-		if (currentSettings?.hapticFeedback) {
+		if (isTelegram && currentSettings?.hapticFeedback) {
 			hapticFeedback.impactOccurred.ifAvailable('medium');
 		}
 	}
 
 	onMount(() => {
-		try {
-			init();
-		} catch (error) {
-			console.warn('Not in Telegram Mini App:', error);
+		isTelegram = checkIsTelegramMiniApp();
+		if (isTelegram) {
+			try {
+				init();
+			} catch (error) {
+				console.warn('Not in Telegram Mini App:', error);
+			}
 		}
 	});
 </script>

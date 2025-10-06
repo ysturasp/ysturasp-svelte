@@ -1,10 +1,11 @@
 <script lang="ts">
 	import BottomModal from '$lib/components/ui/BottomModal.svelte';
-	import { createEventDispatcher } from 'svelte';
+	import { createEventDispatcher, onMount } from 'svelte';
 	import { settings } from '$lib/stores/settings';
 	import type { Settings } from '$lib/stores/settings';
 	import { linearStore } from '$lib/stores/linear';
 	import LinearServerPicker from './LinearServerPicker.svelte';
+	import { checkIsTelegramMiniApp } from '$lib/utils/telegram';
 
 	export let isOpen = false;
 	export let currentPage: 'students' | 'teachers' | 'audiences' = 'students';
@@ -15,6 +16,11 @@
 	let currentSettings: Settings;
 	let linearStoreState: { apiKey: string | null } = { apiKey: null };
 	let isServerPickerOpen = false;
+	let isTelegramMiniApp = false;
+
+	onMount(() => {
+		isTelegramMiniApp = checkIsTelegramMiniApp();
+	});
 
 	settings.subscribe((value) => {
 		currentSettings = { ...value };
@@ -83,18 +89,22 @@
 						<span class="slider round"></span>
 					</label>
 				</div>
-				<div class="flex items-center justify-between">
-					<label for="hapticFeedbackToggle" class="text-white">Тактильная отдача</label>
-					<label class="switch">
-						<input
-							type="checkbox"
-							id="hapticFeedbackToggle"
-							bind:checked={currentSettings.hapticFeedback}
-							on:change={handleSettingChange}
-						/>
-						<span class="slider round"></span>
-					</label>
-				</div>
+				{#if isTelegramMiniApp}
+					<div class="flex items-center justify-between">
+						<label for="hapticFeedbackToggle" class="text-white"
+							>Тактильная отдача</label
+						>
+						<label class="switch">
+							<input
+								type="checkbox"
+								id="hapticFeedbackToggle"
+								bind:checked={currentSettings.hapticFeedback}
+								on:change={handleSettingChange}
+							/>
+							<span class="slider round"></span>
+						</label>
+					</div>
+				{/if}
 				<div class="flex items-center justify-between">
 					<label for="lowercaseToggle" class="text-white">Нижний регистр</label>
 					<label class="switch">

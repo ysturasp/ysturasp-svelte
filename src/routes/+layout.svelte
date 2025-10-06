@@ -31,20 +31,29 @@
 			cleanupOffline = cleanup;
 		});
 
+		let isTelegram = false;
 		try {
 			init();
-			backButton.mount();
-			backButton.onClick(handleBack);
-			entryPath = window.location.pathname;
-			updateBack(window.location.pathname);
+			isTelegram = true;
 		} catch {}
 
-		return () => {
+		if (isTelegram) {
 			try {
-				backButton.unmount();
-				backButton.offClick(handleBack);
-				cleanupOffline?.();
+				backButton.mount();
+				backButton.onClick(handleBack);
+				entryPath = window.location.pathname;
+				updateBack(window.location.pathname);
 			} catch {}
+		}
+
+		return () => {
+			if (isTelegram) {
+				try {
+					backButton.unmount();
+					backButton.offClick(handleBack);
+				} catch {}
+			}
+			cleanupOffline?.();
 		};
 	});
 
