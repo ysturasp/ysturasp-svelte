@@ -356,8 +356,8 @@ export function generateSubgroupDistribution(scheduleData: any, semester: Semest
 			const t1Dates = teacherToDates.get(t1) || [];
 			const t2Dates = teacherToDates.get(t2) || [];
 			if (t1Dates.length === t2Dates.length) {
-				assignAllForTeacher(t1, 1);
-				assignAllForTeacher(t2, 2);
+				assignAllForTeacher(t1, 2);
+				assignAllForTeacher(t2, 1);
 			} else {
 				regularDistribute();
 			}
@@ -431,10 +431,10 @@ export function generateSubgroupDistribution(scheduleData: any, semester: Semest
 				};
 			}
 
-			group1VUC.forEach((e) => add(e, 1));
-			group2VUC.forEach((e) => add(e, 2));
-			group1NonVUC.forEach((e) => add(e, 1));
-			group2NonVUC.forEach((e) => add(e, 2));
+			group1VUC.forEach((e) => add(e, 2));
+			group2VUC.forEach((e) => add(e, 1));
+			group1NonVUC.forEach((e) => add(e, 2));
+			group2NonVUC.forEach((e) => add(e, 1));
 		}
 
 		Object.entries(perTeacherDates).forEach(([teacher, dates]) => {
@@ -528,7 +528,7 @@ export function generateSubgroupDistribution(scheduleData: any, semester: Semest
 			for (const day of weekItem.days) {
 				if (day.info.date === date) {
 					const lessons = day.lessons || [];
-					const sameDayLessons = lessons.filter((l : any) => {
+					const sameDayLessons = lessons.filter((l: any) => {
 						if (!isSubgroupType(l.type)) return false;
 						const lessonTimeRange = l.timeRange || `${l.startAt}-${l.endAt}`;
 						const normalizedTimeRange = lessonTimeRange.replace(/\s+/g, '');

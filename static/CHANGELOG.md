@@ -1,3 +1,4 @@
+- refactor type annotation for lesson filter in generateSubgroupDistribution function (ysturasp, 2025-10-07) [3 files changed, 3 insertions(+), 1 deletion(-)]
 - disable Telegram Mini App features outside of Telegram (ysturasp, 2025-10-06) [8 files changed, 80 insertions(+), 31 deletions(-)]
 - preserve selected week and group when switching favorite groups across institutes (ysturasp, 2025-10-05) [3 files changed, 7 insertions(+), 2 deletions(-)]
 - improve favorite groups section design with responsive layout (ysturasp, 2025-10-05) [3 files changed, 28 insertions(+), 16 deletions(-)]
