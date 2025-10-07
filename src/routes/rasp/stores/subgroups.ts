@@ -528,7 +528,7 @@ export function generateSubgroupDistribution(scheduleData: any, semester: Semest
 			for (const day of weekItem.days) {
 				if (day.info.date === date) {
 					const lessons = day.lessons || [];
-					const sameDayLessons = lessons.filter((l) => {
+					const sameDayLessons = lessons.filter((l : any) => {
 						if (!isSubgroupType(l.type)) return false;
 						const lessonTimeRange = l.timeRange || `${l.startAt}-${l.endAt}`;
 						const normalizedTimeRange = lessonTimeRange.replace(/\s+/g, '');

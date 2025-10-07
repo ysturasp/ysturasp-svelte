@@ -1,3 +1,4 @@
+- disable Telegram Mini App features outside of Telegram (ysturasp, 2025-10-06) [8 files changed, 80 insertions(+), 31 deletions(-)]
 - preserve selected week and group when switching favorite groups across institutes (ysturasp, 2025-10-05) [3 files changed, 7 insertions(+), 2 deletions(-)]
 - improve favorite groups section design with responsive layout (ysturasp, 2025-10-05) [3 files changed, 28 insertions(+), 16 deletions(-)]
 - replace loading overlay on skeleton component in yspu audience schedule (ysturasp, 2025-10-04) [3 files changed, 14 insertions(+), 6 deletions(-)]
