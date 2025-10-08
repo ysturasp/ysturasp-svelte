@@ -1,3 +1,4 @@
+- mirror subgroups and add weekday-based distribution logic (ysturasp, 2025-10-08) [3 files changed, 45 insertions(+), 1 deletion(-)]
 - temporary fix with mirroring distibute lessons like before (ysturasp, 2025-10-07) [3 files changed, 9 insertions(+), 7 deletions(-)]
 - refactor type annotation for lesson filter in generateSubgroupDistribution function (ysturasp, 2025-10-07) [3 files changed, 3 insertions(+), 1 deletion(-)]
 - disable Telegram Mini App features outside of Telegram (ysturasp, 2025-10-06) [8 files changed, 80 insertions(+), 31 deletions(-)]
