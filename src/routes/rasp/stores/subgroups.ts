@@ -362,7 +362,49 @@ export function generateSubgroupDistribution(scheduleData: any, semester: Semest
 				regularDistribute();
 			}
 		} else {
-			regularDistribute();
+			const byWeekday = new Map<number, Entry[]>();
+			items.forEach((e) => {
+				const date = new Date(e.date);
+				const weekday = date.getDay();
+				if (!byWeekday.has(weekday)) byWeekday.set(weekday, []);
+				byWeekday.get(weekday)!.push(e);
+			});
+
+			const weekdays = Array.from(byWeekday.entries());
+			if (weekdays.length === 2 && weekdays[0][1].length === weekdays[1][1].length) {
+				let [group1, group2] = weekdays.map((w) => w[1]);
+
+				const firstDate1 = Math.min(...group1.map((e) => new Date(e.date).getTime()));
+				const firstDate2 = Math.min(...group2.map((e) => new Date(e.date).getTime()));
+
+				if (firstDate1 > firstDate2) {
+					[group1, group2] = [group2, group1];
+				}
+
+				function addByWeekday(entries: Entry[], subgroup: 1 | 2) {
+					entries.forEach((e) => {
+						const formattedDate = new Date(e.date).toLocaleDateString('ru-RU');
+						const dateTimeKey = `${formattedDate}_${e.timeRange}`;
+						if (!perTeacherDates[e.teacher]) perTeacherDates[e.teacher] = {};
+						const lessonIndex = findLessonIndex(
+							e.date,
+							e.timeRange,
+							`${subjectName}_${e.teacher}`
+						);
+						perTeacherDates[e.teacher][dateTimeKey] = {
+							subgroup,
+							isVUC: e.isVUC,
+							lessonIndex,
+							type: e.type
+						};
+					});
+				}
+
+				addByWeekday(group1, 1);
+				addByWeekday(group2, 2);
+			} else {
+				regularDistribute();
+			}
 		}
 
 		function regularDistribute() {
