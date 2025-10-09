@@ -40,19 +40,21 @@
 			<h3 class="mb-2 text-xl font-bold text-emerald-400">🏆 Лучшие предметы</h3>
 			<ul class="space-y-4">
 				{#if isLoading}
-					<li class="skeleton-item">
-						<div class="skeleton skeleton-title"></div>
-						<div class="skeleton skeleton-text"></div>
+					<li class="mb-4 rounded-2xl bg-gray-900 p-4 shadow-md">
+						<div class="mb-2 h-5 w-4/5 animate-pulse rounded bg-gray-600"></div>
+						<div class="h-4 w-3/5 animate-pulse rounded bg-gray-600"></div>
 					</li>
-					<li class="skeleton-item">
-						<div class="skeleton skeleton-title"></div>
-						<div class="skeleton skeleton-text"></div>
+					<li class="mb-4 rounded-2xl bg-gray-900 p-4 shadow-md">
+						<div class="mb-2 h-5 w-4/5 animate-pulse rounded bg-gray-600"></div>
+						<div class="h-4 w-3/5 animate-pulse rounded bg-gray-600"></div>
 					</li>
 				{:else}
 					{#each top10 as item}
-						<li class="list-item">
+						<li
+							class="mb-4 rounded-2xl bg-gray-900 p-4 shadow-md transition-all duration-300 hover:shadow-xl"
+						>
 							<div
-								class="cursor-pointer font-semibold text-emerald-500"
+								class="cursor-pointer font-semibold text-emerald-500 transition-colors duration-200 hover:text-emerald-400"
 								aria-label="Открыть модальное окно с предметом"
 								role="button"
 								tabindex="0"
@@ -78,19 +80,21 @@
 			<h3 class="mb-2 text-xl font-bold text-red-400">👎 Худшие предметы</h3>
 			<ul class="space-y-4">
 				{#if isLoading}
-					<li class="skeleton-item">
-						<div class="skeleton skeleton-title"></div>
-						<div class="skeleton skeleton-text"></div>
+					<li class="mb-4 rounded-2xl bg-gray-900 p-4 shadow-md">
+						<div class="mb-2 h-5 w-4/5 animate-pulse rounded bg-gray-600"></div>
+						<div class="h-4 w-3/5 animate-pulse rounded bg-gray-600"></div>
 					</li>
-					<li class="skeleton-item">
-						<div class="skeleton skeleton-title"></div>
-						<div class="skeleton skeleton-text"></div>
+					<li class="mb-4 rounded-2xl bg-gray-900 p-4 shadow-md">
+						<div class="mb-2 h-5 w-4/5 animate-pulse rounded bg-gray-600"></div>
+						<div class="h-4 w-3/5 animate-pulse rounded bg-gray-600"></div>
 					</li>
 				{:else}
 					{#each antitop10 as item}
-						<li class="list-item">
+						<li
+							class="mb-4 rounded-2xl bg-gray-900 p-4 shadow-md transition-all duration-300 hover:shadow-xl"
+						>
 							<div
-								class="cursor-pointer font-semibold text-red-500"
+								class="cursor-pointer font-semibold text-red-500 transition-colors duration-200 hover:text-red-400"
 								aria-label="Открыть модальное окно с предметом"
 								role="button"
 								tabindex="0"
@@ -114,48 +118,3 @@
 		</div>
 	</div>
 </section>
-
-<style>
-	.list-item {
-		padding: 1rem;
-		background-color: #111827;
-		margin-bottom: 1rem;
-		border-radius: 18px;
-		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-		transition:
-			background-color 0.3s,
-			box-shadow 0.3s;
-	}
-
-	.skeleton {
-		background-color: #555555;
-		border-radius: 4px;
-		margin-bottom: 8px;
-		background-image: linear-gradient(
-			90deg,
-			rgba(255, 255, 255, 0),
-			rgba(255, 255, 255, 0.5),
-			rgba(255, 255, 255, 0)
-		);
-		background-size: 40px 100%;
-		background-repeat: no-repeat;
-		background-position: left -40px top 0;
-		animation: shine 1s ease infinite;
-	}
-
-	.skeleton-title {
-		height: 20px;
-		width: 80%;
-	}
-
-	.skeleton-text {
-		height: 16px;
-		width: 60%;
-	}
-
-	@keyframes shine {
-		to {
-			background-position: right -40px top 0;
-		}
-	}
-</style>
