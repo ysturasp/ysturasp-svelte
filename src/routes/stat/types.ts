@@ -23,7 +23,11 @@ export interface Instructors {
 	teachers: string[];
 }
 
-export type InstituteId = 'btn-digital-systems' | 'btn-architecture-design' | 'btn-civil-transport';
+export type InstituteId =
+	| 'btn-digital-systems'
+	| 'btn-architecture-design'
+	| 'btn-civil-transport'
+	| 'btn-chemistry';
 
 export type InstituteUrls = Record<InstituteId, string>;
 

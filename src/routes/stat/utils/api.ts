@@ -6,7 +6,9 @@ const STATS_URLS: Record<InstituteId, string> = {
 	'btn-architecture-design':
 		'https://script.google.com/macros/s/AKfycbyN0A6BDc-w1yUVLkn25J_fW7s3wpdaR6SgL6s3uBeUAfrBsxJb0pYKuWr3M03mkzGWrA/exec',
 	'btn-civil-transport':
-		'https://script.google.com/macros/s/AKfycbzbxLrOI2rA8ZzVfrT6RXIG5ADMl_5NdAQd8NEIYfg-qKkWVe_fGyB5pDolsCOtH14Mxw/exec'
+		'https://script.google.com/macros/s/AKfycbzbxLrOI2rA8ZzVfrT6RXIG5ADMl_5NdAQd8NEIYfg-qKkWVe_fGyB5pDolsCOtH14Mxw/exec',
+	'btn-chemistry':
+		'https://script.google.com/macros/s/AKfycbwF5HYRZ4k2Eg25VjtHgmlEznjyFOBRj2ZOqQch5z7f_mJ5rJ8LmfOzawS7Kwsv3xiZXg/exec'
 };
 
 const INSTRUCTOR_URLS: Record<InstituteId, string> = {
@@ -15,7 +17,9 @@ const INSTRUCTOR_URLS: Record<InstituteId, string> = {
 	'btn-architecture-design':
 		'https://script.google.com/macros/s/AKfycbxKdSyy9JZAlFfj8KivDJbDsWyOWy1yRzUSI2TYeGBLitVsbpBxbIAaw0sz3STy9mpu/exec',
 	'btn-civil-transport':
-		'https://script.google.com/macros/s/AKfycbzIby7Zm8Jk_LdtCQEPib4aYnvjqv1ucyH3a9aghfwNDu9QyMbCflmolCpd8uK-joPasw/exec'
+		'https://script.google.com/macros/s/AKfycbzIby7Zm8Jk_LdtCQEPib4aYnvjqv1ucyH3a9aghfwNDu9QyMbCflmolCpd8uK-joPasw/exec',
+	'btn-chemistry':
+		'https://script.google.com/macros/s/AKfycbwF5HYRZ4k2Eg25VjtHgmlEznjyFOBRj2ZOqQch5z7f_mJ5rJ8LmfOzawS7Kwsv3xiZXg/exec' // temp plug prepods link for chemistry institute
 };
 
 const TOP_ANTITOP_URLS: Record<InstituteId, string> = {
@@ -24,7 +28,9 @@ const TOP_ANTITOP_URLS: Record<InstituteId, string> = {
 	'btn-architecture-design':
 		'https://script.google.com/macros/s/AKfycbzC6yVUPqlPRubATCOV5GdcgeaFj8O42DSFuOORCVSm6BMki4tW3tCdrTE65C1PoqeDcQ/exec',
 	'btn-civil-transport':
-		'https://script.google.com/macros/s/AKfycbz_5IGSgCYpiJ8zCx7qkwCTj2IE_IN51TlPwi5HlqYUCpnTcQegAuC3vFACV1dUnFxp/exec'
+		'https://script.google.com/macros/s/AKfycbz_5IGSgCYpiJ8zCx7qkwCTj2IE_IN51TlPwi5HlqYUCpnTcQegAuC3vFACV1dUnFxp/exec',
+	'btn-chemistry':
+		'https://script.google.com/macros/s/AKfycbyouqWIqob_4OsQki4-zx4Qk3aPS4MkrbXxU3TXucSlRPFu0j5R6RbgfBHcT5uikgUF0w/exec'
 };
 
 const REFERRAL_API_URL =
