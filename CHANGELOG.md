@@ -1,3 +1,4 @@
+- migrate TopAntiTopSection to Tailwind CSS and improve design section and skeletons (ysturasp, 2025-10-09) [3 files changed, 22 insertions(+), 61 deletions(-)]
 - add chemistry institute support on statistics page (ysturasp, 2025-10-09) [6 files changed, 212 insertions(+), 7 deletions(-)]
 - add сlean param directives for week and semester parameters in robots.txt for improve seo (ysturasp, 2025-10-08) [3 files changed, 9 insertions(+), 1 deletion(-)]
 - mirror subgroups and add weekday-based distribution logic (ysturasp, 2025-10-08) [3 files changed, 45 insertions(+), 1 deletion(-)]

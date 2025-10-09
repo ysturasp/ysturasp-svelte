@@ -44,14 +44,14 @@
 						<div class="mb-2 h-5 w-4/5 animate-pulse rounded bg-gray-600"></div>
 						<div class="h-4 w-3/5 animate-pulse rounded bg-gray-600"></div>
 					</li>
-					<li class="mb-4 rounded-2xl bg-gray-900 p-4 shadow-md">
+					<li class="rounded-2xl bg-gray-900 p-4 shadow-md">
 						<div class="mb-2 h-5 w-4/5 animate-pulse rounded bg-gray-600"></div>
 						<div class="h-4 w-3/5 animate-pulse rounded bg-gray-600"></div>
 					</li>
 				{:else}
 					{#each top10 as item}
 						<li
-							class="mb-4 rounded-2xl bg-gray-900 p-4 shadow-md transition-all duration-300 hover:shadow-xl"
+							class="mb-4 rounded-2xl bg-gray-900 p-4 shadow-md transition-all duration-300 last:mb-0 hover:shadow-xl"
 						>
 							<div
 								class="cursor-pointer font-semibold text-emerald-500 transition-colors duration-200 hover:text-emerald-400"
@@ -84,14 +84,14 @@
 						<div class="mb-2 h-5 w-4/5 animate-pulse rounded bg-gray-600"></div>
 						<div class="h-4 w-3/5 animate-pulse rounded bg-gray-600"></div>
 					</li>
-					<li class="mb-4 rounded-2xl bg-gray-900 p-4 shadow-md">
+					<li class="rounded-2xl bg-gray-900 p-4 shadow-md">
 						<div class="mb-2 h-5 w-4/5 animate-pulse rounded bg-gray-600"></div>
 						<div class="h-4 w-3/5 animate-pulse rounded bg-gray-600"></div>
 					</li>
 				{:else}
 					{#each antitop10 as item}
 						<li
-							class="mb-4 rounded-2xl bg-gray-900 p-4 shadow-md transition-all duration-300 hover:shadow-xl"
+							class="mb-4 rounded-2xl bg-gray-900 p-4 shadow-md transition-all duration-300 last:mb-0 hover:shadow-xl"
 						>
 							<div
 								class="cursor-pointer font-semibold text-red-500 transition-colors duration-200 hover:text-red-400"
