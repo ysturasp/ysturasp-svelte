@@ -356,8 +356,8 @@ export function generateSubgroupDistribution(scheduleData: any, semester: Semest
 			const t1Dates = teacherToDates.get(t1) || [];
 			const t2Dates = teacherToDates.get(t2) || [];
 			if (t1Dates.length === t2Dates.length) {
-				assignAllForTeacher(t1, 2);
-				assignAllForTeacher(t2, 1);
+				assignAllForTeacher(t1, 1);
+				assignAllForTeacher(t2, 2);
 			} else {
 				regularDistribute();
 			}
@@ -473,10 +473,10 @@ export function generateSubgroupDistribution(scheduleData: any, semester: Semest
 				};
 			}
 
-			group1VUC.forEach((e) => add(e, 2));
-			group2VUC.forEach((e) => add(e, 1));
-			group1NonVUC.forEach((e) => add(e, 2));
-			group2NonVUC.forEach((e) => add(e, 1));
+			group1VUC.forEach((e) => add(e, 1));
+			group2VUC.forEach((e) => add(e, 2));
+			group1NonVUC.forEach((e) => add(e, 1));
+			group2NonVUC.forEach((e) => add(e, 2));
 		}
 
 		Object.entries(perTeacherDates).forEach(([teacher, dates]) => {
@@ -627,7 +627,26 @@ export function generateSubgroupDistribution(scheduleData: any, semester: Semest
 		if (!allLabs) return;
 		entries.sort((a, b) => a.lessonIndex - b.lessonIndex);
 		const used = new Set<number>();
-		used.add(entries[0].subgroup);
+
+		const firstEntry = entries[0];
+		const originalFirstSubgroup = firstEntry.subgroup;
+		const invertedFirstSubgroup: 1 | 2 = originalFirstSubgroup === 1 ? 2 : 1;
+
+		const firstCounts = groupCounts.get(firstEntry.groupKey);
+		if (firstCounts) {
+			teacherSubgroups[firstEntry.groupKey].dates[firstEntry.dateTimeKey].subgroup =
+				invertedFirstSubgroup;
+			if (invertedFirstSubgroup === 1) {
+				firstCounts.s1++;
+				firstCounts.s2--;
+			} else {
+				firstCounts.s2++;
+				firstCounts.s1--;
+			}
+			firstEntry.subgroup = invertedFirstSubgroup;
+		}
+
+		used.add(invertedFirstSubgroup);
 
 		function tryCompensate(
 			groupKey: string,
