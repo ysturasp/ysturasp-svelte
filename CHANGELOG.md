@@ -1,3 +1,4 @@
+- invert first subgroup in conflicting labs slots (ysturasp, 2025-10-10) [3 files changed, 28 insertions(+), 7 deletions(-)]
 - fix bottom margins for last element items (ysturasp, 2025-10-09) [3 files changed, 6 insertions(+), 4 deletions(-)]
 - migrate TopAntiTopSection to Tailwind CSS and improve design section and skeletons (ysturasp, 2025-10-09) [3 files changed, 22 insertions(+), 61 deletions(-)]
 - add chemistry institute support on statistics page (ysturasp, 2025-10-09) [6 files changed, 212 insertions(+), 7 deletions(-)]

@@ -621,10 +621,26 @@ export function generateSubgroupDistribution(scheduleData: any, semester: Semest
 		});
 	});
 
+	const parallelGroups = new Map<string, Set<string>>();
+	slotMap.forEach((entries, canonical) => {
+		if (entries.length >= 2) {
+			const allSubgroupTypes = entries.every((e) => isSubgroupType(e.type || 0));
+			if (allSubgroupTypes) {
+				const groupKeys = entries.map((e) => e.groupKey);
+				groupKeys.forEach((gk) => {
+					if (!parallelGroups.has(gk)) parallelGroups.set(gk, new Set());
+					groupKeys.forEach((otherGk) => {
+						if (gk !== otherGk) parallelGroups.get(gk)!.add(otherGk);
+					});
+				});
+			}
+		}
+	});
+
 	slotMap.forEach((entries) => {
 		if (entries.length < 2) return;
-		const allLabs = entries.every((e) => e.type === 8);
-		if (!allLabs) return;
+		const allSubgroupTypes = entries.every((e) => isSubgroupType(e.type || 0));
+		if (!allSubgroupTypes) return;
 		entries.sort((a, b) => a.lessonIndex - b.lessonIndex);
 		const used = new Set<number>();
 
@@ -656,59 +672,42 @@ export function generateSubgroupDistribution(scheduleData: any, semester: Semest
 			currentDtKey: string
 		): boolean {
 			const dates = teacherSubgroups[groupKey]?.dates || {};
-			for (const [dtKey, info] of Object.entries(dates)) {
-				const { dateObj, canonical } = canonicalizeDateTimeKey(dtKey);
-				if (!dateObj) continue;
-				const week = getWeekNumberByDate(dateObj, semester);
-				if (dtKey === currentDtKey) continue;
-				if (week > currentWeek && info.subgroup === desired) {
-					const entries = slotMap.get(canonical) || [];
-					let has1 = false;
-					let has2 = false;
-					for (const ent of entries) {
-						let sg = teacherSubgroups[ent.groupKey]?.dates?.[ent.dateTimeKey]?.subgroup;
-						if (ent.groupKey === groupKey && ent.dateTimeKey === dtKey) sg = current;
-						if (sg === 1) has1 = true;
-						if (sg === 2) has2 = true;
-					}
-					if (entries.length >= 2 && !(has1 && has2)) continue;
-					const cnt = groupCounts.get(groupKey)!;
-					if (desired === 1) {
-						cnt.s1--;
-						cnt.s2++;
-					} else {
-						cnt.s2--;
-						cnt.s1++;
-					}
-					teacherSubgroups[groupKey].dates[dtKey].subgroup = current;
-					return true;
+			const sortedDates = Object.entries(dates)
+				.map(([dtKey, info]) => {
+					const { dateObj } = canonicalizeDateTimeKey(dtKey);
+					const week = dateObj ? getWeekNumberByDate(dateObj, semester) : 0;
+					return { dtKey, info, week, dateObj };
+				})
+				.filter((d) => d.dateObj && d.dtKey !== currentDtKey)
+				.sort((a, b) => b.week - a.week);
+
+			for (const d of sortedDates) {
+				if (d.info.subgroup !== desired) continue;
+				const { canonical } = canonicalizeDateTimeKey(d.dtKey);
+				const entries = slotMap.get(canonical) || [];
+				const subgroupEntries = entries.filter((e) => {
+					const info = teacherSubgroups[e.groupKey]?.dates?.[e.dateTimeKey];
+					return info && isSubgroupType(info.type || 0);
+				});
+				let has1 = false;
+				let has2 = false;
+				for (const ent of subgroupEntries) {
+					let sg = teacherSubgroups[ent.groupKey]?.dates?.[ent.dateTimeKey]?.subgroup;
+					if (ent.groupKey === groupKey && ent.dateTimeKey === d.dtKey) sg = current;
+					if (sg === 1) has1 = true;
+					if (sg === 2) has2 = true;
 				}
-			}
-			for (const [dtKey, info] of Object.entries(dates)) {
-				if (dtKey === currentDtKey) continue;
-				if (info.subgroup === desired) {
-					const { canonical } = canonicalizeDateTimeKey(dtKey);
-					const entries = slotMap.get(canonical) || [];
-					let has1 = false;
-					let has2 = false;
-					for (const ent of entries) {
-						let sg = teacherSubgroups[ent.groupKey]?.dates?.[ent.dateTimeKey]?.subgroup;
-						if (ent.groupKey === groupKey && ent.dateTimeKey === dtKey) sg = current;
-						if (sg === 1) has1 = true;
-						if (sg === 2) has2 = true;
-					}
-					if (entries.length >= 2 && !(has1 && has2)) continue;
-					const cnt = groupCounts.get(groupKey)!;
-					if (desired === 1) {
-						cnt.s1--;
-						cnt.s2++;
-					} else {
-						cnt.s2--;
-						cnt.s1++;
-					}
-					teacherSubgroups[groupKey].dates[dtKey].subgroup = current;
-					return true;
+				if (subgroupEntries.length >= 2 && !(has1 && has2)) continue;
+				const cnt = groupCounts.get(groupKey)!;
+				if (desired === 1) {
+					cnt.s1--;
+					cnt.s2++;
+				} else {
+					cnt.s2--;
+					cnt.s1++;
 				}
+				teacherSubgroups[groupKey].dates[d.dtKey].subgroup = current;
+				return true;
 			}
 			return false;
 		}
@@ -750,19 +749,229 @@ export function generateSubgroupDistribution(scheduleData: any, semester: Semest
 		}
 	});
 
+	parallelGroups.forEach((parallelWith, groupKey) => {
+		const dates = teacherSubgroups[groupKey]?.dates;
+		if (!dates) return;
+		const sortedDates = Object.entries(dates)
+			.map(([dtKey, info]) => {
+				const { dateObj } = canonicalizeDateTimeKey(dtKey);
+				return { dtKey, info, dateObj, date: dateObj?.getTime() || 0 };
+			})
+			.filter((d) => d.dateObj)
+			.sort((a, b) => a.date - b.date);
+
+		sortedDates.forEach((current, idx) => {
+			const { canonical } = canonicalizeDateTimeKey(current.dtKey);
+			const slotEntries = slotMap.get(canonical) || [];
+			if (slotEntries.length < 2) return;
+			const parallelEntry = slotEntries.find((e) => e.groupKey !== groupKey);
+			if (!parallelEntry) return;
+			const parallelSubgroup =
+				teacherSubgroups[parallelEntry.groupKey]?.dates?.[parallelEntry.dateTimeKey]
+					?.subgroup;
+			if (!parallelSubgroup) return;
+			const expectedSubgroup: 1 | 2 = parallelSubgroup === 1 ? 2 : 1;
+			if (current.info.subgroup === expectedSubgroup) return;
+			if (idx === 0) return;
+			const prev = sortedDates[idx - 1];
+			const prevSubgroup = prev.info.subgroup;
+			if (prevSubgroup === expectedSubgroup) {
+				if (canFlipWithoutSlotConflict(groupKey, current.dtKey, expectedSubgroup)) {
+					const cnt = groupCounts.get(groupKey);
+					if (cnt) {
+						if (expectedSubgroup === 1) {
+							cnt.s1++;
+							cnt.s2--;
+						} else {
+							cnt.s2++;
+							cnt.s1--;
+						}
+					}
+					teacherSubgroups[groupKey].dates[current.dtKey].subgroup = expectedSubgroup;
+				}
+			}
+		});
+	});
+
+	const processedSlots = new Set<string>();
+	const groupPatterns = new Map<string, { startWith: 1 | 2; partnerKeys: Set<string> }>();
+	slotMap.forEach((entries, canonical) => {
+		if (entries.length < 2 || processedSlots.has(canonical)) return;
+		const allSubgroupTypes = entries.every((e) => isSubgroupType(e.type || 0));
+		if (!allSubgroupTypes) return;
+		processedSlots.add(canonical);
+		const groups = entries.map((e) => e.groupKey);
+		if (groups.length !== 2) return;
+		const [group1Key, group2Key] = groups;
+		if (!groupPatterns.has(group1Key)) {
+			groupPatterns.set(group1Key, { startWith: 2, partnerKeys: new Set() });
+		}
+		if (!groupPatterns.has(group2Key)) {
+			groupPatterns.set(group2Key, { startWith: 1, partnerKeys: new Set() });
+		}
+		groupPatterns.get(group1Key)!.partnerKeys.add(group2Key);
+		groupPatterns.get(group2Key)!.partnerKeys.add(group1Key);
+		const dates1 = teacherSubgroups[group1Key]?.dates;
+		const dates2 = teacherSubgroups[group2Key]?.dates;
+		if (!dates1 || !dates2) return;
+		const sorted1 = Object.entries(dates1)
+			.map(([dtKey, info]) => {
+				const { dateObj, canonical } = canonicalizeDateTimeKey(dtKey);
+				return { dtKey, info, dateObj, date: dateObj?.getTime() || 0, canonical };
+			})
+			.filter((d) => d.dateObj)
+			.sort((a, b) => a.date - b.date);
+		const sorted2 = Object.entries(dates2)
+			.map(([dtKey, info]) => {
+				const { dateObj, canonical } = canonicalizeDateTimeKey(dtKey);
+				return { dtKey, info, dateObj, date: dateObj?.getTime() || 0, canonical };
+			})
+			.filter((d) => d.dateObj)
+			.sort((a, b) => a.date - b.date);
+		const parallelDates = sorted1
+			.map((d1) => {
+				const d2 = sorted2.find((d) => d.canonical === d1.canonical);
+				return d2 ? { d1, d2, date: d1.date, canonical: d1.canonical } : null;
+			})
+			.filter((p) => p !== null)
+			.sort((a, b) => a!.date - b!.date);
+		let expectedPattern: Array<[1 | 2, 1 | 2]> = [];
+		if (parallelDates.length > 0) {
+			const first = parallelDates[0]!;
+			const firstSubgroup1 = first.d1.info.subgroup;
+			const firstSubgroup2 = first.d2.info.subgroup;
+			groupPatterns.get(group1Key)!.startWith = firstSubgroup1;
+			groupPatterns.get(group2Key)!.startWith = firstSubgroup2;
+			for (let i = 0; i < parallelDates.length; i++) {
+				if (i % 2 === 0) {
+					expectedPattern.push([firstSubgroup1, firstSubgroup2]);
+				} else {
+					expectedPattern.push([
+						firstSubgroup1 === 1 ? 2 : 1,
+						firstSubgroup2 === 1 ? 2 : 1
+					]);
+				}
+			}
+		}
+		parallelDates.forEach((pair, idx) => {
+			if (!pair) return;
+			const [expected1, expected2] = expectedPattern[idx];
+			const current1 = pair.d1.info.subgroup;
+			const current2 = pair.d2.info.subgroup;
+			if (current1 !== current2) return;
+			if (current1 === expected1) {
+				if (canFlipWithoutSlotConflict(group2Key, pair.d2.dtKey, expected2)) {
+					const cnt = groupCounts.get(group2Key);
+					if (cnt) {
+						if (expected2 === 1) {
+							cnt.s1++;
+							cnt.s2--;
+						} else {
+							cnt.s2++;
+							cnt.s1--;
+						}
+					}
+					teacherSubgroups[group2Key].dates[pair.d2.dtKey].subgroup = expected2;
+				}
+			} else if (current2 === expected2) {
+				if (canFlipWithoutSlotConflict(group1Key, pair.d1.dtKey, expected1)) {
+					const cnt = groupCounts.get(group1Key);
+					if (cnt) {
+						if (expected1 === 1) {
+							cnt.s1++;
+							cnt.s2--;
+						} else {
+							cnt.s2++;
+							cnt.s1--;
+						}
+					}
+					teacherSubgroups[group1Key].dates[pair.d1.dtKey].subgroup = expected1;
+				}
+			} else {
+				if (canFlipWithoutSlotConflict(group1Key, pair.d1.dtKey, expected1)) {
+					const cnt = groupCounts.get(group1Key);
+					if (cnt) {
+						if (expected1 === 1) {
+							cnt.s1++;
+							cnt.s2--;
+						} else {
+							cnt.s2++;
+							cnt.s1--;
+						}
+					}
+					teacherSubgroups[group1Key].dates[pair.d1.dtKey].subgroup = expected1;
+				}
+			}
+		});
+	});
+
+	groupPatterns.forEach((pattern, groupKey) => {
+		const dates = teacherSubgroups[groupKey]?.dates;
+		if (!dates) return;
+		const sorted = Object.entries(dates)
+			.map(([dtKey, info]) => {
+				const { dateObj } = canonicalizeDateTimeKey(dtKey);
+				return { dtKey, info, dateObj, date: dateObj?.getTime() || 0 };
+			})
+			.filter((d) => d.dateObj)
+			.sort((a, b) => a.date - b.date);
+		sorted.forEach((current, idx) => {
+			const expected: 1 | 2 =
+				idx % 2 === 0 ? pattern.startWith : pattern.startWith === 1 ? 2 : 1;
+			if (current.info.subgroup === expected) return;
+			const { canonical } = canonicalizeDateTimeKey(current.dtKey);
+			const slotEntries = slotMap.get(canonical) || [];
+			const subgroupSlotEntries = slotEntries.filter((e) => {
+				const info = teacherSubgroups[e.groupKey]?.dates?.[e.dateTimeKey];
+				return info && isSubgroupType(info.type || 0);
+			});
+			if (subgroupSlotEntries.length >= 2) {
+				const hasConflict = subgroupSlotEntries.some((e) => {
+					if (e.groupKey === groupKey) return false;
+					const sg = teacherSubgroups[e.groupKey]?.dates?.[e.dateTimeKey]?.subgroup;
+					return sg === expected;
+				});
+				if (hasConflict) return;
+			}
+			if (canFlipWithoutSlotConflict(groupKey, current.dtKey, expected)) {
+				const cnt = groupCounts.get(groupKey);
+				if (cnt) {
+					const newS1 =
+						cnt.s1 + (expected === 1 ? 1 : 0) - (current.info.subgroup === 1 ? 1 : 0);
+					const newS2 =
+						cnt.s2 + (expected === 2 ? 1 : 0) - (current.info.subgroup === 2 ? 1 : 0);
+					const newDiff = Math.abs(newS1 - newS2);
+					if (newDiff > 1) return;
+					if (expected === 1) {
+						cnt.s1++;
+						cnt.s2--;
+					} else {
+						cnt.s2++;
+						cnt.s1--;
+					}
+				}
+				teacherSubgroups[groupKey].dates[current.dtKey].subgroup = expected;
+			}
+		});
+	});
+
 	function canFlipWithoutSlotConflict(
 		groupKey: string,
 		dtKey: string,
 		newSubgroup: 1 | 2
 	): boolean {
 		const currentInfo = teacherSubgroups[groupKey]?.dates?.[dtKey];
-		if (!currentInfo || currentInfo.type !== 8) return true;
+		if (!currentInfo || !isSubgroupType(currentInfo.type || 0)) return true;
 		const { canonical } = canonicalizeDateTimeKey(dtKey);
 		const entries = slotMap.get(canonical) || [];
-		if (entries.length < 2) return true;
+		const subgroupEntries = entries.filter((e) => {
+			const info = teacherSubgroups[e.groupKey]?.dates?.[e.dateTimeKey];
+			return info && isSubgroupType(info.type || 0);
+		});
+		if (subgroupEntries.length < 2) return true;
 		let has1 = false;
 		let has2 = false;
-		for (const ent of entries) {
+		for (const ent of subgroupEntries) {
 			let sg = teacherSubgroups[ent.groupKey]?.dates?.[ent.dateTimeKey]?.subgroup;
 			if (ent.groupKey === groupKey && ent.dateTimeKey === dtKey) sg = newSubgroup;
 			if (sg === 1) has1 = true;
@@ -804,10 +1013,10 @@ export function generateSubgroupDistribution(scheduleData: any, semester: Semest
 				if (arr.length < 2) return;
 				arr.sort();
 				const keys = arr.map((k) => k);
-				const allLabs = keys
+				const allSubgroupTypes = keys
 					.map((k) => teacherSubgroups[gKey].dates[k]?.type)
-					.every((t) => t === 8);
-				if (!allLabs) return;
+					.every((t) => isSubgroupType(t || 0));
+				if (!allSubgroupTypes) return;
 				const subs = keys.map((k) => teacherSubgroups[gKey].dates[k]?.subgroup);
 				const set = new Set(subs.filter((x) => x === 1 || x === 2));
 				if (set.size >= 2) return;
@@ -837,31 +1046,102 @@ export function generateSubgroupDistribution(scheduleData: any, semester: Semest
 
 	enforcePerDayBothSubgroups();
 
-	Object.keys(teacherSubgroups).forEach((gKey) => {
-		const dates = teacherSubgroups[gKey].dates;
+	const byDisplayName = new Map<string, string[]>();
+	Object.entries(teacherSubgroups).forEach(([gKey, data]) => {
+		const name = data.displayName;
+		if (!byDisplayName.has(name)) byDisplayName.set(name, []);
+		byDisplayName.get(name)!.push(gKey);
+	});
+
+	byDisplayName.forEach((groupKeys) => {
+		const allDates: Array<{ gKey: string; dtKey: string; info: SubgroupInfo }> = [];
+		groupKeys.forEach((gKey) => {
+			const dates = teacherSubgroups[gKey].dates;
+			Object.entries(dates).forEach(([dtKey, info]) => {
+				allDates.push({ gKey, dtKey, info });
+			});
+		});
+
 		const counts = { s1: 0, s2: 0 };
-		Object.values(dates).forEach((info) => {
+		allDates.forEach(({ info }) => {
 			if (info.subgroup === 1) counts.s1++;
 			else if (info.subgroup === 2) counts.s2++;
 		});
+
+		if (counts.s1 === 0 || counts.s2 === 0) {
+			const targetSubgroup: 1 | 2 = counts.s1 === 0 ? 1 : 2;
+			const half = Math.floor(allDates.length / 2);
+			const sortedDates = allDates
+				.map((item) => ({
+					...item,
+					dateObj: (() => {
+						const { dateObj } = canonicalizeDateTimeKey(item.dtKey);
+						return dateObj;
+					})()
+				}))
+				.filter((d) => d.dateObj)
+				.sort((a, b) => a.dateObj!.getTime() - b.dateObj!.getTime());
+
+			sortedDates.forEach((d, idx) => {
+				if (idx < half) {
+					teacherSubgroups[d.gKey].dates[d.dtKey].subgroup = targetSubgroup;
+					d.info.subgroup = targetSubgroup;
+				}
+			});
+
+			counts.s1 = targetSubgroup === 1 ? half : allDates.length - half;
+			counts.s2 = targetSubgroup === 2 ? half : allDates.length - half;
+		}
+
+		const sortedByDate = allDates
+			.map((item) => ({
+				...item,
+				dateObj: (() => {
+					const { dateObj } = canonicalizeDateTimeKey(item.dtKey);
+					return dateObj;
+				})()
+			}))
+			.filter((d) => d.dateObj)
+			.sort((a, b) => a.dateObj!.getTime() - b.dateObj!.getTime());
+
+		for (let i = 1; i < sortedByDate.length; i++) {
+			const prev = sortedByDate[i - 1];
+			const curr = sortedByDate[i];
+			if (prev.info.subgroup === curr.info.subgroup) {
+				const flipTo: 1 | 2 = curr.info.subgroup === 1 ? 2 : 1;
+				if (canFlipWithoutSlotConflict(curr.gKey, curr.dtKey, flipTo)) {
+					const newS1 = counts.s1 + (flipTo === 1 ? 1 : -1);
+					const newS2 = counts.s2 + (flipTo === 2 ? 1 : -1);
+					if (Math.abs(newS1 - newS2) <= 1) {
+						teacherSubgroups[curr.gKey].dates[curr.dtKey].subgroup = flipTo;
+						curr.info.subgroup = flipTo;
+						counts.s1 = newS1;
+						counts.s2 = newS2;
+					}
+				}
+			}
+		}
+
 		while (Math.abs(counts.s1 - counts.s2) > 1) {
 			const flipFrom: 1 | 2 = counts.s1 > counts.s2 ? 1 : 2;
 			const flipTo: 1 | 2 = flipFrom === 1 ? 2 : 1;
 			let flipped = false;
-			const dateEntries = Object.keys(dates)
-				.map((k) => ({
-					k,
+
+			const sortedDates = allDates
+				.filter(({ info }) => info.subgroup === flipFrom)
+				.map((item) => ({
+					...item,
 					week: (() => {
-						const { dateObj } = canonicalizeDateTimeKey(k);
+						const { dateObj } = canonicalizeDateTimeKey(item.dtKey);
 						return dateObj ? getWeekNumberByDate(dateObj, semester) : 0;
 					})()
 				}))
 				.sort((a, b) => b.week - a.week);
-			for (const d of dateEntries) {
-				const info = dates[d.k];
-				if (!info || info.subgroup !== flipFrom) continue;
-				if (!canFlipWithoutSlotConflict(gKey, d.k, flipTo)) continue;
-				dates[d.k].subgroup = flipTo;
+
+			for (const d of sortedDates) {
+				if (!canFlipWithoutSlotConflict(d.gKey, d.dtKey, flipTo)) continue;
+				teacherSubgroups[d.gKey].dates[d.dtKey].subgroup = flipTo;
+				d.info.subgroup = flipTo;
 				if (flipFrom === 1) {
 					counts.s1--;
 					counts.s2++;
