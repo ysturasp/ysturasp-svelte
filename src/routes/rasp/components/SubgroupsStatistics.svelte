@@ -59,20 +59,58 @@
 		);
 	}
 
-	$: hasUnbalancedDistribution = stats.some((stat) => {
-		const totalCount = stat.subgroup1Count + stat.subgroup2Count;
-		const diff = Math.abs(stat.subgroup1Count - stat.subgroup2Count);
-		if (totalCount > 1 && diff > 1) {
-			console.log('Unbalanced distribution found:', {
-				subject: stat.subject,
-				subgroup1: stat.subgroup1Count,
-				subgroup2: stat.subgroup2Count,
-				diff
-			});
-			return true;
-		}
-		return false;
-	});
+	$: unbalancedSubjects = stats
+		.filter((stat) => {
+			const totalCount = stat.subgroup1Count + stat.subgroup2Count;
+			const diff = Math.abs(stat.subgroup1Count - stat.subgroup2Count);
+			return totalCount > 1 && diff > 1;
+		})
+		.map((stat) => {
+			const teacherCount = stat.teachers.length;
+			const hasVUC = stat.vucCount > 0;
+			const diff = Math.abs(stat.subgroup1Count - stat.subgroup2Count);
+
+			const currentDates = stat.dates.map((d) => `${d.date}_${d.time}`);
+			const parallelSubjects = stats
+				.filter((s) => s.subject !== stat.subject)
+				.filter((s) => {
+					const otherDates = s.dates.map((d) => `${d.date}_${d.time}`);
+					return currentDates.some((cd) => otherDates.includes(cd));
+				});
+
+			const reasons = [];
+
+			reasons.push(
+				`1-я подгруппа: ${stat.subgroup1Count} ${pluralize(stat.subgroup1Count, 'занятие', 'занятия', 'занятий')}, 2-я: ${stat.subgroup2Count} ${pluralize(stat.subgroup2Count, 'занятие', 'занятия', 'занятий')}`
+			);
+
+			if (parallelSubjects.length === 0) {
+				if (teacherCount === 1) {
+					reasons.push('без параллелей');
+				} else if (teacherCount === 2) {
+					reasons.push('2 преподавателя, без параллелей');
+				} else {
+					reasons.push(`${teacherCount} преподавателей, без параллелей`);
+				}
+			} else if (parallelSubjects.length === 1) {
+				reasons.push(`параллель с "${parallelSubjects[0].subject}"`);
+			} else {
+				reasons.push(`параллель с ${parallelSubjects.length} предметами`);
+			}
+
+			if (hasVUC) {
+				reasons.push(
+					`${stat.vucCount} ${pluralize(stat.vucCount, 'день', 'дня', 'дней')} с ВУЦ`
+				);
+			}
+
+			return {
+				...stat,
+				reasons
+			};
+		});
+
+	$: hasUnbalancedDistribution = unbalancedSubjects.length > 0;
 
 	let showTableModal = false;
 	let isMobile = false;
@@ -418,10 +456,10 @@
 		</div>
 
 		{#if hasUnbalancedDistribution}
-			<div class="rounded-lg bg-red-900/50 p-6 text-center">
-				<div class="flex flex-col items-center gap-4">
+			<div class="mb-3 rounded-lg border border-orange-500/50 bg-orange-900/30 p-3">
+				<div class="flex flex-col items-center md:flex-row md:gap-2">
 					<svg
-						class="h-12 w-12 text-red-500"
+						class="h-6 w-6 flex-shrink-0 text-orange-400 md:mt-0.5 md:h-5 md:w-5"
 						fill="none"
 						stroke="currentColor"
 						viewBox="0 0 24 24"
@@ -433,29 +471,37 @@
 							d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
 						/>
 					</svg>
-					<h3 class="text-xl font-bold text-white">
-						Обнаружено неравномерное распределение подгрупп
-					</h3>
-					<p class="text-gray-300">
-						Произошел сбой в алгоритме распределения. Пожалуйста, обновите страницу.
-					</p>
-					<button
-						on:click={() => location.reload()}
-						class="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-white transition-all hover:bg-blue-700"
-					>
-						<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-							/>
-						</svg>
-						Обновить страницу
-					</button>
+					<div class="flex-1 text-center md:text-left">
+						<p class="text-sm font-medium text-orange-300">
+							Кажется отдел расписания накосячил — нет возможности распределить
+							оптимально
+						</p>
+						<div class="mt-1 space-y-1.5">
+							{#each unbalancedSubjects as item}
+								<div>
+									<div class="text-sm font-medium text-orange-200">
+										{item.subject}
+									</div>
+									<div class="space-y-0.5 text-xs">
+										{#each item.reasons as reason, i}
+											<div
+												class={i === 0
+													? 'font-medium text-orange-200'
+													: 'text-orange-400/70'}
+											>
+												{reason}
+											</div>
+										{/each}
+									</div>
+								</div>
+							{/each}
+						</div>
+					</div>
 				</div>
 			</div>
-		{:else if stats.length > 0}
+		{/if}
+
+		{#if stats.length > 0}
 			<Carousel.Root
 				opts={{
 					align: 'center',
