@@ -1,3 +1,4 @@
+- add page for generate ideas for diplom project (ysturasp, 2025-10-12) [5 files changed, 698 insertions(+), 1 deletion(-)]
 - improve unbalanced distribution warning UI (ysturasp, 2025-10-11) [3 files changed, 86 insertions(+), 38 deletions(-)]
 - improve logic for distrubute lessons with collisions (ysturasp, 2025-10-11) [3 files changed, 353 insertions(+), 71 deletions(-)]
 - invert first subgroup in conflicting labs slots (ysturasp, 2025-10-10) [3 files changed, 28 insertions(+), 7 deletions(-)]

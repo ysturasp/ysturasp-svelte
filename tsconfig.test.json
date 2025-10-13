@@ -1,0 +1,9 @@
+{
+	"extends": "./tsconfig.json",
+	"compilerOptions": {
+		"paths": {
+			"$app/environment": ["./tests/mocks.ts"],
+			"$lib/*": ["./src/lib/*"]
+		}
+	}
+}

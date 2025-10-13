@@ -11,7 +11,9 @@
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"changelog": "./scripts/generate-changelog.sh",
-		"changelog:install-hooks": "./scripts/install-hooks.sh"
+		"changelog:install-hooks": "./scripts/install-hooks.sh",
+		"test:subgroups": "tsx --tsconfig tsconfig.test.json tests/subgroups-distribution.test.ts",
+		"test:subgroups:group": "tsx --tsconfig tsconfig.test.json tests/subgroups-distribution.test.ts"
 	},
 	"devDependencies": {
 		"@dnd-kit-svelte/core": "^0.0.8",
@@ -44,6 +46,7 @@
 		"tailwind-merge": "^3.3.1",
 		"tailwind-variants": "^1.0.0",
 		"tailwindcss": "^4.0.0",
+		"tsx": "^4.20.6",
 		"tw-animate-css": "^1.3.5",
 		"typescript": "^5.0.0",
 		"vaul-svelte": "^1.0.0-next.7",
