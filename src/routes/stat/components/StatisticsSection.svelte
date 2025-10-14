@@ -87,6 +87,10 @@
 		displayValue: discipline
 	}));
 
+	$: if (selectedDiscipline) {
+		getStatistics();
+	}
+
 	function handleInstituteChange(institute: InstituteId) {
 		selectedInstitute = institute;
 		switch (institute) {
