@@ -4,6 +4,7 @@
 	import CopyLinkButton from '$lib/components/ui/CopyLinkButton.svelte';
 	import CalendarExportModal from './CalendarExportModal.svelte';
 	import NotificationSettingsModal from './NotificationSettingsModal.svelte';
+	import { hiddenSubjects } from '../stores';
 	import {
 		SEMESTER_WEEKS_COUNT,
 		formatWeekStartDate,
@@ -305,6 +306,7 @@
 		isOpen={isNotificationModalOpen}
 		onClose={() => (isNotificationModalOpen = false)}
 		groupName={selectedGroup}
+		hiddenSubjects={$hiddenSubjects[selectedGroup] || []}
 	/>
 
 	{#if favoriteGroups.length > 0}

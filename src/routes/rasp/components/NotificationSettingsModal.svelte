@@ -8,6 +8,7 @@
 	export let isOpen = false;
 	export let onClose: () => void;
 	export let groupName = '';
+	export let hiddenSubjects: any[] = [];
 
 	let isLoading = false;
 	let isTelegramMiniApp = false;
@@ -19,6 +20,7 @@
 	let selectedMinutes = 15;
 	let allSubscriptions: any[] = [];
 	let isCurrentGroupSubscribed = false;
+	let excludeHiddenSubjects = true;
 
 	const timeOptions = [
 		{ minutes: 5, label: '5 мин' },
@@ -56,13 +58,16 @@
 				if (groupSubscription) {
 					selectedMinutes = groupSubscription.notifyMinutes;
 					isCurrentGroupSubscribed = true;
+					excludeHiddenSubjects = groupSubscription.excludeHidden !== false;
 				} else {
 					selectedMinutes = 15;
 					isCurrentGroupSubscribed = false;
+					excludeHiddenSubjects = true;
 				}
 			} else if (groupName) {
 				selectedMinutes = 15;
 				isCurrentGroupSubscribed = false;
+				excludeHiddenSubjects = true;
 			}
 		} catch (error) {
 		} finally {
@@ -75,7 +80,13 @@
 
 		isLoading = true;
 		try {
-			const success = await toggleNotifications(groupName, selectedMinutes);
+			const subjectsToExclude = excludeHiddenSubjects ? hiddenSubjects : null;
+			const success = await toggleNotifications(
+				groupName,
+				selectedMinutes,
+				subjectsToExclude,
+				true
+			);
 			if (success) {
 				triggerHapticFeedback('success');
 				await loadNotificationStatus();
@@ -212,6 +223,25 @@
 						{/each}
 					</div>
 
+					{#if hiddenSubjects.length > 0}
+						<div class="mb-4 rounded-lg bg-slate-700 p-3">
+							<div class="flex items-center justify-between">
+								<div class="flex-1">
+									<p class="text-sm font-medium text-white">
+										Исключить скрытые предметы
+									</p>
+									<p class="text-xs text-gray-400">
+										Не уведомлять о {hiddenSubjects.length} скрытых предметах
+									</p>
+								</div>
+								<label class="switch">
+									<input type="checkbox" bind:checked={excludeHiddenSubjects} />
+									<span class="slider round"></span>
+								</label>
+							</div>
+						</div>
+					{/if}
+
 					<div class="flex gap-2">
 						<button
 							on:click={handleSave}
@@ -288,3 +318,59 @@
 		</div>
 	{/if}
 </BottomModal>
+
+<style>
+	.switch {
+		position: relative;
+		display: inline-block;
+		width: 34px;
+		height: 20px;
+		flex-shrink: 0;
+	}
+
+	.switch input {
+		opacity: 0;
+		width: 0;
+		height: 0;
+	}
+
+	.slider {
+		position: absolute;
+		cursor: pointer;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		background-color: #ccc;
+		transition: 0.4s;
+		border-radius: 34px;
+	}
+
+	.slider:before {
+		position: absolute;
+		content: '';
+		height: 14px;
+		width: 14px;
+		left: 3px;
+		bottom: 3px;
+		background-color: white;
+		transition: 0.4s;
+		border-radius: 50%;
+	}
+
+	input:checked + .slider {
+		background-color: #2196f3;
+	}
+
+	input:checked + .slider:before {
+		transform: translateX(14px);
+	}
+
+	.slider.round {
+		border-radius: 34px;
+	}
+
+	.slider.round:before {
+		border-radius: 50%;
+	}
+</style>

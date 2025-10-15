@@ -2,7 +2,7 @@ import { browser } from '$app/environment';
 import { checkIsTelegramMiniApp } from '$lib/utils/telegram';
 
 const NOTIFICATIONS_API_URL =
-	'https://script.google.com/macros/s/AKfycbyprE0K771nbi8Q1hkA1xEyC0cyRxC1osM5491bYrjWFdrU4hoLTNMHYYWZbfyyDZcw/exec';
+	'https://script.google.com/macros/s/AKfycbyq0S8qcn3lenfSs8nNIo-5c_DQdrqDRdj05MSIF-G1dsuBSUdlDm5mi3fVXlj4QYc6/exec';
 
 function getTelegramUserData(): { id: string; username?: string } | null {
 	const tg = (window as any).Telegram?.WebApp;
@@ -46,6 +46,8 @@ function getTelegramUserData(): { id: string; username?: string } | null {
 export interface NotificationSubscription {
 	groupName: string;
 	notifyMinutes: number;
+	hiddenSubjects?: any[];
+	excludeHidden?: boolean;
 }
 
 export interface NotificationStatus {
@@ -119,7 +121,9 @@ export async function checkNotificationStatus(
 
 export async function toggleNotifications(
 	groupName: string,
-	notifyMinutes: number = 0
+	notifyMinutes: number = 0,
+	hiddenSubjects: any[] | null = null,
+	update: boolean = false
 ): Promise<boolean> {
 	if (!browser) {
 		return false;
@@ -146,7 +150,9 @@ export async function toggleNotifications(
 				userId: userData.id,
 				username: userData.username || 'admin',
 				groupName: groupName,
-				notifyMinutes: notifyMinutes.toString()
+				notifyMinutes: notifyMinutes.toString(),
+				hiddenSubjects: hiddenSubjects || [],
+				update: update
 			})
 		});
 

@@ -1,3 +1,4 @@
+- add subtitle for notification settings modal (ysturasp, 2025-10-15) [3 files changed, 8 insertions(+), 1 deletion(-)]
 - update url web support requests (ysturasp, 2025-10-15) [3 files changed, 3 insertions(+), 1 deletion(-)]
 - add support subscribe on notify by lessons in telegram mini app and improve style hot buttons (ysturasp, 2025-10-15) [6 files changed, 485 insertions(+), 3 deletions(-)]
 - add auto request with select discipline in name search input (ysturasp, 2025-10-14) [3 files changed, 6 insertions(+)]
