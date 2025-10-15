@@ -31,7 +31,7 @@
 	}
 
 	const SCRIPT_URL =
-		'https://script.google.com/macros/s/AKfycbw-QqacFR3FisIJC9jl0yOgfZaa27CsxDktotciI0UbLj4sSvJTrUEtk9nyPQU5a5diFg/exec';
+		'https://script.google.com/macros/s/AKfycbyprE0K771nbi8Q1hkA1xEyC0cyRxC1osM5491bYrjWFdrU4hoLTNMHYYWZbfyyDZcw/exec';
 
 	async function encryptMessage(msg: string): Promise<string> {
 		const response = await fetch('/api/encrypt', {
