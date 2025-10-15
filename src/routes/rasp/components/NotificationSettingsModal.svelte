@@ -283,17 +283,17 @@
 								class="flex items-center justify-between rounded-lg bg-slate-700 p-3"
 							>
 								<div>
-									<p class="font-medium text-white">{subscription.groupName}</p>
+									<p class="font-medium text-white">
+										{subscription.groupName}
+										{#if groupName === subscription.groupName}
+											<span class="text-blue-400">(текущая)</span>
+										{/if}
+									</p>
 									<p class="text-sm text-gray-400">
 										За {subscription.notifyMinutes} минут до начала
 									</p>
 								</div>
 								<div class="flex items-center gap-2">
-									{#if groupName === subscription.groupName}
-										<span class="text-sm font-medium text-blue-400"
-											>Текущая группа</span
-										>
-									{/if}
 									<button
 										on:click={() =>
 											handleUnsubscribeGroup(subscription.groupName)}
