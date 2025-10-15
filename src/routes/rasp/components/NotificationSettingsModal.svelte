@@ -149,7 +149,12 @@
 	}
 </script>
 
-<BottomModal {isOpen} title="Настройка уведомлений" {onClose}>
+<BottomModal
+	{isOpen}
+	title="Настройка уведомлений"
+	subtitle="Убедитесь, что взаимодействовали с ботом хотя бы один раз и он не заблокирован"
+	{onClose}
+>
 	{#if isLoading}
 		<div class="flex items-center justify-center py-8">
 			<div class="h-8 w-8 animate-spin rounded-full border-b-2 border-white"></div>
