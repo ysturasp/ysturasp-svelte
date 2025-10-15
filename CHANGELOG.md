@@ -1,3 +1,4 @@
+- add auto request with select discipline in name search input (ysturasp, 2025-10-14) [3 files changed, 6 insertions(+)]
 - add dot for view emoji in search system (ysturasp, 2025-10-13) [3 files changed, 3 insertions(+), 1 deletion(-)]
 - add tests for check right distribute lessons by subgroup for all groups (ysturasp, 2025-10-13) [7 files changed, 469 insertions(+), 1 deletion(-)]
 - add page for generate ideas for diplom project (ysturasp, 2025-10-12) [5 files changed, 698 insertions(+), 1 deletion(-)]

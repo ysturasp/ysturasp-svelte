@@ -66,7 +66,7 @@
 
 <button
 	type="button"
-	class="flex h-8 items-center gap-1 rounded-lg bg-slate-700 px-1.5 text-[11px] text-blue-400 transition-all hover:bg-slate-600 disabled:cursor-not-allowed disabled:opacity-50 {className}"
+	class="flex h-12 flex-col items-center justify-center gap-0.5 rounded-lg bg-slate-700 px-1.5 text-[10px] text-blue-400 transition-all hover:bg-slate-600 disabled:cursor-not-allowed disabled:opacity-50 sm:h-8 sm:flex-row sm:items-center sm:gap-1 sm:text-[11px] {className}"
 	on:click={copyLink}
 	{disabled}
 >

@@ -3,13 +3,17 @@
 	import CustomSelect from '$lib/components/ui/CustomSelect.svelte';
 	import CopyLinkButton from '$lib/components/ui/CopyLinkButton.svelte';
 	import CalendarExportModal from './CalendarExportModal.svelte';
+	import NotificationSettingsModal from './NotificationSettingsModal.svelte';
 	import {
 		SEMESTER_WEEKS_COUNT,
 		formatWeekStartDate,
 		type SemesterInfo
 	} from '$lib/utils/semester';
+	import { checkIsTelegramMiniApp } from '$lib/utils/telegram';
 
 	let isCalendarModalOpen = false;
+	let isNotificationModalOpen = false;
+	let isTelegramMiniApp = false;
 
 	export let institutes: Institute[] = [];
 	export let selectedInstitute = '';
@@ -149,6 +153,8 @@
 			}, 0);
 		}
 	}
+
+	$: isTelegramMiniApp = checkIsTelegramMiniApp();
 </script>
 
 <form class="grid grid-cols-1 gap-1" on:submit|preventDefault={handleSubmit}>
@@ -227,7 +233,7 @@
 					<button
 						on:click={() => (isCalendarModalOpen = true)}
 						disabled={!selectedGroup}
-						class="flex h-8 items-center gap-1 rounded-lg bg-slate-700 px-1.5 text-[11px] text-blue-400 transition-all hover:bg-slate-600 disabled:cursor-not-allowed disabled:opacity-50"
+						class="flex h-12 flex-col items-center justify-center gap-0.5 rounded-lg bg-slate-700 px-1.5 text-[10px] text-blue-400 transition-all hover:bg-slate-600 disabled:cursor-not-allowed disabled:opacity-50 sm:h-8 sm:flex-row sm:items-center sm:gap-1 sm:text-[11px]"
 					>
 						<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 							<path
@@ -239,12 +245,35 @@
 						</svg>
 						<span>Календарь</span>
 					</button>
+
+					{#if isTelegramMiniApp}
+						<button
+							on:click={() => (isNotificationModalOpen = true)}
+							disabled={!selectedGroup}
+							class="flex h-12 flex-col items-center justify-center gap-0.5 rounded-lg bg-slate-700 px-1.5 text-[10px] text-blue-400 transition-all hover:bg-slate-600 disabled:cursor-not-allowed disabled:opacity-50 sm:h-8 sm:flex-row sm:items-center sm:gap-1 sm:text-[11px]"
+						>
+							<svg
+								class="h-4 w-4"
+								fill="none"
+								stroke="currentColor"
+								viewBox="0 0 24 24"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M12 2a7 7 0 00-7 7v4.29l-1.71 1.7a1 1 0 00-.29.71v1a1 1 0 001 1h16a1 1 0 001-1v-1a1 1 0 00-.29-.71L19 13.29V9a7 7 0 00-7-7zM10 21a2 2 0 104 0"
+								/>
+							</svg>
+							<span>Уведомления</span>
+						</button>
+					{/if}
 				{/if}
 
 				{#if showFavoriteButton}
 					<button
 						on:click={toggleFavorite}
-						class="flex h-8 items-center gap-1 rounded-lg bg-slate-700 px-1.5 text-[11px] text-blue-400 transition-all hover:bg-slate-600"
+						class="flex h-12 flex-col items-center justify-center gap-0.5 rounded-lg bg-slate-700 px-1.5 text-[10px] text-blue-400 transition-all hover:bg-slate-600 sm:h-8 sm:flex-row sm:items-center sm:gap-1 sm:text-[11px]"
 					>
 						<svg
 							class="h-4 w-4"
@@ -270,6 +299,12 @@
 		isOpen={isCalendarModalOpen}
 		onClose={() => (isCalendarModalOpen = false)}
 		{selectedGroup}
+	/>
+
+	<NotificationSettingsModal
+		isOpen={isNotificationModalOpen}
+		onClose={() => (isNotificationModalOpen = false)}
+		groupName={selectedGroup}
 	/>
 
 	{#if favoriteGroups.length > 0}
