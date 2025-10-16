@@ -39,6 +39,34 @@ we ask you to:
 - avoid compromising data privacy, service disruption, or quality degradation
 - not exploit the vulnerability to access other users' data
 
+### what we accept
+
+- vulnerabilities affecting confidentiality, integrity, or availability of data
+- authentication and authorization flaws, injections, XSS, RCE, and other significant issues
+- security misconfigurations and exposed sensitive data
+
+### out of scope
+
+- denial of service (DoS) attacks
+- spam or social engineering of users and staff
+- reports from automated tools without proof of exploitability
+- issues in third-party services we don't control
+
+### report format
+
+please include:
+
+1. brief description and impact assessment
+2. steps to reproduce
+3. expected vs actual behavior
+4. supporting materials: screenshots, logs, proof of concept
+
+## hall of fame
+
+we recognize and thank security researchers who help us improve:
+
+_no reports yet. be the first!_
+
 thank you for helping keep our project secure!
 
 ---
@@ -83,5 +111,33 @@ thank you for helping keep our project secure!
 - дать нам разумное время на исправление проблемы перед публичным раскрытием
 - избегать нарушения конфиденциальности данных, остановки сервисов или ухудшения качества обслуживания
 - не использовать уязвимость для получения доступа к данным других пользователей
+
+### что мы принимаем
+
+- уязвимости, влияющие на конфиденциальность, целостность или доступность данных
+- ошибки аутентификации и авторизации, инъекции, XSS, RCE и другие существенные проблемы
+- неправильные настройки безопасности и утечки чувствительных данных
+
+### вне области действия
+
+- атаки типа отказ в обслуживании (DoS)
+- спам или социальная инженерия пользователей и сотрудников
+- отчёты от автоматических сканеров без доказательства эксплуатации
+- проблемы в сторонних сервисах, которые мы не контролируем
+
+### формат отчёта
+
+пожалуйста, включите:
+
+1. краткое описание и оценка влияния
+2. шаги для воспроизведения
+3. ожидаемое и фактическое поведение
+4. подтверждающие материалы: скриншоты, логи, proof of concept
+
+## зал славы
+
+мы признаём и благодарим исследователей безопасности, которые помогают нам стать лучше:
+
+_пока нет отчётов. станьте первым!_
 
 спасибо за помощь в обеспечении безопасности проекта!
