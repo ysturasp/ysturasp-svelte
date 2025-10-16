@@ -284,6 +284,19 @@
 									<p class="text-sm text-gray-400">
 										За {subscription.notifyMinutes} минут до начала
 									</p>
+									{#if subscription.excludeHidden && subscription.hiddenSubjects && subscription.hiddenSubjects.length > 0}
+										<p class="text-xs text-orange-400">
+											🚫 Исключено {subscription.hiddenSubjects.length} предметов
+										</p>
+									{:else if subscription.excludeHidden}
+										<p class="text-xs text-gray-500">
+											🚫 Исключены скрытые предметы: нет
+										</p>
+									{:else}
+										<p class="text-xs text-green-400">
+											✅ Все предметы включены
+										</p>
+									{/if}
 								</div>
 								<div class="flex items-center gap-2">
 									<button
