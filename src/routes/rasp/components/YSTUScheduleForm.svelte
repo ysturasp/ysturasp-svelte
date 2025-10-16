@@ -247,28 +247,21 @@
 						<span>Календарь</span>
 					</button>
 
-					{#if isTelegramMiniApp}
-						<button
-							on:click={() => (isNotificationModalOpen = true)}
-							disabled={!selectedGroup}
-							class="flex h-12 flex-col items-center justify-center gap-0.5 rounded-lg bg-slate-700 px-1.5 text-[10px] text-blue-400 transition-all hover:bg-slate-600 disabled:cursor-not-allowed disabled:opacity-50 sm:h-8 sm:flex-row sm:items-center sm:gap-1 sm:text-[11px]"
-						>
-							<svg
-								class="h-4 w-4"
-								fill="none"
-								stroke="currentColor"
-								viewBox="0 0 24 24"
-							>
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M12 2a7 7 0 00-7 7v4.29l-1.71 1.7a1 1 0 00-.29.71v1a1 1 0 001 1h16a1 1 0 001-1v-1a1 1 0 00-.29-.71L19 13.29V9a7 7 0 00-7-7zM10 21a2 2 0 104 0"
-								/>
-							</svg>
-							<span>Уведомления</span>
-						</button>
-					{/if}
+					<button
+						on:click={() => (isNotificationModalOpen = true)}
+						disabled={!selectedGroup}
+						class="flex h-12 flex-col items-center justify-center gap-0.5 rounded-lg bg-slate-700 px-1.5 text-[10px] text-blue-400 transition-all hover:bg-slate-600 disabled:cursor-not-allowed disabled:opacity-50 sm:h-8 sm:flex-row sm:items-center sm:gap-1 sm:text-[11px]"
+					>
+						<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M12 2a7 7 0 00-7 7v4.29l-1.71 1.7a1 1 0 00-.29.71v1a1 1 0 001 1h16a1 1 0 001-1v-1a1 1 0 00-.29-.71L19 13.29V9a7 7 0 00-7-7zM10 21a2 2 0 104 0"
+							/>
+						</svg>
+						<span>Уведомления</span>
+					</button>
 				{/if}
 
 				{#if showFavoriteButton}

@@ -184,14 +184,6 @@
 			<p class="mb-4 text-lg text-gray-300">
 				Для использования уведомлений откройте мини приложение в Telegram
 			</p>
-			<p class="mb-4 text-sm text-gray-500">
-				Debug: isTelegramMiniApp = {isTelegramMiniApp}, hasTelegram = {typeof window !==
-				'undefined'
-					? !!(window as any).Telegram?.WebApp
-					: 'N/A'}, hash = {typeof window !== 'undefined'
-					? window.location.hash.substring(0, 50) + '...'
-					: 'N/A'}
-			</p>
 			<a
 				href="https://t.me/ysturasp_bot/ysturasp_webapp"
 				target="_blank"

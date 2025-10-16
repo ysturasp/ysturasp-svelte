@@ -1,3 +1,4 @@
+- improve text for current week in subscribe notify modal (ysturasp, 2025-10-15) [3 files changed, 8 insertions(+), 6 deletions(-)]
 - add turn off notify for hidden lessons (ysturasp, 2025-10-15) [5 files changed, 100 insertions(+), 4 deletions(-)]
 - add subtitle for notification settings modal (ysturasp, 2025-10-15) [3 files changed, 8 insertions(+), 1 deletion(-)]
 - update url web support requests (ysturasp, 2025-10-15) [3 files changed, 3 insertions(+), 1 deletion(-)]
