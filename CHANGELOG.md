@@ -1,3 +1,4 @@
+- update url for bot server endpoint (ysturasp, 2025-10-16) [4 files changed, 4 insertions(+), 2 deletions(-)]
 - add text for all subscription with hidden or not hidden lessons in telegram mini app (ysturasp, 2025-10-16) [3 files changed, 15 insertions(+)]
 - show notification button outside telegram (ysturasp, 2025-10-16) [4 files changed, 17 insertions(+), 30 deletions(-)]
 - improve text for current week in subscribe notify modal (ysturasp, 2025-10-15) [3 files changed, 8 insertions(+), 6 deletions(-)]
