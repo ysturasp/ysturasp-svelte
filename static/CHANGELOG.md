@@ -1,3 +1,4 @@
+- add text for all subscription with hidden or not hidden lessons in telegram mini app (ysturasp, 2025-10-16) [3 files changed, 15 insertions(+)]
 - show notification button outside telegram (ysturasp, 2025-10-16) [4 files changed, 17 insertions(+), 30 deletions(-)]
 - improve text for current week in subscribe notify modal (ysturasp, 2025-10-15) [3 files changed, 8 insertions(+), 6 deletions(-)]
 - add turn off notify for hidden lessons (ysturasp, 2025-10-15) [5 files changed, 100 insertions(+), 4 deletions(-)]
