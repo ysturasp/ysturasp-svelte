@@ -17,6 +17,7 @@
 	import HiddenSubjects from './components/HiddenSubjects.svelte';
 	import GithubApiSection from '$lib/components/sections/GithubApiSection.svelte';
 	import LinearIntegrationModal from '$lib/components/linear/LinearIntegrationModal.svelte';
+	import LinearAllSubjectsTasks from '$lib/components/linear/LinearAllSubjectsTasks.svelte';
 	import FormatDocumentPromo from './components/FormatDocumentPromo.svelte';
 	import {
 		SEMESTER_WEEKS_COUNT,
@@ -28,6 +29,7 @@
 		type SemesterInfo
 	} from '$lib/utils/semester';
 	import { notifications } from '$lib/stores/notifications';
+	import { linearStore } from '$lib/stores/linear';
 	import {
 		subgroupSettings,
 		teacherSubgroups,
@@ -724,6 +726,13 @@
 		</section>
 
 		<FormatDocumentPromo />
+
+		{#if $linearStore.isConfigured && !isScheduleLoading}
+			<section class="mt-4 rounded-2xl bg-slate-800 p-4 sm:p-6">
+				<h2 class="mb-4 text-xl font-bold text-white">Задачи по предметам</h2>
+				<LinearAllSubjectsTasks />
+			</section>
+		{/if}
 
 		{#if scheduleData && selectedSemester && Object.keys(currentTeacherSubgroups).length > 0 && currentSettings.showSubgroups && !isScheduleLoading}
 			<section class="mt-4 rounded-2xl bg-slate-800 p-4 sm:p-6">
