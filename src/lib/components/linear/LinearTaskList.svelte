@@ -20,6 +20,8 @@
 	import LinearStatePicker from './LinearStatePicker.svelte';
 	import { onMount } from 'svelte';
 	import type { TeacherSubgroups } from '../../../routes/rasp/stores/subgroups';
+	import { quintOut } from 'svelte/easing';
+	import { scale } from 'svelte/transition';
 
 	export let lesson: YSTULesson;
 	export let date: string;
@@ -36,6 +38,7 @@
 	let isPriorityPickerOpen = false;
 	let isStatePickerOpen = false;
 	let activeTask: LinearTask | null = null;
+	let showCompletedTasks = false;
 
 	function getStateColor(state: LinearState | null): string {
 		if (!state) return '';
@@ -105,6 +108,20 @@
 	$: lessonKey = getLessonKey(lesson, date);
 	$: tasks = $linearStore.tasks[lessonKey] || [];
 	$: states = $linearStore.states;
+	$: activeTasks = tasks.filter(
+		(task) =>
+			!task.state.name.toLowerCase().includes('done') &&
+			!task.state.name.toLowerCase().includes('complete')
+	);
+	$: completedTasks = tasks.filter(
+		(task) =>
+			task.state.name.toLowerCase().includes('done') ||
+			task.state.name.toLowerCase().includes('complete')
+	);
+
+	function toggleCompletedList() {
+		showCompletedTasks = !showCompletedTasks;
+	}
 
 	async function handleCreateTask() {
 		if (!newTaskTitle.trim()) {
@@ -365,9 +382,9 @@
 		</button>
 	</form>
 
-	{#if tasks.length > 0}
+	{#if activeTasks.length > 0 || completedTasks.length > 0}
 		<div class="space-y-2">
-			{#each tasks as task}
+			{#each activeTasks as task}
 				<div class="flex items-center justify-between rounded-lg bg-slate-700 p-3">
 					<div class="flex-grow">
 						<div class="mr-2 flex items-center gap-2">
@@ -426,6 +443,120 @@
 				</div>
 			{/each}
 		</div>
+
+		{#if completedTasks.length > 0}
+			<div class="relative mt-4 rounded-lg bg-slate-800">
+				<div class="flex items-center justify-between">
+					<div class="flex items-center gap-2">
+						<svg class="h-5 w-5 text-green-400" fill="currentColor" viewBox="0 0 14 14">
+							<path
+								fill-rule="evenodd"
+								clip-rule="evenodd"
+								d="M7 0C3.13401 0 0 3.13401 0 7C0 10.866 3.13401 14 7 14C10.866 14 14 10.866 14 7C14 3.13401 10.866 0 7 0ZM11.101 5.10104C11.433 4.76909 11.433 4.23091 11.101 3.89896C10.7691 3.56701 10.2309 3.56701 9.89896 3.89896L5.5 8.29792L4.10104 6.89896C3.7691 6.56701 3.2309 6.56701 2.89896 6.89896C2.56701 7.2309 2.56701 7.7691 2.89896 8.10104L4.89896 10.101C5.2309 10.433 5.7691 10.433 6.10104 10.101L11.101 5.10104Z"
+							/>
+						</svg>
+						<span class="text-green-400">Завершенные ({completedTasks.length})</span>
+					</div>
+					<button
+						on:click|stopPropagation={toggleCompletedList}
+						class="flex items-center gap-1 rounded-lg bg-slate-700 px-3 py-1 text-sm text-white transition-all hover:bg-slate-600"
+					>
+						{showCompletedTasks ? 'Скрыть' : 'Открыть'}
+						<svg
+							class="h-4 w-4 transition-transform duration-200 {showCompletedTasks
+								? 'rotate-180'
+								: ''}"
+							fill="none"
+							stroke="currentColor"
+							viewBox="0 0 24 24"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M19 9l-7 7-7-7"
+							/>
+						</svg>
+					</button>
+				</div>
+
+				{#if showCompletedTasks}
+					<div
+						transition:scale={{
+							duration: 200,
+							opacity: 0,
+							start: 0.95,
+							easing: quintOut
+						}}
+					>
+						<div class="mt-4 space-y-2">
+							{#each completedTasks as task}
+								<div
+									class="flex items-center justify-between rounded-lg bg-slate-900 p-3"
+								>
+									<div class="flex-grow">
+										<div class="mr-2 flex items-center gap-2">
+											<span class="text-sm text-white">{task.title}</span>
+											<button
+												class="rounded px-2 py-0.5 text-xs {getStateColor(
+													task.state
+												)}"
+												on:click={() => {
+													activeTask = task;
+													isStatePickerOpen = true;
+												}}
+											>
+												{task.state.name}
+											</button>
+											<button
+												class="flex h-6 w-6 items-center justify-center text-sm {getPriorityColor(
+													task.priority
+												)}"
+												on:click={() => {
+													activeTask = task;
+													isPriorityPickerOpen = true;
+												}}
+											>
+												{@html getPriorityInfo(task.priority).icon}
+											</button>
+											<button
+												class="text-xs whitespace-nowrap text-gray-400"
+												on:click={() => {
+													activeTask = task;
+													isDatePickerOpen = true;
+												}}
+											>
+												{formatDueDate(task.dueDate)}
+											</button>
+										</div>
+									</div>
+									<button
+										on:click={() => handleDeleteTask(task.id)}
+										class="flex h-8 w-8 items-center justify-center rounded-lg bg-red-600 text-white transition-all hover:bg-red-700"
+										aria-label="Удалить задачу"
+									>
+										<svg
+											class="h-4 w-4"
+											viewBox="0 0 16 16"
+											fill="currentColor"
+											xmlns="http://www.w3.org/2000/svg"
+										>
+											<path
+												d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"
+											/>
+											<path
+												fill-rule="evenodd"
+												d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"
+											/>
+										</svg>
+									</button>
+								</div>
+							{/each}
+						</div>
+					</div>
+				{/if}
+			</div>
+		{/if}
 	{:else}
 		<div class="text-center text-sm text-gray-400">Нет задач для этого предмета</div>
 	{/if}

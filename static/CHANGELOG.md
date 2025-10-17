@@ -1,3 +1,4 @@
+- add security.txt and update SECURITY.md (ysturasp, 2025-10-16) [5 files changed, 82 insertions(+)]
 - update url for bot update: add lesson type for notify message (ysturasp, 2025-10-16) [4 files changed, 4 insertions(+), 2 deletions(-)]
 - update url for bot server endpoint (ysturasp, 2025-10-16) [4 files changed, 4 insertions(+), 2 deletions(-)]
 - add text for all subscription with hidden or not hidden lessons in telegram mini app (ysturasp, 2025-10-16) [3 files changed, 15 insertions(+)]
