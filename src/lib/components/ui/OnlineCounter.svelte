@@ -30,8 +30,8 @@
 	let unsubscribeOnline: (() => void) | null = null;
 	let initialized = false;
 	let lastActivityTimestamp = Date.now();
-	let activityCheckInterval: ReturnType<typeof setInterval>;
-	let heartbeatInterval: ReturnType<typeof setInterval>;
+	let activityCheckInterval: ReturnType<typeof setInterval> | undefined;
+	let heartbeatInterval: ReturnType<typeof setInterval> | undefined;
 
 	if (browser && !sessionStorage.getItem('onlineUserId')) {
 		sessionStorage.setItem('onlineUserId', userId);
@@ -233,6 +233,7 @@
 	<div
 		class="online-users-counter {variant} offline"
 		on:click={() => offlineStore.openOfflineModal()}
+		on:keydown={(e) => e.key === 'Enter' && offlineStore.openOfflineModal()}
 		role="button"
 		tabindex="0"
 	>
