@@ -26,6 +26,7 @@
 	import type { Teacher } from './api';
 	import type { TeacherScheduleData } from './types';
 	import NavigationLinks from '$lib/components/ui/NavigationLinks.svelte';
+	import OnlineCounter from '$lib/components/ui/OnlineCounter.svelte';
 	import ScheduleSwitcher from '$lib/components/schedule/ScheduleSwitcher.svelte';
 	import { settings } from '$lib/stores/settings';
 	import type { Settings } from '$lib/stores/settings';
@@ -322,6 +323,18 @@
 			variant="mobile"
 			currentPage="ystu"
 			pageType="teachers"
+		/>
+		<OnlineCounter
+			variant="desktop"
+			slot="online-counter-desktop"
+			selectedGroupLabel={selectedTeacher}
+			selectedDirectionLabel=""
+		/>
+		<OnlineCounter
+			variant="mobile"
+			slot="online-counter-mobile"
+			selectedGroupLabel={selectedTeacher}
+			selectedDirectionLabel=""
 		/>
 		<div slot="personal-account-ystu">
 			<a

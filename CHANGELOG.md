@@ -1,3 +1,4 @@
+- add section for view tasks by all lessons from linear (ysturasp, 2025-10-17) [4 files changed, 457 insertions(+)]
 - add collapsible section for completed tasks in linear task modal (ysturasp, 2025-10-17) [3 files changed, 135 insertions(+), 2 deletions(-)]
 - add security.txt and update SECURITY.md (ysturasp, 2025-10-16) [5 files changed, 82 insertions(+)]
 - update url for bot update: add lesson type for notify message (ysturasp, 2025-10-16) [4 files changed, 4 insertions(+), 2 deletions(-)]
