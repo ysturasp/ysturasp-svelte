@@ -25,6 +25,7 @@
 	import type { Audience } from './api';
 	import type { AudienceScheduleData } from './types';
 	import NavigationLinks from '$lib/components/ui/NavigationLinks.svelte';
+	import OnlineCounter from '$lib/components/ui/OnlineCounter.svelte';
 	import ScheduleSwitcher from '$lib/components/schedule/ScheduleSwitcher.svelte';
 	import { settings } from '$lib/stores/settings';
 	import GithubApiSection from '$lib/components/sections/GithubApiSection.svelte';
@@ -310,6 +311,18 @@
 			variant="mobile"
 			currentPage="ystu"
 			pageType="audience"
+		/>
+		<OnlineCounter
+			variant="desktop"
+			slot="online-counter-desktop"
+			selectedGroupLabel={selectedAudience}
+			selectedDirectionLabel=""
+		/>
+		<OnlineCounter
+			variant="mobile"
+			slot="online-counter-mobile"
+			selectedGroupLabel={selectedAudience}
+			selectedDirectionLabel=""
 		/>
 		<div slot="personal-account-ystu">
 			<a
