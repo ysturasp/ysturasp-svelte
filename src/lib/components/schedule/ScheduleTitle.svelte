@@ -50,10 +50,12 @@
 		{typeLabels[type]}
 		{title}
 		{#if subtitle || weekNumber || (availableSemesters.length > 0 && selectedSemester)}
-			<p class="text-sm text-gray-400">
+			<div class="text-sm text-gray-400">
 				{#if weekNumber}
-					Неделя {weekNumber}<span class="separator-dot"
-						>{availableSemesters.length > 0 || selectedSemester ? ' • ' : ''}</span
+					<span
+						>Неделя {weekNumber}<span class="separator-dot"
+							>{availableSemesters.length > 0 || selectedSemester ? ' • ' : ''}</span
+						></span
 					>
 				{/if}
 				{#if availableSemesters.length > 1}
@@ -82,6 +84,7 @@
 
 						{#if showSemesterOptions}
 							<div
+								role="menu"
 								tabindex="0"
 								use:autoFocus
 								class="absolute top-full left-1/2 z-50 mt-2 min-w-48 -translate-x-1/2 transform rounded-xl bg-slate-800 p-3 shadow-2xl ring-1 ring-blue-500/50"
@@ -99,6 +102,7 @@
 							>
 								{#each availableSemesters as semester}
 									<button
+										role="menuitem"
 										on:click={() => handleSemesterSelect(semester)}
 										class="mb-1 w-full rounded-lg px-3 py-2 text-left text-sm text-white transition-all last:mb-0 hover:ring-2 hover:ring-blue-500/30 {semester.id ===
 										selectedSemester?.id
@@ -115,11 +119,13 @@
 					<span>{selectedSemester.name}</span>
 				{/if}
 				{#if subtitle}
-					{availableSemesters.length > 0 || selectedSemester || weekNumber
-						? ' • '
-						: ''}{subtitle}
+					<span
+						>{availableSemesters.length > 0 || selectedSemester || weekNumber
+							? ' • '
+							: ''}{subtitle}</span
+					>
 				{/if}
-			</p>
+			</div>
 			{#if onSubgroupsClick}
 				<button
 					on:click={onSubgroupsClick}

@@ -1,3 +1,4 @@
+- add online counter to ystu audience schedule page (ysturasp, 2025-10-19) [3 files changed, 15 insertions(+)]
 - resolve ts and accessibility issues in online counter component (ysturasp, 2025-10-18) [3 files changed, 5 insertions(+), 2 deletions(-)]
 - add online counter to ystu teacher schedule page (ysturasp, 2025-10-18) [3 files changed, 15 insertions(+)]
 - add section for view tasks by all lessons from linear (ysturasp, 2025-10-17) [4 files changed, 457 insertions(+)]
