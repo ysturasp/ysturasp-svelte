@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { Institute } from '../types';
+	import type { Institute, ScheduleData } from '../types';
 	import CustomSelect from '$lib/components/ui/CustomSelect.svelte';
 	import CopyLinkButton from '$lib/components/ui/CopyLinkButton.svelte';
 	import CalendarExportModal from './CalendarExportModal.svelte';
@@ -28,6 +28,7 @@
 	export let submitButtonText = 'Показать расписание';
 	export let copyButtonText = 'Копировать';
 	export let selectedSemester: SemesterInfo | null = null;
+	export let scheduleData: ScheduleData | null = null;
 
 	let isInitialized = false;
 	let previousGroup = '';
@@ -300,6 +301,7 @@
 		onClose={() => (isNotificationModalOpen = false)}
 		groupName={selectedGroup}
 		hiddenSubjects={$hiddenSubjects[selectedGroup] || []}
+		{scheduleData}
 	/>
 
 	{#if favoriteGroups.length > 0}

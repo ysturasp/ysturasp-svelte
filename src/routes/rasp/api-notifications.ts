@@ -48,6 +48,7 @@ export interface NotificationSubscription {
 	notifyMinutes: number;
 	hiddenSubjects?: any[];
 	excludeHidden?: boolean;
+	manuallyExcludedSubjects?: string[];
 }
 
 export interface NotificationStatus {
@@ -123,7 +124,8 @@ export async function toggleNotifications(
 	groupName: string,
 	notifyMinutes: number = 0,
 	hiddenSubjects: any[] | null = null,
-	update: boolean = false
+	update: boolean = false,
+	manuallyExcludedSubjects: string[] = []
 ): Promise<boolean> {
 	if (!browser) {
 		return false;
@@ -152,7 +154,8 @@ export async function toggleNotifications(
 				groupName: groupName,
 				notifyMinutes: notifyMinutes.toString(),
 				hiddenSubjects: hiddenSubjects || [],
-				update: update
+				update: update,
+				manuallyExcludedSubjects: manuallyExcludedSubjects || []
 			})
 		});
 

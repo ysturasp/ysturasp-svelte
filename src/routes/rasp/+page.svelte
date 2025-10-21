@@ -568,6 +568,7 @@
 				onSubmit={loadSchedule}
 				{isLoading}
 				{selectedSemester}
+				{scheduleData}
 			/>
 
 			{#if scheduleData && !isScheduleLoading}

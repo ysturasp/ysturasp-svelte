@@ -1,14 +1,18 @@
 <script lang="ts">
 	import BottomModal from '$lib/components/ui/BottomModal.svelte';
+	import SubjectExclusionsModal from './SubjectExclusionsModal.svelte';
 	import { onMount } from 'svelte';
 	import { checkIsTelegramMiniApp } from '$lib/utils/telegram';
 	import { checkNotificationStatus, toggleNotifications } from '../api-notifications';
 	import { hapticFeedback } from '@telegram-apps/sdk-svelte';
+	import type { ScheduleData } from '../types';
+	import { LessonTypes } from '$lib/types/schedule';
 
 	export let isOpen = false;
 	export let onClose: () => void;
 	export let groupName = '';
 	export let hiddenSubjects: any[] = [];
+	export let scheduleData: ScheduleData | null = null;
 
 	let isLoading = false;
 	let isTelegramMiniApp = false;
@@ -21,6 +25,9 @@
 	let allSubscriptions: any[] = [];
 	let isCurrentGroupSubscribed = false;
 	let excludeHiddenSubjects = true;
+	let manuallyExcludedSubjects: string[] = [];
+	let apiHiddenSubjects: any[] = [];
+	let isExclusionsModalOpen = false;
 
 	const timeOptions = [
 		{ minutes: 5, label: '5 мин' },
@@ -59,15 +66,21 @@
 					selectedMinutes = groupSubscription.notifyMinutes;
 					isCurrentGroupSubscribed = true;
 					excludeHiddenSubjects = groupSubscription.excludeHidden !== false;
+					manuallyExcludedSubjects = groupSubscription.manuallyExcludedSubjects || [];
+					apiHiddenSubjects = groupSubscription.hiddenSubjects || [];
 				} else {
 					selectedMinutes = 15;
 					isCurrentGroupSubscribed = false;
 					excludeHiddenSubjects = true;
+					manuallyExcludedSubjects = [];
+					apiHiddenSubjects = [];
 				}
 			} else if (groupName) {
 				selectedMinutes = 15;
 				isCurrentGroupSubscribed = false;
 				excludeHiddenSubjects = true;
+				manuallyExcludedSubjects = [];
+				apiHiddenSubjects = [];
 			}
 		} catch (error) {
 		} finally {
@@ -80,12 +93,21 @@
 
 		isLoading = true;
 		try {
-			const subjectsToExclude = excludeHiddenSubjects ? hiddenSubjects : null;
+			const baseHidden =
+				apiHiddenSubjects.length > 0
+					? apiHiddenSubjects
+					: excludeHiddenSubjects
+						? hiddenSubjects
+						: [];
+
+			const combinedExclusions = [...baseHidden, ...manuallyExcludedSubjects];
+
 			const success = await toggleNotifications(
 				groupName,
 				selectedMinutes,
-				subjectsToExclude,
-				true
+				combinedExclusions,
+				true,
+				manuallyExcludedSubjects
 			);
 			if (success) {
 				triggerHapticFeedback('success');
@@ -106,7 +128,7 @@
 
 		isLoading = true;
 		try {
-			const success = await toggleNotifications(groupName, 0);
+			const success = await toggleNotifications(groupName, 0, null, false, []);
 			if (success) {
 				notificationStatus = { subscribed: false };
 				triggerHapticFeedback('success');
@@ -126,7 +148,7 @@
 
 		isLoading = true;
 		try {
-			const success = await toggleNotifications(targetGroupName, 0);
+			const success = await toggleNotifications(targetGroupName, 0, null, false, []);
 			if (success) {
 				triggerHapticFeedback('success');
 				await loadNotificationStatus();
@@ -157,6 +179,11 @@
 	function selectTimeOption(minutes: number) {
 		selectedMinutes = minutes;
 		triggerHapticFeedback('selection');
+	}
+
+	function handleExclusionsSave(excluded: string[]) {
+		manuallyExcludedSubjects = excluded;
+		triggerHapticFeedback('success');
 	}
 </script>
 
@@ -234,6 +261,41 @@
 						</div>
 					{/if}
 
+					<button
+						type="button"
+						on:click={() => (isExclusionsModalOpen = true)}
+						class="mb-4 w-full rounded-lg bg-slate-700 p-4 text-left transition-all hover:bg-slate-600"
+					>
+						<div class="flex items-center justify-between">
+							<div class="flex-1">
+								<p class="text-sm font-medium text-white">
+									Исключить занятия вручную
+								</p>
+								<p class="mt-1 text-xs text-gray-400">
+									Выберите какие занятия не нужно включать в уведомления
+								</p>
+								{#if manuallyExcludedSubjects.length > 0}
+									<p class="mt-2 text-xs text-orange-400">
+										Исключено: {manuallyExcludedSubjects.length} типов занятий
+									</p>
+								{/if}
+							</div>
+							<svg
+								class="h-5 w-5 flex-shrink-0 text-gray-400"
+								fill="none"
+								stroke="currentColor"
+								viewBox="0 0 24 24"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M9 5l7 7-7 7"
+								/>
+							</svg>
+						</div>
+					</button>
+
 					<div class="flex gap-2">
 						<button
 							on:click={handleSave}
@@ -286,13 +348,34 @@
 									</p>
 									{#if subscription.excludeHidden && subscription.hiddenSubjects && subscription.hiddenSubjects.length > 0}
 										<p class="text-xs text-orange-400">
-											🚫 Исключено {subscription.hiddenSubjects.length} предметов
+											🚫 Исключено скрытых: {subscription.hiddenSubjects
+												.length}
 										</p>
 									{:else if subscription.excludeHidden}
 										<p class="text-xs text-gray-500">
 											🚫 Исключены скрытые предметы: нет
 										</p>
-									{:else}
+									{/if}
+									{#if subscription.manuallyExcludedSubjects && subscription.manuallyExcludedSubjects.length > 0}
+										<details class="mt-1">
+											<summary
+												class="cursor-pointer text-xs text-red-400 hover:text-red-300"
+											>
+												🚫 Исключено вручную: {subscription
+													.manuallyExcludedSubjects.length} типов занятий
+											</summary>
+											<div class="mt-1 ml-4 space-y-0.5">
+												{#each subscription.manuallyExcludedSubjects as excluded}
+													{@const [subj, typeStr] = excluded.split('|')}
+													{@const type = parseInt(typeStr)}
+													<p class="text-xs text-gray-400">
+														• {subj} — {LessonTypes[type] ||
+															`Тип ${type}`}
+													</p>
+												{/each}
+											</div>
+										</details>
+									{:else if !subscription.excludeHidden && (!subscription.manuallyExcludedSubjects || subscription.manuallyExcludedSubjects.length === 0)}
 										<p class="text-xs text-green-400">
 											✅ Все предметы включены
 										</p>
@@ -323,6 +406,15 @@
 		</div>
 	{/if}
 </BottomModal>
+
+<SubjectExclusionsModal
+	isOpen={isExclusionsModalOpen}
+	onClose={() => (isExclusionsModalOpen = false)}
+	{scheduleData}
+	hiddenSubjects={apiHiddenSubjects}
+	{manuallyExcludedSubjects}
+	onSave={handleExclusionsSave}
+/>
 
 <style>
 	.switch {
