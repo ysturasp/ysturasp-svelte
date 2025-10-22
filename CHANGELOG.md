@@ -1,3 +1,4 @@
+- enhance notification settings with manual exclusions (ysturasp, 2025-10-21) [7 files changed, 484 insertions(+), 10 deletions(-)]
 - improve accessibility and fix structure in schedule title (ysturasp, 2025-10-20) [3 files changed, 15 insertions(+), 7 deletions(-)]
 - add online counter to ystu audience schedule page (ysturasp, 2025-10-19) [3 files changed, 15 insertions(+)]
 - resolve ts and accessibility issues in online counter component (ysturasp, 2025-10-18) [3 files changed, 5 insertions(+), 2 deletions(-)]

@@ -1,6 +1,7 @@
 <script>
 	import Header from '$lib/components/layout/Header.svelte';
 	import PageLayout from '$lib/components/layout/PageLayout.svelte';
+	import LegalNavigation from '$lib/components/layout/LegalNavigation.svelte';
 </script>
 
 <svelte:head>
@@ -15,12 +16,12 @@
 	<Header />
 	<main class="container mx-auto mt-5 px-3 md:mt-7 md:px-0">
 		<section class="flex flex-col gap-y-8 py-6 md:py-8">
-			<div class="mx-auto max-w-4xl">
-				<h1 class="mb-8 text-3xl font-bold text-white md:text-4xl">
+			<div class="mx-auto w-full max-w-4xl">
+				<h1 class="mb-8 text-3xl font-bold break-words text-white md:text-4xl">
 					Политика конфиденциальности
 				</h1>
 
-				<div class="space-y-6 text-slate-400">
+				<div class="space-y-6 break-words text-slate-400">
 					<div class="rounded-2xl bg-slate-800 p-6">
 						<h2 class="mb-4 text-2xl font-semibold text-white">1. Введение</h2>
 						<div class="space-y-4">
@@ -183,19 +184,12 @@
 						</div>
 					</div>
 
-					<div class="mt-8 text-slate-300">
+					<div class="mt-8 mb-20 text-slate-300 md:mb-8">
 						<p>Дата последнего обновления: 16 марта 2024 года</p>
-						<div class="mt-4 flex gap-4">
-							<a href="/legal/terms" class="text-blue-400 hover:text-blue-300"
-								>← Условия использования</a
-							>
-							<a href="/legal/license" class="text-blue-400 hover:text-blue-300"
-								>Лицензионное соглашение →</a
-							>
-						</div>
 					</div>
 				</div>
 			</div>
 		</section>
 	</main>
+	<LegalNavigation currentPage="privacy" />
 </PageLayout>
