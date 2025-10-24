@@ -1,11 +1,11 @@
-# Channels of communication in descending order of preference
+# channels of communication in descending order of preference
 Contact: https://ysturasp.netlify.app/support
 Contact: https://t.me/ysturasp_bot
 
-# Security policy
+# security policy
 Policy: https://github.com/ysturasp/ysturasp-svelte/blob/main/SECURITY.md
 
-# Acknowledgments to researchers
+# acknowledgments to researchers
 Acknowledgments: https://github.com/ysturasp/ysturasp-svelte/blob/main/SECURITY.md#hall-of-fame
 
 Preferred-Languages: ru, en
