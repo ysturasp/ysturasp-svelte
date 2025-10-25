@@ -1,3 +1,4 @@
+- imrpove security.txt (ysturasp, 2025-10-24) [3 files changed, 5 insertions(+), 3 deletions(-)]
 - improve legal documents page (ysturasp, 2025-10-22) [6 files changed, 78 insertions(+), 36 deletions(-)]
 - enhance notification settings with manual exclusions (ysturasp, 2025-10-21) [7 files changed, 484 insertions(+), 10 deletions(-)]
 - improve accessibility and fix structure in schedule title (ysturasp, 2025-10-20) [3 files changed, 15 insertions(+), 7 deletions(-)]

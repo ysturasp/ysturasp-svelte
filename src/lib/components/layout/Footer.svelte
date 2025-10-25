@@ -68,6 +68,14 @@
 						</div>
 					</a>
 				</nav>
+			<a
+				href="https://stats.uptimerobot.com/COz2FUGsub"
+				target="_blank"
+				rel="noopener noreferrer"
+				class="mt-1 inline-flex items-center gap-2 text-sm text-blue-300 transition-all hover:text-white"
+			>
+				<span>Проверить статус работы сервисов</span>
+			</a>
 			</div>
 			<div class="mt-4 w-full text-center md:mt-0 md:w-1/3 md:text-right">
 				<div class="flex justify-center md:justify-end">
