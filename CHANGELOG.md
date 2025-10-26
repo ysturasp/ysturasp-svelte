@@ -1,3 +1,4 @@
+- refactor footer component for improved link formatting (ysturasp, 2025-10-25) [3 files changed, 10 insertions(+), 8 deletions(-)]
 - add link to service status check in footer (ysturasp, 2025-10-25) [3 files changed, 10 insertions(+)]
 - imrpove security.txt (ysturasp, 2025-10-24) [3 files changed, 5 insertions(+), 3 deletions(-)]
 - improve legal documents page (ysturasp, 2025-10-22) [6 files changed, 78 insertions(+), 36 deletions(-)]

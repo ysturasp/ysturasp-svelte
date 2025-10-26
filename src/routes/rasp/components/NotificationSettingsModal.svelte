@@ -28,6 +28,8 @@
 	let manuallyExcludedSubjects: string[] = [];
 	let apiHiddenSubjects: any[] = [];
 	let isExclusionsModalOpen = false;
+	let isCustomTime = false;
+	let customMinutes = 15;
 
 	const timeOptions = [
 		{ minutes: 5, label: '5 мин' },
@@ -68,12 +70,19 @@
 					excludeHiddenSubjects = groupSubscription.excludeHidden !== false;
 					manuallyExcludedSubjects = groupSubscription.manuallyExcludedSubjects || [];
 					apiHiddenSubjects = groupSubscription.hiddenSubjects || [];
+
+					const isPresetTime = timeOptions.some((opt) => opt.minutes === selectedMinutes);
+					isCustomTime = !isPresetTime;
+					if (isCustomTime) {
+						customMinutes = selectedMinutes;
+					}
 				} else {
 					selectedMinutes = 15;
 					isCurrentGroupSubscribed = false;
 					excludeHiddenSubjects = true;
 					manuallyExcludedSubjects = [];
 					apiHiddenSubjects = [];
+					isCustomTime = false;
 				}
 			} else if (groupName) {
 				selectedMinutes = 15;
@@ -81,6 +90,7 @@
 				excludeHiddenSubjects = true;
 				manuallyExcludedSubjects = [];
 				apiHiddenSubjects = [];
+				isCustomTime = false;
 			}
 		} catch (error) {
 		} finally {
@@ -93,19 +103,12 @@
 
 		isLoading = true;
 		try {
-			const baseHidden =
-				apiHiddenSubjects.length > 0
-					? apiHiddenSubjects
-					: excludeHiddenSubjects
-						? hiddenSubjects
-						: [];
-
-			const combinedExclusions = [...baseHidden, ...manuallyExcludedSubjects];
+			const baseHidden = excludeHiddenSubjects ? hiddenSubjects : [];
 
 			const success = await toggleNotifications(
 				groupName,
 				selectedMinutes,
-				combinedExclusions,
+				baseHidden,
 				true,
 				manuallyExcludedSubjects
 			);
@@ -178,7 +181,39 @@
 
 	function selectTimeOption(minutes: number) {
 		selectedMinutes = minutes;
+		isCustomTime = false;
 		triggerHapticFeedback('selection');
+	}
+
+	function enableCustomTime() {
+		if (isCustomTime) {
+			isCustomTime = false;
+			const closest = timeOptions.reduce((prev, curr) =>
+				Math.abs(curr.minutes - selectedMinutes) < Math.abs(prev.minutes - selectedMinutes)
+					? curr
+					: prev
+			);
+			selectedMinutes = closest.minutes;
+		} else {
+			isCustomTime = true;
+			customMinutes = selectedMinutes;
+		}
+		triggerHapticFeedback('selection');
+	}
+
+	function updateCustomMinutes(value: number) {
+		if (value >= 1) {
+			customMinutes = value;
+			selectedMinutes = value;
+		}
+	}
+
+	function handleCustomMinutesInput(event: Event) {
+		const target = event.target as HTMLInputElement;
+		const value = parseInt(target.value);
+		if (!isNaN(value)) {
+			updateCustomMinutes(value);
+		}
 	}
 
 	function handleExclusionsSave(excluded: string[]) {
@@ -231,8 +266,8 @@
 					<div class="mb-4 grid grid-cols-4 gap-2">
 						{#each timeOptions as option}
 							<button
-								class="rounded-lg px-4 py-2 transition-all {selectedMinutes ===
-								option.minutes
+								class="rounded-lg px-4 py-2 transition-all {!isCustomTime &&
+								selectedMinutes === option.minutes
 									? 'bg-blue-600 text-white'
 									: 'bg-slate-700 text-gray-300 hover:bg-blue-600'}"
 								on:click={() => selectTimeOption(option.minutes)}
@@ -240,7 +275,57 @@
 								{option.label}
 							</button>
 						{/each}
+						<button
+							class="rounded-lg px-4 py-2 text-xs transition-all {isCustomTime
+								? 'bg-blue-600 text-white'
+								: 'bg-slate-700 text-gray-300 hover:bg-blue-600'}"
+							on:click={enableCustomTime}
+						>
+							Другое
+						</button>
 					</div>
+
+					{#if isCustomTime}
+						<div class="mb-4 rounded-lg bg-slate-700 p-3">
+							<label
+								for="custom-minutes-input"
+								class="mb-2 block text-sm font-medium text-white"
+							>
+								Кастомное время (минуты):
+							</label>
+							<div class="flex items-center gap-2">
+								<input
+									id="custom-minutes-input"
+									type="number"
+									min="1"
+									bind:value={customMinutes}
+									on:input={handleCustomMinutesInput}
+									class="w-24 rounded-lg bg-slate-800 px-3 py-2 text-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
+									placeholder="Мин."
+								/>
+								<div class="flex-1 text-xs text-gray-400">
+									{#if customMinutes >= 1440}
+										{@const days = Math.floor(customMinutes / 1440)}
+										{@const hours = Math.floor((customMinutes % 1440) / 60)}
+										{@const mins = customMinutes % 60}
+										<span class="text-blue-400">
+											≈ {days} д
+											{#if hours > 0}{hours} ч{/if}
+											{#if mins > 0}{mins} м{/if}
+										</span>
+									{:else if customMinutes >= 60}
+										<span class="text-blue-400">
+											≈ {Math.floor(customMinutes / 60)} ч {customMinutes %
+												60} мин
+										</span>
+									{:else}
+										<span class="text-blue-400">{customMinutes} мин</span>
+									{/if}
+								</div>
+							</div>
+							<p class="mt-2 text-xs text-gray-400">Введите любое количество минут</p>
+						</div>
+					{/if}
 
 					{#if hiddenSubjects.length > 0}
 						<div class="mb-4 rounded-lg bg-slate-700 p-3">
@@ -357,24 +442,10 @@
 										</p>
 									{/if}
 									{#if subscription.manuallyExcludedSubjects && subscription.manuallyExcludedSubjects.length > 0}
-										<details class="mt-1">
-											<summary
-												class="cursor-pointer text-xs text-red-400 hover:text-red-300"
-											>
-												🚫 Исключено вручную: {subscription
-													.manuallyExcludedSubjects.length} типов занятий
-											</summary>
-											<div class="mt-1 ml-4 space-y-0.5">
-												{#each subscription.manuallyExcludedSubjects as excluded}
-													{@const [subj, typeStr] = excluded.split('|')}
-													{@const type = parseInt(typeStr)}
-													<p class="text-xs text-gray-400">
-														• {subj} — {LessonTypes[type] ||
-															`Тип ${type}`}
-													</p>
-												{/each}
-											</div>
-										</details>
+										<p class="text-xs text-red-400">
+											🚫 Исключено вручную: {subscription
+												.manuallyExcludedSubjects.length} типов занятий
+										</p>
 									{:else if !subscription.excludeHidden && (!subscription.manuallyExcludedSubjects || subscription.manuallyExcludedSubjects.length === 0)}
 										<p class="text-xs text-green-400">
 											✅ Все предметы включены

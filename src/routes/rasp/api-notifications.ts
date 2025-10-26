@@ -2,7 +2,7 @@ import { browser } from '$app/environment';
 import { checkIsTelegramMiniApp } from '$lib/utils/telegram';
 
 const NOTIFICATIONS_API_URL =
-	'https://script.google.com/macros/s/AKfycby-wF6ICSlKVhwvh0qsz6pKbHlYbqKgTh7QPCXCYI-eXD81kbu09ikt_tzlV7cBXYpw/exec';
+	'https://script.google.com/macros/s/AKfycbynJ6k1bvJGUYUF4rb0LYFusgADmDqPXuR27yXf4gC3aBSQLKHvZ-r5rgpbQldUxLnK/exec';
 
 function getTelegramUserData(): { id: string; username?: string } | null {
 	const tg = (window as any).Telegram?.WebApp;
