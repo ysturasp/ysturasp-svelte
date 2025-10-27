@@ -69,6 +69,31 @@
 				</button>
 
 				<div class="hidden h-4 w-[1px] bg-slate-700/50 md:block"></div>
+			{:else}
+				<a
+					href="https://aeza.net/?ref=538988"
+					target="_blank"
+					rel="noopener noreferrer"
+					class="group relative flex w-full items-center justify-center gap-1.5 rounded-lg bg-white/95 px-2.5 py-1.5 text-sm transition-opacity hover:opacity-80 md:w-auto md:py-2"
+					on:click={() => handleNavClick()}
+				>
+					<img
+						src="https://my.aeza.net/assets/images/logo-dark.svg"
+						alt="Aeza"
+						class="h-4 w-auto"
+					/>
+					<span class="text-xs whitespace-nowrap text-slate-700"
+						>🤝 Серверы от €4.94/мес</span
+					>
+
+					<div
+						class="absolute -top-9 left-1/2 z-10 hidden -translate-x-1/2 translate-y-1 transform rounded-lg border border-slate-600 bg-slate-900 px-2 py-1 text-xs text-white opacity-0 shadow-lg transition-all duration-200 ease-in-out group-hover:translate-y-0 group-hover:opacity-100 md:block"
+					>
+						Партнёрское предложение
+					</div>
+				</a>
+
+				<div class="hidden h-4 w-[1px] bg-slate-700/50 md:block"></div>
 			{/if}
 
 			<div class="flex items-center gap-1.5">

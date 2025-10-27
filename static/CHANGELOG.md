@@ -1,3 +1,4 @@
+- add economics management institute and related disciplines to statistics sections (ysturasp, 2025-10-27) [8 files changed, 232 insertions(+), 8 deletions(-)]
 - enhance notification settings modal with custom time option and improved exclusions handling (ysturasp, 2025-10-26) [4 files changed, 103 insertions(+), 30 deletions(-)]
 - refactor footer component for improved link formatting (ysturasp, 2025-10-25) [3 files changed, 10 insertions(+), 8 deletions(-)]
 - add link to service status check in footer (ysturasp, 2025-10-25) [3 files changed, 10 insertions(+)]
