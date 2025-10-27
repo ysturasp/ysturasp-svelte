@@ -7,6 +7,7 @@
 	import { settings } from '$lib/stores/settings';
 	import type { Settings } from '$lib/stores/settings';
 	import { checkIsTelegramMiniApp } from '$lib/utils/telegram';
+	import { reachGoal } from '$lib/utils/metrika';
 
 	export let selectedSemester: SemesterInfo | null = null;
 	export let onSemesterChange: (semester: SemesterInfo) => void;
@@ -75,7 +76,10 @@
 					target="_blank"
 					rel="noopener noreferrer"
 					class="group relative flex w-full items-center justify-center gap-1.5 rounded-lg bg-white/95 px-2.5 py-1.5 text-sm transition-opacity hover:opacity-80 md:w-auto md:py-2"
-					on:click={() => handleNavClick()}
+					on:click={() => {
+						reachGoal('aeza_affiliate_click');
+						handleNavClick();
+					}}
 				>
 					<img
 						src="https://my.aeza.net/assets/images/logo-dark.svg"
