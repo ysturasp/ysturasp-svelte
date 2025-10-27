@@ -8,7 +8,9 @@ const STATS_URLS: Record<InstituteId, string> = {
 	'btn-civil-transport':
 		'https://script.google.com/macros/s/AKfycbzbxLrOI2rA8ZzVfrT6RXIG5ADMl_5NdAQd8NEIYfg-qKkWVe_fGyB5pDolsCOtH14Mxw/exec',
 	'btn-chemistry':
-		'https://script.google.com/macros/s/AKfycbwF5HYRZ4k2Eg25VjtHgmlEznjyFOBRj2ZOqQch5z7f_mJ5rJ8LmfOzawS7Kwsv3xiZXg/exec'
+		'https://script.google.com/macros/s/AKfycbwF5HYRZ4k2Eg25VjtHgmlEznjyFOBRj2ZOqQch5z7f_mJ5rJ8LmfOzawS7Kwsv3xiZXg/exec',
+	'btn-economics-management':
+		'https://script.google.com/macros/s/AKfycbyr3n31rcxeR-uG9UjrbYwNaEKQqm695ZIU8y1h5uAQ1Dr8sRt5gkT3_T9eCA250-Pf/exec'
 };
 
 const INSTRUCTOR_URLS: Record<InstituteId, string> = {
@@ -19,7 +21,9 @@ const INSTRUCTOR_URLS: Record<InstituteId, string> = {
 	'btn-civil-transport':
 		'https://script.google.com/macros/s/AKfycbzIby7Zm8Jk_LdtCQEPib4aYnvjqv1ucyH3a9aghfwNDu9QyMbCflmolCpd8uK-joPasw/exec',
 	'btn-chemistry':
-		'https://script.google.com/macros/s/AKfycbwF5HYRZ4k2Eg25VjtHgmlEznjyFOBRj2ZOqQch5z7f_mJ5rJ8LmfOzawS7Kwsv3xiZXg/exec' // temp plug prepods link for chemistry institute
+		'https://script.google.com/macros/s/AKfycbwF5HYRZ4k2Eg25VjtHgmlEznjyFOBRj2ZOqQch5z7f_mJ5rJ8LmfOzawS7Kwsv3xiZXg/exec', // temp plug prepods link for chemistry institute
+	'btn-economics-management':
+		'https://script.google.com/macros/s/AKfycbyr3n31rcxeR-uG9UjrbYwNaEKQqm695ZIU8y1h5uAQ1Dr8sRt5gkT3_T9eCA250-Pf/exec' // temp plug prepods link for economics institute
 };
 
 const TOP_ANTITOP_URLS: Record<InstituteId, string> = {
@@ -30,7 +34,9 @@ const TOP_ANTITOP_URLS: Record<InstituteId, string> = {
 	'btn-civil-transport':
 		'https://script.google.com/macros/s/AKfycbz_5IGSgCYpiJ8zCx7qkwCTj2IE_IN51TlPwi5HlqYUCpnTcQegAuC3vFACV1dUnFxp/exec',
 	'btn-chemistry':
-		'https://script.google.com/macros/s/AKfycbyouqWIqob_4OsQki4-zx4Qk3aPS4MkrbXxU3TXucSlRPFu0j5R6RbgfBHcT5uikgUF0w/exec'
+		'https://script.google.com/macros/s/AKfycbyouqWIqob_4OsQki4-zx4Qk3aPS4MkrbXxU3TXucSlRPFu0j5R6RbgfBHcT5uikgUF0w/exec',
+	'btn-economics-management':
+		'https://script.google.com/macros/s/AKfycbwInviggJZhXAiiHqc6Ypuq-KP1uYE31CoYC6nUq70nZQ57jqAcLAMuykMPd5PynzbR/exec'
 };
 
 const REFERRAL_API_URL =

@@ -4,7 +4,8 @@
 		disciplinesDigitalSystems,
 		disciplinesAiD,
 		disciplinesCivilTransport,
-		disciplinesChemistry
+		disciplinesChemistry,
+		disciplinesEconomicsManagement
 	} from '../data/disciplines';
 	import type { Stats, Instructors, InstituteId, NotificationOptions } from '../types';
 	import { getSubjectStats, getInstructors, checkViewLimit } from '../utils/api';
@@ -105,6 +106,9 @@
 				break;
 			case 'btn-chemistry':
 				currentDisciplines = disciplinesChemistry;
+				break;
+			case 'btn-economics-management':
+				currentDisciplines = disciplinesEconomicsManagement;
 				break;
 		}
 		dispatch('instituteChange', institute);
@@ -282,8 +286,8 @@
 
 	<div class="form-group">
 		<p class="mt-2 text-slate-300">
-			На данный момент поддерживается статистика предметов ИЦС, ИАиД, ИИСиТ и ИХХТ. В будующем
-			планируется добавление статистики и для других Институтов
+			На данный момент поддерживается статистика предметов ИЦС, ИАиД, ИИСиТ, ИХХТ и ИЭиМ. В
+			будующем планируется добавление статистики и для других Институтов
 		</p>
 
 		<div class="flex items-center justify-center">
@@ -362,6 +366,14 @@
 				on:click={() => handleInstituteChange('btn-chemistry')}
 			>
 				Институт Химии и Химической Технологии
+			</button>
+			<button
+				class="institute-button {selectedInstitute === 'btn-economics-management'
+					? 'active'
+					: ''}"
+				on:click={() => handleInstituteChange('btn-economics-management')}
+			>
+				Институт Экономики и Менеджмента
 			</button>
 		</div>
 

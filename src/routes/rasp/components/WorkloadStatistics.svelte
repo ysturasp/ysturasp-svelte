@@ -16,7 +16,9 @@
 		'Институт инженеров строительства и транспорта':
 			'https://script.google.com/macros/s/AKfycbzbxLrOI2rA8ZzVfrT6RXIG5ADMl_5NdAQd8NEIYfg-qKkWVe_fGyB5pDolsCOtH14Mxw/exec',
 		'Институт химии и химической технологии':
-			'https://script.google.com/macros/s/AKfycbwF5HYRZ4k2Eg25VjtHgmlEznjyFOBRj2ZOqQch5z7f_mJ5rJ8LmfOzawS7Kwsv3xiZXg/exec'
+			'https://script.google.com/macros/s/AKfycbwF5HYRZ4k2Eg25VjtHgmlEznjyFOBRj2ZOqQch5z7f_mJ5rJ8LmfOzawS7Kwsv3xiZXg/exec',
+		'Институт экономики и менеджмента':
+			'https://script.google.com/macros/s/AKfycbyr3n31rcxeR-uG9UjrbYwNaEKQqm695ZIU8y1h5uAQ1Dr8sRt5gkT3_T9eCA250-Pf/exec'
 	} as const;
 
 	interface ExamInfo {

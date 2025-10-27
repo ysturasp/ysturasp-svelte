@@ -21,6 +21,10 @@
 				return 'Институт Архитектуры и Дизайна';
 			case 'btn-civil-transport':
 				return 'Институт Инженеров Строительства и Транспорта';
+			case 'btn-chemistry':
+				return 'Институт Химии и Химической Технологии';
+			case 'btn-economics-management':
+				return 'Институт Экономики и Менеджмента';
 			default:
 				return '';
 		}
