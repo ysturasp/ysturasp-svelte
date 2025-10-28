@@ -146,18 +146,38 @@ export interface AudienceLesson {
 	originalTimeTitle?: string;
 }
 
+export enum LessonType {
+	None = 0,
+	CourseProject = 1,
+	Lecture = 1 << 1,
+	Exam = 3,
+	Practical = 1 << 2,
+	Consultation = 5,
+	LecturePractical = 6,
+	DifferentiatedTest = 7,
+	Laboratory = 1 << 3,
+	Library = 9,
+	LectureLaboratory = 10,
+	OrganizationalMeeting = 11,
+	Unsupported = 12,
+	ExamAlt = 1 << 8,
+	Unknown = 1 << 12
+}
+
 export const LessonTypes: Record<number, string> = {
-	0: 'none',
-	2: 'Лекция',
-	4: 'Практика',
-	8: 'Лабораторная работа',
-	1: 'Курсовой проект',
-	5: 'Консультация',
-	6: 'Лекция + Практика',
-	7: 'Дифференцированный зачет',
-	3: 'Экзамен',
-	9: 'Библиотека',
-	10: 'Лекция + Лабораторная работа',
-	11: 'Организационное собрание',
-	12: 'Не поддерживается'
+	[LessonType.None]: 'none',
+	[LessonType.Lecture]: 'Лекция',
+	[LessonType.Practical]: 'Практика',
+	[LessonType.Laboratory]: 'Лабораторная работа',
+	[LessonType.CourseProject]: 'Курсовой проект',
+	[LessonType.Consultation]: 'Консультация',
+	[LessonType.LecturePractical]: 'Лекция + Практика',
+	[LessonType.DifferentiatedTest]: 'Дифференцированный зачет',
+	[LessonType.Exam]: 'Экзамен',
+	[LessonType.Library]: 'Библиотека',
+	[LessonType.LectureLaboratory]: 'Лекция + Лабораторная работа',
+	[LessonType.OrganizationalMeeting]: 'Организационное собрание',
+	[LessonType.Unsupported]: 'Не поддерживается',
+	[LessonType.ExamAlt]: 'Экзамен',
+	[LessonType.Unknown]: 'Неизвестный тип'
 };
