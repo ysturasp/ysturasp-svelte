@@ -34,6 +34,7 @@
 					<a
 						href="https://t.me/ysturasp"
 						class="text-slate-400 transition-all hover:text-white"
+						aria-label="Telegram"
 					>
 						<div class="h-14 w-14 rounded-xl bg-white p-1">
 							<img
@@ -46,18 +47,25 @@
 					<a
 						href="https://boosty.to/ysturasp.me"
 						class="text-slate-400 transition-all hover:text-white"
+						aria-label="Boosty"
 					>
 						<div class="h-14 w-14 rounded-xl bg-white p-1">
-							<img
-								src="https://boosty.to/favicon.ico"
-								alt="Boosty"
+							<svg
 								class="mx-auto my-1 h-10 w-10"
-							/>
+								xmlns="http://www.w3.org/2000/svg"
+								viewBox="0 0 830.9 1000"
+							>
+								<path
+									fill="#EE7829"
+									d="M26.2,597.3L199.1,0h265l-53.6,185.2c-0.6,1-1,2.1-1.3,3.3l-140.7,489h131.3C344.8,814.6,301.9,922.1,271,1000   C28.7,997.2-39.2,823.6,20.2,618.3 M271.9,1000l319.4-460H455.8l117.9-294.7c202.4,21.3,297.2,180.4,241.5,373   c-59.9,207-302.3,381.7-538.3,381.7C275.2,1000,273.6,1000,271.9,1000z"
+								/>
+							</svg>
 						</div>
 					</a>
 					<a
 						href="https://github.com/ysturasp"
 						class="text-slate-400 transition-all hover:text-white"
+						aria-label="GitHub"
 					>
 						<div class="h-14 w-14 rounded-xl bg-white p-1">
 							<img
