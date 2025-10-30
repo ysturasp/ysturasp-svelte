@@ -1,3 +1,4 @@
+- replace boosty icon with svg (ysturasp, 2025-10-29) [3 files changed, 14 insertions(+), 4 deletions(-)]
 - add LessonType enum and refactor LessonTypes mapping for improved clarity in schedule types (ysturasp, 2025-10-28) [3 files changed, 35 insertions(+), 13 deletions(-)]
 - add tracking goal for affiliate link clicks in ScheduleSwitcher component (ysturasp, 2025-10-27) [3 files changed, 7 insertions(+), 1 deletion(-)]
 - add Aeza partner referal block and update legal docs for affiliate program (ysturasp, 2025-10-27) [7 files changed, 242 insertions(+), 17 deletions(-)]

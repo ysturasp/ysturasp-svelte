@@ -99,7 +99,7 @@
 				<div class="dialog-subtitle {subtitleClass}">{subtitle}</div>
 			{/if}
 		</div>
-		<div class="dialog-content">
+		<div class="overflow-y-auto px-4">
 			<slot />
 		</div>
 		<div class="dialog-footer">
@@ -193,12 +193,6 @@
 	.dialog-subtitle {
 		font-size: 0.875rem;
 		margin-top: 4px;
-	}
-
-	.dialog-content {
-		overflow-y: auto;
-		padding: 16px;
-		color: rgb(209 213 219);
 	}
 
 	.dialog-footer {
