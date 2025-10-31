@@ -1,3 +1,4 @@
+- add docker support (ysturasp, 2025-11-01) [4 files changed, 37 insertions(+)]
 - update url for bot update: convert group chat keyboard buttons to inline buttons with callbacks (ysturasp, 2025-10-31) [4 files changed, 4 insertions(+), 2 deletions(-)]
 - refactor BottomModal component to improve content styling and remove redundant CSS (ysturasp, 2025-10-30) [3 files changed, 3 insertions(+), 7 deletions(-)]
 - replace boosty icon with svg (ysturasp, 2025-10-29) [3 files changed, 14 insertions(+), 4 deletions(-)]

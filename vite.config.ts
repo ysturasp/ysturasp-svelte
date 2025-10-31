@@ -13,5 +13,8 @@ export default defineConfig({
 		}),
 		tailwindcss(),
 		sveltekit()
-	]
+	],
+	server: {
+		allowedHosts: ['ysturasp.ru']
+	}
 });
