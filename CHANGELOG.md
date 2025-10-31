@@ -1,3 +1,4 @@
+- refactor BottomModal component to improve content styling and remove redundant CSS (ysturasp, 2025-10-30) [3 files changed, 3 insertions(+), 7 deletions(-)]
 - replace boosty icon with svg (ysturasp, 2025-10-29) [3 files changed, 14 insertions(+), 4 deletions(-)]
 - add LessonType enum and refactor LessonTypes mapping for improved clarity in schedule types (ysturasp, 2025-10-28) [3 files changed, 35 insertions(+), 13 deletions(-)]
 - add tracking goal for affiliate link clicks in ScheduleSwitcher component (ysturasp, 2025-10-27) [3 files changed, 7 insertions(+), 1 deletion(-)]
