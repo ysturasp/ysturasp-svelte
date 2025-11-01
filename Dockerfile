@@ -1,13 +1,24 @@
-FROM node:20-alpine
+FROM node:20-alpine AS builder
 
 WORKDIR /usr/src/app
 
 COPY package*.json ./
-
-RUN npm install
+RUN npm ci --only=production=false
 
 COPY . .
+RUN npm run build
 
-EXPOSE 5173
+FROM node:20-alpine AS production
 
-CMD ["npm", "run", "dev"]
+WORKDIR /usr/src/app
+
+COPY package*.json ./
+RUN npm ci && npm cache clean --force
+
+COPY --from=builder /usr/src/app/build ./build
+COPY --from=builder /usr/src/app/.svelte-kit ./.svelte-kit
+COPY --from=builder /usr/src/app/static ./static
+
+EXPOSE 4173
+
+CMD ["npm", "run", "preview", "--", "--host"]
