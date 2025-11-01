@@ -1,40 +1,39 @@
-FROM node:20-alpine AS deps
+FROM node:20-bookworm-slim AS deps
 
 WORKDIR /app
 
 COPY package*.json ./
-RUN npm ci
+RUN npm ci --no-audit --no-fund
 
-FROM node:20-alpine AS build
+FROM node:20-bookworm-slim AS build
 
 WORKDIR /app
-ENV NODE_ENV=production
+ENV NODE_ENV=production \
+    BUILD_ADAPTER=node
 
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-RUN npm run build
+RUN npm run prepare && npm run build
 
-FROM node:20-alpine AS runner
+FROM node:20-bookworm-slim AS prod-deps
+
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --omit=dev --omit=optional --no-audit --no-fund && npm cache clean --force
+
+FROM gcr.io/distroless/nodejs20-debian12:nonroot AS runner
 
 WORKDIR /app
 
-RUN addgroup -S nodejs && adduser -S nodeuser -G nodejs
-
 ENV NODE_ENV=production \
     HOST=0.0.0.0 \
-    PORT=5173
+    PORT=3000
 
-COPY package*.json ./
-COPY --from=deps /app/node_modules ./node_modules
-COPY --from=build /app/build ./build
-COPY --from=build /app/.svelte-kit ./.svelte-kit
-COPY --from=build /app/static ./static
-COPY vite.config.ts ./vite.config.ts
+COPY --chown=nonroot:nonroot --from=prod-deps /app/node_modules ./node_modules
+COPY --chown=nonroot:nonroot --from=build /app/build ./build
 
-RUN chown -R nodeuser:nodejs /app
+EXPOSE 3000
 
-EXPOSE 5173
+USER nonroot
 
-USER nodeuser
-
-CMD ["npm", "run", "preview", "--", "--host", "0.0.0.0", "--port", "5173"]
+CMD ["build/index.js"]
