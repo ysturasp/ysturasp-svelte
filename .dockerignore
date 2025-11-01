@@ -1,0 +1,14 @@
+node_modules
+.svelte-kit
+build
+.git
+.gitignore
+.DS_Store
+npm-debug.log*
+yarn-error.log*
+pnpm-lock.yaml
+
+# Editor junk
+
+.vscode
+.idea

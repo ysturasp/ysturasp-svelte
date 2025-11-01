@@ -1,3 +1,4 @@
+- update Docker configuration for production environment (ysturasp, 2025-11-01) [4 files changed, 20 insertions(+), 13 deletions(-)]
 - add server configuration to allow specific hosts in Vite setup (ysturasp, 2025-11-01) [3 files changed, 6 insertions(+), 1 deletion(-)]
 - add docker support (ysturasp, 2025-11-01) [4 files changed, 37 insertions(+)]
 - update url for bot update: convert group chat keyboard buttons to inline buttons with callbacks (ysturasp, 2025-10-31) [4 files changed, 4 insertions(+), 2 deletions(-)]
