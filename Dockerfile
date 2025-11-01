@@ -11,6 +11,11 @@ WORKDIR /app
 ENV NODE_ENV=production \
     BUILD_ADAPTER=node
 
+ARG PRIVATE_KEY
+ARG GROQ_API_KEY
+ENV PRIVATE_KEY=$PRIVATE_KEY \
+    GROQ_API_KEY=$GROQ_API_KEY
+
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN npm run prepare && npm run build
