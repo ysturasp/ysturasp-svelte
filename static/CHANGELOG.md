@@ -1,3 +1,4 @@
+- enhance Docker configuration by adding build arguments for PRIVATE_KEY and GROQ_API_KEY (ysturasp, 2025-11-01) [4 files changed, 12 insertions(+), 1 deletion(-)]
 - add PRIVATE_KEY in env docker (ysturasp, 2025-11-01) [4 files changed, 5 insertions(+), 2 deletions(-)]
 - refactor Dockerfile for enhanced build process, switch to slim base image, and integrate new Svelte adapter (ysturasp, 2025-11-01) [6 files changed, 181 insertions(+), 24 deletions(-)]
 - refactor Docker setup for improved production build process and update port configuration (ysturasp, 2025-11-01) [5 files changed, 47 insertions(+), 12 deletions(-)]
