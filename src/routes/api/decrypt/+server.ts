@@ -1,13 +1,18 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import CryptoJS from 'crypto-js';
-import { PRIVATE_KEY } from '$env/static/private';
+import { env } from '$env/dynamic/private';
 
 export const POST: RequestHandler = async ({ request }) => {
 	try {
 		const { message } = await request.json();
 
-		const decrypted = CryptoJS.AES.decrypt(message, PRIVATE_KEY, {
+		const secret = env.PRIVATE_KEY;
+		if (!secret) {
+			return new Response('Секретный ключ не задан', { status: 500 });
+		}
+
+		const decrypted = CryptoJS.AES.decrypt(message, secret, {
 			mode: CryptoJS.mode.CBC,
 			padding: CryptoJS.pad.Pkcs7
 		}).toString(CryptoJS.enc.Utf8);

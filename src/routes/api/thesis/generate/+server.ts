@@ -1,6 +1,6 @@
 import { json } from '@sveltejs/kit';
 import type { RequestEvent } from '@sveltejs/kit';
-import { GROQ_API_KEY } from '$env/static/private';
+import { env } from '$env/dynamic/private';
 
 const instituteContexts: Record<string, string> = {
 	'Институт цифровых систем': `
@@ -97,7 +97,7 @@ ${instituteExamples}
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
-				'Authorization': `Bearer ${GROQ_API_KEY}`
+				'Authorization': `Bearer ${env.GROQ_API_KEY || ''}`
 			},
 			body: JSON.stringify({
 				model: 'llama-3.1-8b-instant',

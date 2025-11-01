@@ -1,3 +1,4 @@
+- add all Firebase environment variables to Docker configuration for enhanced integration (ysturasp, 2025-11-01) [4 files changed, 32 insertions(+)]
 - enhance Docker configuration by adding build arguments for PRIVATE_KEY and GROQ_API_KEY (ysturasp, 2025-11-01) [4 files changed, 12 insertions(+), 1 deletion(-)]
 - add PRIVATE_KEY in env docker (ysturasp, 2025-11-01) [4 files changed, 5 insertions(+), 2 deletions(-)]
 - refactor Dockerfile for enhanced build process, switch to slim base image, and integrate new Svelte adapter (ysturasp, 2025-11-01) [6 files changed, 181 insertions(+), 24 deletions(-)]
