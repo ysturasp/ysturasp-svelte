@@ -1,3 +1,4 @@
+- refactor Dockerfile for enhanced build process, switch to slim base image, and integrate new Svelte adapter (ysturasp, 2025-11-01) [6 files changed, 181 insertions(+), 24 deletions(-)]
 - refactor Docker setup for improved production build process and update port configuration (ysturasp, 2025-11-01) [5 files changed, 47 insertions(+), 12 deletions(-)]
 - update Docker configuration for production environment (ysturasp, 2025-11-01) [4 files changed, 20 insertions(+), 13 deletions(-)]
 - add server configuration to allow specific hosts in Vite setup (ysturasp, 2025-11-01) [3 files changed, 6 insertions(+), 1 deletion(-)]
