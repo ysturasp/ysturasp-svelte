@@ -109,7 +109,7 @@
 					></path>
 				</svg>
 			</div>
-			<span>Мгновенный доступ ко всем сервисам ystuRASP</span>
+			<span>Мгновенный доступ ко всем сервисам ysturasp</span>
 		</div>
 	</div>
 

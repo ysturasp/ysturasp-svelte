@@ -33,7 +33,7 @@
 
 <svelte:head>
 	<title
-		>{isOffline ? 'Нет подключения к интернету - ystuRASP' : 'Упс.. Ошибочка - ystuRASP'}</title
+		>{isOffline ? 'Нет подключения к интернету - ysturasp' : 'Упс.. Ошибочка - ysturasp'}</title
 	>
 	<meta
 		name="description"

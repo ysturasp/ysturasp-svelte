@@ -4,8 +4,8 @@
 </script>
 
 <svelte:head>
-	<title>Юридическая информация - ystuRASP</title>
-	<meta name="description" content="Юридическая информация и документы сервиса ystuRASP" />
+	<title>Юридическая информация - ysturasp</title>
+	<meta name="description" content="Юридическая информация и документы сервиса ysturasp" />
 </svelte:head>
 
 <PageLayout>

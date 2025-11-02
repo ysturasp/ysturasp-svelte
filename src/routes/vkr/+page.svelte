@@ -101,7 +101,7 @@
 </script>
 
 <svelte:head>
-	<title>Генератор тем ВКР | ystuRASP</title>
+	<title>Генератор тем ВКР | ysturasp</title>
 	<meta
 		name="description"
 		content="Генератор тем для выпускных квалификационных работ студентов ЯГТУ"

@@ -1,3 +1,4 @@
+- revert throwinf ports on network (ysturasp, 2025-11-01) [3 files changed, 4 insertions(+), 2 deletions(-)]
 - refactor Docker and API routes to use dynamic environment variables, removing static keys for improved security (ysturasp, 2025-11-01) [7 files changed, 22 insertions(+), 32 deletions(-)]
 - add all Firebase environment variables to Docker configuration for enhanced integration (ysturasp, 2025-11-01) [4 files changed, 32 insertions(+)]
 - enhance Docker configuration by adding build arguments for PRIVATE_KEY and GROQ_API_KEY (ysturasp, 2025-11-01) [4 files changed, 12 insertions(+), 1 deletion(-)]

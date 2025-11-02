@@ -452,7 +452,7 @@
 </script>
 
 <svelte:head>
-	<title>Экспорт и импорт данных | ystuRASP</title>
+	<title>Экспорт и импорт данных | ysturasp</title>
 	<meta name="description" content="Экспорт и импорт кэша" />
 </svelte:head>
 

@@ -41,16 +41,16 @@
 </script>
 
 <svelte:head>
-	<title>ystuRASP. Оценки по предметам ЯГТУ</title>
+	<title>ysturasp. Оценки по предметам ЯГТУ</title>
 	<meta
 		name="description"
 		content="Узнайте статистику оценок предметов ЯГТУ, средние баллы и расписание 2024. ysturasp"
 	/>
 	<meta
 		name="keywords"
-		content="ystuRASP, статистика оценок ЯГТУ, средний балл предметов ЯГТУ, анализ успеваемости ЯГТУ, успеваемость по предметам ЯГТУ, ystuRASP, баллы по предметам ЯГТУ, оценочная статистика ЯГТУ"
+		content="ysturasp, статистика оценок ЯГТУ, средний балл предметов ЯГТУ, анализ успеваемости ЯГТУ, успеваемость по предметам ЯГТУ, ysturasp, баллы по предметам ЯГТУ, оценочная статистика ЯГТУ"
 	/>
-	<meta property="og:title" content="ystuRASP. Оценки по предметам ЯГТУ" />
+	<meta property="og:title" content="ysturasp. Оценки по предметам ЯГТУ" />
 	<meta
 		property="og:description"
 		content="Узнайте статистику оценок предметов ЯГТУ, средние баллы и расписание 2024. ysturasp"

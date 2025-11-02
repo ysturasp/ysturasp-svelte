@@ -65,7 +65,7 @@
 </script>
 
 <svelte:head>
-	<title>О нас - ystuRASP</title>
+	<title>О нас - ysturasp</title>
 	<meta
 		name="description"
 		content="Узнайте статистику оценок студентов ЯГТУ, средние баллы и распределение оценок по различным дисциплинам. ysturasp"

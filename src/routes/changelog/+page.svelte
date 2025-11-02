@@ -77,10 +77,10 @@
 </script>
 
 <svelte:head>
-	<title>История изменений - ystuRASP</title>
+	<title>История изменений - ysturasp</title>
 	<meta
 		name="description"
-		content="История изменений ystuRASP - отслеживайте все обновления и улучшения нашего сервиса"
+		content="История изменений ysturasp - отслеживайте все обновления и улучшения нашего сервиса"
 	/>
 	<link rel="icon" href="/images/cat.png" type="image/png" />
 </svelte:head>

@@ -1,6 +1,6 @@
 {
-	"name": "ystuRASP",
-	"short_name": "ystuRASP",
+	"name": "ysturasp",
+	"short_name": "ysturasp",
 	"start_url": "/rasp",
 	"scope": "/",
 	"display": "standalone",
