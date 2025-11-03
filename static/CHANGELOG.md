@@ -1,3 +1,4 @@
+- update profile links to new domain (ysturasp, 2025-11-03) [5 files changed, 5 insertions(+), 3 deletions(-)]
 - renaming all ystuRASP --> ysturasp (ysturasp, 2025-11-02) [19 files changed, 37 insertions(+), 35 deletions(-)]
 - revert throwinf ports on network (ysturasp, 2025-11-01) [3 files changed, 4 insertions(+), 2 deletions(-)]
 - refactor Docker and API routes to use dynamic environment variables, removing static keys for improved security (ysturasp, 2025-11-01) [7 files changed, 22 insertions(+), 32 deletions(-)]

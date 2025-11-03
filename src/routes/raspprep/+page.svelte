@@ -28,6 +28,7 @@
 	import NavigationLinks from '$lib/components/ui/NavigationLinks.svelte';
 	import OnlineCounter from '$lib/components/ui/OnlineCounter.svelte';
 	import ScheduleSwitcher from '$lib/components/schedule/ScheduleSwitcher.svelte';
+	import { page } from '$app/stores';
 	import { settings } from '$lib/stores/settings';
 	import type { Settings } from '$lib/stores/settings';
 	import { reachGoal } from '$lib/utils/metrika';
@@ -305,7 +306,7 @@
 		<meta name="robots" content="index, follow" />
 		<link
 			rel="canonical"
-			href={`https://ysturasp.netlify.app/raspprep?teacher=${encodeURIComponent(selectedTeacher)}`}
+			href={`${$page.url.origin}/raspprep?teacher=${encodeURIComponent(selectedTeacher)}`}
 		/>
 	{/if}
 </svelte:head>

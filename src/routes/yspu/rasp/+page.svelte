@@ -26,6 +26,7 @@
 	import NavigationLinks from '$lib/components/ui/NavigationLinks.svelte';
 	import ScheduleSwitcher from '$lib/components/schedule/ScheduleSwitcher.svelte';
 	import { settings } from '$lib/stores/settings';
+	import { page } from '$app/stores';
 	import type { Settings } from '$lib/stores/settings';
 	import type { SemesterInfo } from '$lib/utils/semester';
 	import { getCurrentWeek, getCurrentWeekMessage } from '$lib/utils/semester';
@@ -523,7 +524,7 @@
 		<meta name="robots" content="index, follow" />
 		<link
 			rel="canonical"
-			href={`https://ysturasp.netlify.app/yspu/rasp?direction=${encodeURIComponent(selectedDirection)}&group=${encodeURIComponent(selectedGroup)}`}
+			href={`${$page.url.origin}/yspu/rasp?direction=${encodeURIComponent(selectedDirection)}&group=${encodeURIComponent(selectedGroup)}`}
 		/>
 	{/if}
 </svelte:head>

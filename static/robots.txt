@@ -1,9 +1,0 @@
-User-agent: *
-Host: ysturasp.netlify.app
-Sitemap: https://ysturasp.netlify.app/sitemap.xml
-Clean-param: week&semester /rasp
-Clean-param: week&semester /raspprep
-Clean-param: week&semester /raspaudience
-Clean-param: week&semester /yspu/rasp
-Clean-param: week&semester /yspu/raspprep
-Clean-param: week&semester /yspu/raspaudience

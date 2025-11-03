@@ -44,6 +44,7 @@
 	import { replaceState } from '$app/navigation';
 	import NavigationLinks from '$lib/components/ui/NavigationLinks.svelte';
 	import { writable } from 'svelte/store';
+	import { page } from '$app/stores';
 	import { fade } from 'svelte/transition';
 	import { quintOut } from 'svelte/easing';
 	import ScheduleSwitcher from '$lib/components/schedule/ScheduleSwitcher.svelte';
@@ -489,7 +490,7 @@
 		<meta name="robots" content="index, follow" />
 		<link
 			rel="canonical"
-			href={`https://ysturasp.netlify.app/rasp?institute=${encodeURIComponent(selectedInstitute)}&group=${encodeURIComponent(selectedGroup)}`}
+			href={`${$page.url.origin}/rasp?institute=${encodeURIComponent(selectedInstitute)}&group=${encodeURIComponent(selectedGroup)}`}
 		/>
 	{/if}
 </svelte:head>

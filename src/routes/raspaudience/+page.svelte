@@ -27,6 +27,7 @@
 	import NavigationLinks from '$lib/components/ui/NavigationLinks.svelte';
 	import OnlineCounter from '$lib/components/ui/OnlineCounter.svelte';
 	import ScheduleSwitcher from '$lib/components/schedule/ScheduleSwitcher.svelte';
+	import { page } from '$app/stores';
 	import { settings } from '$lib/stores/settings';
 	import GithubApiSection from '$lib/components/sections/GithubApiSection.svelte';
 	import type { Settings } from '$lib/stores/settings';
@@ -293,7 +294,7 @@
 		<meta name="robots" content="index, follow" />
 		<link
 			rel="canonical"
-			href={`https://ysturasp.netlify.app/raspaudience?audience=${encodeURIComponent(selectedAudience)}`}
+			href={`${$page.url.origin}/raspaudience?audience=${encodeURIComponent(selectedAudience)}`}
 		/>
 	{/if}
 </svelte:head>
