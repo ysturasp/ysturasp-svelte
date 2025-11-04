@@ -5,7 +5,8 @@
 		disciplinesAiD,
 		disciplinesCivilTransport,
 		disciplinesChemistry,
-		disciplinesEconomicsManagement
+		disciplinesEconomicsManagement,
+		disciplinesEngineeringMachinery
 	} from '../data/disciplines';
 	import type { Stats, Instructors, InstituteId, NotificationOptions } from '../types';
 	import { getSubjectStats, getInstructors, checkViewLimit } from '../utils/api';
@@ -109,6 +110,9 @@
 				break;
 			case 'btn-economics-management':
 				currentDisciplines = disciplinesEconomicsManagement;
+				break;
+			case 'btn-engineering-machinery':
+				currentDisciplines = disciplinesEngineeringMachinery;
 				break;
 		}
 		dispatch('instituteChange', institute);
@@ -374,6 +378,14 @@
 				on:click={() => handleInstituteChange('btn-economics-management')}
 			>
 				Институт Экономики и Менеджмента
+			</button>
+			<button
+				class="institute-button {selectedInstitute === 'btn-engineering-machinery'
+					? 'active'
+					: ''}"
+				on:click={() => handleInstituteChange('btn-engineering-machinery')}
+			>
+				Институт Инженерии и Машиностроения
 			</button>
 		</div>
 

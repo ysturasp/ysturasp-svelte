@@ -10,7 +10,9 @@ const STATS_URLS: Record<InstituteId, string> = {
 	'btn-chemistry':
 		'https://script.google.com/macros/s/AKfycbwF5HYRZ4k2Eg25VjtHgmlEznjyFOBRj2ZOqQch5z7f_mJ5rJ8LmfOzawS7Kwsv3xiZXg/exec',
 	'btn-economics-management':
-		'https://script.google.com/macros/s/AKfycbyr3n31rcxeR-uG9UjrbYwNaEKQqm695ZIU8y1h5uAQ1Dr8sRt5gkT3_T9eCA250-Pf/exec'
+		'https://script.google.com/macros/s/AKfycbyr3n31rcxeR-uG9UjrbYwNaEKQqm695ZIU8y1h5uAQ1Dr8sRt5gkT3_T9eCA250-Pf/exec',
+	'btn-engineering-machinery':
+		'https://script.google.com/macros/s/AKfycby9OL8AdcmXOz9pcZVs2yVShTABPtVIDTRW4Fo4rawK-HkLtuacH_2uclmCQpDzcUrG/exec'
 };
 
 const INSTRUCTOR_URLS: Record<InstituteId, string> = {
@@ -23,7 +25,9 @@ const INSTRUCTOR_URLS: Record<InstituteId, string> = {
 	'btn-chemistry':
 		'https://script.google.com/macros/s/AKfycbwF5HYRZ4k2Eg25VjtHgmlEznjyFOBRj2ZOqQch5z7f_mJ5rJ8LmfOzawS7Kwsv3xiZXg/exec', // temp plug prepods link for chemistry institute
 	'btn-economics-management':
-		'https://script.google.com/macros/s/AKfycbyr3n31rcxeR-uG9UjrbYwNaEKQqm695ZIU8y1h5uAQ1Dr8sRt5gkT3_T9eCA250-Pf/exec' // temp plug prepods link for economics institute
+		'https://script.google.com/macros/s/AKfycbyr3n31rcxeR-uG9UjrbYwNaEKQqm695ZIU8y1h5uAQ1Dr8sRt5gkT3_T9eCA250-Pf/exec', // temp plug prepods link for economics institute
+	'btn-engineering-machinery':
+		'https://script.google.com/macros/s/AKfycby9OL8AdcmXOz9pcZVs2yVShTABPtVIDTRW4Fo4rawK-HkLtuacH_2uclmCQpDzcUrG/exec' // temp plug prepods link for engineering machinery institute
 };
 
 const TOP_ANTITOP_URLS: Record<InstituteId, string> = {
@@ -36,7 +40,9 @@ const TOP_ANTITOP_URLS: Record<InstituteId, string> = {
 	'btn-chemistry':
 		'https://script.google.com/macros/s/AKfycbyouqWIqob_4OsQki4-zx4Qk3aPS4MkrbXxU3TXucSlRPFu0j5R6RbgfBHcT5uikgUF0w/exec',
 	'btn-economics-management':
-		'https://script.google.com/macros/s/AKfycbwInviggJZhXAiiHqc6Ypuq-KP1uYE31CoYC6nUq70nZQ57jqAcLAMuykMPd5PynzbR/exec'
+		'https://script.google.com/macros/s/AKfycbwInviggJZhXAiiHqc6Ypuq-KP1uYE31CoYC6nUq70nZQ57jqAcLAMuykMPd5PynzbR/exec',
+	'btn-engineering-machinery':
+		'https://script.google.com/macros/s/AKfycbxl1Mu8QEvzqEtjy21nMOKH9LsrsdyrkotYmney8b37gylEyxTQUOP2Sx4Qi9GXQlYN/exec'
 };
 
 const REFERRAL_API_URL =

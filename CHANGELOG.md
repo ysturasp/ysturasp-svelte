@@ -1,3 +1,4 @@
+- replace hardcoded domain with dynamic origin in canonical links and meta files (ysturasp, 2025-11-03) [16 files changed, 160 insertions(+), 98 deletions(-)]
 - update profile links to new domain (ysturasp, 2025-11-03) [5 files changed, 5 insertions(+), 3 deletions(-)]
 - renaming all ystuRASP --> ysturasp (ysturasp, 2025-11-02) [19 files changed, 37 insertions(+), 35 deletions(-)]
 - revert throwinf ports on network (ysturasp, 2025-11-01) [3 files changed, 4 insertions(+), 2 deletions(-)]

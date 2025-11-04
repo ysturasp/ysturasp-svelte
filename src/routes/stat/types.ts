@@ -28,7 +28,8 @@ export type InstituteId =
 	| 'btn-architecture-design'
 	| 'btn-civil-transport'
 	| 'btn-chemistry'
-	| 'btn-economics-management';
+	| 'btn-economics-management'
+	| 'btn-engineering-machinery';
 
 export type InstituteUrls = Record<InstituteId, string>;
 

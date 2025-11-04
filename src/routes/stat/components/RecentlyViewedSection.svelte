@@ -25,6 +25,8 @@
 				return 'Институт Химии и Химической Технологии';
 			case 'btn-economics-management':
 				return 'Институт Экономики и Менеджмента';
+			case 'btn-engineering-machinery':
+				return 'Институт Инженерии и Машиностроения';
 			default:
 				return '';
 		}

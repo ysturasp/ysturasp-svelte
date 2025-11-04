@@ -18,7 +18,9 @@
 		'Институт химии и химической технологии':
 			'https://script.google.com/macros/s/AKfycbwF5HYRZ4k2Eg25VjtHgmlEznjyFOBRj2ZOqQch5z7f_mJ5rJ8LmfOzawS7Kwsv3xiZXg/exec',
 		'Институт экономики и менеджмента':
-			'https://script.google.com/macros/s/AKfycbyr3n31rcxeR-uG9UjrbYwNaEKQqm695ZIU8y1h5uAQ1Dr8sRt5gkT3_T9eCA250-Pf/exec'
+			'https://script.google.com/macros/s/AKfycbyr3n31rcxeR-uG9UjrbYwNaEKQqm695ZIU8y1h5uAQ1Dr8sRt5gkT3_T9eCA250-Pf/exec',
+		'Институт инженерии и машиностроения':
+			'https://script.google.com/macros/s/AKfycby9OL8AdcmXOz9pcZVs2yVShTABPtVIDTRW4Fo4rawK-HkLtuacH_2uclmCQpDzcUrG/exec'
 	} as const;
 
 	interface ExamInfo {
