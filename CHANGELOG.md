@@ -1,3 +1,4 @@
+- add support for Engineering Machinery institute by updating urls, types, and components (ysturasp, 2025-11-04) [8 files changed, 234 insertions(+), 6 deletions(-)]
 - replace hardcoded domain with dynamic origin in canonical links and meta files (ysturasp, 2025-11-03) [16 files changed, 160 insertions(+), 98 deletions(-)]
 - update profile links to new domain (ysturasp, 2025-11-03) [5 files changed, 5 insertions(+), 3 deletions(-)]
 - renaming all ystuRASP --> ysturasp (ysturasp, 2025-11-02) [19 files changed, 37 insertions(+), 35 deletions(-)]

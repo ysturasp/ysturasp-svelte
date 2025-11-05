@@ -1,8 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import CopyLinkButton from '$lib/components/ui/CopyLinkButton.svelte';
-	import { scale } from 'svelte/transition';
-	import { quintOut } from 'svelte/easing';
 
 	interface Item {
 		id: string;
@@ -22,10 +20,16 @@
 
 	let searchQuery = '';
 	let showOptions = false;
+	let isClosing = false;
 	let filteredItems: Item[] = [];
 	let overlay: HTMLDivElement;
 	let inputElement: HTMLInputElement;
+	let comboboxContainer: HTMLDivElement;
+	let closeButton: HTMLButtonElement;
+	let optionsList: HTMLUListElement;
 	let showErrorAnimation = false;
+	let mouseDownTarget: HTMLElement | null = null;
+	let justOpened = false;
 
 	$: if (error) {
 		showErrorAnimation = false;
@@ -69,10 +73,19 @@
 		);
 	}
 
+	function handleAnimationEnd() {
+		if (isClosing) {
+			isClosing = false;
+			showOptions = false;
+		}
+	}
+
 	function closeDropdown() {
-		showOptions = false;
-		overlay.classList.add('hidden');
-		inputElement?.blur();
+		if (!isClosing && showOptions) {
+			isClosing = true;
+			overlay.classList.add('hidden');
+			inputElement?.blur();
+		}
 	}
 
 	function selectItem(item: Item) {
@@ -87,27 +100,62 @@
 	}
 
 	function handleFocus() {
-		showOptions = true;
-		overlay.classList.remove('hidden');
-		setTimeout(() => {
-			if (inputElement) {
-				window.scrollTo({
-					top: inputElement.getBoundingClientRect().top + window.pageYOffset - 115,
-					behavior: 'smooth'
-				});
-			}
-		}, 300);
+		if (!showOptions && !isClosing) {
+			showOptions = true;
+			isClosing = false;
+			overlay.classList.remove('hidden');
+			justOpened = true;
+			setTimeout(() => {
+				justOpened = false;
+			}, 100);
+			setTimeout(() => {
+				if (inputElement) {
+					window.scrollTo({
+						top: inputElement.getBoundingClientRect().top + window.pageYOffset - 115,
+						behavior: 'smooth'
+					});
+				}
+			}, 300);
+		}
+	}
+
+	function handleMouseDown(event: MouseEvent) {
+		mouseDownTarget = event.target as HTMLElement;
 	}
 
 	function handleClickOutside(event: MouseEvent) {
+		if (justOpened) {
+			return;
+		}
+
 		const target = event.target as HTMLElement;
+		const optionsElement = document.getElementById('combobox-options');
+
+		if (mouseDownTarget) {
+			const startedInside =
+				comboboxContainer?.contains(mouseDownTarget) ||
+				optionsElement?.contains(mouseDownTarget) ||
+				mouseDownTarget === closeButton ||
+				closeButton?.contains(mouseDownTarget) ||
+				mouseDownTarget === inputElement;
+
+			if (startedInside) {
+				mouseDownTarget = null;
+				return;
+			}
+		}
+
 		if (
-			inputElement &&
-			!inputElement.contains(target) &&
-			!document.getElementById('combobox-options')?.contains(target)
+			comboboxContainer &&
+			!comboboxContainer.contains(target) &&
+			!optionsElement?.contains(target) &&
+			target !== closeButton &&
+			!closeButton?.contains(target)
 		) {
 			closeDropdown();
 		}
+
+		mouseDownTarget = null;
 	}
 
 	function handleKeydown(event: KeyboardEvent) {
@@ -126,10 +174,12 @@
 		overlay.classList.add('ambient-overlay', 'hidden');
 		document.body.appendChild(overlay);
 
+		document.addEventListener('mousedown', handleMouseDown);
 		document.addEventListener('click', handleClickOutside);
 		document.addEventListener('keydown', handleKeydown);
 
 		return () => {
+			document.removeEventListener('mousedown', handleMouseDown);
 			document.removeEventListener('click', handleClickOutside);
 			document.removeEventListener('keydown', handleKeydown);
 			if (overlay && overlay.parentNode) {
@@ -140,8 +190,11 @@
 </script>
 
 <form class="grid grid-cols-1 gap-2" on:submit|preventDefault={onSubmit}>
-	<div class="flex items-center gap-2">
-		<div class="relative flex-1">
+	<div class="combobox-wrapper flex items-center gap-2" bind:this={comboboxContainer}>
+		<div
+			class="input-container relative flex-1"
+			class:has-close-button={showOptions && !isClosing}
+		>
 			<input
 				bind:this={inputElement}
 				id="combobox-input"
@@ -164,6 +217,7 @@
 				<button
 					type="button"
 					class="clear-button"
+					class:has-close-button={showOptions && !isClosing}
 					on:click|stopPropagation={clearSelection}
 					aria-label="Очистить"
 				>
@@ -187,17 +241,13 @@
 
 			{#if showOptions}
 				<ul
+					bind:this={optionsList}
 					id="combobox-options"
-					class="combobox-options absolute left-0 mt-2 w-full overflow-hidden rounded-2xl border border-gray-600 bg-slate-900 p-2"
-					style="width: calc(100% + 52px)"
-					class:active={showOptions}
+					class="combobox-options absolute left-0 mt-2 w-full overflow-hidden rounded-2xl border border-gray-600 bg-slate-900 p-2 {isClosing
+						? 'hide'
+						: 'show'}"
 					class:ambient-focus={showOptions}
-					transition:scale={{
-						duration: 200,
-						opacity: 0,
-						start: 0.95,
-						easing: quintOut
-					}}
+					on:animationend={handleAnimationEnd}
 				>
 					{#each filteredItems as item}
 						<li
@@ -215,12 +265,12 @@
 					{/each}
 				</ul>
 			{/if}
-		</div>
 
-		{#if showOptions}
 			<button
+				bind:this={closeButton}
 				type="button"
 				class="close-circle-button"
+				class:visible={showOptions || isClosing}
 				on:click|stopPropagation={clearAndClose}
 				aria-label="Закрыть"
 			>
@@ -239,7 +289,7 @@
 					/>
 				</svg>
 			</button>
-		{/if}
+		</div>
 	</div>
 
 	<button
@@ -301,6 +351,8 @@
 
 	input {
 		transition: all 0.4s ease-in-out;
+		position: relative;
+		z-index: 66;
 	}
 
 	input:focus {
@@ -343,10 +395,16 @@
 		color: #888;
 		font-size: 1rem;
 		cursor: pointer;
-		z-index: 65;
+		z-index: 68;
 		padding: 0;
 		line-height: 1;
-		transition: color 0.2s;
+		transition:
+			right 0.3s ease-in-out,
+			color 0.2s;
+	}
+
+	.clear-button.has-close-button {
+		right: 62px;
 	}
 	.clear-button:hover .clear-icon {
 		color: #ef4444;
@@ -365,26 +423,61 @@
 	.combobox-options {
 		max-height: 300px;
 		overflow-y: auto;
-		opacity: 0;
-		transform: translateY(-10px);
-		transition:
-			opacity 0.8s ease,
-			transform 0.8s ease;
-		max-height: 0;
-		overflow: scroll;
 	}
 
-	.combobox-options.active {
-		opacity: 1;
-		transform: translateY(0);
-		max-height: 300px;
+	.combobox-options.show {
+		animation: fadeInScale 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55) forwards;
+	}
+
+	.combobox-options.hide {
+		animation: fadeOutScale 0.2s ease-in forwards;
+	}
+
+	@keyframes fadeInScale {
+		from {
+			opacity: 0;
+			transform: scale(0.95) translateY(-10px);
+		}
+		to {
+			opacity: 1;
+			transform: scale(1) translateY(0);
+		}
+	}
+
+	@keyframes fadeOutScale {
+		from {
+			opacity: 1;
+			transform: scale(1) translateY(0);
+		}
+		to {
+			opacity: 0;
+			transform: scale(0.95) translateY(-10px);
+		}
 	}
 
 	.combobox-options li:hover {
 		background-color: #0072e461;
 	}
 
+	.input-container {
+		transition: padding-right 0.3s ease-in-out;
+	}
+
+	.input-container.has-close-button {
+		padding-right: 52px;
+	}
+
+	.clear-button {
+		transition:
+			right 0.3s ease-in-out,
+			color 0.2s;
+	}
+
 	.close-circle-button {
+		position: absolute;
+		right: 0;
+		top: 50%;
+		transform: translateY(-50%);
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
@@ -395,8 +488,17 @@
 		background: #0f172a;
 		color: #888;
 		cursor: pointer;
-		transition: all 0.2s ease-in-out;
+		opacity: 0;
+		pointer-events: none;
+		transition:
+			opacity 0.3s ease-in-out 0.1s,
+			all 0.2s ease-in-out;
 		z-index: 65;
+	}
+
+	.close-circle-button.visible {
+		opacity: 1;
+		pointer-events: auto;
 	}
 
 	.close-circle-button:hover {
