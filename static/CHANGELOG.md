@@ -1,3 +1,4 @@
+- refactor subgroups yable modal component to improve modal behavior and animations, including handling closing states and rendering logic (ysturasp, 2025-11-06) [3 files changed, 297 insertions(+), 202 deletions(-)]
 - refactor schedule and simple compobox components to improve dropdown behavior and animations, including handling closing states (ysturasp, 2025-11-05) [4 files changed, 295 insertions(+), 92 deletions(-)]
 - add support for Engineering Machinery institute by updating urls, types, and components (ysturasp, 2025-11-04) [8 files changed, 234 insertions(+), 6 deletions(-)]
 - replace hardcoded domain with dynamic origin in canonical links and meta files (ysturasp, 2025-11-03) [16 files changed, 160 insertions(+), 98 deletions(-)]
