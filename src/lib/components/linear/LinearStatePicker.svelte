@@ -52,7 +52,25 @@
 	}
 
 	function getStateColor(state: LinearState): string {
-		return `bg-${state.color}-500/20 text-${state.color}-400`;
+		const name = state.name.toLowerCase();
+
+		if (name.includes('todo') || name.includes('to do')) {
+			return 'bg-blue-500/20 text-blue-400';
+		}
+		if (name.includes('progress') || name.includes('doing') || name.includes('in progress')) {
+			return 'bg-yellow-500/20 text-yellow-400';
+		}
+		if (name.includes('done') || name.includes('complete') || name.includes('completed')) {
+			return 'bg-indigo-500/20 text-indigo-400';
+		}
+		if (name.includes('cancel') || name.includes('cancelled')) {
+			return 'bg-red-500/20 text-red-400';
+		}
+		if (name.includes('backlog')) {
+			return 'bg-gray-500/20 text-gray-400';
+		}
+
+		return 'bg-gray-500/20 text-gray-400';
 	}
 
 	function getStateIcon(stateName: string): string {
