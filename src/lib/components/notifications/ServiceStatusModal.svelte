@@ -79,4 +79,13 @@
 			</div>
 		{/if}
 	</div>
+
+	<div slot="footer">
+		<button
+			class="w-full rounded-lg bg-blue-700 p-3 text-white transition-all hover:bg-blue-600"
+			on:click={() => window.open('https://stats.uptimerobot.com/COz2FUGsub', '_blank')}
+		>
+			Посмотреть доступность сервисов
+		</button>
+	</div>
 </BottomModal>

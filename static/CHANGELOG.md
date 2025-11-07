@@ -1,3 +1,4 @@
+- implement service status check on layout initialization, add service status modal to display down services (ysturasp, 2025-11-08) [5 files changed, 236 insertions(+)]
 - enhance task title display in linear components by adding margin for better spacing and readability (ysturasp, 2025-11-07) [4 files changed, 13 insertions(+), 5 deletions(-)]
 - refactor state color logic in linear components to improve task state representation based on descriptive names (ysturasp, 2025-11-07) [5 files changed, 59 insertions(+), 3 deletions(-)]
 - format code (ysturasp, 2025-11-06) [4 files changed, 2 insertions(+), 2 deletions(-)]
