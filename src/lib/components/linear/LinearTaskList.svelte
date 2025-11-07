@@ -405,8 +405,10 @@
 			{#each activeTasks as task}
 				<div class="flex items-center justify-between rounded-lg bg-slate-700 p-3">
 					<div class="flex-grow">
-						<div class="mr-2 flex items-center gap-2">
+						<div class="mr-2 mb-1 flex items-center gap-2">
 							<span class="text-sm text-white">{task.title}</span>
+						</div>
+						<div class="mr-2 flex items-center gap-2">
 							<button
 								class="rounded px-2 py-0.5 text-xs {getStateColor(task.state)}"
 								on:click={() => {
@@ -515,6 +517,8 @@
 									<div class="flex-grow">
 										<div class="mr-2 flex items-center gap-2">
 											<span class="text-sm text-white">{task.title}</span>
+										</div>
+										<div class="mr-2 flex items-center gap-2">
 											<button
 												class="rounded px-2 py-0.5 text-xs {getStateColor(
 													task.state
