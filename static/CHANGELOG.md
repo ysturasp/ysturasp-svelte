@@ -1,3 +1,4 @@
+- remove debug logs to service status modal (ysturasp, 2025-11-08) [4 files changed, 8 insertions(+), 34 deletions(-)]
 - add footer button to service status modal for viewing service availability (ysturasp, 2025-11-08) [3 files changed, 11 insertions(+)]
 - implement service status check on layout initialization, add service status modal to display down services (ysturasp, 2025-11-08) [5 files changed, 236 insertions(+)]
 - enhance task title display in linear components by adding margin for better spacing and readability (ysturasp, 2025-11-07) [4 files changed, 13 insertions(+), 5 deletions(-)]
