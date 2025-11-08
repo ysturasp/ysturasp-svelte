@@ -34,32 +34,14 @@
 	}
 
 	async function checkServices() {
-		try {
-			console.log('Checking service status...');
-			const statusData = await checkServiceStatus();
-			console.log('Service status data:', statusData);
+		const statusData = await checkServiceStatus();
 
-			if (statusData) {
-				const down = getDownServices(statusData);
-				console.log('Down services:', down);
-				console.log('Total down:', statusData.statistics?.counts?.down);
+		if (statusData) {
+			const down = getDownServices(statusData);
 
-				if (down.length > 0) {
-					downServices = down;
-					totalDown = statusData.statistics?.counts?.down || down.length;
-					showServiceStatusModal = true;
-					console.log('Service status modal should be shown');
-					console.log('showServiceStatusModal value:', showServiceStatusModal);
-					console.log('downServices length:', downServices.length);
-					console.log('totalDown:', totalDown);
-				} else {
-					console.log('No down services found');
-				}
-			} else {
-				console.log('No status data received');
-			}
-		} catch (error) {
-			console.error('Error checking service status:', error);
+			downServices = down;
+			totalDown = statusData.statistics?.counts?.down || down.length;
+			showServiceStatusModal = true;
 		}
 	}
 
@@ -109,7 +91,6 @@
 <ServiceStatusModal
 	isOpen={showServiceStatusModal}
 	{downServices}
-	{totalDown}
 	onClose={() => {
 		showServiceStatusModal = false;
 	}}

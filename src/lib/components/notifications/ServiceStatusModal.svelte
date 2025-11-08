@@ -1,21 +1,12 @@
 <script lang="ts">
 	import BottomModal from '$lib/components/ui/BottomModal.svelte';
 	import type { UptimeRobotMonitor } from '$lib/utils/uptimerobot';
-	import { onMount } from 'svelte';
 
 	export let isOpen = false;
 	export let downServices: UptimeRobotMonitor[] = [];
-	export let totalDown: number = 0;
 	export let onClose: (() => void) | undefined = undefined;
 
-	$: {
-		console.log('ServiceStatusModal - isOpen:', isOpen);
-		console.log('ServiceStatusModal - downServices:', downServices);
-		console.log('ServiceStatusModal - totalDown:', totalDown);
-	}
-
 	function handleClose() {
-		console.log('ServiceStatusModal - handleClose called');
 		if (onClose) {
 			onClose();
 		}
