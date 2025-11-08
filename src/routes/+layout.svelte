@@ -41,7 +41,10 @@
 
 			downServices = down;
 			totalDown = statusData.statistics?.counts?.down || down.length;
-			showServiceStatusModal = true;
+
+			if (totalDown > 0 || down.length > 0) {
+				showServiceStatusModal = true;
+			}
 		}
 	}
 

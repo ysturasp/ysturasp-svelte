@@ -1,3 +1,4 @@
+- format linear all subjects tasks section (ysturasp, 2025-11-08) [3 files changed, 5 insertions(+), 1 deletion(-)]
 - remove debug logs to service status modal (ysturasp, 2025-11-08) [4 files changed, 8 insertions(+), 34 deletions(-)]
 - add footer button to service status modal for viewing service availability (ysturasp, 2025-11-08) [3 files changed, 11 insertions(+)]
 - implement service status check on layout initialization, add service status modal to display down services (ysturasp, 2025-11-08) [5 files changed, 236 insertions(+)]
