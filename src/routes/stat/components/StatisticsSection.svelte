@@ -15,6 +15,16 @@
 	import ScheduleCombobox from '$lib/components/schedule/ScheduleCombobox.svelte';
 	import NotificationsContainer from '$lib/components/notifications/NotificationsContainer.svelte';
 	import { notifications } from '$lib/stores/notifications';
+	import CustomSelect from '$lib/components/ui/CustomSelect.svelte';
+
+	export const institutes = [
+		{ value: 'btn-digital-systems', label: 'Институт цифровых систем' },
+		{ value: 'btn-architecture-design', label: 'Институт архитектуры и дизайна' },
+		{ value: 'btn-civil-transport', label: 'Институт инженеров строительства и транспорта' },
+		{ value: 'btn-chemistry', label: 'Институт химии и химической технологии' },
+		{ value: 'btn-economics-management', label: 'Институт экономики и менеджмента' },
+		{ value: 'btn-engineering-machinery', label: 'Институт инженерии и машиностроения' }
+	];
 
 	const dispatch = createEventDispatcher<{
 		showNotification: NotificationOptions;
@@ -341,52 +351,21 @@
 
 		<span class="mb-2 block text-sm font-medium text-slate-400">Выберите институт:</span>
 		<div class="institute-buttons mb-3">
-			<button
-				class="institute-button {selectedInstitute === 'btn-digital-systems'
-					? 'active'
-					: ''}"
-				on:click={() => handleInstituteChange('btn-digital-systems')}
-			>
-				Институт Цифровых Систем
-			</button>
-			<button
-				class="institute-button {selectedInstitute === 'btn-architecture-design'
-					? 'active'
-					: ''}"
-				on:click={() => handleInstituteChange('btn-architecture-design')}
-			>
-				Институт Архитектуры и Дизайна
-			</button>
-			<button
-				class="institute-button {selectedInstitute === 'btn-civil-transport'
-					? 'active'
-					: ''}"
-				on:click={() => handleInstituteChange('btn-civil-transport')}
-			>
-				Институт Инженеров Строительства и Транспорта
-			</button>
-			<button
-				class="institute-button {selectedInstitute === 'btn-chemistry' ? 'active' : ''}"
-				on:click={() => handleInstituteChange('btn-chemistry')}
-			>
-				Институт Химии и Химической Технологии
-			</button>
-			<button
-				class="institute-button {selectedInstitute === 'btn-economics-management'
-					? 'active'
-					: ''}"
-				on:click={() => handleInstituteChange('btn-economics-management')}
-			>
-				Институт Экономики и Менеджмента
-			</button>
-			<button
-				class="institute-button {selectedInstitute === 'btn-engineering-machinery'
-					? 'active'
-					: ''}"
-				on:click={() => handleInstituteChange('btn-engineering-machinery')}
-			>
-				Институт Инженерии и Машиностроения
-			</button>
+			<CustomSelect
+				items={institutes.map((institute) => ({
+					id: institute.value,
+					label: institute.label
+				}))}
+				bind:selectedId={selectedInstitute}
+				on:select={(e) => handleInstituteChange(e.detail.id)}
+				placeholder="Выберите институт..."
+				width="100%"
+				searchPlaceholder="Поиск института..."
+				searchable={true}
+				highlight={false}
+				error={false}
+				isLoading={false}
+			/>
 		</div>
 
 		<label for="discipline-input" class="mb-2 block text-sm font-medium text-slate-400">
@@ -617,38 +596,6 @@
 <NotificationsContainer />
 
 <style>
-	.institute-button {
-		background-color: #374151;
-		color: #ffffff;
-		padding: 6px 12px;
-		margin: 5px;
-		border-radius: 15px;
-		font-weight: 500;
-		text-align: center;
-		border: 1px solid transparent;
-		cursor: pointer;
-		transition:
-			background-color 0.3s,
-			box-shadow 0.3s;
-		box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-	}
-
-	.institute-button:hover {
-		background-color: #374151;
-		box-shadow: 0 6px 10px rgba(0, 0, 0, 0.2);
-	}
-
-	.institute-button.active {
-		background-color: #2563eb;
-		border-color: #3b82f6;
-		box-shadow: 0 8px 12px rgba(37, 99, 235, 0.3);
-	}
-
-	.institute-button:focus {
-		outline: none;
-		box-shadow: 0 0 30px rgba(59, 130, 246, 0.8);
-	}
-
 	.emoji-bg {
 		z-index: 1;
 	}

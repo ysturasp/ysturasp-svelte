@@ -590,7 +590,7 @@
 			0 4px 6px -1px rgb(0 0 0 / 0.1),
 			0 2px 4px -2px rgb(0 0 0 / 0.1);
 		overflow-y: auto;
-		z-index: 50;
+		z-index: 67;
 		margin-top: 10px;
 		margin-bottom: 4px;
 		min-width: 100%;
