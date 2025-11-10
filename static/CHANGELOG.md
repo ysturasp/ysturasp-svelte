@@ -1,3 +1,4 @@
+- replace buttons on custom select component in statistics page (ysturasp, 2025-11-09) [4 files changed, 28 insertions(+), 79 deletions(-)]
 - update service status modal logic to display only when there are down services (ysturasp, 2025-11-08) [3 files changed, 6 insertions(+), 1 deletion(-)]
 - format linear all subjects tasks section (ysturasp, 2025-11-08) [3 files changed, 5 insertions(+), 1 deletion(-)]
 - remove debug logs to service status modal (ysturasp, 2025-11-08) [4 files changed, 8 insertions(+), 34 deletions(-)]

@@ -57,8 +57,6 @@ export async function checkServiceStatus(): Promise<UptimeRobotResponse | null> 
 		const timestamp = Date.now();
 		const url = `https://stats.uptimerobot.com/api/getMonitorList/COz2FUGsub?page=1&_=${timestamp}`;
 
-		console.log('Fetching service status from:', url);
-
 		const response = await fetch(url, {
 			method: 'GET',
 			headers: {
@@ -72,8 +70,6 @@ export async function checkServiceStatus(): Promise<UptimeRobotResponse | null> 
 			credentials: 'omit'
 		});
 
-		console.log('Response status:', response.status, response.statusText);
-
 		if (!response.ok) {
 			console.error('Failed to fetch service status:', response.status, response.statusText);
 			const text = await response.text();
@@ -82,11 +78,6 @@ export async function checkServiceStatus(): Promise<UptimeRobotResponse | null> 
 		}
 
 		const data: UptimeRobotResponse = await response.json();
-		console.log('Parsed data:', data);
-		console.log('Data status:', data.status);
-		console.log('Data length:', data.data?.length);
-		console.log('Statistics:', data.statistics);
-
 		return data;
 	} catch (error) {
 		console.error('Error checking service status:', error);
