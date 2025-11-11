@@ -26,7 +26,6 @@
 
 	function handleSettingsSave(event: CustomEvent) {
 		const settings = event.detail;
-		console.log('Сохранены настройки:', settings);
 	}
 
 	function handleClick() {
