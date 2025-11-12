@@ -252,7 +252,6 @@ export async function POST({ request }: RequestEvent) {
 				throw new Error('Not enough topics generated');
 			}
 		} catch (error) {
-			console.log('Falling back to template generation');
 			topics = generateFallbackTopics(institute, 5);
 		}
 
