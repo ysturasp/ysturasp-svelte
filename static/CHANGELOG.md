@@ -1,3 +1,4 @@
+- remove logs in thesis server (ysturasp, 2025-11-12) [3 files changed, 2 insertions(+), 1 deletion(-)]
 - remove logs in schedule switcher (ysturasp, 2025-11-11) [3 files changed, 2 insertions(+), 1 deletion(-)]
 - remove comments in uptime utils (ysturasp, 2025-11-10) [3 files changed, 2 insertions(+), 9 deletions(-)]
 - replace buttons on custom select component in statistics page (ysturasp, 2025-11-09) [4 files changed, 28 insertions(+), 79 deletions(-)]

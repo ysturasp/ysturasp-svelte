@@ -26,7 +26,6 @@ async function getFromServiceWorkerCache(url: string): Promise<any | null> {
 			(name) => name.includes('ysturasp') && name.includes('api')
 		);
 		if (!apiCacheName) {
-			console.log('No API cache found');
 			return null;
 		}
 
