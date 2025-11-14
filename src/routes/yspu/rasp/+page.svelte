@@ -863,7 +863,7 @@
 	title="Что такое Beta?"
 	onClose={() => (isBetaModalOpen = false)}
 >
-	<div class="rounded-lg bg-gray-800 p-4">
+	<div class="rounded-lg bg-gray-800 p-4 text-white">
 		<p class="mb-4">
 			Это бета-версия расписания ЯГПУ. Мы разработали экосистему для ЯГТУ, настало время
 			расширяться, на одном из факультетов ЯГПУ <a
