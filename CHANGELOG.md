@@ -1,3 +1,4 @@
+- update beta modal styling to improve text visibility (ysturasp, 2025-11-14) [3 files changed, 3 insertions(+), 1 deletion(-)]
 - test push (ysturasp, 2025-11-13) [3 files changed, 2 insertions(+), 1 deletion(-)]
 - remove logs in thesis server (ysturasp, 2025-11-12) [3 files changed, 2 insertions(+), 1 deletion(-)]
 - remove logs in schedule switcher (ysturasp, 2025-11-11) [3 files changed, 2 insertions(+), 1 deletion(-)]

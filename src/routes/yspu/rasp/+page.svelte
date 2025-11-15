@@ -108,6 +108,11 @@
 		isFullView = localStorage.getItem('isFullViewYspu') === 'true';
 		selectedDay = parseInt(localStorage.getItem('lastSelectedDayYspu') || '0', 10);
 
+		const betaModalClosed = storage.get('yspuBetaModalClosed', 'false');
+		if (betaModalClosed !== 'true') {
+			isBetaModalOpen = true;
+		}
+
 		const loadData = async () => {
 			try {
 				isLoading = true;
@@ -861,7 +866,10 @@
 <BetaModal
 	isOpen={isBetaModalOpen}
 	title="Что такое Beta?"
-	onClose={() => (isBetaModalOpen = false)}
+	onClose={() => {
+		isBetaModalOpen = false;
+		storage.set('yspuBetaModalClosed', 'true');
+	}}
 >
 	<div class="rounded-lg bg-gray-800 p-4 text-white">
 		<p class="mb-4">
@@ -892,7 +900,10 @@
 	</div>
 	<svelte:fragment slot="footer">
 		<button
-			on:click={() => (isBetaModalOpen = false)}
+			on:click={() => {
+				isBetaModalOpen = false;
+				storage.set('yspuBetaModalClosed', 'true');
+			}}
 			class="w-full rounded-lg bg-blue-600 px-4 py-3 text-white transition-all hover:bg-blue-700"
 		>
 			ок, пон
