@@ -632,7 +632,7 @@
 			<div class="mt-4 flex flex-wrap justify-center gap-6 p-0">
 				<div class="card w-full max-w-md rounded-2xl bg-slate-900 p-4 text-center md:p-6">
 					<div class="mx-auto mb-4 h-27 w-54 rounded-full">
-						<p class="transportation" style="font-size: 100px;">📱👉 🖥️</p>
+						<p class="transportation text-[65px]">📱👉 🖥️</p>
 					</div>
 					<h3 class="mb-2 text-xl font-bold text-white">
 						При переносе на другое устройство
