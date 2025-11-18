@@ -3,7 +3,6 @@
 	import { browser } from '$app/environment';
 	import Header from '$lib/components/layout/Header.svelte';
 	import Footer from '$lib/components/layout/Footer.svelte';
-	import LoadingOverlay from '$lib/components/loading/LoadingOverlay.svelte';
 	import ErrorContent from '$lib/components/common/ErrorContent.svelte';
 	import ChangelogItem from '$lib/components/changelog/ChangelogItem.svelte';
 	import { loadChangelog, translateTexts } from '$lib/utils/changelog';
@@ -86,10 +85,6 @@
 </svelte:head>
 
 <PageLayout>
-	{#if loading}
-		<LoadingOverlay />
-	{/if}
-
 	<div
 		class="pointer-events-none fixed inset-0 bg-gradient-to-br from-blue-900/20 to-purple-900/20"
 	></div>

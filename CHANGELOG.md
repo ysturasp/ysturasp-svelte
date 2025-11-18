@@ -1,3 +1,4 @@
+- update transportation text size in data page for better visibility (ysturasp, 2025-11-17) [3 files changed, 3 insertions(+), 1 deletion(-)]
 - implement beta modal logic to track closure state and persist in local storage (ysturasp, 2025-11-15) [3 files changed, 15 insertions(+), 2 deletions(-)]
 - update beta modal styling to improve text visibility (ysturasp, 2025-11-14) [3 files changed, 3 insertions(+), 1 deletion(-)]
 - test push (ysturasp, 2025-11-13) [3 files changed, 2 insertions(+), 1 deletion(-)]
