@@ -69,7 +69,7 @@
 <BottomModal
 	{isOpen}
 	title="Покупка форматирований"
-	subtitle={`Осталось бесплатных форматирований: ${remaining}`}
+	subtitle={`Доступно форматирований: ${remaining}`}
 	onClose={close}
 	checkCanClose={canClose}
 	contentClass="px-4 overflow-visible"
