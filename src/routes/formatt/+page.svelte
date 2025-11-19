@@ -1,0 +1,300 @@
+<script lang="ts">
+	import DocumentUploader from './components/DocumentUploader.svelte';
+	import FormatRules from './components/FormatRules.svelte';
+	import FormatSettings from './components/FormatSettings.svelte';
+	import FormattingHistory from './components/FormattingHistory.svelte';
+	import AuthButton from './components/AuthButton.svelte';
+	import PaymentModal from './components/PaymentModal.svelte';
+	import Header from '$lib/components/layout/Header.svelte';
+	import Footer from '$lib/components/layout/Footer.svelte';
+	import PageLayout from '$lib/components/layout/PageLayout.svelte';
+	import type { FormatParams, FormatLimit } from './api';
+	import { defaultFormatParams } from './constants';
+	import { auth } from '$lib/stores/auth';
+	import { checkFormatLimit } from './api';
+	import { onMount } from 'svelte';
+	import { page } from '$app/stores';
+
+	let isProcessing = false;
+	let errorMessage = '';
+	let downloadData: { base64: string; fileName: string } | null = null;
+	let isComplete = false;
+	let formatParams: FormatParams = JSON.parse(JSON.stringify(defaultFormatParams));
+	let isSettingsOpen = false;
+	let isPaymentModalOpen = false;
+	let formatLimit: FormatLimit = { can: true, remaining: 0 };
+
+	onMount(() => {
+		auth.checkAuth();
+		checkLimit();
+
+		if ($page.url.searchParams.get('payment') === 'success') {
+			handlePaymentReturn();
+		}
+	});
+
+	async function checkLimit() {
+		if ($auth.authenticated) {
+			formatLimit = await checkFormatLimit();
+		}
+	}
+
+	function handleError(event: CustomEvent<string>) {
+		errorMessage = event.detail;
+		if (errorMessage) {
+			downloadData = null;
+			isComplete = false;
+		}
+	}
+
+	function handleProcessing(event: CustomEvent<boolean>) {
+		isProcessing = event.detail;
+		if (isProcessing) {
+			downloadData = null;
+			errorMessage = '';
+		}
+	}
+
+	function handleDownloadReady(event: CustomEvent<{ base64: string; fileName: string }>) {
+		const { base64, fileName } = event.detail;
+		downloadData = base64 && fileName ? { base64, fileName } : null;
+	}
+
+	function handleComplete() {
+		isComplete = true;
+	}
+
+	function handleFormatParamsChange(event: CustomEvent<FormatParams>) {
+		formatParams = event.detail;
+	}
+
+	function handleLimitExceeded(event: CustomEvent<{ remaining: number }>) {
+		isPaymentModalOpen = true;
+		formatLimit.remaining = event.detail.remaining;
+	}
+
+	function handlePaymentModalClose() {
+		isPaymentModalOpen = false;
+		checkLimit();
+	}
+
+	async function handlePaymentReturn() {
+		let paymentId: string | null = null;
+
+		try {
+			paymentId = window.localStorage.getItem('lastPaymentId');
+		} catch (error) {
+			console.warn('Не удалось прочитать идентификатор платежа:', error);
+		}
+
+		if (!paymentId) {
+			await checkLimit();
+			alert('Платеж обрабатывается. Лимиты обновятся автоматически после подтверждения.');
+			return;
+		}
+
+		try {
+			const response = await fetch(`/api/payment/status?paymentId=${paymentId}`);
+			const data = await response.json();
+
+			if (!response.ok) {
+				console.error('Ошибка ответа при проверке платежа:', data?.error);
+				alert('Не удалось проверить статус платежа. Попробуйте позже.');
+			} else if (data.status === 'succeeded') {
+				alert('Платеж успешно обработан! Форматирования добавлены.');
+			} else {
+				alert('Платеж все еще обрабатывается. Мы обновим лимиты как только он завершится.');
+			}
+		} catch (error) {
+			console.error('Ошибка проверки статуса платежа:', error);
+			alert('Не удалось проверить статус платежа. Попробуйте позже.');
+		} finally {
+			try {
+				window.localStorage.removeItem('lastPaymentId');
+			} catch (error) {
+				console.warn('Не удалось удалить идентификатор платежа:', error);
+			}
+			await checkLimit();
+		}
+	}
+
+	function downloadFile() {
+		if (!downloadData) return;
+
+		const { base64, fileName } = downloadData;
+		const binStr = atob(base64);
+		const bytes = new Uint8Array(binStr.length);
+		for (let i = 0; i < binStr.length; i++) {
+			bytes[i] = binStr.charCodeAt(i);
+		}
+		const blob = new Blob([bytes], {
+			type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+		});
+		const url = URL.createObjectURL(blob);
+		const a = document.createElement('a');
+		a.href = url;
+		a.download = `formatted_${fileName}`;
+		document.body.appendChild(a);
+		a.click();
+		document.body.removeChild(a);
+		URL.revokeObjectURL(url);
+	}
+</script>
+
+<svelte:head>
+	<title>Форматирование отчётов | ysturasp</title>
+	<meta name="description" content="Форматирование отчётов по стандартам оформления работ" />
+	<meta
+		name="keywords"
+		content="сто ягту, отчёты ягту, отчёты ягту форматирование, правила оформления отчётов ягту, форматирование отчётов, стандарты оформления работ, форматирование документов, форматирование отчётов по стандартам, форматирование отчётов по стандартам оформления работ"
+	/>
+	<meta property="og:title" content="Форматирование отчётов | ysturasp" />
+	<meta
+		property="og:description"
+		content="Форматирование отчётов по стандартам оформления работ"
+	/>
+</svelte:head>
+
+<PageLayout>
+	<Header />
+
+	<main class="container mx-auto mt-5 px-3 md:mt-7 md:px-0">
+		<div class="mt-8 space-y-4">
+			<div class="rounded-2xl bg-slate-800 p-4 md:p-6">
+				<div class="mb-6 flex items-center justify-between border-b border-slate-700 pb-4">
+					<div class="flex items-center">
+						<h2 class="text-4xl font-semibold text-white">📄</h2>
+						<h2 class="ml-2 text-2xl font-semibold text-white md:text-4xl">
+							Форматирование документов
+						</h2>
+					</div>
+					<AuthButton />
+				</div>
+
+				{#if $auth.authenticated}
+					<div class="mb-4 rounded-lg bg-slate-700/30 p-3">
+						<div class="flex items-center justify-between">
+							<span class="text-sm text-slate-300">Осталось форматирований:</span>
+							<span class="text-lg font-semibold text-white"
+								>{formatLimit.remaining || 0}</span
+							>
+						</div>
+						{#if formatLimit.remaining === 0}
+							<button
+								on:click={() => (isPaymentModalOpen = true)}
+								class="mt-2 w-full rounded-lg bg-blue-600 px-4 py-2 text-sm text-white transition-colors hover:bg-blue-700"
+							>
+								Купить форматирования
+							</button>
+						{/if}
+					</div>
+				{:else}
+					<div class="mb-4 rounded-lg bg-yellow-500/10 p-3 text-yellow-300">
+						<div class="flex items-center gap-2">
+							<svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+								<path
+									fill-rule="evenodd"
+									d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+									clip-rule="evenodd"
+								/>
+							</svg>
+							<span class="text-sm">
+								Для форматирования документов необходима авторизация через Google
+							</span>
+						</div>
+					</div>
+				{/if}
+
+				<div class="rounded-xl bg-slate-700/30 p-4">
+					<h3 class="text-center text-lg font-medium text-white">
+						Автоматическое форматирование по стандартам оформления работ
+					</h3>
+				</div>
+
+				<div class="mt-4">
+					<FormatSettings
+						{formatParams}
+						isOpen={isSettingsOpen}
+						on:change={handleFormatParamsChange}
+					/>
+				</div>
+
+				<div class="mt-4">
+					<DocumentUploader
+						{formatParams}
+						on:error={handleError}
+						on:processing={handleProcessing}
+						on:downloadReady={handleDownloadReady}
+						on:complete={handleComplete}
+						on:limitExceeded={handleLimitExceeded}
+					/>
+				</div>
+
+				{#if downloadData}
+					<div
+						class="mt-4 flex items-center gap-2 rounded-lg bg-green-500/10 p-3 text-green-300"
+					>
+						<svg class="h-5 w-5 shrink-0" viewBox="0 0 20 20" fill="currentColor">
+							<path
+								fill-rule="evenodd"
+								d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+								clip-rule="evenodd"
+							/>
+						</svg>
+						<span>Документ готов!</span>
+						<button
+							class="ml-auto rounded-lg bg-green-500 px-4 py-1 text-sm text-white transition-colors hover:bg-green-400"
+							on:click={downloadFile}
+						>
+							Скачать
+						</button>
+					</div>
+				{/if}
+
+				{#if errorMessage}
+					<div
+						class="mt-4 rounded-lg border border-red-500/30 bg-red-500/10 p-4 text-red-400"
+					>
+						<div class="flex items-center gap-2">
+							<svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+								<path
+									fill-rule="evenodd"
+									d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+									clip-rule="evenodd"
+								/>
+							</svg>
+							<span>{errorMessage}</span>
+						</div>
+					</div>
+				{/if}
+
+				<div
+					class="mt-4 flex items-center gap-2 rounded-lg bg-blue-500/10 p-3 text-sm text-blue-300"
+				>
+					<svg class="h-5 w-5 shrink-0" viewBox="0 0 20 20" fill="currentColor">
+						<path
+							fill-rule="evenodd"
+							d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+							clip-rule="evenodd"
+						/>
+					</svg>
+					<span>
+						ysturasp может использовать загруженные документы для улучшения работы
+						алгоритма форматирования
+					</span>
+				</div>
+			</div>
+
+			<FormatRules />
+			<FormattingHistory />
+		</div>
+	</main>
+
+	<Footer />
+
+	<PaymentModal
+		isOpen={isPaymentModalOpen}
+		remaining={formatLimit.remaining || 0}
+		on:close={handlePaymentModalClose}
+	/>
+</PageLayout>

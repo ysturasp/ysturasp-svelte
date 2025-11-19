@@ -5,6 +5,13 @@ declare global {
 		// interface PageData {}
 		// interface PageState {}
 		// interface Platform {}
+		interface Locals {
+			user?: {
+				id: string;
+				email: string;
+				name?: string;
+			};
+		}
 	}
 }
 

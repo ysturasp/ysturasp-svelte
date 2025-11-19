@@ -1,3 +1,4 @@
+import type { Handle } from '@sveltejs/kit';
 import { sequence } from '@sveltejs/kit/hooks';
 import { handleErrorWithSentry, sentryHandle } from '@sentry/sveltekit';
 import * as Sentry from '@sentry/sveltekit';
@@ -14,8 +15,18 @@ Sentry.init({
 	// spotlight: import.meta.env.DEV,
 });
 
+const skipMonocraftHandle: Handle = async ({ event, resolve }) => {
+	const pathname = decodeURIComponent(event.url.pathname);
+
+	if (pathname.startsWith('/url(') && pathname.includes('Monocraft')) {
+		return new Response(null, { status: 204 });
+	}
+
+	return resolve(event);
+};
+
 // If you have custom handlers, make sure to place them after `sentryHandle()` in the `sequence` function.
-export const handle = sequence(sentryHandle());
+export const handle = sequence(sentryHandle(), skipMonocraftHandle);
 
 // If you have a custom error handler, pass it to `handleErrorWithSentry`
 export const handleError = handleErrorWithSentry();
