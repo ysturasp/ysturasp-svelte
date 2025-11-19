@@ -8,6 +8,7 @@
 	export let subtitleClass = 'text-gray-400';
 	export let onClose: () => void;
 	export let checkCanClose: (() => boolean) | undefined = undefined;
+	export let contentClass: string = 'overflow-y-auto px-4';
 
 	let modalContent: HTMLElement;
 	let overlay: HTMLElement;
@@ -99,7 +100,7 @@
 				<div class="dialog-subtitle {subtitleClass}">{subtitle}</div>
 			{/if}
 		</div>
-		<div class="overflow-y-auto px-4">
+		<div class={contentClass}>
 			<slot />
 		</div>
 		<div class="dialog-footer">
