@@ -60,7 +60,7 @@
 			}
 		} catch (error) {
 			console.error('Ошибка платежа:', error);
-			alert('Ошибка создания платежа. Попробуйте позже.');
+			dispatch('error', { message: 'Ошибка создания платежа. Попробуйте позже.' });
 			isProcessing = false;
 		}
 	}

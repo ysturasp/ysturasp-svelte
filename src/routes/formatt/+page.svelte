@@ -14,6 +14,10 @@
 	import { checkFormatLimit } from './api';
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
+	import { goto } from '$app/navigation';
+	import { notifications } from '$lib/stores/notifications';
+	import NotificationsContainer from '$lib/components/notifications/NotificationsContainer.svelte';
+	import BottomModal from '$lib/components/ui/BottomModal.svelte';
 
 	let isProcessing = false;
 	let errorMessage = '';
@@ -23,15 +27,22 @@
 	let isSettingsOpen = false;
 	let isPaymentModalOpen = false;
 	let formatLimit: FormatLimit = { can: true, remaining: 0 };
+	let isSuccessModalOpen = false;
+	let successModalMessage = '';
+	let isErrorModalOpen = false;
+	let errorModalMessage = '';
 
 	onMount(() => {
 		auth.checkAuth();
-		checkLimit();
 
 		if ($page.url.searchParams.get('payment') === 'success') {
 			handlePaymentReturn();
 		}
 	});
+
+	$: if (!$auth.loading && $auth.authenticated) {
+		checkLimit();
+	}
 
 	async function checkLimit() {
 		if ($auth.authenticated) {
@@ -78,7 +89,16 @@
 		checkLimit();
 	}
 
+	function handlePaymentError(event: CustomEvent<{ message: string }>) {
+		errorModalMessage = event.detail.message;
+		isErrorModalOpen = true;
+	}
+
 	async function handlePaymentReturn() {
+		const url = new URL($page.url);
+		url.searchParams.delete('payment');
+		goto(url.pathname + url.search, { replaceState: true, noScroll: true });
+
 		let paymentId: string | null = null;
 
 		try {
@@ -89,7 +109,10 @@
 
 		if (!paymentId) {
 			await checkLimit();
-			alert('Платеж обрабатывается. Лимиты обновятся автоматически после подтверждения.');
+			notifications.add(
+				'Платеж обрабатывается. Лимиты обновятся автоматически после подтверждения.',
+				'info'
+			);
 			return;
 		}
 
@@ -99,15 +122,21 @@
 
 			if (!response.ok) {
 				console.error('Ошибка ответа при проверке платежа:', data?.error);
-				alert('Не удалось проверить статус платежа. Попробуйте позже.');
+				errorModalMessage = 'Не удалось проверить статус платежа. Попробуйте позже.';
+				isErrorModalOpen = true;
 			} else if (data.status === 'succeeded') {
-				alert('Платеж успешно обработан! Форматирования добавлены.');
+				successModalMessage = 'Платеж успешно обработан! Форматирования добавлены.';
+				isSuccessModalOpen = true;
 			} else {
-				alert('Платеж все еще обрабатывается. Мы обновим лимиты как только он завершится.');
+				notifications.add(
+					'Платеж все еще обрабатывается. Мы обновим лимиты как только он завершится.',
+					'info'
+				);
 			}
 		} catch (error) {
 			console.error('Ошибка проверки статуса платежа:', error);
-			alert('Не удалось проверить статус платежа. Попробуйте позже.');
+			errorModalMessage = 'Не удалось проверить статус платежа. Попробуйте позже.';
+			isErrorModalOpen = true;
 		} finally {
 			try {
 				window.localStorage.removeItem('lastPaymentId');
@@ -179,14 +208,12 @@
 								>{formatLimit.remaining || 0}</span
 							>
 						</div>
-						{#if formatLimit.remaining === 0}
-							<button
-								on:click={() => (isPaymentModalOpen = true)}
-								class="mt-2 w-full rounded-lg bg-blue-600 px-4 py-2 text-sm text-white transition-colors hover:bg-blue-700"
-							>
-								Купить форматирования
-							</button>
-						{/if}
+						<button
+							on:click={() => (isPaymentModalOpen = true)}
+							class="mt-2 w-full rounded-lg bg-blue-600 px-4 py-2 text-sm text-white transition-colors hover:bg-blue-700"
+						>
+							Купить форматирования
+						</button>
 					</div>
 				{:else}
 					<div class="mb-4 rounded-lg bg-yellow-500/10 p-3 text-yellow-300">
@@ -296,5 +323,70 @@
 		isOpen={isPaymentModalOpen}
 		remaining={formatLimit.remaining || 0}
 		on:close={handlePaymentModalClose}
+		on:error={handlePaymentError}
 	/>
 </PageLayout>
+
+<BottomModal
+	isOpen={isSuccessModalOpen}
+	title="Успешно!"
+	subtitle={successModalMessage}
+	subtitleClass="text-green-400"
+	onClose={() => {
+		isSuccessModalOpen = false;
+		checkLimit();
+	}}
+	contentClass="px-4"
+>
+	<div class="flex items-center justify-center py-4">
+		<svg class="h-16 w-16 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+			<path
+				stroke-linecap="round"
+				stroke-linejoin="round"
+				stroke-width="2"
+				d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+			></path>
+		</svg>
+	</div>
+	<div slot="footer">
+		<button
+			on:click={() => {
+				isSuccessModalOpen = false;
+				checkLimit();
+			}}
+			class="w-full rounded-lg bg-green-600 px-4 py-2 text-white transition-colors hover:bg-green-700"
+		>
+			Отлично!
+		</button>
+	</div>
+</BottomModal>
+
+<BottomModal
+	isOpen={isErrorModalOpen}
+	title="Ошибка"
+	subtitle={errorModalMessage}
+	subtitleClass="text-red-400"
+	onClose={() => (isErrorModalOpen = false)}
+	contentClass="px-4"
+>
+	<div class="flex items-center justify-center py-4">
+		<svg class="h-16 w-16 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+			<path
+				stroke-linecap="round"
+				stroke-linejoin="round"
+				stroke-width="2"
+				d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+			></path>
+		</svg>
+	</div>
+	<div slot="footer">
+		<button
+			on:click={() => (isErrorModalOpen = false)}
+			class="w-full rounded-lg bg-red-600 px-4 py-2 text-white transition-colors hover:bg-red-700"
+		>
+			Понятно
+		</button>
+	</div>
+</BottomModal>
+
+<NotificationsContainer />

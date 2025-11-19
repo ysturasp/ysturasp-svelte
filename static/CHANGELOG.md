@@ -1,3 +1,4 @@
+- add volume configuration for PostgreSQL in docker-compose to persist database data (ysturasp, 2025-11-19) [3 files changed, 7 insertions(+)]
 - enhance database initialization with retry logic and logging; update docker-compose to expose PostgreSQL port (ysturasp, 2025-11-19) [5 files changed, 129 insertions(+), 58 deletions(-)]
 - initialize database connection in server hooks (ysturasp, 2025-11-19) [4 files changed, 19 insertions(+), 8 deletions(-)]
 - update docker-compose to include db service dependency and simplify Google OAuth URL handling (ysturasp, 2025-11-19) [4 files changed, 5 insertions(+), 4 deletions(-)]
