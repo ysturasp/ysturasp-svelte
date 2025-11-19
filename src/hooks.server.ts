@@ -2,6 +2,7 @@ import type { Handle } from '@sveltejs/kit';
 import { sequence } from '@sveltejs/kit/hooks';
 import { handleErrorWithSentry, sentryHandle } from '@sentry/sveltekit';
 import * as Sentry from '@sentry/sveltekit';
+import { initDatabase } from '$lib/db/database';
 
 Sentry.init({
 	dsn: 'https://1b06d9a1c323ed3e01e5cc72d1a1a760@o4508637792239616.ingest.us.sentry.io/4509830716260352',
@@ -15,6 +16,21 @@ Sentry.init({
 	// spotlight: import.meta.env.DEV,
 });
 
+let dbInitialized = false;
+
+const initDbHandle: Handle = async ({ event, resolve }) => {
+	if (!dbInitialized) {
+		try {
+			await initDatabase();
+			dbInitialized = true;
+		} catch (error) {
+			console.error('Ошибка инициализации БД:', error);
+		}
+	}
+
+	return resolve(event);
+};
+
 const skipMonocraftHandle: Handle = async ({ event, resolve }) => {
 	const pathname = decodeURIComponent(event.url.pathname);
 
@@ -26,7 +42,7 @@ const skipMonocraftHandle: Handle = async ({ event, resolve }) => {
 };
 
 // If you have custom handlers, make sure to place them after `sentryHandle()` in the `sequence` function.
-export const handle = sequence(sentryHandle(), skipMonocraftHandle);
+export const handle = sequence(sentryHandle(), initDbHandle, skipMonocraftHandle);
 
 // If you have a custom error handler, pass it to `handleErrorWithSentry`
 export const handleError = handleErrorWithSentry();

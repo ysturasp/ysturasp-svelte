@@ -2,15 +2,8 @@ import { json, redirect } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { getGoogleOAuthUrl, exchangeGoogleCode, verifyGoogleToken } from '$lib/auth/google';
 import { getOrCreateUser } from '$lib/db/users';
-import { initDatabase } from '$lib/db/database';
 
 export const GET: RequestHandler = async ({ url, cookies }) => {
-	try {
-		await initDatabase();
-	} catch (error) {
-		console.error('Ошибка инициализации БД:', error);
-	}
-
 	const code = url.searchParams.get('code');
 
 	const baseUrl = url.origin;
