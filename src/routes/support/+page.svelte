@@ -4,7 +4,7 @@
 	import type { SupportRequest } from '$lib/types/support';
 	import { onMount } from 'svelte';
 	import PageLayout from '$lib/components/layout/PageLayout.svelte';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { browser } from '$app/environment';
 
 	let message = '';
@@ -18,7 +18,7 @@
 	let isSecurityReport = false;
 	let decryptedMessages: { [key: string]: string } = {};
 
-	let userId = $page.url.searchParams.get('userId');
+	let userId = page.url.searchParams.get('userId');
 	if (!userId && browser) {
 		userId = localStorage.getItem('userId');
 		if (!userId) {

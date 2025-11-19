@@ -13,7 +13,7 @@
 	import { auth } from '$lib/stores/auth';
 	import { checkFormatLimit } from './api';
 	import { onMount } from 'svelte';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
 	import { notifications } from '$lib/stores/notifications';
 	import NotificationsContainer from '$lib/components/notifications/NotificationsContainer.svelte';
@@ -35,7 +35,7 @@
 	onMount(() => {
 		auth.checkAuth();
 
-		if ($page.url.searchParams.get('payment') === 'success') {
+		if (page.url.searchParams.get('payment') === 'success') {
 			handlePaymentReturn();
 		}
 	});
@@ -95,7 +95,7 @@
 	}
 
 	async function handlePaymentReturn() {
-		const url = new URL($page.url);
+		const url = new URL(page.url);
 		url.searchParams.delete('payment');
 		goto(url.pathname + url.search, { replaceState: true, noScroll: true });
 

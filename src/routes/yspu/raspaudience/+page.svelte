@@ -17,7 +17,7 @@
 	import NavigationLinks from '$lib/components/ui/NavigationLinks.svelte';
 	import ScheduleSwitcher from '$lib/components/schedule/ScheduleSwitcher.svelte';
 	import { settings } from '$lib/stores/settings';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import type { Settings } from '$lib/stores/settings';
 	import { writable } from 'svelte/store';
 	import { fade } from 'svelte/transition';
@@ -218,7 +218,7 @@
 		<meta name="robots" content="index, follow" />
 		<link
 			rel="canonical"
-			href={`${$page.url.origin}/yspu/raspaudience?audience=${encodeURIComponent(selectedAudience)}`}
+			href={`${page.url.origin}/yspu/raspaudience?audience=${encodeURIComponent(selectedAudience)}`}
 		/>
 	{/if}
 </svelte:head>

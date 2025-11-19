@@ -1,3 +1,4 @@
+- refactor payment handling in format page to utilize notifications and modals for user feedback (ysturasp, 2025-11-20) [4 files changed, 109 insertions(+), 15 deletions(-)]
 - add volume configuration for PostgreSQL in docker-compose to persist database data (ysturasp, 2025-11-19) [3 files changed, 7 insertions(+)]
 - enhance database initialization with retry logic and logging; update docker-compose to expose PostgreSQL port (ysturasp, 2025-11-19) [5 files changed, 129 insertions(+), 58 deletions(-)]
 - initialize database connection in server hooks (ysturasp, 2025-11-19) [4 files changed, 19 insertions(+), 8 deletions(-)]

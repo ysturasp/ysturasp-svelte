@@ -1,5 +1,5 @@
 <script>
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { browser } from '$app/environment';
 	import Header from '$lib/components/layout/Header.svelte';
 	import ErrorContent from '$lib/components/common/ErrorContent.svelte';
@@ -88,8 +88,8 @@
 			</div>
 		{:else}
 			<ErrorContent
-				status={$page.status}
-				message={$page.status === 404
+				status={page.status}
+				message={page.status === 404
 					? 'К сожалению, запрашиваемая вами страница не существует. Похоже, что она еще не создана или у нас небольшие работы'
 					: 'Произошла непредвиденная ошибка. Мы уже работаем над её устранением.'}
 			/>
