@@ -1,3 +1,4 @@
+- add database service to docker-compose and update environment variables in Dockerfile for enhanced configuration (ysturasp, 2025-11-19) [5 files changed, 31 insertions(+), 2 deletions(-)]
 - refactor PaymentModal to use BottomModal component and enhance format selection functionality (ysturasp, 2025-11-19) [4 files changed, 61 insertions(+), 75 deletions(-)]
 - add test paid formating and auth with used google oauth (ysturasp, 2025-11-19) [34 files changed, 2871 insertions(+), 6 deletions(-)]
 - remove loading overlay from changelog page for improved performance (ysturasp, 2025-11-18) [3 files changed, 2 insertions(+), 5 deletions(-)]

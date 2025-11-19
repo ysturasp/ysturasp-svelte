@@ -3,7 +3,6 @@ import type { RequestHandler } from './$types';
 import { getGoogleOAuthUrl, exchangeGoogleCode, verifyGoogleToken } from '$lib/auth/google';
 import { getOrCreateUser } from '$lib/db/users';
 import { initDatabase } from '$lib/db/database';
-import { env } from '$env/dynamic/public';
 
 export const GET: RequestHandler = async ({ url, cookies }) => {
 	try {
@@ -14,7 +13,7 @@ export const GET: RequestHandler = async ({ url, cookies }) => {
 
 	const code = url.searchParams.get('code');
 
-	const baseUrl = env.PUBLIC_BASE_URL || url.origin;
+	const baseUrl = url.origin;
 	const redirectUri = `${baseUrl}/api/auth/google`;
 
 	if (!code) {
