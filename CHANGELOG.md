@@ -1,3 +1,4 @@
+- refactor PaymentModal to use BottomModal component and enhance format selection functionality (ysturasp, 2025-11-19) [4 files changed, 61 insertions(+), 75 deletions(-)]
 - add test paid formating and auth with used google oauth (ysturasp, 2025-11-19) [34 files changed, 2871 insertions(+), 6 deletions(-)]
 - remove loading overlay from changelog page for improved performance (ysturasp, 2025-11-18) [3 files changed, 2 insertions(+), 5 deletions(-)]
 - update transportation text size in data page for better visibility (ysturasp, 2025-11-17) [3 files changed, 3 insertions(+), 1 deletion(-)]

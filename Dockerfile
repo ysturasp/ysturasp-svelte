@@ -41,11 +41,24 @@ RUN npm ci --omit=dev --omit=optional --no-audit --no-fund && npm cache clean --
 
 FROM gcr.io/distroless/nodejs20-debian12:nonroot AS runner
 
+ARG DATABASE_URL
+ARG GOOGLE_CLIENT_ID
+ARG GOOGLE_CLIENT_SECRET
+ARG YOOKASSA_SHOP_ID
+ARG YOOKASSA_SECRET_KEY
+ARG GROQ_API_KEY
+
 WORKDIR /app
 
 ENV NODE_ENV=production \
     HOST=0.0.0.0 \
-    PORT=5173
+    PORT=5173 \
+    DATABASE_URL=${DATABASE_URL:-} \
+    GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID:-} \
+    GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET:-} \
+    YOOKASSA_SHOP_ID=${YOOKASSA_SHOP_ID:-} \
+    YOOKASSA_SECRET_KEY=${YOOKASSA_SECRET_KEY:-} \
+    GROQ_API_KEY=${GROQ_API_KEY:-}
 
 COPY --chown=nonroot:nonroot --from=prod-deps /app/node_modules ./node_modules
 COPY --chown=nonroot:nonroot --from=build /app/build ./build
