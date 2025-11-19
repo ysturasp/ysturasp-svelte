@@ -1,3 +1,4 @@
+- initialize database connection in server hooks (ysturasp, 2025-11-19) [4 files changed, 19 insertions(+), 8 deletions(-)]
 - update docker-compose to include db service dependency and simplify Google OAuth URL handling (ysturasp, 2025-11-19) [4 files changed, 5 insertions(+), 4 deletions(-)]
 - add database service to docker-compose and update environment variables in Dockerfile for enhanced configuration (ysturasp, 2025-11-19) [5 files changed, 31 insertions(+), 2 deletions(-)]
 - refactor PaymentModal to use BottomModal component and enhance format selection functionality (ysturasp, 2025-11-19) [4 files changed, 61 insertions(+), 75 deletions(-)]
