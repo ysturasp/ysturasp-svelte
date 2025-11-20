@@ -1,7 +1,7 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { verifyGoogleToken } from '$lib/auth/google';
-import { getUserByGoogleId } from '$lib/db/users';
+import { verifySessionToken } from '$lib/auth/session';
+import { getUserById } from '$lib/db/users';
 import { getPaymentByYookassaId, updatePaymentStatus } from '$lib/db/payments';
 import { addPaidFormats } from '$lib/db/limits';
 import { getPayment as fetchPayment } from '$lib/payment/yookassa';
@@ -14,18 +14,13 @@ export const GET: RequestHandler = async ({ url, cookies }) => {
 	}
 
 	const token = cookies.get('session_token');
-	const userIdCookie = cookies.get('user_id');
+	const session = verifySessionToken(token);
 
-	if (!token || !userIdCookie) {
+	if (!session) {
 		return json({ error: 'Не авторизован' }, { status: 401 });
 	}
 
-	const userInfo = await verifyGoogleToken(token);
-	if (!userInfo) {
-		return json({ error: 'Неверный токен' }, { status: 401 });
-	}
-
-	const user = await getUserByGoogleId(userInfo.id);
+	const user = await getUserById(session.userId);
 	if (!user) {
 		return json({ error: 'Пользователь не найден' }, { status: 404 });
 	}

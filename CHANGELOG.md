@@ -1,3 +1,4 @@
+- refactor formatting page layout and update payment modal text for clarity (ysturasp, 2025-11-20) [4 files changed, 49 insertions(+), 36 deletions(-)]
 - rename subtitle payment modal (ysturasp, 2025-11-20) [3 files changed, 3 insertions(+), 1 deletion(-)]
 - refactor imports to use $app/state instead of $app/stores across multiple pages (ysturasp, 2025-11-20) [11 files changed, 22 insertions(+), 20 deletions(-)]
 - refactor payment handling in format page to utilize notifications and modals for user feedback (ysturasp, 2025-11-20) [4 files changed, 109 insertions(+), 15 deletions(-)]

@@ -1,23 +1,18 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { useFormat } from '$lib/db/limits';
-import { getUserByGoogleId } from '$lib/db/users';
-import { verifyGoogleToken } from '$lib/auth/google';
+import { getUserById } from '$lib/db/users';
+import { verifySessionToken } from '$lib/auth/session';
 
 export const POST: RequestHandler = async ({ request, cookies }) => {
 	const token = cookies.get('session_token');
-	const userId = cookies.get('user_id');
+	const session = verifySessionToken(token);
 
-	if (!token || !userId) {
+	if (!session) {
 		return json({ error: 'Не авторизован' }, { status: 401 });
 	}
 
-	const userInfo = await verifyGoogleToken(token);
-	if (!userInfo) {
-		return json({ error: 'Неверный токен' }, { status: 401 });
-	}
-
-	const user = await getUserByGoogleId(userInfo.id);
+	const user = await getUserById(session.userId);
 	if (!user) {
 		return json({ error: 'Пользователь не найден' }, { status: 404 });
 	}

@@ -30,6 +30,12 @@ export async function createUser(
 	return result.rows[0];
 }
 
+export async function getUserById(id: string): Promise<User | null> {
+	const pool = getPool();
+	const result = await pool.query('SELECT * FROM users WHERE id = $1', [id]);
+	return result.rows[0] || null;
+}
+
 export async function getOrCreateUser(
 	googleId: string,
 	email: string,

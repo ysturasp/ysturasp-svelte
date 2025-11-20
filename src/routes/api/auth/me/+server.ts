@@ -1,26 +1,32 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { getUserByGoogleId } from '$lib/db/users';
-import { verifyGoogleToken } from '$lib/auth/google';
+import { getUserById } from '$lib/db/users';
+import { createSessionToken, shouldRefreshSession, verifySessionToken } from '$lib/auth/session';
 
 export const GET: RequestHandler = async ({ cookies }) => {
 	const token = cookies.get('session_token');
-	const userId = cookies.get('user_id');
 
-	if (!token || !userId) {
-		return json({ authenticated: false }, { status: 401 });
-	}
-
-	const userInfo = await verifyGoogleToken(token);
-	if (!userInfo) {
+	const session = verifySessionToken(token);
+	if (!session) {
 		cookies.delete('session_token', { path: '/' });
-		cookies.delete('user_id', { path: '/' });
 		return json({ authenticated: false }, { status: 401 });
 	}
 
-	const user = await getUserByGoogleId(userInfo.id);
+	const user = await getUserById(session.userId);
 	if (!user) {
+		cookies.delete('session_token', { path: '/' });
 		return json({ authenticated: false }, { status: 401 });
+	}
+
+	if (shouldRefreshSession(session)) {
+		const newSession = createSessionToken(user.id);
+		cookies.set('session_token', newSession.token, {
+			path: '/',
+			httpOnly: true,
+			secure: process.env.NODE_ENV === 'production',
+			sameSite: 'lax',
+			maxAge: 60 * 60 * 24 * 30
+		});
 	}
 
 	return json({

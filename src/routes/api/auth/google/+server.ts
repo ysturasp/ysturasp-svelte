@@ -2,6 +2,7 @@ import { json, redirect } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { getGoogleOAuthUrl, exchangeGoogleCode, verifyGoogleToken } from '$lib/auth/google';
 import { getOrCreateUser } from '$lib/db/users';
+import { createSessionToken } from '$lib/auth/session';
 
 export const GET: RequestHandler = async ({ url, cookies }) => {
 	const code = url.searchParams.get('code');
@@ -36,15 +37,9 @@ export const GET: RequestHandler = async ({ url, cookies }) => {
 		userInfo.picture
 	);
 
-	cookies.set('session_token', accessToken, {
-		path: '/',
-		httpOnly: true,
-		secure: process.env.NODE_ENV === 'production',
-		sameSite: 'lax',
-		maxAge: 60 * 60 * 24 * 30
-	});
+	const session = createSessionToken(user.id);
 
-	cookies.set('user_id', user.id, {
+	cookies.set('session_token', session.token, {
 		path: '/',
 		httpOnly: true,
 		secure: process.env.NODE_ENV === 'production',
