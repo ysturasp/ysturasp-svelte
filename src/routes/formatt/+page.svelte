@@ -190,52 +190,63 @@
 	<main class="container mx-auto mt-5 px-3 md:mt-7 md:px-0">
 		<div class="mt-8 space-y-4">
 			<div class="rounded-2xl bg-slate-800 p-4 md:p-6">
-				<div class="mb-6 flex items-center justify-between border-b border-slate-700 pb-4">
-					<div class="flex items-center">
+				<div class="mb-4 border-b border-slate-700 pb-4">
+					<div class="flex items-center justify-center md:justify-start">
 						<h2 class="text-4xl font-semibold text-white">📄</h2>
 						<h2 class="ml-2 text-2xl font-semibold text-white md:text-4xl">
 							Форматирование документов
 						</h2>
 					</div>
-					<AuthButton />
+					<p class="mt-2 text-center text-slate-400 md:text-left">
+						Автоматическое форматирование по стандартам оформления работ
+					</p>
 				</div>
 
-				{#if $auth.authenticated}
-					<div class="mb-4 rounded-lg bg-slate-700/30 p-3">
-						<div class="flex items-center justify-between">
-							<span class="text-sm text-slate-300">Осталось форматирований:</span>
-							<span class="text-lg font-semibold text-white"
-								>{formatLimit.remaining || 0}</span
-							>
-						</div>
-						<button
-							on:click={() => (isPaymentModalOpen = true)}
-							class="mt-2 w-full rounded-lg bg-blue-600 px-4 py-2 text-sm text-white transition-colors hover:bg-blue-700"
+				<div class="mb-4 rounded-xl bg-slate-700/30 p-4 md:p-5">
+					{#if $auth.authenticated}
+						<div
+							class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between"
 						>
-							Купить форматирования
-						</button>
-					</div>
-				{:else}
-					<div class="mb-4 rounded-lg bg-yellow-500/10 p-3 text-yellow-300">
-						<div class="flex items-center gap-2">
-							<svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-								<path
-									fill-rule="evenodd"
-									d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
-									clip-rule="evenodd"
-								/>
-							</svg>
-							<span class="text-sm">
-								Для форматирования документов необходима авторизация через Google
-							</span>
-						</div>
-					</div>
-				{/if}
+							<div
+								class="flex flex-col items-center gap-3 rounded-lg bg-slate-800/50 p-3 ring-1 ring-blue-500/50 md:flex-row md:gap-6 md:bg-transparent md:p-0 md:ring-0"
+							>
+								<div class="text-center md:text-right">
+									<span
+										class="block text-xs tracking-wider text-slate-400 uppercase"
+										>Доступно</span
+									>
+									<span class="text-xl font-bold text-white"
+										>{formatLimit.remaining || 0}
+										<span class="text-sm font-normal text-slate-400">док.</span
+										></span
+									>
+								</div>
+								<div class="hidden h-8 w-px bg-slate-600 md:block"></div>
+								<button
+									on:click={() => (isPaymentModalOpen = true)}
+									class="w-full rounded-lg bg-blue-600 px-5 py-2 text-sm font-medium text-white transition-all hover:bg-blue-700 hover:shadow-lg hover:shadow-blue-500/20 md:w-auto"
+								>
+									Пополнить
+								</button>
+							</div>
 
-				<div class="rounded-xl bg-slate-700/30 p-4">
-					<h3 class="text-center text-lg font-medium text-white">
-						Автоматическое форматирование по стандартам оформления работ
-					</h3>
+							<div class="flex items-center justify-center md:justify-start">
+								<AuthButton />
+							</div>
+						</div>
+					{:else}
+						<div
+							class="flex flex-col items-center justify-center gap-4 py-2 text-center"
+						>
+							<div class="max-w-md text-slate-300">
+								<p class="mb-3">
+									Для начала работы необходимо авторизоваться. Это позволит
+									сохранять историю и управлять лимитами.
+								</p>
+							</div>
+							<AuthButton />
+						</div>
+					{/if}
 				</div>
 
 				<div class="mt-4">

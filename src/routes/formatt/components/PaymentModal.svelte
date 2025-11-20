@@ -89,7 +89,7 @@
 		</div>
 
 		<div class="rounded-lg bg-blue-500/10 p-4">
-			<div class="text-sm text-slate-400">Стоимость</div>
+			<div class="text-sm text-slate-400">К оплате</div>
 			<div class="text-2xl font-bold text-blue-400">{formatsCount * 100} ₽</div>
 		</div>
 	</div>
