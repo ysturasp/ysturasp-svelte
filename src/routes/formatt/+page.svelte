@@ -352,7 +352,6 @@
 		title="Активные устройства"
 		subtitle="Управляйте входами на разных устройствах"
 		onClose={() => (isSessionsModalOpen = false)}
-		contentClass="px-4"
 	>
 		<div class="py-2">
 			<SessionManager />
@@ -369,7 +368,6 @@
 		isSuccessModalOpen = false;
 		checkLimit();
 	}}
-	contentClass="px-4"
 >
 	<div class="flex items-center justify-center py-4">
 		<svg class="h-16 w-16 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -400,7 +398,6 @@
 	subtitle={errorModalMessage}
 	subtitleClass="text-red-400"
 	onClose={() => (isErrorModalOpen = false)}
-	contentClass="px-4"
 >
 	<div class="flex items-center justify-center py-4">
 		<svg class="h-16 w-16 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">

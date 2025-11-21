@@ -1,3 +1,4 @@
+- add SESSION_SECRET environment variable to Docker configuration (ysturasp, 2025-11-21) [4 files changed, 6 insertions(+), 1 deletion(-)]
 - add per-device session tracking and management UI (ysturasp, 2025-11-21) [18 files changed, 633 insertions(+), 89 deletions(-)]
 - add signed session tokens with sliding refresh (ysturasp, 2025-11-20) [12 files changed, 160 insertions(+), 68 deletions(-)]
 - refactor formatting page layout and update payment modal text for clarity (ysturasp, 2025-11-20) [4 files changed, 49 insertions(+), 36 deletions(-)]
