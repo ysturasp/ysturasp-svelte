@@ -47,6 +47,7 @@ ARG GOOGLE_CLIENT_SECRET
 ARG YOOKASSA_SHOP_ID
 ARG YOOKASSA_SECRET_KEY
 ARG GROQ_API_KEY
+ARG SESSION_SECRET
 
 WORKDIR /app
 
@@ -58,7 +59,8 @@ ENV NODE_ENV=production \
     GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET:-} \
     YOOKASSA_SHOP_ID=${YOOKASSA_SHOP_ID:-} \
     YOOKASSA_SECRET_KEY=${YOOKASSA_SECRET_KEY:-} \
-    GROQ_API_KEY=${GROQ_API_KEY:-}
+    GROQ_API_KEY=${GROQ_API_KEY:-} \
+    SESSION_SECRET=${SESSION_SECRET:-}
 
 COPY --chown=nonroot:nonroot --from=prod-deps /app/node_modules ./node_modules
 COPY --chown=nonroot:nonroot --from=build /app/build ./build
