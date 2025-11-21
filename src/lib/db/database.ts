@@ -102,11 +102,30 @@ export async function initDatabase() {
 		console.log('Таблица payments создана/проверена');
 
 		await pool.query(`
+			CREATE TABLE IF NOT EXISTS user_sessions (
+				id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+				user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+				token_hash TEXT NOT NULL,
+				device_name TEXT,
+				ip_address TEXT,
+				user_agent TEXT,
+				metadata JSONB,
+				created_at TIMESTAMP DEFAULT NOW(),
+				last_seen TIMESTAMP DEFAULT NOW(),
+				expires_at TIMESTAMP NOT NULL,
+				revoked_at TIMESTAMP
+			)
+		`);
+		console.log('Таблица user_sessions создана/проверена');
+
+		await pool.query(`
 			CREATE INDEX IF NOT EXISTS idx_users_google_id ON users(google_id);
 			CREATE INDEX IF NOT EXISTS idx_user_limits_user_id ON user_limits(user_id);
 			CREATE INDEX IF NOT EXISTS idx_format_history_user_id ON format_history(user_id);
 			CREATE INDEX IF NOT EXISTS idx_payments_user_id ON payments(user_id);
 			CREATE INDEX IF NOT EXISTS idx_payments_yookassa_id ON payments(yookassa_payment_id);
+			CREATE INDEX IF NOT EXISTS idx_user_sessions_user_id ON user_sessions(user_id);
+			CREATE INDEX IF NOT EXISTS idx_user_sessions_token_hash ON user_sessions(token_hash);
 		`);
 		console.log('Индексы созданы/проверены');
 		console.log('Инициализация БД завершена успешно');

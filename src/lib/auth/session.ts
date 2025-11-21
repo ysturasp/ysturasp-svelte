@@ -1,11 +1,13 @@
 import { env } from '$env/dynamic/private';
 import { createHmac, randomBytes, timingSafeEqual } from 'crypto';
 
-const DEFAULT_SESSION_TTL = 60 * 60 * 24 * 30;
+export const DEFAULT_SESSION_TTL = 60 * 60 * 24 * 30;
 const REFRESH_THRESHOLD_SECONDS = 60 * 60 * 24 * 7;
 
 export interface SessionPayload {
 	userId: string;
+	sessionId: string;
+	sessionKey: string;
 	issuedAt: number;
 	expiresAt: number;
 	nonce: string;
@@ -37,15 +39,26 @@ function signPayload(payload: string): string {
 	return base64UrlEncode(createHmac('sha256', getSessionSecret()).update(payload).digest());
 }
 
-export function createSessionToken(
-	userId: string,
-	ttlSeconds: number = DEFAULT_SESSION_TTL
-): { token: string; expiresAt: number } {
+export interface CreateTokenParams {
+	userId: string;
+	sessionId: string;
+	sessionKey: string;
+	ttlSeconds?: number;
+}
+
+export function createSessionToken({
+	userId,
+	sessionId,
+	sessionKey,
+	ttlSeconds = DEFAULT_SESSION_TTL
+}: CreateTokenParams): { token: string; expiresAt: number } {
 	const issuedAt = Math.floor(Date.now() / 1000);
 	const expiresAt = issuedAt + ttlSeconds;
 
 	const payload: SessionPayload = {
 		userId,
+		sessionId,
+		sessionKey,
 		issuedAt,
 		expiresAt,
 		nonce: randomBytes(16).toString('hex')
@@ -84,7 +97,7 @@ export function verifySessionToken(token: string | undefined | null): SessionPay
 		if (payload.expiresAt <= Math.floor(Date.now() / 1000)) {
 			return null;
 		}
-		if (!payload.userId) {
+		if (!payload.userId || !payload.sessionId || !payload.sessionKey) {
 			return null;
 		}
 		return payload;

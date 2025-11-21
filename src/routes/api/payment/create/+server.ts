@@ -2,27 +2,21 @@ import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { createPayment } from '$lib/payment/yookassa';
 import { createPayment as createPaymentRecord } from '$lib/db/payments';
-import { getUserById } from '$lib/db/users';
-import { verifySessionToken } from '$lib/auth/session';
+import { getSessionContext } from '$lib/server/sessionContext';
 
 const FORMATS_PRICE = 100;
 const FORMATS_COUNT = 10;
 
 export const POST: RequestHandler = async ({ request, cookies, url }) => {
-	const token = cookies.get('session_token');
-	const session = verifySessionToken(token);
-
-	if (!session) {
+	const context = await getSessionContext(cookies);
+	if (!context) {
 		return json({ error: 'Не авторизован' }, { status: 401 });
 	}
 
-	const user = await getUserById(session.userId);
-	if (!user) {
-		return json({ error: 'Пользователь не найден' }, { status: 404 });
-	}
+	const { user } = context;
 
-	const { formatsCount } = await request.json().catch(() => ({}));
-	const count = formatsCount || FORMATS_COUNT;
+	const { formatsCount } = await request.json().catch(() => ({}) as { formatsCount?: number });
+	const count = Math.min(Math.max(formatsCount ?? FORMATS_COUNT, 1), 500);
 	const amount = FORMATS_PRICE * count;
 
 	try {

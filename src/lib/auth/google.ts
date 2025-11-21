@@ -31,7 +31,7 @@ export async function verifyGoogleToken(token: string): Promise<GoogleUserInfo |
 	}
 }
 
-export function getGoogleOAuthUrl(redirectUri: string): string {
+export function getGoogleOAuthUrl(redirectUri: string, state: string): string {
 	const clientId = env.GOOGLE_CLIENT_ID;
 	if (!clientId) {
 		throw new Error('GOOGLE_CLIENT_ID не задан');
@@ -43,7 +43,8 @@ export function getGoogleOAuthUrl(redirectUri: string): string {
 		response_type: 'code',
 		scope: 'openid email profile',
 		access_type: 'offline',
-		prompt: 'consent'
+		prompt: 'consent',
+		state
 	});
 
 	return `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;

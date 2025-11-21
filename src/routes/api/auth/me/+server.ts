@@ -1,32 +1,37 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { getUserById } from '$lib/db/users';
-import { createSessionToken, shouldRefreshSession, verifySessionToken } from '$lib/auth/session';
+import { createSessionToken, shouldRefreshSession, DEFAULT_SESSION_TTL } from '$lib/auth/session';
+import { getSessionContext } from '$lib/server/sessionContext';
+import { updateSessionActivity } from '$lib/db/userSessions';
 
 export const GET: RequestHandler = async ({ cookies }) => {
-	const token = cookies.get('session_token');
-
-	const session = verifySessionToken(token);
-	if (!session) {
-		cookies.delete('session_token', { path: '/' });
+	const context = await getSessionContext(cookies, { touch: false });
+	if (!context) {
 		return json({ authenticated: false }, { status: 401 });
 	}
 
-	const user = await getUserById(session.userId);
-	if (!user) {
-		cookies.delete('session_token', { path: '/' });
-		return json({ authenticated: false }, { status: 401 });
-	}
+	const { user, session, payload } = context;
 
-	if (shouldRefreshSession(session)) {
-		const newSession = createSessionToken(user.id);
-		cookies.set('session_token', newSession.token, {
+	if (shouldRefreshSession(payload)) {
+		const refreshed = createSessionToken({
+			userId: user.id,
+			sessionId: session.id,
+			sessionKey: payload.sessionKey
+		});
+
+		cookies.set('session_token', refreshed.token, {
 			path: '/',
 			httpOnly: true,
 			secure: process.env.NODE_ENV === 'production',
 			sameSite: 'lax',
-			maxAge: 60 * 60 * 24 * 30
+			maxAge: DEFAULT_SESSION_TTL
 		});
+
+		await updateSessionActivity(session.id, {
+			expiresAt: new Date(refreshed.expiresAt * 1000)
+		});
+	} else {
+		await updateSessionActivity(session.id);
 	}
 
 	return json({
