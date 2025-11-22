@@ -1,3 +1,4 @@
+- remove unnecessary contentClass attribute from modals in formatting page (ysturasp, 2025-11-21) [3 files changed, 2 insertions(+), 3 deletions(-)]
 - add SESSION_SECRET environment variable to Docker configuration (ysturasp, 2025-11-21) [4 files changed, 6 insertions(+), 1 deletion(-)]
 - add per-device session tracking and management UI (ysturasp, 2025-11-21) [18 files changed, 633 insertions(+), 89 deletions(-)]
 - add signed session tokens with sliding refresh (ysturasp, 2025-11-20) [12 files changed, 160 insertions(+), 68 deletions(-)]

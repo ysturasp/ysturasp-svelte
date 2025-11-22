@@ -9,6 +9,7 @@
 	export let onClose: () => void;
 	export let checkCanClose: (() => boolean) | undefined = undefined;
 	export let contentClass: string = 'overflow-y-auto px-4';
+	export let showCloseButton = true;
 
 	let modalContent: HTMLElement;
 	let overlay: HTMLElement;
@@ -85,16 +86,23 @@
 		<div class="dialog-header">
 			<div class="dialog-title-section">
 				<h3 class="dialog-title">{title}</h3>
-				<button on:click={closeModal} class="dialog-close-btn" aria-label="Закрыть">
-					<svg class="close-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M6 18L18 6M6 6l12 12"
-						></path>
-					</svg>
-				</button>
+				{#if showCloseButton}
+					<button on:click={closeModal} class="dialog-close-btn" aria-label="Закрыть">
+						<svg
+							class="close-icon"
+							fill="none"
+							stroke="currentColor"
+							viewBox="0 0 24 24"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M6 18L18 6M6 6l12 12"
+							></path>
+						</svg>
+					</button>
+				{/if}
 			</div>
 			{#if subtitle}
 				<div class="dialog-subtitle {subtitleClass}">{subtitle}</div>

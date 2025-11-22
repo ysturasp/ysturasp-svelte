@@ -6,6 +6,7 @@
 	import AuthButton from './components/AuthButton.svelte';
 	import PaymentModal from './components/PaymentModal.svelte';
 	import SessionManager from './components/SessionManager.svelte';
+	import DomainCheckModal from './components/DomainCheckModal.svelte';
 	import Header from '$lib/components/layout/Header.svelte';
 	import Footer from '$lib/components/layout/Footer.svelte';
 	import PageLayout from '$lib/components/layout/PageLayout.svelte';
@@ -33,8 +34,13 @@
 	let isErrorModalOpen = false;
 	let errorModalMessage = '';
 	let isSessionsModalOpen = false;
+	let isDomainCheckModalOpen = false;
 
 	onMount(() => {
+		if (window.location.hostname !== 'ysturasp.ru') {
+			isDomainCheckModalOpen = true;
+		}
+
 		auth.checkAuth();
 
 		if (page.url.searchParams.get('payment') === 'success') {
@@ -418,5 +424,7 @@
 		</button>
 	</div>
 </BottomModal>
+
+<DomainCheckModal isOpen={isDomainCheckModalOpen} />
 
 <NotificationsContainer />
