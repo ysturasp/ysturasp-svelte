@@ -2,7 +2,7 @@
 	import DocumentUploader from './components/DocumentUploader.svelte';
 	import FormatRules from './components/FormatRules.svelte';
 	import FormatSettings from './components/FormatSettings.svelte';
-	import FormattingHistory from './components/FormattingHistory.svelte';
+	import FormattingHistoryCard from './components/FormattingHistoryCard.svelte';
 	import AuthButton from './components/AuthButton.svelte';
 	import PaymentModal from './components/PaymentModal.svelte';
 	import DomainCheckModal from './components/DomainCheckModal.svelte';
@@ -335,7 +335,7 @@
 			</div>
 
 			<FormatRules />
-			<FormattingHistory />
+			<FormattingHistoryCard />
 		</div>
 	</main>
 

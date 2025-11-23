@@ -1,3 +1,4 @@
+- implement privacy settings management in profile and update AuthButton for user data masking (ysturasp, 2025-11-23) [7 files changed, 250 insertions(+), 45 deletions(-)]
 - refactor formatting page by removing session management components and updating AuthButton for profile navigation (ysturasp, 2025-11-23) [9 files changed, 493 insertions(+), 105 deletions(-)]
 - update domain check logic to allow localhost access (ysturasp, 2025-11-23) [3 files changed, 6 insertions(+), 1 deletion(-)]
 - implement domain check modal and add close button visibility option to BottomModal (ysturasp, 2025-11-22) [5 files changed, 94 insertions(+), 10 deletions(-)]
