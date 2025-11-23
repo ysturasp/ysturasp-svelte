@@ -116,15 +116,7 @@
 	}
 </script>
 
-<div class="rounded-2xl bg-slate-800 p-4 md:p-6">
-	<div class="mb-4 flex items-center border-b border-slate-700 pb-4">
-		<h2 class="text-4xl">🔐</h2>
-		<div class="ml-3">
-			<h3 class="text-xl font-semibold text-white md:text-2xl">Активные сессии</h3>
-			<p class="text-sm text-slate-400">Управление входами на разных устройствах</p>
-		</div>
-	</div>
-
+<div>
 	{#if loading}
 		<div class="py-6 text-center text-slate-400">Загрузка...</div>
 	{:else if error}
@@ -132,61 +124,49 @@
 	{:else if activeSessions.length === 0}
 		<div class="py-6 text-center text-slate-400">Активных сессий нет</div>
 	{:else}
-		<div class="space-y-3">
+		<div class="space-y-4">
 			{#each activeSessions as session}
-				<div class="rounded-xl bg-slate-900/40 p-4">
-					<div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-						<div>
-							<div class="flex flex-wrap items-center gap-2">
-								<span class="text-base font-semibold text-white">
-									{session.deviceName || 'Неизвестное устройство'}
+				<div
+					class="flex flex-col gap-3 border-b border-slate-700 pb-4 last:border-0 md:flex-row md:items-center md:justify-between"
+				>
+					<div class="flex-1">
+						<div class="flex flex-wrap items-center gap-2">
+							<span class="text-base font-medium text-white">
+								{session.deviceName || 'Неизвестное устройство'}
+							</span>
+							{#if session.isCurrent}
+								<span
+									class="rounded-full bg-blue-500/10 px-2 py-0.5 text-xs text-blue-300"
+								>
+									Текущая
 								</span>
-								{#if session.isCurrent}
-									<span
-										class="rounded-full bg-blue-500/10 px-2 py-0.5 text-xs text-blue-300"
-									>
-										Текущая
-									</span>
-								{/if}
-								{#if !session.isActive}
-									<span
-										class="rounded-full bg-red-500/10 px-2 py-0.5 text-xs text-red-300"
-									>
-										Неактивна
-									</span>
-								{/if}
-							</div>
-							<p class="text-sm text-slate-400">
-								{session.ipAddress || 'IP неизвестен'}
-							</p>
-							<p class="text-xs text-slate-500">
-								Последняя активность: {formatDate(session.lastSeen)}
-							</p>
+							{/if}
 						</div>
-						<div class="flex flex-wrap gap-2">
-							<button
-								class="rounded-lg border border-slate-600 px-3 py-1.5 text-sm text-slate-300 transition-colors hover:bg-slate-700 disabled:opacity-50"
-								on:click={() => handleRevoke(session.id)}
-								disabled={session.revokedAt !== null || revoking[session.id]}
-							>
-								{session.isCurrent ? 'Выйти здесь' : 'Выйти'}
-							</button>
-						</div>
+						<p class="mt-1 text-sm text-slate-400">
+							{session.ipAddress || 'IP неизвестен'} · {formatDate(session.lastSeen)}
+						</p>
 					</div>
+					<button
+						class="rounded-lg border border-slate-600 bg-slate-700/50 px-3 py-1.5 text-sm text-slate-300 transition-colors hover:bg-slate-700 disabled:opacity-50"
+						on:click={() => handleRevoke(session.id)}
+						disabled={session.revokedAt !== null || revoking[session.id]}
+					>
+						{session.isCurrent ? 'Выйти здесь' : 'Выйти'}
+					</button>
 				</div>
 			{/each}
 		</div>
 
-		<div class="mt-6 flex flex-col gap-3 md:flex-row">
+		<div class="mt-6 flex flex-col gap-2 border-t border-slate-700 pt-4 md:flex-row">
 			<button
-				class="flex-1 rounded-lg border border-slate-600 px-4 py-2 text-sm text-slate-300 transition-colors hover:bg-slate-700 disabled:opacity-50"
+				class="rounded-lg border border-slate-600 bg-slate-700/50 px-4 py-2 text-sm text-slate-300 transition-colors hover:bg-slate-700 disabled:opacity-50"
 				on:click={handleRevokeOthers}
 				disabled={actionLoading || activeSessions.length <= 1}
 			>
 				Выйти из других устройств
 			</button>
 			<button
-				class="flex-1 rounded-lg bg-red-600 px-4 py-2 text-sm text-white transition-colors hover:bg-red-500 disabled:opacity-50"
+				class="rounded-lg border border-red-500/50 bg-red-500/10 px-4 py-2 text-sm text-red-400 transition-colors hover:bg-red-500/20 disabled:opacity-50"
 				on:click={handleRevokeAll}
 				disabled={actionLoading}
 			>

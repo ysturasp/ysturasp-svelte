@@ -51,16 +51,7 @@
 	});
 </script>
 
-<div class="mt-8 rounded-2xl bg-slate-800 p-4 md:p-6">
-	<div class="mb-6 flex items-center border-b border-slate-700 pb-4">
-		<div class="flex items-center">
-			<h2 class="text-4xl font-semibold text-white">📋</h2>
-			<h2 class="ml-3 text-xl font-semibold text-white md:text-3xl">
-				История форматирования
-			</h2>
-		</div>
-	</div>
-
+<div>
 	{#if isLoading}
 		<div class="flex justify-center py-8 text-slate-400">Загрузка...</div>
 	{:else if error}
@@ -72,20 +63,18 @@
 			У вас пока нет отформатированных файлов
 		</div>
 	{:else}
-		<div class="space-y-4">
+		<div class="space-y-3">
 			{#each files as file}
-				<div class="rounded-lg bg-slate-700/30 p-4">
-					<div class="flex items-center justify-between">
-						<div>
-							<h3 class="font-medium text-white">{file.fileName}</h3>
-							<div class="mt-1 text-sm text-slate-400">
-								{new Date(file.timestamp).toLocaleString()}
-							</div>
-							<div class="mt-1 flex gap-4 text-sm text-slate-300">
-								<span class={file.isPaid ? 'text-green-400' : 'text-blue-400'}>
-									{file.isPaid ? 'Платное' : 'Бесплатное'}
-								</span>
-							</div>
+				<div
+					class="flex items-center justify-between border-b border-slate-700 pb-3 last:border-0"
+				>
+					<div class="flex-1">
+						<h3 class="font-medium text-white">{file.fileName}</h3>
+						<div class="mt-1 flex items-center gap-3 text-sm text-slate-400">
+							<span>{new Date(file.timestamp).toLocaleString()}</span>
+							<span class={file.isPaid ? 'text-green-400' : 'text-blue-400'}>
+								{file.isPaid ? 'Платное' : 'Бесплатное'}
+							</span>
 						</div>
 					</div>
 				</div>

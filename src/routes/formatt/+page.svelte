@@ -5,7 +5,6 @@
 	import FormattingHistory from './components/FormattingHistory.svelte';
 	import AuthButton from './components/AuthButton.svelte';
 	import PaymentModal from './components/PaymentModal.svelte';
-	import SessionManager from './components/SessionManager.svelte';
 	import DomainCheckModal from './components/DomainCheckModal.svelte';
 	import Header from '$lib/components/layout/Header.svelte';
 	import Footer from '$lib/components/layout/Footer.svelte';
@@ -33,7 +32,6 @@
 	let successModalMessage = '';
 	let isErrorModalOpen = false;
 	let errorModalMessage = '';
-	let isSessionsModalOpen = false;
 	let isDomainCheckModalOpen = false;
 
 	onMount(() => {
@@ -245,12 +243,6 @@
 								class="flex flex-col items-center gap-3 md:flex-row md:justify-start"
 							>
 								<AuthButton />
-								<button
-									class="w-full rounded-lg border border-slate-600/70 px-4 py-2 text-sm text-slate-200 transition-colors hover:border-slate-500 hover:bg-slate-700/50 md:w-auto"
-									on:click={() => (isSessionsModalOpen = true)}
-								>
-									Устройства
-								</button>
 							</div>
 						</div>
 					{:else}
@@ -355,17 +347,6 @@
 		on:close={handlePaymentModalClose}
 		on:error={handlePaymentError}
 	/>
-
-	<BottomModal
-		isOpen={isSessionsModalOpen}
-		title="Активные устройства"
-		subtitle="Управляйте входами на разных устройствах"
-		onClose={() => (isSessionsModalOpen = false)}
-	>
-		<div class="py-2">
-			<SessionManager />
-		</div>
-	</BottomModal>
 </PageLayout>
 
 <BottomModal

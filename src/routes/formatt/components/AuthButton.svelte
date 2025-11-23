@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { auth } from '$lib/stores/auth';
 	import { onMount } from 'svelte';
+	import { goto } from '$app/navigation';
 
 	onMount(() => {
 		auth.checkAuth();
@@ -10,8 +11,8 @@
 		auth.login();
 	}
 
-	function handleLogout() {
-		auth.logout();
+	function handleProfileClick() {
+		goto('/profile');
 	}
 </script>
 
@@ -22,26 +23,32 @@
 		></div>
 	</div>
 {:else if $auth.authenticated && $auth.user}
-	<div class="flex items-center gap-3">
+	<button
+		on:click={handleProfileClick}
+		class="flex items-center gap-3 rounded-lg bg-slate-700/50 px-3 py-2 text-white transition-colors hover:bg-slate-600"
+	>
 		{#if $auth.user.picture}
 			<img
 				src={$auth.user.picture}
 				alt={$auth.user.name || 'User'}
 				class="h-8 w-8 rounded-full"
 			/>
+		{:else}
+			<div class="flex h-8 w-8 items-center justify-center rounded-full bg-slate-600">👤</div>
 		{/if}
-		<div class="flex flex-col">
-			<span class="text-sm font-medium text-white">{$auth.user.name || $auth.user.email}</span
-			>
-			<span class="text-xs text-slate-400">{$auth.user.email}</span>
+		<div class="flex flex-col items-start">
+			<span class="text-sm font-medium">{$auth.user.name || $auth.user.email}</span>
+			<span class="text-xs text-slate-400">Личный кабинет</span>
 		</div>
-		<button
-			on:click={handleLogout}
-			class="rounded-lg bg-slate-700 px-3 py-1 text-sm text-white transition-colors hover:bg-slate-600"
-		>
-			Выйти
-		</button>
-	</div>
+		<svg class="h-4 w-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+			<path
+				stroke-linecap="round"
+				stroke-linejoin="round"
+				stroke-width="2"
+				d="M9 5l7 7-7 7"
+			/>
+		</svg>
+	</button>
 {:else}
 	<button
 		on:click={handleLogin}
