@@ -10,12 +10,15 @@
 	}
 
 	let files: HistoryFile[] = [];
-	let isLoading = true;
+	let isLoading = false;
 	let error = '';
+	let isLoaded = false;
 
 	async function loadFiles() {
-		if (!$auth.authenticated) {
-			isLoading = false;
+		if (!$auth.authenticated || isLoading || isLoaded) {
+			if (!$auth.authenticated) {
+				isLoading = false;
+			}
 			return;
 		}
 
@@ -28,6 +31,7 @@
 			}
 			const data = await response.json();
 			files = data.files || [];
+			isLoaded = true;
 		} catch (err) {
 			error = err instanceof Error ? err.message : 'Ошибка при загрузке файлов';
 		} finally {
@@ -37,18 +41,15 @@
 
 	formattingComplete.subscribe((complete) => {
 		if (complete) {
+			isLoaded = false;
 			loadFiles();
 			formattingComplete.set(false);
 		}
 	});
 
-	auth.subscribe(() => {
+	$: if (!$auth.loading && $auth.authenticated && !isLoaded && !isLoading) {
 		loadFiles();
-	});
-
-	onMount(() => {
-		loadFiles();
-	});
+	}
 </script>
 
 <div>

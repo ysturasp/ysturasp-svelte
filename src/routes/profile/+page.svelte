@@ -12,15 +12,25 @@
 	import { checkFormatLimit } from '../formatt/api';
 	import type { FormatLimit } from '../formatt/api';
 	import BottomModal from '$lib/components/ui/BottomModal.svelte';
+	import { browser } from '$app/environment';
+	import {
+		loadPrivacySettings,
+		savePrivacySettings,
+		maskEmail,
+		maskName,
+		type PrivacySettings
+	} from '$lib/utils/privacy';
 
 	let activeTab = 'profile';
 	let formatLimit: FormatLimit = { can: true, remaining: 0 };
 	let isPaymentModalOpen = false;
 	let isErrorModalOpen = false;
 	let errorModalMessage = '';
+	let privacySettings: PrivacySettings = loadPrivacySettings();
 
 	onMount(() => {
 		auth.checkAuth();
+		privacySettings = loadPrivacySettings();
 	});
 
 	$: if (!$auth.loading) {
@@ -37,6 +47,11 @@
 		}
 	}
 
+	function handlePrivacyChange(setting: keyof PrivacySettings) {
+		privacySettings = { ...privacySettings, [setting]: !privacySettings[setting] };
+		savePrivacySettings(privacySettings);
+	}
+
 	function handlePaymentModalClose() {
 		isPaymentModalOpen = false;
 		checkLimit();
@@ -51,6 +66,16 @@
 		await auth.logout();
 		goto('/formatt');
 	}
+
+	$: displayName = privacySettings.hideName
+		? maskName($auth.user?.name || null)
+		: $auth.user?.name || 'Пользователь';
+
+	$: displayEmail = privacySettings.hideEmail
+		? maskEmail($auth.user?.email || '')
+		: $auth.user?.email;
+
+	$: showAvatar = !privacySettings.hideAvatar;
 </script>
 
 <svelte:head>
@@ -84,24 +109,36 @@
 		{:else}
 			<div class="mt-8">
 				<div class="mb-4 flex items-center gap-3">
-					{#if $auth.user?.picture}
+					{#if showAvatar && $auth.user?.picture}
 						<img
 							src={$auth.user.picture}
-							alt={$auth.user.name || 'User'}
+							alt={displayName}
 							class="h-12 w-12 rounded-full"
 						/>
 					{:else}
 						<div
-							class="flex h-12 w-12 items-center justify-center rounded-full bg-slate-700 text-xl text-slate-400"
+							class="flex h-12 w-12 items-center justify-center rounded-full bg-slate-700 text-slate-400"
 						>
-							👤
+							<svg
+								class="h-6 w-6"
+								fill="none"
+								stroke="currentColor"
+								viewBox="0 0 24 24"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+								/>
+							</svg>
 						</div>
 					{/if}
 					<div>
 						<h1 class="text-2xl font-semibold text-white md:text-3xl">
-							{$auth.user?.name || 'Пользователь'}
+							{displayName}
 						</h1>
-						<p class="text-sm text-slate-400">{$auth.user?.email}</p>
+						<p class="text-sm text-slate-400">{displayEmail}</p>
 					</div>
 				</div>
 
@@ -169,21 +206,50 @@
 				{#if activeTab === 'profile'}
 					<div class="space-y-6">
 						<div>
-							<h2 class="mb-4 text-lg font-semibold text-white">
-								Лимиты форматирования
+							<h2 class="mb-2 text-lg font-semibold text-white">
+								Настройки приватности
 							</h2>
-							<div class="flex items-baseline gap-2">
-								<span class="text-4xl font-bold text-white"
-									>{formatLimit.remaining || 0}</span
-								>
-								<span class="text-slate-400">доступно</span>
+							<p class="mb-4 text-sm text-slate-400">
+								Скрывайте личные данные для защиты приватности при стриминге
+							</p>
+							<div class="space-y-4">
+								<div class="flex items-center justify-between">
+									<label for="hideEmail" class="text-white">Скрыть email</label>
+									<label class="switch">
+										<input
+											type="checkbox"
+											id="hideEmail"
+											checked={privacySettings.hideEmail}
+											on:change={() => handlePrivacyChange('hideEmail')}
+										/>
+										<span class="slider round"></span>
+									</label>
+								</div>
+								<div class="flex items-center justify-between">
+									<label for="hideName" class="text-white">Скрыть имя</label>
+									<label class="switch">
+										<input
+											type="checkbox"
+											id="hideName"
+											checked={privacySettings.hideName}
+											on:change={() => handlePrivacyChange('hideName')}
+										/>
+										<span class="slider round"></span>
+									</label>
+								</div>
+								<div class="flex items-center justify-between">
+									<label for="hideAvatar" class="text-white">Скрыть аватар</label>
+									<label class="switch">
+										<input
+											type="checkbox"
+											id="hideAvatar"
+											checked={privacySettings.hideAvatar}
+											on:change={() => handlePrivacyChange('hideAvatar')}
+										/>
+										<span class="slider round"></span>
+									</label>
+								</div>
 							</div>
-							<button
-								on:click={() => (isPaymentModalOpen = true)}
-								class="mt-4 rounded-lg bg-blue-600 px-4 py-2 text-sm text-white transition-colors hover:bg-blue-700"
-							>
-								Пополнить баланс
-							</button>
 						</div>
 
 						<div class="border-t border-slate-700 pt-6">
@@ -278,5 +344,68 @@
 	}
 	.scrollbar-hide::-webkit-scrollbar {
 		display: none;
+	}
+
+	.switch {
+		position: relative;
+		display: inline-block;
+		width: 34px;
+		height: 20px;
+		flex-shrink: 0;
+	}
+
+	.switch input {
+		opacity: 0;
+		width: 0;
+		height: 0;
+	}
+
+	.switch input:disabled {
+		cursor: not-allowed;
+	}
+
+	.slider {
+		position: absolute;
+		cursor: pointer;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		background-color: #ccc;
+		transition: 0.4s;
+		border-radius: 34px;
+	}
+
+	.switch input:disabled + .slider {
+		opacity: 0.5;
+		cursor: not-allowed;
+	}
+
+	.slider:before {
+		position: absolute;
+		content: '';
+		height: 14px;
+		width: 14px;
+		left: 3px;
+		bottom: 3px;
+		background-color: white;
+		transition: 0.4s;
+		border-radius: 50%;
+	}
+
+	input:checked + .slider {
+		background-color: #2196f3;
+	}
+
+	input:checked + .slider:before {
+		transform: translateX(14px);
+	}
+
+	.slider.round {
+		border-radius: 34px;
+	}
+
+	.slider.round:before {
+		border-radius: 50%;
 	}
 </style>

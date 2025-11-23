@@ -14,8 +14,9 @@
 	}
 
 	let payments: Payment[] = [];
-	let isLoading = true;
+	let isLoading = false;
 	let error = '';
+	let isLoaded = false;
 
 	function getStatusText(status: string): string {
 		const statusMap: Record<string, string> = {
@@ -38,8 +39,10 @@
 	}
 
 	async function loadPayments() {
-		if (!$auth.authenticated) {
-			isLoading = false;
+		if (!$auth.authenticated || isLoading || isLoaded) {
+			if (!$auth.authenticated) {
+				isLoading = false;
+			}
 			return;
 		}
 
@@ -52,6 +55,7 @@
 			}
 			const data = await response.json();
 			payments = data.payments || [];
+			isLoaded = true;
 		} catch (err) {
 			error = err instanceof Error ? err.message : 'Ошибка при загрузке платежей';
 		} finally {
@@ -59,13 +63,9 @@
 		}
 	}
 
-	auth.subscribe(() => {
+	$: if (!$auth.loading && $auth.authenticated && !isLoaded && !isLoading) {
 		loadPayments();
-	});
-
-	onMount(() => {
-		loadPayments();
-	});
+	}
 </script>
 
 <div>

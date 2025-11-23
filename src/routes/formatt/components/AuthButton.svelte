@@ -2,9 +2,24 @@
 	import { auth } from '$lib/stores/auth';
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
+	import { loadPrivacySettings, maskEmail, maskName } from '$lib/utils/privacy';
+	import { browser } from '$app/environment';
+
+	let privacySettings = loadPrivacySettings();
 
 	onMount(() => {
 		auth.checkAuth();
+		if (browser) {
+			const updatePrivacy = () => {
+				privacySettings = loadPrivacySettings();
+			};
+			window.addEventListener('storage', updatePrivacy);
+			const interval = setInterval(updatePrivacy, 500);
+			return () => {
+				window.removeEventListener('storage', updatePrivacy);
+				clearInterval(interval);
+			};
+		}
 	});
 
 	function handleLogin() {
@@ -14,6 +29,16 @@
 	function handleProfileClick() {
 		goto('/profile');
 	}
+
+	$: displayName = privacySettings.hideName
+		? maskName($auth.user?.name || null)
+		: $auth.user?.name || $auth.user?.email || '';
+
+	$: displayEmail = privacySettings.hideEmail
+		? maskEmail($auth.user?.email || '')
+		: $auth.user?.email;
+
+	$: showAvatar = !privacySettings.hideAvatar;
 </script>
 
 {#if $auth.loading}
@@ -27,17 +52,24 @@
 		on:click={handleProfileClick}
 		class="flex items-center gap-3 rounded-lg bg-slate-700/50 px-3 py-2 text-white transition-colors hover:bg-slate-600"
 	>
-		{#if $auth.user.picture}
-			<img
-				src={$auth.user.picture}
-				alt={$auth.user.name || 'User'}
-				class="h-8 w-8 rounded-full"
-			/>
+		{#if showAvatar && $auth.user.picture}
+			<img src={$auth.user.picture} alt={displayName} class="h-8 w-8 rounded-full" />
 		{:else}
-			<div class="flex h-8 w-8 items-center justify-center rounded-full bg-slate-600">👤</div>
+			<div
+				class="flex h-8 w-8 items-center justify-center rounded-full bg-slate-600 text-slate-400"
+			>
+				<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+					/>
+				</svg>
+			</div>
 		{/if}
 		<div class="flex flex-col items-start">
-			<span class="text-sm font-medium">{$auth.user.name || $auth.user.email}</span>
+			<span class="text-sm font-medium">{displayName}</span>
 			<span class="text-xs text-slate-400">Личный кабинет</span>
 		</div>
 		<svg class="h-4 w-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
