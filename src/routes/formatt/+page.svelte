@@ -37,7 +37,10 @@
 	let isDomainCheckModalOpen = false;
 
 	onMount(() => {
-		if (window.location.hostname !== 'ysturasp.ru') {
+		if (
+			window.location.hostname !== 'ysturasp.ru' &&
+			window.location.hostname !== 'localhost'
+		) {
 			isDomainCheckModalOpen = true;
 		}
 
