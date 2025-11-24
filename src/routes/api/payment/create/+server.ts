@@ -23,7 +23,7 @@ export const POST: RequestHandler = async ({ request, cookies, url }) => {
 		const payment = await createPayment({
 			amount,
 			description: `Покупка ${count} форматирований`,
-			returnUrl: `${url.origin}/format?payment=success`,
+			returnUrl: `${url.origin}/formatt?payment=success`,
 			metadata: {
 				userId: user.id,
 				formatsCount: count.toString()

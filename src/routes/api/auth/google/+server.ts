@@ -99,5 +99,5 @@ export const GET: RequestHandler = async (event) => {
 		maxAge: DEFAULT_SESSION_TTL
 	});
 
-	throw redirect(302, '/format');
+	throw redirect(302, '/formatt');
 };
