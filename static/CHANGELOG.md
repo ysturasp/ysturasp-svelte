@@ -1,3 +1,4 @@
+- fix redirect paths in Google auth and payment creation to use correct test endpoint '/formatt' (ysturasp, 2025-11-24) [4 files changed, 4 insertions(+), 2 deletions(-)]
 - replace FormattingHistory component with FormattingHistoryCard in formatting page (ysturasp, 2025-11-23) [4 files changed, 100 insertions(+), 2 deletions(-)]
 - implement privacy settings management in profile and update AuthButton for user data masking (ysturasp, 2025-11-23) [7 files changed, 250 insertions(+), 45 deletions(-)]
 - refactor formatting page by removing session management components and updating AuthButton for profile navigation (ysturasp, 2025-11-23) [9 files changed, 493 insertions(+), 105 deletions(-)]
