@@ -1,3 +1,4 @@
+- fix style payment button on format page (ysturasp, 2025-11-26) [3 files changed, 3 insertions(+), 1 deletion(-)]
 - update formatt page component (ysturasp, 2025-11-25) [3 files changed, 3 insertions(+), 1 deletion(-)]
 - fix redirect paths in Google auth and payment creation to use correct test endpoint '/formatt' (ysturasp, 2025-11-24) [4 files changed, 4 insertions(+), 2 deletions(-)]
 - replace FormattingHistory component with FormattingHistoryCard in formatting page (ysturasp, 2025-11-23) [4 files changed, 100 insertions(+), 2 deletions(-)]

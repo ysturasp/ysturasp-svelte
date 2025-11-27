@@ -1,4 +1,7 @@
 import type { FormatResponse } from '$lib/types/document';
+import type { FormatParams } from '$lib/types/formatting';
+
+export type { FormatParams };
 
 function generateUserId(): string {
 	return 'user_' + Math.random().toString(36).substring(2) + Date.now().toString(36);
@@ -22,10 +25,12 @@ export interface FormattedFile {
 	base64: string;
 }
 
+const FORMAT_API_URL = '/api/format';
+
 export async function getUserFiles(): Promise<FormattedFile[]> {
 	try {
 		const userId = getUserId();
-		const response = await fetch(`${GOOGLE_SCRIPT_URL}?userId=${userId}`, {
+		const response = await fetch(`${FORMAT_API_URL}?userId=${userId}`, {
 			method: 'GET'
 		});
 
@@ -41,32 +46,6 @@ export async function getUserFiles(): Promise<FormattedFile[]> {
 	}
 }
 
-export interface FormatParams {
-	margins: {
-		top: number;
-		right: number;
-		bottom: number;
-		left: number;
-	};
-	text: {
-		font: string;
-		size: number;
-		indent: number;
-		lineHeight: number;
-		removeBold: boolean;
-		removeItalic: boolean;
-		removeUnderline: boolean;
-	};
-	headers: {
-		h1: { spacingBefore: number; spacingAfter: number };
-		h2: { spacingBefore: number; spacingAfter: number };
-		h3: { spacingBefore: number; spacingAfter: number };
-	};
-}
-
-const GOOGLE_SCRIPT_URL =
-	'https://script.google.com/macros/s/AKfycbyPkfyon0XnNzdfvHSr3XyZfjF9FzZ-jEhBp6x9nDzR-jhvMd9hi27sUwVXPC3ReKQxrA/exec';
-
 export async function formatDocument(
 	base64: string,
 	formatParams?: FormatParams,
@@ -74,8 +53,9 @@ export async function formatDocument(
 ): Promise<FormatResponse> {
 	try {
 		const userId = getUserId();
-		const response = await fetch(GOOGLE_SCRIPT_URL, {
+		const response = await fetch(FORMAT_API_URL, {
 			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
 			body: formatParams
 				? JSON.stringify({ file: base64, formatParams, fileName, userId })
 				: JSON.stringify({ file: base64, fileName, userId })

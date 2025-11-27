@@ -87,6 +87,19 @@ export async function initDatabase() {
 		console.log('Таблица format_history создана/проверена');
 
 		await pool.query(`
+			CREATE TABLE IF NOT EXISTS public_format_history (
+				id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+				user_key TEXT NOT NULL,
+				file_name TEXT NOT NULL,
+				original_size INTEGER NOT NULL,
+				formatted_size INTEGER NOT NULL,
+				formatted_base64 TEXT NOT NULL,
+				created_at TIMESTAMP DEFAULT NOW()
+			)
+		`);
+		console.log('Таблица public_format_history создана/проверена');
+
+		await pool.query(`
 			CREATE TABLE IF NOT EXISTS payments (
 				id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 				user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -122,6 +135,7 @@ export async function initDatabase() {
 			CREATE INDEX IF NOT EXISTS idx_users_google_id ON users(google_id);
 			CREATE INDEX IF NOT EXISTS idx_user_limits_user_id ON user_limits(user_id);
 			CREATE INDEX IF NOT EXISTS idx_format_history_user_id ON format_history(user_id);
+			CREATE INDEX IF NOT EXISTS idx_public_format_history_user_key ON public_format_history(user_key);
 			CREATE INDEX IF NOT EXISTS idx_payments_user_id ON payments(user_id);
 			CREATE INDEX IF NOT EXISTS idx_payments_yookassa_id ON payments(yookassa_payment_id);
 			CREATE INDEX IF NOT EXISTS idx_user_sessions_user_id ON user_sessions(user_id);
