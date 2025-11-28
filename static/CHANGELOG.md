@@ -1,3 +1,4 @@
+- add FormatParams interface to define formatting options (ysturasp, 2025-11-27) [3 files changed, 24 insertions(+)]
 - add format endpoint instead of google app script and other improves (ysturasp, 2025-11-27) [14 files changed, 967 insertions(+), 107 deletions(-)]
 - fix style payment button on format page (ysturasp, 2025-11-26) [3 files changed, 3 insertions(+), 1 deletion(-)]
 - update formatt page component (ysturasp, 2025-11-25) [3 files changed, 3 insertions(+), 1 deletion(-)]

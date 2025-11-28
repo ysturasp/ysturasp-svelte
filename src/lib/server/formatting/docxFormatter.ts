@@ -72,7 +72,6 @@ function processStylesXml(xml: string, params: FormatParams): string {
 		after: 0,
 		line: calculateLineSpacing(params.text.lineHeight)
 	});
-	setParagraphIndent(paragraphDefaults, params.text.indent);
 
 	return js2xml(json, { compact: false, spaces: 4 });
 }
@@ -94,6 +93,9 @@ function formatBodyParagraphs(body: XmlElement, params: FormatParams) {
 	pruneEmptyParagraphs(body.elements ?? [], paragraphContexts, titleBoundaryIndex);
 
 	for (const context of paragraphContexts) {
+		if (titleBoundaryIndex >= 0 && context.bodyIndex <= titleBoundaryIndex) {
+			continue;
+		}
 		formatParagraph(context.element, params);
 	}
 }
