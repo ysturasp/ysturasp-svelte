@@ -51,3 +51,30 @@ export async function getPayment(paymentId: string) {
 	const checkout = getCheckout();
 	return await checkout.getPayment(paymentId);
 }
+
+export interface RefundPaymentParams {
+	paymentId: string;
+	amount?: number;
+	description?: string;
+}
+
+export async function refundPayment(params: RefundPaymentParams) {
+	const checkout = getCheckout();
+
+	const refundData: any = {
+		payment_id: params.paymentId
+	};
+
+	if (params.amount) {
+		refundData.amount = {
+			value: params.amount.toFixed(2),
+			currency: 'RUB'
+		};
+	}
+
+	if (params.description) {
+		refundData.description = params.description;
+	}
+
+	return await checkout.createRefund(refundData);
+}

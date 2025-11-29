@@ -83,3 +83,37 @@ export async function addPaidFormats(userId: string, count: number): Promise<voi
 		[count, userId]
 	);
 }
+
+export async function removePaidFormats(
+	userId: string,
+	purchasedCount: number,
+	usedCount: number = 0
+): Promise<void> {
+	const pool = getPool();
+	const limits = await getUserLimits(userId);
+
+	const totalCount = purchasedCount;
+
+	await pool.query(
+		`UPDATE user_limits 
+		 SET paid_formats_purchased = GREATEST(0, paid_formats_purchased - $1), 
+		     updated_at = NOW() 
+		 WHERE user_id = $2`,
+		[totalCount, userId]
+	);
+
+	if (usedCount > 0) {
+		const currentUsed = limits.paid_formats_used;
+		const decreaseUsed = Math.min(usedCount, currentUsed);
+
+		if (decreaseUsed > 0) {
+			await pool.query(
+				`UPDATE user_limits 
+				 SET paid_formats_used = GREATEST(0, paid_formats_used - $1), 
+				     updated_at = NOW() 
+				 WHERE user_id = $2`,
+				[decreaseUsed, userId]
+			);
+		}
+	}
+}
