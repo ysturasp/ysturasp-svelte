@@ -1,3 +1,4 @@
+- improve bot request handling in hooks.server.ts, add isbot dependency (ysturasp, 2025-11-30) [5 files changed, 312 insertions(+), 2 deletions(-)]
 - update IP address tracking to session management and session activity logic (ysturasp, 2025-11-29) [8 files changed, 31 insertions(+), 17 deletions(-)]
 - enhance payment refund process with additional checks for payment status and user ownership (ysturasp, 2025-11-29) [6 files changed, 30 insertions(+), 6 deletions(-)]
 - implement refund functionality for payments, including checks for eligibility and user notifications (ysturasp, 2025-11-29) [9 files changed, 489 insertions(+), 3 deletions(-)]

@@ -186,27 +186,29 @@ let dbInitialized = false;
 let dbInitPromise: Promise<void> | null = null;
 
 const initDbHandle: Handle = async ({ event, resolve }) => {
-	if (!dbInitialized && !dbInitPromise) {
-		console.log('[initDbHandle] Запуск инициализации БД...');
-		dbInitPromise = (async () => {
-			try {
-				console.log('[initDbHandle] Начало инициализации БД...');
-				await initDatabase();
-				dbInitialized = true;
-				console.log('[initDbHandle] БД успешно инициализирована');
-			} catch (error) {
-				console.error('[initDbHandle] Ошибка инициализации БД:', error);
-				dbInitPromise = null;
-			}
-		})();
+	if (dbInitialized) {
+		return resolve(event);
 	}
 
 	if (dbInitPromise) {
-		console.log('[initDbHandle] Ожидание завершения инициализации...');
 		await dbInitPromise;
-		console.log('[initDbHandle] Инициализация завершена, обработка запроса');
+		return resolve(event);
 	}
 
+	console.log('[initDbHandle] Запуск инициализации БД...');
+	dbInitPromise = (async () => {
+		try {
+			await initDatabase();
+			dbInitialized = true;
+			console.log('[initDbHandle] БД успешно инициализирована');
+		} catch (error) {
+			console.error('[initDbHandle] Ошибка инициализации БД:', error);
+			dbInitPromise = null;
+			throw error;
+		}
+	})();
+
+	await dbInitPromise;
 	return resolve(event);
 };
 
@@ -348,7 +350,7 @@ process.stderr.write = (chunk: any, ...args: any[]) => {
 
 console.log('[hooks.server] Модуль загружен, запуск инициализации БД в фоне...');
 
-(async () => {
+dbInitPromise = (async () => {
 	try {
 		console.log('[hooks.server] Фоновая инициализация БД...');
 		await initDatabase();
@@ -357,6 +359,7 @@ console.log('[hooks.server] Модуль загружен, запуск иниц
 	} catch (error) {
 		console.error('[hooks.server] Ошибка фоновой инициализации БД:', error);
 		console.log('[hooks.server] Инициализация будет выполнена при первом запросе');
+		dbInitPromise = null;
 	}
 })();
 
