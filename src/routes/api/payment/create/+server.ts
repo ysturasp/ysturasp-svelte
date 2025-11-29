@@ -14,8 +14,9 @@ function calculatePrice(count: number): number {
 	return count * 100;
 }
 
-export const POST: RequestHandler = async ({ request, cookies, url }) => {
-	const context = await getSessionContext(cookies);
+export const POST: RequestHandler = async ({ request, cookies, url, getClientAddress }) => {
+	const ipAddress = getClientAddress();
+	const context = await getSessionContext(cookies, { ipAddress });
 	if (!context) {
 		return json({ error: 'Не авторизован' }, { status: 401 });
 	}

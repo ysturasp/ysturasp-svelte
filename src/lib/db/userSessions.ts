@@ -57,11 +57,11 @@ export async function getSessionById(sessionId: string): Promise<UserSession | n
 
 export async function updateSessionActivity(
 	sessionId: string,
-	options: { lastSeen?: Date; expiresAt?: Date } = {}
+	options: { lastSeen?: Date; expiresAt?: Date; ipAddress?: string | null } = {}
 ): Promise<void> {
 	const pool = getPool();
 	const fields: string[] = [];
-	const values: Array<string | Date> = [];
+	const values: Array<string | Date | null> = [];
 
 	if (options.lastSeen) {
 		values.push(options.lastSeen);
@@ -73,6 +73,11 @@ export async function updateSessionActivity(
 	if (options.expiresAt) {
 		values.push(options.expiresAt);
 		fields.push(`expires_at = $${values.length}`);
+	}
+
+	if (options.ipAddress !== undefined) {
+		values.push(options.ipAddress || null);
+		fields.push(`ip_address = $${values.length}`);
 	}
 
 	if (fields.length === 0) {

@@ -8,8 +8,9 @@ import {
 	revokeSessionsByUser
 } from '$lib/db/userSessions';
 
-export const GET: RequestHandler = async ({ cookies }) => {
-	const context = await getSessionContext(cookies);
+export const GET: RequestHandler = async ({ cookies, getClientAddress }) => {
+	const ipAddress = getClientAddress();
+	const context = await getSessionContext(cookies, { ipAddress });
 	if (!context) {
 		return json({ error: 'Не авторизован' }, { status: 401 });
 	}
@@ -38,8 +39,9 @@ type ActionBody =
 	| { action: 'revokeOthers' }
 	| { action: 'revokeAll' };
 
-export const POST: RequestHandler = async ({ cookies, request }) => {
-	const context = await getSessionContext(cookies);
+export const POST: RequestHandler = async ({ cookies, request, getClientAddress }) => {
+	const ipAddress = getClientAddress();
+	const context = await getSessionContext(cookies, { ipAddress });
 	if (!context) {
 		return json({ error: 'Не авторизован' }, { status: 401 });
 	}

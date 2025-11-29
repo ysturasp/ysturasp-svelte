@@ -4,8 +4,9 @@ import { createSessionToken, shouldRefreshSession, DEFAULT_SESSION_TTL } from '$
 import { getSessionContext } from '$lib/server/sessionContext';
 import { updateSessionActivity } from '$lib/db/userSessions';
 
-export const GET: RequestHandler = async ({ cookies }) => {
-	const context = await getSessionContext(cookies, { touch: false });
+export const GET: RequestHandler = async ({ cookies, getClientAddress }) => {
+	const ipAddress = getClientAddress();
+	const context = await getSessionContext(cookies, { touch: false, ipAddress });
 	if (!context) {
 		return json({ authenticated: false }, { status: 401 });
 	}
@@ -30,8 +31,6 @@ export const GET: RequestHandler = async ({ cookies }) => {
 		await updateSessionActivity(session.id, {
 			expiresAt: new Date(refreshed.expiresAt * 1000)
 		});
-	} else {
-		await updateSessionActivity(session.id);
 	}
 
 	return json({

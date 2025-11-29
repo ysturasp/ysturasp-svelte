@@ -16,7 +16,7 @@ export interface SessionContext {
 
 export async function getSessionContext(
 	cookies: Cookies,
-	{ touch = true }: { touch?: boolean } = {}
+	{ touch = true, ipAddress }: { touch?: boolean; ipAddress?: string | null } = {}
 ): Promise<SessionContext | null> {
 	const token = cookies.get('session_token');
 	if (!token) {
@@ -52,8 +52,12 @@ export async function getSessionContext(
 		return null;
 	}
 
-	if (touch) {
-		await updateSessionActivity(session.id);
+	if (touch || (ipAddress !== undefined && session.ip_address !== ipAddress)) {
+		const updateOptions: { ipAddress?: string | null } = {};
+		if (ipAddress !== undefined && session.ip_address !== ipAddress) {
+			updateOptions.ipAddress = ipAddress;
+		}
+		await updateSessionActivity(session.id, updateOptions);
 	}
 
 	return { user, session, payload };

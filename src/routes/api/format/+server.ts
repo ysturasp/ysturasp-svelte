@@ -37,8 +37,9 @@ export const GET: RequestHandler = async ({ url }) => {
 	}
 };
 
-export const POST: RequestHandler = async ({ request, cookies }) => {
-	const context = await getSessionContext(cookies);
+export const POST: RequestHandler = async ({ request, cookies, getClientAddress }) => {
+	const ipAddress = getClientAddress();
+	const context = await getSessionContext(cookies, { ipAddress });
 	let body: FormatRequestBody;
 
 	try {
