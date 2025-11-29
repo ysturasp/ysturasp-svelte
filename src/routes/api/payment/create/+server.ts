@@ -4,8 +4,15 @@ import { createPayment } from '$lib/payment/yookassa';
 import { createPayment as createPaymentRecord } from '$lib/db/payments';
 import { getSessionContext } from '$lib/server/sessionContext';
 
-const FORMATS_PRICE = 100;
 const FORMATS_COUNT = 10;
+
+function calculatePrice(count: number): number {
+	if (count >= 50) return 3000;
+	if (count >= 20) return 1500;
+	if (count >= 10) return 850;
+	if (count >= 5) return 500;
+	return count * 100;
+}
 
 export const POST: RequestHandler = async ({ request, cookies, url }) => {
 	const context = await getSessionContext(cookies);
@@ -17,7 +24,7 @@ export const POST: RequestHandler = async ({ request, cookies, url }) => {
 
 	const { formatsCount } = await request.json().catch(() => ({}) as { formatsCount?: number });
 	const count = Math.min(Math.max(formatsCount ?? FORMATS_COUNT, 1), 500);
-	const amount = FORMATS_PRICE * count;
+	const amount = calculatePrice(count);
 
 	try {
 		const payment = await createPayment({

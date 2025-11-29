@@ -4,7 +4,7 @@ import type { FormatParams } from '$lib/types/formatting';
 import { formatDocx } from '$lib/server/formatting/docxFormatter';
 import { getPublicFormatHistory, savePublicFormatRecord } from '$lib/db/publicFormatHistory';
 import { getSessionContext } from '$lib/server/sessionContext';
-import { useFormat } from '$lib/db/limits';
+import { useFormat, canFormat } from '$lib/db/limits';
 
 type FormatRequestBody = {
 	file?: string;
@@ -75,10 +75,10 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 	const mergedParams = mergeFormatParams(body.formatParams);
 
 	if (context) {
-		const used = await useFormat(context.user.id, fileName);
-		if (!used) {
+		const can = await canFormat(context.user.id);
+		if (!can.can) {
 			return buildErrorResponse(
-				'Лимит форматирований исчерпан',
+				can.reason || 'Лимит форматирований исчерпан',
 				'LimitExceeded',
 				undefined,
 				context.user.id,
@@ -90,6 +90,16 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 	try {
 		const formattedBuffer = await formatDocx(decodedBuffer, mergedParams);
 		const formattedBase64 = formattedBuffer.toString('base64');
+
+		if (context) {
+			const used = await useFormat(context.user.id, fileName);
+			if (!used) {
+				console.error('Не удалось списать форматирование после успешного форматирования', {
+					userId: context.user.id,
+					fileName
+				});
+			}
+		}
 
 		if (publicUserId) {
 			await savePublicFormatRecord({

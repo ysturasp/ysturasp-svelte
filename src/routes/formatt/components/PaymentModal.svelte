@@ -11,11 +11,23 @@
 	let isProcessing = false;
 
 	let formatsCount = 10;
+
+	function calculatePrice(count: number): number {
+		if (count >= 50) return 3000;
+		if (count >= 20) return 1500;
+		if (count >= 10) return 850;
+		return 500;
+	}
+
+	function getPricePerFormat(count: number): number {
+		return Math.round(calculatePrice(count) / count);
+	}
+
 	const formatOptions = [
-		{ id: 5, label: '5 форматирований · 500 ₽' },
-		{ id: 10, label: '10 форматирований · 1000 ₽' },
-		{ id: 20, label: '20 форматирований · 2000 ₽' },
-		{ id: 50, label: '50 форматирований · 5000 ₽' }
+		{ id: 5, label: `5 форматирований · 500 ₽ (${getPricePerFormat(5)} ₽/шт)` },
+		{ id: 10, label: `10 форматирований · 850 ₽ (${getPricePerFormat(10)} ₽/шт)` },
+		{ id: 20, label: `20 форматирований · 1500 ₽ (${getPricePerFormat(20)} ₽/шт)` },
+		{ id: 50, label: `50 форматирований · 3000 ₽ (${getPricePerFormat(50)} ₽/шт)` }
 	];
 
 	function canClose() {
@@ -90,7 +102,10 @@
 
 		<div class="rounded-lg bg-blue-500/10 p-4">
 			<div class="text-sm text-slate-400">К оплате</div>
-			<div class="text-2xl font-bold text-blue-400">{formatsCount * 100} ₽</div>
+			<div class="text-2xl font-bold text-blue-400">{calculatePrice(formatsCount)} ₽</div>
+			<div class="mt-1 text-xs text-slate-500">
+				{getPricePerFormat(formatsCount)} ₽ за форматирование
+			</div>
 		</div>
 	</div>
 

@@ -21,19 +21,6 @@ export async function checkFormatLimit(): Promise<FormatLimit> {
 	}
 }
 
-export async function useFormatLimit(fileName: string): Promise<boolean> {
-	try {
-		const response = await fetch('/api/format/use', {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ fileName })
-		});
-		return response.ok;
-	} catch (error) {
-		return false;
-	}
-}
-
 export interface FormattedFile {
 	timestamp: string;
 	fileName: string;
@@ -58,14 +45,6 @@ export async function formatDocument(
 
 		if (!fileName) {
 			return { success: false, error: 'Имя файла не указано' };
-		}
-
-		const used = await useFormatLimit(fileName);
-		if (!used) {
-			return {
-				success: false,
-				error: 'Не удалось зарегистрировать использование форматирования'
-			};
 		}
 
 		const response = await fetch(FORMAT_API_URL, {
