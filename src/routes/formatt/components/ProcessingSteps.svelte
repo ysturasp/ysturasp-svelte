@@ -1,94 +1,33 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-	import { tweened } from 'svelte/motion';
-	import { cubicOut } from 'svelte/easing';
-
 	const steps = [
 		{
 			id: 'upload',
 			icon: '📨',
 			title: 'загрузка',
-			subtitle: 'файла',
-			duration: 2000
+			subtitle: 'файла'
 		},
 		{
 			id: 'analyze',
 			icon: '🔍',
 			title: 'анализ',
-			subtitle: 'структуры',
-			duration: 5000
+			subtitle: 'структуры'
 		},
 		{
 			id: 'format',
 			icon: '✨',
 			title: 'формат',
-			subtitle: 'документа',
-			duration: 20000
+			subtitle: 'документа'
 		},
 		{
 			id: 'save',
 			icon: '💾',
 			title: 'сохранение',
-			subtitle: 'документа',
-			duration: 1500
+			subtitle: 'документа'
 		}
 	];
 
 	export let currentStep = '';
-	export let isProcessing = false;
 	export let isComplete = false;
-
-	const progress = tweened(0, {
-		duration: 1000,
-		easing: cubicOut
-	});
-
-	let prevStep = '';
-	let transitionTimer: ReturnType<typeof setTimeout>;
-	let stepStartTime = 0;
-
-	$: if (isProcessing && currentStep !== prevStep) {
-		handleStepChange();
-	} else if (!isProcessing && !isComplete) {
-		resetProgress();
-	}
-
-	function handleStepChange() {
-		if (!currentStep) return;
-
-		const currentStepIndex = steps.findIndex((s) => s.id === currentStep);
-		if (currentStepIndex === -1) return;
-
-		const stepDuration = steps[currentStepIndex].duration;
-
-		progress.set(0, { duration: 0 });
-		stepStartTime = Date.now();
-
-		setTimeout(() => {
-			progress.set(100, {
-				duration: stepDuration - 200,
-				easing: cubicOut
-			});
-		}, 100);
-
-		if (transitionTimer) clearTimeout(transitionTimer);
-
-		transitionTimer = setTimeout(() => {
-			prevStep = currentStep;
-		}, stepDuration);
-	}
-
-	function resetProgress() {
-		progress.set(0);
-		prevStep = '';
-		if (transitionTimer) clearTimeout(transitionTimer);
-	}
-
-	onMount(() => {
-		return () => {
-			if (transitionTimer) clearTimeout(transitionTimer);
-		};
-	});
 </script>
 
 <div class="flex w-full items-center justify-between">
@@ -140,8 +79,8 @@
 
 			{#if isActive && !isComplete}
 				<div
-					class="absolute -bottom-1 left-0 h-0.5 bg-blue-500 transition-all duration-200"
-					style="width: {$progress}%"
+					class="absolute -bottom-1 left-0 h-0.5 animate-pulse bg-blue-500"
+					style="width: 100%"
 				></div>
 			{/if}
 		</div>

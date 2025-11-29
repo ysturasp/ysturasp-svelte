@@ -1,3 +1,4 @@
+- refactor format handling and pricing logic, remove unused API endpoint and update payment modal for dynamic pricing (ysturasp, 2025-11-29) [7 files changed, 45 insertions(+), 55 deletions(-)]
 - update page title and meta description (ysturasp, 2025-11-29) [3 files changed, 5 insertions(+), 3 deletions(-)]
 - refactor docxFormatter to remove paragraph indent setting and optimize paragraph formatting logic (ysturasp, 2025-11-28) [3 files changed, 5 insertions(+), 1 deletion(-)]
 - add FormatParams interface to define formatting options (ysturasp, 2025-11-27) [3 files changed, 24 insertions(+)]
