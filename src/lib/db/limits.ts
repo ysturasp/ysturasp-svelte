@@ -13,6 +13,7 @@ const FREE_FORMATS_LIMIT = 3;
 
 export async function getUserLimits(userId: string): Promise<UserLimits> {
 	const pool = getPool();
+	if (!pool) throw new Error('База данных недоступна');
 	let result = await pool.query('SELECT * FROM user_limits WHERE user_id = $1', [userId]);
 
 	if (result.rows.length === 0) {
@@ -52,6 +53,7 @@ export async function useFormat(
 ): Promise<boolean> {
 	const limits = await getUserLimits(userId);
 	const pool = getPool();
+	if (!pool) throw new Error('База данных недоступна');
 
 	if (limits.free_formats_used < FREE_FORMATS_LIMIT) {
 		await pool.query(
@@ -78,6 +80,7 @@ export async function useFormat(
 
 export async function addPaidFormats(userId: string, count: number): Promise<void> {
 	const pool = getPool();
+	if (!pool) throw new Error('База данных недоступна');
 	await pool.query(
 		'UPDATE user_limits SET paid_formats_purchased = paid_formats_purchased + $1, updated_at = NOW() WHERE user_id = $2',
 		[count, userId]
@@ -90,6 +93,7 @@ export async function removePaidFormats(
 	usedCount: number = 0
 ): Promise<void> {
 	const pool = getPool();
+	if (!pool) throw new Error('База данных недоступна');
 	const limits = await getUserLimits(userId);
 
 	const totalCount = purchasedCount;

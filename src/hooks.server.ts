@@ -204,7 +204,6 @@ const initDbHandle: Handle = async ({ event, resolve }) => {
 		} catch (error) {
 			console.error('[initDbHandle] Ошибка инициализации БД:', error);
 			dbInitPromise = null;
-			throw error;
 		}
 	})();
 

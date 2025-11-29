@@ -31,6 +31,7 @@ export function hashSessionKey(sessionKey: string): string {
 
 export async function createUserSession(params: CreateUserSessionParams): Promise<UserSession> {
 	const pool = getPool();
+	if (!pool) throw new Error('База данных недоступна');
 	const result = await pool.query(
 		`INSERT INTO user_sessions (user_id, token_hash, device_name, ip_address, user_agent, metadata, expires_at)
 		 VALUES ($1, $2, $3, $4, $5, $6, $7)
@@ -51,6 +52,7 @@ export async function createUserSession(params: CreateUserSessionParams): Promis
 
 export async function getSessionById(sessionId: string): Promise<UserSession | null> {
 	const pool = getPool();
+	if (!pool) return null;
 	const result = await pool.query('SELECT * FROM user_sessions WHERE id = $1', [sessionId]);
 	return result.rows[0] || null;
 }
@@ -60,6 +62,7 @@ export async function updateSessionActivity(
 	options: { lastSeen?: Date; expiresAt?: Date; ipAddress?: string | null } = {}
 ): Promise<void> {
 	const pool = getPool();
+	if (!pool) return;
 	const fields: string[] = [];
 	const values: Array<string | Date | null> = [];
 
@@ -93,6 +96,7 @@ export async function updateSessionActivity(
 
 export async function revokeSession(sessionId: string): Promise<void> {
 	const pool = getPool();
+	if (!pool) return;
 	await pool.query('UPDATE user_sessions SET revoked_at = NOW() WHERE id = $1', [sessionId]);
 }
 
@@ -101,6 +105,7 @@ export async function revokeSessionsByUser(
 	options: { excludeSessionId?: string } = {}
 ): Promise<void> {
 	const pool = getPool();
+	if (!pool) return;
 	if (options.excludeSessionId) {
 		await pool.query(
 			'UPDATE user_sessions SET revoked_at = NOW() WHERE user_id = $1 AND id != $2',
@@ -115,6 +120,7 @@ export async function revokeSessionsByUser(
 
 export async function listUserSessions(userId: string): Promise<UserSession[]> {
 	const pool = getPool();
+	if (!pool) return [];
 	const result = await pool.query(
 		'SELECT * FROM user_sessions WHERE user_id = $1 ORDER BY revoked_at IS NULL DESC, last_seen DESC',
 		[userId]

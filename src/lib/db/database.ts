@@ -3,10 +3,10 @@ import { env } from '$env/dynamic/private';
 
 let pool: PoolType | null = null;
 
-export function getPool(): PoolType {
+export function getPool(): PoolType | null {
 	if (!pool) {
 		if (!env.DATABASE_URL) {
-			throw new Error('DATABASE_URL не задан в переменных окружения');
+			return null;
 		}
 		pool = new Pool({
 			connectionString: env.DATABASE_URL,
@@ -18,6 +18,9 @@ export function getPool(): PoolType {
 
 async function waitForDatabase(maxRetries = 10, delayMs = 1000): Promise<void> {
 	const pool = getPool();
+	if (!pool) {
+		throw new Error('DATABASE_URL не задан в переменных окружения');
+	}
 
 	for (let i = 0; i < maxRetries; i++) {
 		try {
@@ -38,6 +41,12 @@ async function waitForDatabase(maxRetries = 10, delayMs = 1000): Promise<void> {
 }
 
 export async function initDatabase() {
+	const pool = getPool();
+	if (!pool) {
+		console.log('[initDatabase] DATABASE_URL не задан, инициализация БД пропущена');
+		return;
+	}
+
 	try {
 		await waitForDatabase();
 		console.log('Подключение к БД установлено');
@@ -45,8 +54,6 @@ export async function initDatabase() {
 		console.error('Ошибка подключения к БД:', error);
 		throw error;
 	}
-
-	const pool = getPool();
 
 	try {
 		await pool.query(`

@@ -10,6 +10,10 @@ export const GET: RequestHandler = async ({ cookies }) => {
 	}
 
 	const pool = getPool();
+	if (!pool) {
+		return json({ error: 'База данных недоступна' }, { status: 503 });
+	}
+
 	const result = await pool.query(
 		`SELECT 
 			id,

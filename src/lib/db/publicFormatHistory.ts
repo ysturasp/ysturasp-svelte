@@ -16,6 +16,7 @@ export async function savePublicFormatRecord(params: {
 	formattedBase64: string;
 }): Promise<void> {
 	const pool = getPool();
+	if (!pool) return;
 	await pool.query(
 		`INSERT INTO public_format_history (user_key, file_name, original_size, formatted_size, formatted_base64)
 		 VALUES ($1, $2, $3, $4, $5)`,
@@ -31,6 +32,7 @@ export async function savePublicFormatRecord(params: {
 
 export async function getPublicFormatHistory(userKey: string): Promise<PublicFormatRecord[]> {
 	const pool = getPool();
+	if (!pool) return [];
 	const result = await pool.query(
 		`SELECT file_name, original_size, formatted_size, formatted_base64, created_at
 		 FROM public_format_history

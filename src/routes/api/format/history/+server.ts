@@ -10,6 +10,10 @@ export const GET: RequestHandler = async ({ cookies }) => {
 	}
 
 	const pool = getPool();
+	if (!pool) {
+		return json({ error: 'База данных недоступна' }, { status: 503 });
+	}
+
 	const result = await pool.query(
 		'SELECT file_name, is_paid, created_at FROM format_history WHERE user_id = $1 ORDER BY created_at DESC LIMIT 50',
 		[context.user.id]

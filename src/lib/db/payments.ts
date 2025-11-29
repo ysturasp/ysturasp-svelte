@@ -21,6 +21,7 @@ export async function createPayment(
 	status: string = 'pending'
 ): Promise<Payment> {
 	const pool = getPool();
+	if (!pool) throw new Error('База данных недоступна');
 	const result = await pool.query(
 		`INSERT INTO payments (user_id, yookassa_payment_id, amount, formats_count, status) 
 		 VALUES ($1, $2, $3, $4, $5) RETURNING *`,
@@ -34,6 +35,7 @@ export async function updatePaymentStatus(
 	status: string
 ): Promise<Payment | null> {
 	const pool = getPool();
+	if (!pool) return null;
 	const result = await pool.query(
 		'UPDATE payments SET status = $1, updated_at = NOW() WHERE yookassa_payment_id = $2 RETURNING *',
 		[status, yookassaPaymentId]
@@ -43,6 +45,7 @@ export async function updatePaymentStatus(
 
 export async function getPaymentByYookassaId(yookassaPaymentId: string): Promise<Payment | null> {
 	const pool = getPool();
+	if (!pool) return null;
 	const result = await pool.query('SELECT * FROM payments WHERE yookassa_payment_id = $1', [
 		yookassaPaymentId
 	]);
@@ -51,12 +54,14 @@ export async function getPaymentByYookassaId(yookassaPaymentId: string): Promise
 
 export async function getPaymentById(paymentId: string): Promise<Payment | null> {
 	const pool = getPool();
+	if (!pool) return null;
 	const result = await pool.query('SELECT * FROM payments WHERE id = $1', [paymentId]);
 	return result.rows[0] || null;
 }
 
 export async function getUserPayments(userId: string): Promise<Payment[]> {
 	const pool = getPool();
+	if (!pool) return [];
 	const result = await pool.query(
 		'SELECT * FROM payments WHERE user_id = $1 ORDER BY created_at DESC',
 		[userId]
@@ -69,6 +74,7 @@ export async function getUsedFormatsCountForPayment(
 	paymentId: string
 ): Promise<number> {
 	const pool = getPool();
+	if (!pool) return 0;
 
 	const payment = await getPaymentById(paymentId);
 	if (!payment) {
@@ -190,6 +196,7 @@ export async function markPaymentAsRefunded(
 	refundedAmount: number
 ): Promise<Payment | null> {
 	const pool = getPool();
+	if (!pool) return null;
 	const result = await pool.query(
 		`UPDATE payments 
 		 SET status = 'refunded', updated_at = NOW() 
