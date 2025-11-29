@@ -1,3 +1,4 @@
+- refactor docxFormatter to remove paragraph indent setting and optimize paragraph formatting logic (ysturasp, 2025-11-28) [3 files changed, 5 insertions(+), 1 deletion(-)]
 - add FormatParams interface to define formatting options (ysturasp, 2025-11-27) [3 files changed, 24 insertions(+)]
 - add format endpoint instead of google app script and other improves (ysturasp, 2025-11-27) [14 files changed, 967 insertions(+), 107 deletions(-)]
 - fix style payment button on format page (ysturasp, 2025-11-26) [3 files changed, 3 insertions(+), 1 deletion(-)]
