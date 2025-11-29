@@ -38,6 +38,18 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 			return json({ error: 'Платеж не найден' }, { status: 404 });
 		}
 
+		if (payment.user_id !== user.id) {
+			return json({ error: 'Платеж не принадлежит вам' }, { status: 403 });
+		}
+
+		if (payment.status === 'refunded') {
+			return json({ error: 'Платеж уже был возвращен' }, { status: 400 });
+		}
+
+		if (payment.status !== 'succeeded') {
+			return json({ error: 'Можно вернуть только успешные платежи' }, { status: 400 });
+		}
+
 		const purchasedCount = Number(payment.formats_count);
 		const refundedCount = purchasedCount;
 		const usedCountForThisPayment = 0;

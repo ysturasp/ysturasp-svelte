@@ -66,10 +66,12 @@ export const POST: RequestHandler = async ({ request }) => {
 		const status = event.object?.status;
 
 		if (status) {
-			await updatePaymentStatus(paymentId, status);
+			const updatedPayment = await updatePaymentStatus(paymentId, status);
 
 			if (status === 'succeeded' && payment.status !== 'succeeded') {
-				await addPaidFormats(payment.user_id, payment.formats_count);
+				if (updatedPayment && updatedPayment.status === 'succeeded') {
+					await addPaidFormats(payment.user_id, payment.formats_count);
+				}
 			}
 		}
 

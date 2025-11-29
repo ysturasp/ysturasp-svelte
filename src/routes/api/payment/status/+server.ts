@@ -38,10 +38,11 @@ export const GET: RequestHandler = async ({ url, cookies }) => {
 
 	const previousStatus = payment.status;
 	let currentStatus = payment.status;
+	let updatedPayment: typeof payment | null = null;
 
 	if (remoteStatus && remoteStatus !== payment.status) {
-		const updated = await updatePaymentStatus(paymentId, remoteStatus);
-		currentStatus = updated?.status ?? remoteStatus;
+		updatedPayment = await updatePaymentStatus(paymentId, remoteStatus);
+		currentStatus = updatedPayment?.status ?? remoteStatus;
 	} else {
 		currentStatus = payment.status;
 	}
@@ -49,8 +50,11 @@ export const GET: RequestHandler = async ({ url, cookies }) => {
 	let formatsAdded = 0;
 
 	if (previousStatus !== 'succeeded' && currentStatus === 'succeeded') {
-		await addPaidFormats(user.id, payment.formats_count);
-		formatsAdded = payment.formats_count;
+		const paymentToCheck = updatedPayment || payment;
+		if (paymentToCheck.status === 'succeeded') {
+			await addPaidFormats(user.id, payment.formats_count);
+			formatsAdded = payment.formats_count;
+		}
 	}
 
 	return json({

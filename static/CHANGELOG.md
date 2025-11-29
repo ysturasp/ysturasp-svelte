@@ -1,3 +1,4 @@
+- implement refund functionality for payments, including checks for eligibility and user notifications (ysturasp, 2025-11-29) [9 files changed, 489 insertions(+), 3 deletions(-)]
 - update legal documents to include payment service details, pricing, and contact info (ysturasp, 2025-11-29) [5 files changed, 183 insertions(+), 6 deletions(-)]
 - refactor DocumentUploader and ProcessingSteps components to streamline file processing steps (ysturasp, 2025-11-29) [4 files changed, 22 insertions(+), 117 deletions(-)]
 - refactor format handling and pricing logic, remove unused API endpoint and update payment modal for dynamic pricing (ysturasp, 2025-11-29) [7 files changed, 45 insertions(+), 55 deletions(-)]

@@ -138,6 +138,10 @@ export async function canRefundPayment(
 		return { can: false, reason: 'Платеж не принадлежит вам' };
 	}
 
+	if (payment.status === 'refunded') {
+		return { can: false, reason: 'Платеж уже был возвращен' };
+	}
+
 	if (payment.status !== 'succeeded') {
 		return { can: false, reason: 'Можно вернуть только успешные платежи' };
 	}
