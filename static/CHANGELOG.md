@@ -1,3 +1,4 @@
+- update IP address tracking to session management and session activity logic (ysturasp, 2025-11-29) [8 files changed, 31 insertions(+), 17 deletions(-)]
 - enhance payment refund process with additional checks for payment status and user ownership (ysturasp, 2025-11-29) [6 files changed, 30 insertions(+), 6 deletions(-)]
 - implement refund functionality for payments, including checks for eligibility and user notifications (ysturasp, 2025-11-29) [9 files changed, 489 insertions(+), 3 deletions(-)]
 - update legal documents to include payment service details, pricing, and contact info (ysturasp, 2025-11-29) [5 files changed, 183 insertions(+), 6 deletions(-)]
