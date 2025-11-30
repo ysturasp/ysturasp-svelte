@@ -49,6 +49,12 @@
 					notifications.add(result.error, 'warning');
 				}
 			}
+
+			urlParams.delete('ref');
+			const newUrl = urlParams.toString()
+				? `${window.location.pathname}?${urlParams.toString()}`
+				: window.location.pathname;
+			window.history.replaceState({}, '', newUrl);
 		}
 
 		if (subject && statisticsComponent) {

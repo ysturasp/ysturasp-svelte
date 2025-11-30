@@ -7,6 +7,7 @@ import { createUserSession, hashSessionKey } from '$lib/db/userSessions';
 import { randomBytes } from 'crypto';
 
 const STATE_COOKIE_NAME = 'oauth_state';
+const RETURN_URL_COOKIE_NAME = 'oauth_return_url';
 const STATE_TTL_SECONDS = 60 * 5;
 
 function detectDevice(userAgent: string | null): string {
@@ -22,6 +23,7 @@ export const GET: RequestHandler = async (event) => {
 	const { url, cookies, request, getClientAddress } = event;
 	const code = url.searchParams.get('code');
 	const stateParam = url.searchParams.get('state');
+	const returnUrl = url.searchParams.get('returnUrl');
 
 	const baseUrl = 'https://ahah.ysturasp.ru';
 	const redirectUri = `${baseUrl}/api/auth/google`;
@@ -35,6 +37,38 @@ export const GET: RequestHandler = async (event) => {
 			sameSite: 'lax',
 			maxAge: STATE_TTL_SECONDS
 		});
+
+		if (returnUrl) {
+			cookies.set(RETURN_URL_COOKIE_NAME, returnUrl, {
+				path: '/',
+				httpOnly: true,
+				secure: process.env.NODE_ENV === 'production',
+				sameSite: 'lax',
+				maxAge: STATE_TTL_SECONDS
+			});
+		} else {
+			const referer = request.headers.get('referer');
+			if (referer) {
+				try {
+					const refererUrl = new URL(referer);
+					if (
+						refererUrl.pathname === '/stat' ||
+						refererUrl.pathname.startsWith('/stat')
+					) {
+						cookies.set(RETURN_URL_COOKIE_NAME, '/stat', {
+							path: '/',
+							httpOnly: true,
+							secure: process.env.NODE_ENV === 'production',
+							sameSite: 'lax',
+							maxAge: STATE_TTL_SECONDS
+						});
+					}
+				} catch (e) {
+					console.error('Error parsing referer:', e);
+				}
+			}
+		}
+
 		const authUrl = getGoogleOAuthUrl(redirectUri, stateValue);
 		console.log('Redirect URI:', redirectUri);
 		throw redirect(302, authUrl);
@@ -99,5 +133,10 @@ export const GET: RequestHandler = async (event) => {
 		maxAge: DEFAULT_SESSION_TTL
 	});
 
-	throw redirect(302, '/formatt');
+	const savedReturnUrl = cookies.get(RETURN_URL_COOKIE_NAME);
+	cookies.delete(RETURN_URL_COOKIE_NAME, { path: '/' });
+
+	const redirectTo =
+		savedReturnUrl && savedReturnUrl.startsWith('/') ? savedReturnUrl : '/formatt';
+	throw redirect(302, redirectTo);
 };

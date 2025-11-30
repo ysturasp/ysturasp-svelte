@@ -89,10 +89,7 @@
 	onMount(async () => {
 		await auth.checkAuth();
 		if (!$auth.user?.id) {
-			notifications.add(
-				'Необходима авторизация для использования реферальной системы',
-				'warning'
-			);
+			notifications.add('Необходима авторизация для просмотра статистики оценок', 'warning');
 		}
 	});
 </script>
