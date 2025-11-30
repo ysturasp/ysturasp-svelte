@@ -1,8 +1,10 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onMount, createEventDispatcher } from 'svelte';
 	import { auth } from '$lib/stores/auth';
 	import BottomModal from '$lib/components/ui/BottomModal.svelte';
 	import { notifications } from '$lib/stores/notifications';
+
+	const dispatch = createEventDispatcher();
 
 	interface Payment {
 		id: string;
@@ -123,6 +125,7 @@
 			refundCheck = null;
 			isLoaded = false;
 			await loadPayments();
+			dispatch('refund-success');
 		} catch (err) {
 			notifications.add(
 				err instanceof Error ? err.message : 'Ошибка при выполнении возврата',

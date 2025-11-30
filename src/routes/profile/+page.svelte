@@ -287,7 +287,7 @@
 
 						<div class="border-t border-slate-700 pt-6">
 							<h2 class="mb-4 text-lg font-semibold text-white">История оплат</h2>
-							<PaymentHistory />
+							<PaymentHistory on:refund-success={checkLimit} />
 						</div>
 					</div>
 				{/if}
