@@ -1,3 +1,4 @@
+- add check limit after format document (ysturasp, 2025-11-30) [3 files changed, 4 insertions(+), 1 deletion(-)]
 - add new page for search nearest toilets (ysturasp, 2025-11-30) [8 files changed, 520 insertions(+)]
 - hot fix for work netlify version without DATABASE_URL (ysturasp, 2025-11-30) [11 files changed, 44 insertions(+), 5 deletions(-)]
 - refactor database initialization logic in hooks.server.ts to improve handling of initialization state and error management (ysturasp, 2025-11-30) [3 files changed, 21 insertions(+), 16 deletions(-)]

@@ -1,6 +1,37 @@
 import type { Toilet, ToiletSearchResult, Section, Gender } from './types';
 import { getAllToilets, getToiletsByFloorAndSection } from './data/toilets';
 
+function getSectionByAudienceNumber(audienceNumber: number, floor: number): Section | null {
+	const maxAudienceNumber = getMaxAudienceNumberForFloor(floor);
+	if (maxAudienceNumber === null) {
+		return null;
+	}
+
+	const third = Math.ceil(maxAudienceNumber / 3);
+
+	if (audienceNumber <= third) {
+		return 1;
+	} else if (audienceNumber <= third * 2) {
+		return 2;
+	} else {
+		return 3;
+	}
+}
+
+function getMaxAudienceNumberForFloor(floor: number): number | null {
+	const maxNumbers: Record<number, number> = {
+		1: 22,
+		2: 28,
+		3: 37,
+		5: 19,
+		6: 33,
+		7: 35,
+		8: 26,
+		9: 25
+	};
+	return maxNumbers[floor] ?? null;
+}
+
 export function parseAudience(audience: string): {
 	floor: number | null;
 	section: Section | null;
@@ -26,24 +57,16 @@ export function parseAudience(audience: string): {
 		const audienceNum = parseInt(parts[0], 10);
 		if (!isNaN(audienceNum)) {
 			const floor = Math.floor(audienceNum / 100);
-			const lastTwoDigits = audienceNum % 100;
-			let section: Section | null = null;
+			const audienceNumberOnFloor = audienceNum % 100;
 
-			if (lastTwoDigits >= 1 && lastTwoDigits <= 19) {
-				section = 1;
-			} else if (lastTwoDigits >= 20 && lastTwoDigits <= 39) {
-				section = 2;
-			} else if (lastTwoDigits >= 40 && lastTwoDigits <= 59) {
-				section = 3;
-			} else if (lastTwoDigits >= 60 && lastTwoDigits <= 99) {
-				section = 3;
+			if (floor >= 1 && floor <= 9) {
+				const section = getSectionByAudienceNumber(audienceNumberOnFloor, floor);
+				return {
+					floor,
+					section,
+					audienceNumber: audienceNum
+				};
 			}
-
-			return {
-				floor: floor >= 1 && floor <= 9 ? floor : null,
-				section,
-				audienceNumber: audienceNum
-			};
 		}
 	}
 
