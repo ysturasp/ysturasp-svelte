@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { createEventDispatcher, onMount } from 'svelte';
 	import type { NotificationOptions } from '../types';
-	import { getUserId, getReferralStats, updateReferralStats } from '../utils/api';
+	import { getReferralStats } from '../utils/api';
+	import { auth } from '$lib/stores/auth';
 	import NotificationsContainer from '$lib/components/notifications/NotificationsContainer.svelte';
 	import { notifications } from '$lib/stores/notifications';
 	import TgsSticker from '$lib/components/common/TgsSticker.svelte';
@@ -15,7 +16,30 @@
 	let statsLimit = 10;
 	let referralLink = '';
 
+	async function updateReferralLink() {
+		if ($auth?.user?.id) {
+			try {
+				const response = await fetch('/api/stat/referral-code');
+				if (response.ok) {
+					const data = await response.json();
+					referralLink = `${window.location.origin}${window.location.pathname}?ref=${data.referralCode}`;
+				} else {
+					referralLink = `${window.location.origin}${window.location.pathname}`;
+				}
+			} catch (error) {
+				referralLink = `${window.location.origin}${window.location.pathname}`;
+			}
+		} else {
+			referralLink = `${window.location.origin}${window.location.pathname}`;
+		}
+	}
+
 	async function updateStats() {
+		if (!$auth?.user?.id) {
+			notifications.add('Необходима авторизация', 'error');
+			return;
+		}
+
 		const stats = await getReferralStats();
 		referralCount = stats.referralCount;
 		statsLimit = stats.statsLimit;
@@ -47,10 +71,23 @@
 		}
 	}
 
-	onMount(() => {
-		const userId = getUserId();
-		referralLink = `${window.location.origin}${window.location.pathname}?ref=${userId}`;
-		updateStats();
+	$: {
+		if ($auth) {
+			if ($auth.user?.id && !$auth.loading) {
+				updateReferralLink();
+				updateStats();
+			}
+		}
+	}
+
+	onMount(async () => {
+		await auth.checkAuth();
+		if (!$auth.user?.id) {
+			notifications.add(
+				'Необходима авторизация для использования реферальной системы',
+				'warning'
+			);
+		}
 	});
 </script>
 
@@ -157,7 +194,7 @@
 								получите бонусы
 							</li>
 							<li>
-								За каждого приглашенного студента +10 просмотров статистики в день
+								За каждого приглашенного студента +10 просмотров статистики в месяц
 							</li>
 						</ol>
 					</div>
@@ -171,7 +208,7 @@
 							</div>
 							<div class="text-center">
 								<div class="text-2xl font-bold">{statsLimit}</div>
-								<div class="text-sm">Лимит просмотров/день</div>
+								<div class="text-sm">Лимит просмотров/месяц</div>
 							</div>
 						</div>
 					</div>

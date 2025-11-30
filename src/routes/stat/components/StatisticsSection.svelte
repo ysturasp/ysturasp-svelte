@@ -9,7 +9,7 @@
 		disciplinesEngineeringMachinery
 	} from '../data/disciplines';
 	import type { Stats, Instructors, InstituteId, NotificationOptions } from '../types';
-	import { getSubjectStats, getInstructors, checkViewLimit } from '../utils/api';
+	import { getSubjectStats, getInstructors, checkViewLimit, registerView } from '../utils/api';
 	import StatisticsChart from './StatisticsChart.svelte';
 	import { recentlyViewedStore } from '../stores/recentlyViewedStore';
 	import ScheduleCombobox from '$lib/components/schedule/ScheduleCombobox.svelte';
@@ -161,17 +161,6 @@
 				}
 			}
 
-			const limitCheck = await checkViewLimit(false);
-			if (!limitCheck.success) {
-				dispatch('showNotification', {
-					message:
-						'Достигнут дневной лимит просмотров. Пригласите друзей, чтобы увеличить лимит!',
-					type: 'warning'
-				});
-				dispatch('showReferral');
-				return;
-			}
-
 			const statsPromise = getSubjectStats(selectedInstitute, selectedDiscipline);
 			const instructorsPromise = getInstructors(selectedInstitute, selectedDiscipline);
 
@@ -190,6 +179,18 @@
 				throw new Error('Failed to fetch data');
 			}
 
+			const viewResult = await registerView(selectedDiscipline, selectedInstitute);
+			if (!viewResult.success) {
+				dispatch('showNotification', {
+					message:
+						'Достигнут месячный лимит просмотров. Пригласите друзей, чтобы увеличить лимит!',
+					type: 'warning'
+				});
+				dispatch('showReferral');
+				dispatch('loading', { value: false });
+				return;
+			}
+
 			localStorage.setItem(
 				cacheKey,
 				JSON.stringify({
@@ -202,6 +203,7 @@
 			statistics = statsData;
 			instructors = instructorsData;
 			displayedDiscipline = selectedDiscipline;
+			remainingViews = viewResult.remaining.toString();
 
 			const newItem = {
 				discipline: selectedDiscipline,
@@ -210,11 +212,6 @@
 			};
 
 			recentlyViewedStore.addItem(newItem);
-
-			const viewsCheck = await checkViewLimit(true);
-			if (viewsCheck.success) {
-				remainingViews = viewsCheck.remaining.toString();
-			}
 		} catch (error) {
 			console.error('Error in getStatistics:', error);
 			dispatch('showNotification', {

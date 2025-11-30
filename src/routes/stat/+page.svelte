@@ -11,6 +11,9 @@
 	import type { InstituteId } from './types';
 	import NotificationsContainer from '$lib/components/notifications/NotificationsContainer.svelte';
 	import { notifications } from '$lib/stores/notifications';
+	import { registerReferral } from './utils/api';
+	import { get } from 'svelte/store';
+	import { auth } from '$lib/stores/auth';
 
 	let showReferralModal = false;
 	let isLoading = false;
@@ -31,9 +34,23 @@
 		}
 	}
 
-	onMount(() => {
+	onMount(async () => {
 		const urlParams = new URLSearchParams(window.location.search);
 		const subject = urlParams.get('subject');
+		const ref = urlParams.get('ref');
+
+		if (ref) {
+			const authState = get(auth);
+			if (authState?.user?.id) {
+				const result = await registerReferral(ref);
+				if (result.success) {
+					notifications.add('Реферальная ссылка активирована!', 'success');
+				} else if (result.error) {
+					notifications.add(result.error, 'warning');
+				}
+			}
+		}
+
 		if (subject && statisticsComponent) {
 			statisticsComponent.viewSubject(subject);
 		}

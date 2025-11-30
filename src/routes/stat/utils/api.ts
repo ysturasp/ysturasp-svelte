@@ -45,9 +45,6 @@ const TOP_ANTITOP_URLS: Record<InstituteId, string> = {
 		'https://script.google.com/macros/s/AKfycbxl1Mu8QEvzqEtjy21nMOKH9LsrsdyrkotYmney8b37gylEyxTQUOP2Sx4Qi9GXQlYN/exec'
 };
 
-const REFERRAL_API_URL =
-	'https://script.google.com/macros/s/AKfycbxbAl--AM5WqHdw49XNpGSNSxL4jHDEHhLD6YAgwgZQAnB4-Id0fKfyxQ--85Mljco1/exec';
-
 export async function getSubjectStats(institute: InstituteId, discipline: string): Promise<Stats> {
 	const url = `${STATS_URLS[institute]}?discipline=${encodeURIComponent(discipline)}`;
 	const response = await fetch(url);
@@ -86,65 +83,72 @@ export async function getTopAntiTop(institute: InstituteId) {
 	return data;
 }
 
-export async function getIP() {
-	try {
-		const response = await fetch('https://api.ipify.org?format=json');
-		const data = await response.json();
-		return data.ip;
-	} catch (error) {
-		console.error('Error getting IP:', error);
-		return 'unknown';
-	}
-}
-
-export async function makeReferralRequest(action: string, params: any) {
-	const queryParams = new URLSearchParams({
-		action,
-		...params
-	});
-
-	try {
-		const response = await fetch(`${REFERRAL_API_URL}?${queryParams}`);
-		return await response.json();
-	} catch (error) {
-		console.error('API request failed:', error);
-		throw error;
-	}
-}
-
-export function getUserId() {
-	let userId = localStorage.getItem('userId');
-	if (!userId) {
-		userId =
-			Math.random().toString(36).substring(2, 15) +
-			Math.random().toString(36).substring(2, 15);
-		localStorage.setItem('userId', userId);
-	}
-	return userId;
-}
-
 export async function checkViewLimit(isCheckOnly = true) {
 	try {
-		const response = await makeReferralRequest('checkLimit', {
-			userId: getUserId(),
-			ip: await getIP(),
-			isCheckOnly: isCheckOnly.toString()
-		});
-		return response;
+		if (isCheckOnly) {
+			const response = await fetch('/api/stat/views');
+			if (!response.ok) {
+				return { success: false, remaining: 0 };
+			}
+			const data = await response.json();
+			return {
+				success: data.remaining > 0,
+				remaining: data.remaining,
+				monthlyLimit: data.monthlyLimit
+			};
+		} else {
+			return { success: false, remaining: 0 };
+		}
 	} catch (error) {
 		console.error('Error checking view limit:', error);
 		return { success: false, remaining: 0 };
 	}
 }
 
+export async function registerView(discipline: string, institute: string) {
+	try {
+		const response = await fetch('/api/stat/views', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({ discipline, institute })
+		});
+
+		if (!response.ok) {
+			const data = await response.json();
+			return {
+				success: false,
+				error: data.error || 'Ошибка при регистрации просмотра',
+				remaining: 0
+			};
+		}
+
+		const data = await response.json();
+		return {
+			success: data.success,
+			remaining: data.remaining,
+			monthlyLimit: data.monthlyLimit
+		};
+	} catch (error) {
+		console.error('Error registering view:', error);
+		return { success: false, remaining: 0 };
+	}
+}
+
 export async function getReferralStats() {
 	try {
-		const response = await makeReferralRequest('getReferrals', {
-			userId: getUserId()
-		});
+		const response = await fetch('/api/stat/referrals');
+		if (!response.ok) {
+			return {
+				referralCount: 0,
+				statsLimit: 10
+			};
+		}
+		const data = await response.json();
 		return {
-			referralCount: response.count,
-			statsLimit: response.dailyLimit
+			referralCount: data.referralCount || 0,
+			statsLimit: data.monthlyLimit || 10
 		};
 	} catch (error) {
 		console.error('Error getting referral stats:', error);
@@ -156,6 +160,21 @@ export async function getReferralStats() {
 }
 
 export async function updateReferralStats() {
-	const stats = await getReferralStats();
-	return stats;
+	return await getReferralStats();
+}
+
+export function getUserId() {
+	return null;
+}
+
+export async function registerReferral(referralCode: string) {
+	try {
+		const response = await fetch(`/api/stat/register-referral?ref=${referralCode}`, {
+			method: 'POST'
+		});
+		return await response.json();
+	} catch (error) {
+		console.error('Error registering referral:', error);
+		return { success: false };
+	}
 }
