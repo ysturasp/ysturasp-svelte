@@ -1,3 +1,4 @@
+- improve referral system with full server and unique referral codes for users, including database migrations (ysturasp, 2025-11-30) [15 files changed, 664 insertions(+), 75 deletions(-)]
 - refactor audience parsing logic in utils.ts to improve section determination based on audience number (ysturasp, 2025-11-30) [3 files changed, 42 insertions(+), 17 deletions(-)]
 - add check limit after format document (ysturasp, 2025-11-30) [3 files changed, 4 insertions(+), 1 deletion(-)]
 - add new page for search nearest toilets (ysturasp, 2025-11-30) [8 files changed, 520 insertions(+)]

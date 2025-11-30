@@ -96,12 +96,11 @@
 
 	<Footer />
 
-	{#if showReferralModal}
-		<ReferralModal
-			on:close={() => (showReferralModal = false)}
-			on:showNotification={({ detail }) => notifications.add(detail.message, detail.type)}
-		/>
-	{/if}
+	<ReferralModal
+		isOpen={showReferralModal}
+		on:close={() => (showReferralModal = false)}
+		on:showNotification={({ detail }) => notifications.add(detail.message, detail.type)}
+	/>
 
 	{#if isLoading}
 		<LoadingOverlay />
