@@ -80,8 +80,9 @@
 		downloadData = base64 && fileName ? { base64, fileName } : null;
 	}
 
-	function handleComplete() {
+	async function handleComplete() {
 		isComplete = true;
+		await checkLimit();
 	}
 
 	function handleFormatParamsChange(event: CustomEvent<FormatParams>) {

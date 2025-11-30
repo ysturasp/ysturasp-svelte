@@ -1,3 +1,4 @@
+- add new page for search nearest toilets (ysturasp, 2025-11-30) [8 files changed, 520 insertions(+)]
 - hot fix for work netlify version without DATABASE_URL (ysturasp, 2025-11-30) [11 files changed, 44 insertions(+), 5 deletions(-)]
 - refactor database initialization logic in hooks.server.ts to improve handling of initialization state and error management (ysturasp, 2025-11-30) [3 files changed, 21 insertions(+), 16 deletions(-)]
 - improve bot request handling in hooks.server.ts, add isbot dependency (ysturasp, 2025-11-30) [5 files changed, 312 insertions(+), 2 deletions(-)]
