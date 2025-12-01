@@ -53,7 +53,7 @@ WORKDIR /app
 
 ENV NODE_ENV=production \
     HOST=0.0.0.0 \
-    PORT=5173 \
+    PORT=80 \
     DATABASE_URL=${DATABASE_URL:-} \
     GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID:-} \
     GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET:-} \
@@ -65,7 +65,7 @@ ENV NODE_ENV=production \
 COPY --chown=nonroot:nonroot --from=prod-deps /app/node_modules ./node_modules
 COPY --chown=nonroot:nonroot --from=build /app/build ./build
 
-EXPOSE 5173
+EXPOSE 80
 
 USER nonroot
 

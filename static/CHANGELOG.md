@@ -1,3 +1,4 @@
+- add limits fetching in PaymentHistory component after refund success event (ysturasp, 2025-11-30) [4 files changed, 7 insertions(+), 2 deletions(-)]
 - enhance statistics section with privacy settings and user authentication features (ysturasp, 2025-11-30) [7 files changed, 233 insertions(+), 43 deletions(-)]
 - refactor ReferralModal component to use BottomModal for improved UI and functionality (ysturasp, 2025-11-30) [4 files changed, 83 insertions(+), 128 deletions(-)]
 - improve referral system with full server and unique referral codes for users, including database migrations (ysturasp, 2025-11-30) [15 files changed, 664 insertions(+), 75 deletions(-)]
