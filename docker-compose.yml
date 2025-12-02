@@ -12,7 +12,7 @@ services:
                 - VITE_FIREBASE_APP_ID=${VITE_FIREBASE_APP_ID}
                 - VITE_FIREBASE_MEASUREMENT_ID=${VITE_FIREBASE_MEASUREMENT_ID}
         ports:
-            - '80:80'
+            - '5173:5173'
         environment:
             - PRIVATE_KEY=${PRIVATE_KEY}
             - GROQ_API_KEY=${GROQ_API_KEY}
