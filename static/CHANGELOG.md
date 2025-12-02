@@ -1,3 +1,4 @@
+- update application default port to 80 in Docker configuration (ysturasp, 2025-12-01) [4 files changed, 5 insertions(+), 3 deletions(-)]
 - add limits fetching in PaymentHistory component after refund success event (ysturasp, 2025-11-30) [4 files changed, 7 insertions(+), 2 deletions(-)]
 - enhance statistics section with privacy settings and user authentication features (ysturasp, 2025-11-30) [7 files changed, 233 insertions(+), 43 deletions(-)]
 - refactor ReferralModal component to use BottomModal for improved UI and functionality (ysturasp, 2025-11-30) [4 files changed, 83 insertions(+), 128 deletions(-)]
