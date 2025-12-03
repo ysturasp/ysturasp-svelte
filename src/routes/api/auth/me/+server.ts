@@ -3,9 +3,10 @@ import type { RequestHandler } from './$types';
 import { createSessionToken, shouldRefreshSession, DEFAULT_SESSION_TTL } from '$lib/auth/session';
 import { getSessionContext } from '$lib/server/sessionContext';
 import { updateSessionActivity } from '$lib/db/userSessions';
+import { getRealIp } from '$lib/server/ip';
 
-export const GET: RequestHandler = async ({ cookies, getClientAddress }) => {
-	const ipAddress = getClientAddress();
+export const GET: RequestHandler = async ({ cookies, getClientAddress, request }) => {
+	const ipAddress = getRealIp(request, getClientAddress);
 	const context = await getSessionContext(cookies, { touch: false, ipAddress });
 	if (!context) {
 		return json({ authenticated: false }, { status: 401 });

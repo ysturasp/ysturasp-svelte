@@ -3,6 +3,7 @@ import type { RequestHandler } from './$types';
 import { createPayment } from '$lib/payment/yookassa';
 import { createPayment as createPaymentRecord } from '$lib/db/payments';
 import { getSessionContext } from '$lib/server/sessionContext';
+import { getRealIp } from '$lib/server/ip';
 
 const FORMATS_COUNT = 10;
 
@@ -15,7 +16,7 @@ function calculatePrice(count: number): number {
 }
 
 export const POST: RequestHandler = async ({ request, cookies, url, getClientAddress }) => {
-	const ipAddress = getClientAddress();
+	const ipAddress = getRealIp(request, getClientAddress);
 	const context = await getSessionContext(cookies, { ipAddress });
 	if (!context) {
 		return json({ error: 'Не авторизован' }, { status: 401 });

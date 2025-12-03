@@ -5,6 +5,7 @@ import { formatDocx } from '$lib/server/formatting/docxFormatter';
 import { getPublicFormatHistory, savePublicFormatRecord } from '$lib/db/publicFormatHistory';
 import { getSessionContext } from '$lib/server/sessionContext';
 import { useFormat, canFormat } from '$lib/db/limits';
+import { getRealIp } from '$lib/server/ip';
 
 type FormatRequestBody = {
 	file?: string;
@@ -38,7 +39,7 @@ export const GET: RequestHandler = async ({ url }) => {
 };
 
 export const POST: RequestHandler = async ({ request, cookies, getClientAddress }) => {
-	const ipAddress = getClientAddress();
+	const ipAddress = getRealIp(request, getClientAddress);
 	const context = await getSessionContext(cookies, { ipAddress });
 	let body: FormatRequestBody;
 

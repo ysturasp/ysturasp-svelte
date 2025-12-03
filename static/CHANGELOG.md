@@ -1,3 +1,4 @@
+- update application port from 80 to 5173 in Docker config (ysturasp, 2025-12-02) [4 files changed, 5 insertions(+), 3 deletions(-)]
 - implement manual login functionality with a dedicated API endpoint for check yomoney (ysturasp, 2025-12-02) [5 files changed, 243 insertions(+), 55 deletions(-)]
 - update application default port to 80 in Docker configuration (ysturasp, 2025-12-01) [4 files changed, 5 insertions(+), 3 deletions(-)]
 - add limits fetching in PaymentHistory component after refund success event (ysturasp, 2025-11-30) [4 files changed, 7 insertions(+), 2 deletions(-)]

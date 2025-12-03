@@ -7,9 +7,10 @@ import {
 	revokeSession,
 	revokeSessionsByUser
 } from '$lib/db/userSessions';
+import { getRealIp } from '$lib/server/ip';
 
-export const GET: RequestHandler = async ({ cookies, getClientAddress }) => {
-	const ipAddress = getClientAddress();
+export const GET: RequestHandler = async ({ cookies, getClientAddress, request }) => {
+	const ipAddress = getRealIp(request, getClientAddress);
 	const context = await getSessionContext(cookies, { ipAddress });
 	if (!context) {
 		return json({ error: 'Не авторизован' }, { status: 401 });
@@ -40,7 +41,7 @@ type ActionBody =
 	| { action: 'revokeAll' };
 
 export const POST: RequestHandler = async ({ cookies, request, getClientAddress }) => {
-	const ipAddress = getClientAddress();
+	const ipAddress = getRealIp(request, getClientAddress);
 	const context = await getSessionContext(cookies, { ipAddress });
 	if (!context) {
 		return json({ error: 'Не авторизован' }, { status: 401 });

@@ -5,6 +5,7 @@ import { getOrCreateUser } from '$lib/db/users';
 import { createSessionToken, DEFAULT_SESSION_TTL } from '$lib/auth/session';
 import { createUserSession, hashSessionKey } from '$lib/db/userSessions';
 import { randomBytes } from 'crypto';
+import { getRealIp } from '$lib/server/ip';
 
 const STATE_COOKIE_NAME = 'oauth_state';
 const RETURN_URL_COOKIE_NAME = 'oauth_return_url';
@@ -108,7 +109,7 @@ export const GET: RequestHandler = async (event) => {
 	const expiresAt = new Date(Date.now() + DEFAULT_SESSION_TTL * 1000);
 	const userAgent = request.headers.get('user-agent');
 	const deviceName = detectDevice(userAgent);
-	const ipAddress = getClientAddress();
+	const ipAddress = getRealIp(request, getClientAddress);
 
 	const userSession = await createUserSession({
 		userId: user.id,
