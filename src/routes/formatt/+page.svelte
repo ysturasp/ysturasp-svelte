@@ -9,6 +9,7 @@
 	import Header from '$lib/components/layout/Header.svelte';
 	import Footer from '$lib/components/layout/Footer.svelte';
 	import PageLayout from '$lib/components/layout/PageLayout.svelte';
+	import PricingSection from './components/PricingSection.svelte';
 	import type { FormatParams, FormatLimit } from './api';
 	import { defaultFormatParams } from './constants';
 	import { auth } from '$lib/stores/auth';
@@ -27,12 +28,14 @@
 	let formatParams: FormatParams = JSON.parse(JSON.stringify(defaultFormatParams));
 	let isSettingsOpen = false;
 	let isPaymentModalOpen = false;
+	let selectedFormatsCount = 10;
 	let formatLimit: FormatLimit = { can: true, remaining: 0 };
 	let isSuccessModalOpen = false;
 	let successModalMessage = '';
 	let isErrorModalOpen = false;
 	let errorModalMessage = '';
 	let isDomainCheckModalOpen = false;
+	let authSectionRef: HTMLDivElement | null = null;
 
 	onMount(() => {
 		if (
@@ -51,6 +54,13 @@
 
 	$: if (!$auth.loading && $auth.authenticated) {
 		checkLimit();
+	}
+
+	function requireAuth() {
+		notifications.add('Авторизуйтесь, чтобы пополнить форматирования', 'info');
+		if (authSectionRef) {
+			authSectionRef.scrollIntoView({ behavior: 'smooth', block: 'start' });
+		}
 	}
 
 	async function checkLimit() {
@@ -212,7 +222,7 @@
 					</p>
 				</div>
 
-				<div class="mb-4 rounded-xl bg-slate-700/30 p-4 md:p-5">
+				<div class="mb-4 rounded-xl bg-slate-700/30 p-4 md:p-5" bind:this={authSectionRef}>
 					{#if $auth.authenticated}
 						<div
 							class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between"
@@ -233,7 +243,13 @@
 								</div>
 								<div class="hidden h-8 w-px bg-slate-600 md:block"></div>
 								<button
-									on:click={() => (isPaymentModalOpen = true)}
+									on:click={() => {
+										if (!$auth.authenticated) {
+											requireAuth();
+											return;
+										}
+										isPaymentModalOpen = true;
+									}}
 									class="w-full rounded-lg bg-blue-600 px-5 py-2 text-sm font-medium text-white transition-all hover:bg-blue-500 md:w-auto"
 								>
 									Пополнить
@@ -335,6 +351,18 @@
 				</div>
 			</div>
 
+			<PricingSection
+				remaining={formatLimit.remaining || 0}
+				on:openPayment={(event) => {
+					if (!$auth.authenticated) {
+						requireAuth();
+						return;
+					}
+					selectedFormatsCount = event.detail.docs;
+					isPaymentModalOpen = true;
+				}}
+			/>
+
 			<FormatRules />
 			<FormattingHistoryCard />
 		</div>
@@ -345,6 +373,7 @@
 	<PaymentModal
 		isOpen={isPaymentModalOpen}
 		remaining={formatLimit.remaining || 0}
+		formatsCount={selectedFormatsCount}
 		on:close={handlePaymentModalClose}
 		on:error={handlePaymentError}
 	/>

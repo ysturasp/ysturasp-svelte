@@ -1,3 +1,4 @@
+- refactor redirect URI to use dynamic base URL from request origin (ysturasp, 2025-12-03) [3 files changed, 3 insertions(+), 1 deletion(-)]
 - refactor IP address retrieval in authentication and session management endpoints to use getRealIp with check CF headers (ysturasp, 2025-12-03) [9 files changed, 47 insertions(+), 9 deletions(-)]
 - update application port from 80 to 5173 in Docker config (ysturasp, 2025-12-02) [4 files changed, 5 insertions(+), 3 deletions(-)]
 - implement manual login functionality with a dedicated API endpoint for check yomoney (ysturasp, 2025-12-02) [5 files changed, 243 insertions(+), 55 deletions(-)]

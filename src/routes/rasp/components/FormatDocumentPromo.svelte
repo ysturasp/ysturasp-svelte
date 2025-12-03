@@ -1,6 +1,11 @@
-<a href="/format" class="mt-4 block">
+<script lang="ts">
+	export let href = '/format';
+	export let class_name = '';
+</script>
+
+<a {href} class="mt-4 block">
 	<div
-		class="group rounded-2xl bg-slate-800 p-4 ring-1 ring-blue-500/50 transition-all hover:bg-slate-700/50"
+		class="group rounded-2xl bg-slate-800 p-4 ring-1 ring-blue-500/50 transition-all hover:bg-slate-700/50 {class_name}"
 	>
 		<div class="flex items-center justify-between gap-4">
 			<div class="flex items-center gap-4">

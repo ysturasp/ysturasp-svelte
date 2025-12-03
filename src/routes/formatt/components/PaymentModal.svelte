@@ -5,12 +5,11 @@
 
 	export let isOpen = false;
 	export let remaining = 0;
+	export let formatsCount = 10;
 
 	const dispatch = createEventDispatcher();
 
 	let isProcessing = false;
-
-	let formatsCount = 10;
 
 	function calculatePrice(count: number): number {
 		if (count >= 50) return 3000;
