@@ -21,7 +21,22 @@
 		type PrivacySettings
 	} from '$lib/utils/privacy';
 
-	let activeTab = 'profile';
+	const ACTIVE_TAB_STORAGE_KEY = 'profile_active_tab';
+	const VALID_TABS = ['profile', 'sessions', 'history', 'payments'] as const;
+
+	function loadActiveTab(): string {
+		if (!browser) return 'profile';
+		const saved = localStorage.getItem(ACTIVE_TAB_STORAGE_KEY);
+		return saved && VALID_TABS.includes(saved as any) ? saved : 'profile';
+	}
+
+	function saveActiveTab(tab: string) {
+		if (browser) {
+			localStorage.setItem(ACTIVE_TAB_STORAGE_KEY, tab);
+		}
+	}
+
+	let activeTab = loadActiveTab();
 	let formatLimit: FormatLimit = { can: true, remaining: 0 };
 	let isPaymentModalOpen = false;
 	let isErrorModalOpen = false;
@@ -31,7 +46,12 @@
 	onMount(() => {
 		auth.checkAuth();
 		privacySettings = loadPrivacySettings();
+		activeTab = loadActiveTab();
 	});
+
+	$: if (browser && activeTab) {
+		saveActiveTab(activeTab);
+	}
 
 	$: if (!$auth.loading) {
 		if (!$auth.authenticated) {
