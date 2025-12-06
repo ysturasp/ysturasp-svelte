@@ -4,6 +4,9 @@ import { getSessionContext } from '$lib/server/sessionContext';
 import { getPaymentByYookassaId, updatePaymentStatus } from '$lib/db/payments';
 import { addPaidFormats } from '$lib/db/limits';
 import { getPayment as fetchPayment } from '$lib/payment/yookassa';
+import { cancelPaymentCheck } from '$lib/payment/payment-scheduler';
+
+const PENDING_TIMEOUT_MINUTES = 10;
 
 export const GET: RequestHandler = async ({ url, cookies }) => {
 	const paymentId = url.searchParams.get('paymentId');
@@ -28,12 +31,22 @@ export const GET: RequestHandler = async ({ url, cookies }) => {
 		return json({ error: 'Нет доступа к этому платежу' }, { status: 403 });
 	}
 
+	const paymentCreatedAt = new Date(payment.created_at);
+	const now = new Date();
+	const minutesSinceCreation = (now.getTime() - paymentCreatedAt.getTime()) / (1000 * 60);
+
 	let remoteStatus: string | undefined;
 	try {
 		const remotePayment = await fetchPayment(paymentId);
 		remoteStatus = remotePayment?.status;
 	} catch (error) {
 		console.error('Не удалось получить статус платежа от ЮKassa:', error);
+	}
+
+	if (payment.status === 'pending' && minutesSinceCreation >= PENDING_TIMEOUT_MINUTES) {
+		if (!remoteStatus || remoteStatus === 'pending') {
+			remoteStatus = 'canceled';
+		}
 	}
 
 	const previousStatus = payment.status;
@@ -55,6 +68,10 @@ export const GET: RequestHandler = async ({ url, cookies }) => {
 			await addPaidFormats(user.id, payment.formats_count);
 			formatsAdded = payment.formats_count;
 		}
+	}
+
+	if (previousStatus === 'pending' && currentStatus !== 'pending') {
+		cancelPaymentCheck(paymentId);
 	}
 
 	return json({

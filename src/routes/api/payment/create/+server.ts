@@ -4,6 +4,7 @@ import { createPayment } from '$lib/payment/yookassa';
 import { createPayment as createPaymentRecord } from '$lib/db/payments';
 import { getSessionContext } from '$lib/server/sessionContext';
 import { getRealIp } from '$lib/server/ip';
+import { schedulePaymentCheck } from '$lib/payment/payment-scheduler';
 
 const FORMATS_COUNT = 10;
 
@@ -40,6 +41,10 @@ export const POST: RequestHandler = async ({ request, cookies, url, getClientAdd
 		});
 
 		await createPaymentRecord(user.id, payment.id, amount, count, payment.status || 'pending');
+
+		if (payment.status === 'pending') {
+			schedulePaymentCheck(payment.id);
+		}
 
 		return json({
 			paymentId: payment.id,

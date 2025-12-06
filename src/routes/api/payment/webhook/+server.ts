@@ -2,6 +2,7 @@ import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { getPaymentByYookassaId, updatePaymentStatus } from '$lib/db/payments';
 import { addPaidFormats } from '$lib/db/limits';
+import { cancelPaymentCheck } from '$lib/payment/payment-scheduler';
 import ipaddr from 'ipaddr.js';
 
 const ALLOWED_YOOKASSA_IPS = [
@@ -66,7 +67,12 @@ export const POST: RequestHandler = async ({ request }) => {
 		const status = event.object?.status;
 
 		if (status) {
+			const previousStatus = payment.status;
 			const updatedPayment = await updatePaymentStatus(paymentId, status);
+
+			if (previousStatus === 'pending' && status !== 'pending') {
+				cancelPaymentCheck(paymentId);
+			}
 
 			if (status === 'succeeded' && payment.status !== 'succeeded') {
 				if (updatedPayment && updatedPayment.status === 'succeeded') {

@@ -4,6 +4,7 @@ import { handleErrorWithSentry, sentryHandle } from '@sentry/sveltekit';
 import * as Sentry from '@sentry/sveltekit';
 import { initDatabase } from '$lib/db/database';
 import { isbot } from 'isbot';
+import { startPaymentChecker } from '$lib/payment/payment-scheduler';
 
 const KNOWN_ROUTE_PREFIXES = [
 	'/api',
@@ -355,6 +356,8 @@ dbInitPromise = (async () => {
 		await initDatabase();
 		dbInitialized = true;
 		console.log('[hooks.server] Фоновая инициализация БД завершена успешно');
+
+		startPaymentChecker();
 	} catch (error) {
 		console.error('[hooks.server] Ошибка фоновой инициализации БД:', error);
 		console.log('[hooks.server] Инициализация будет выполнена при первом запросе');

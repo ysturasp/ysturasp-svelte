@@ -206,3 +206,19 @@ export async function markPaymentAsRefunded(
 	);
 	return result.rows[0] || null;
 }
+
+export async function getPendingPaymentsOlderThan(minutes: number): Promise<Payment[]> {
+	const pool = getPool();
+	if (!pool) return [];
+
+	const cutoffTime = new Date(Date.now() - minutes * 60 * 1000);
+
+	const result = await pool.query(
+		`SELECT * FROM payments 
+		 WHERE status = 'pending' 
+		 AND created_at < $1
+		 ORDER BY created_at ASC`,
+		[cutoffTime]
+	);
+	return result.rows;
+}
