@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { onMount, createEventDispatcher } from 'svelte';
+	import { onDestroy, createEventDispatcher } from 'svelte';
+	import { writable } from 'svelte/store';
 	import { auth } from '$lib/stores/auth';
 	import BottomModal from '$lib/components/ui/BottomModal.svelte';
 	import { notifications } from '$lib/stores/notifications';
@@ -24,6 +25,8 @@
 		purchasedCount?: number;
 	}
 
+	const PENDING_TIMEOUT_MINUTES = 10;
+
 	let payments: Payment[] = [];
 	let isLoading = false;
 	let error = '';
@@ -33,10 +36,13 @@
 	let refundCheck: RefundCheck | null = null;
 	let isCheckingRefund = false;
 	let isProcessingRefund = false;
+	let isGettingPaymentUrl = false;
+	const currentTime = writable(Date.now());
+	let timerInterval: ReturnType<typeof setInterval> | null = null;
 
 	function getStatusText(status: string): string {
 		const statusMap: Record<string, string> = {
-			pending: 'Ожидает оплаты',
+			pending: 'Неоплачен',
 			succeeded: 'Оплачено',
 			canceled: 'Отменено',
 			waiting_for_capture: 'Ожидает подтверждения',
@@ -54,6 +60,18 @@
 			refunded: 'text-slate-400'
 		};
 		return colorMap[status] || 'text-slate-400';
+	}
+
+	function formatTimeRemaining(ms: number): string {
+		if (ms <= 0) {
+			return '0:00';
+		}
+
+		const totalSeconds = Math.floor(ms / 1000);
+		const minutes = Math.floor(totalSeconds / 60);
+		const seconds = totalSeconds % 60;
+
+		return `${minutes}:${seconds.toString().padStart(2, '0')}`;
 	}
 
 	async function loadPayments() {
@@ -144,9 +162,95 @@
 		}
 	}
 
+	async function goToPayment(payment: Payment) {
+		try {
+			isGettingPaymentUrl = true;
+			const response = await fetch(
+				`/api/payment/get-payment-url?paymentId=${payment.paymentId}`
+			);
+
+			if (!response.ok) {
+				const data = await response.json();
+				throw new Error(data.error || 'Ошибка при получении ссылки на оплату');
+			}
+
+			const data = await response.json();
+
+			if (data.confirmationUrl) {
+				window.location.href = data.confirmationUrl;
+			} else {
+				throw new Error('URL для оплаты не найден');
+			}
+		} catch (err) {
+			notifications.add(
+				err instanceof Error ? err.message : 'Ошибка при переходе к оплате',
+				'error'
+			);
+		} finally {
+			isGettingPaymentUrl = false;
+		}
+	}
+
 	$: if (!$auth.loading && $auth.authenticated && !isLoaded && !isLoading) {
 		loadPayments();
 	}
+
+	function getTimeUntilCancel(payment: Payment): number | null {
+		if (payment.status !== 'pending') {
+			return null;
+		}
+		return paymentTimes[payment.id] ?? null;
+	}
+
+	$: paymentTimes = (() => {
+		const now = $currentTime;
+		const times: Record<string, number> = {};
+		payments.forEach((payment) => {
+			if (payment.status === 'pending') {
+				const createdAt = new Date(payment.createdAt);
+				const cancelTime = new Date(
+					createdAt.getTime() + PENDING_TIMEOUT_MINUTES * 60 * 1000
+				);
+				const remaining = cancelTime.getTime() - now;
+				times[payment.id] = remaining > 0 ? remaining : 0;
+			}
+		});
+		return times;
+	})();
+
+	$: if (payments.some((p) => p.status === 'pending')) {
+		if (!timerInterval) {
+			timerInterval = setInterval(async () => {
+				const now = Date.now();
+				currentTime.set(now);
+
+				const hasExpiredPayments = payments.some((payment) => {
+					if (payment.status !== 'pending') return false;
+					const createdAt = new Date(payment.createdAt);
+					const cancelTime = new Date(
+						createdAt.getTime() + PENDING_TIMEOUT_MINUTES * 60 * 1000
+					);
+					return cancelTime.getTime() <= now;
+				});
+
+				if (hasExpiredPayments) {
+					isLoaded = false;
+					await loadPayments();
+				}
+			}, 1000);
+		}
+	} else {
+		if (timerInterval) {
+			clearInterval(timerInterval);
+			timerInterval = null;
+		}
+	}
+
+	onDestroy(() => {
+		if (timerInterval) {
+			clearInterval(timerInterval);
+		}
+	});
 </script>
 
 <div>
@@ -165,13 +269,29 @@
 					class="flex items-center justify-between border-b border-slate-700 pb-3 last:border-0"
 				>
 					<div class="flex-1">
-						<div class="flex items-center gap-3">
+						<div class="flex flex-wrap items-center gap-3">
 							<span class="font-medium text-white">
 								{payment.formatsCount} форматирований
 							</span>
 							<span class={getStatusColor(payment.status)}>
 								{getStatusText(payment.status)}
 							</span>
+							{#if payment.status === 'pending'}
+								{@const timeRemaining = paymentTimes[payment.id]}
+								{#if timeRemaining !== null && timeRemaining !== undefined && timeRemaining > 0}
+									<span
+										class="-mt-2 block w-full text-xs text-slate-400 sm:mt-0 sm:inline sm:w-auto"
+									>
+										(отменится через {formatTimeRemaining(timeRemaining)})
+									</span>
+								{:else}
+									<span
+										class="block w-full text-xs text-slate-400 sm:inline sm:w-auto"
+									>
+										(отменится автоматически)
+									</span>
+								{/if}
+							{/if}
 						</div>
 						<div class="mt-1 flex items-center gap-3 text-sm text-slate-400">
 							<span>{payment.amount.toLocaleString('ru-RU')} {payment.currency}</span>
@@ -179,18 +299,29 @@
 							<span>{new Date(payment.createdAt).toLocaleString('ru-RU')}</span>
 						</div>
 					</div>
-					{#if payment.status === 'succeeded'}
-						<button
-							on:click={() => checkRefund(payment)}
-							disabled={isCheckingRefund}
-							class="ml-4 rounded-lg bg-slate-700 px-3 py-1.5 text-sm text-white transition-colors hover:bg-slate-600 disabled:opacity-50"
-							title="Запросить возврат"
-						>
-							{isCheckingRefund && selectedPayment?.id === payment.id
-								? 'Проверка...'
-								: 'Вернуть'}
-						</button>
-					{/if}
+					<div class="ml-4 flex gap-2">
+						{#if payment.status === 'pending'}
+							<button
+								on:click={() => goToPayment(payment)}
+								disabled={isGettingPaymentUrl}
+								class="rounded-lg bg-blue-600 px-3 py-1.5 text-sm text-white transition-colors hover:bg-blue-700 disabled:opacity-50"
+								title="Перейти к оплате"
+							>
+								{isGettingPaymentUrl ? 'Загрузка...' : 'Оплатить'}
+							</button>
+						{:else if payment.status === 'succeeded'}
+							<button
+								on:click={() => checkRefund(payment)}
+								disabled={isCheckingRefund}
+								class="rounded-lg bg-slate-700 px-3 py-1.5 text-sm text-white transition-colors hover:bg-slate-600 disabled:opacity-50"
+								title="Запросить возврат"
+							>
+								{isCheckingRefund && selectedPayment?.id === payment.id
+									? 'Проверка...'
+									: 'Вернуть'}
+							</button>
+						{/if}
+					</div>
 				</div>
 			{/each}
 		</div>

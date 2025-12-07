@@ -1,3 +1,4 @@
+- enhance payment processing by add schedule checks for pending payments and updating status handling in webhook and API endpoints (ysturasp, 2025-12-06) [9 files changed, 198 insertions(+)]
 - implement active tab persistence in profile component using localStorage (ysturasp, 2025-12-05) [3 files changed, 23 insertions(+), 1 deletion(-)]
 - refactor layout components and enhance payment functionality with new PricingSection and FormatDocumentPromo components (ysturasp, 2025-12-03) [8 files changed, 158 insertions(+), 9 deletions(-)]
 - refactor redirect URI to use dynamic base URL from request origin (ysturasp, 2025-12-03) [3 files changed, 3 insertions(+), 1 deletion(-)]
