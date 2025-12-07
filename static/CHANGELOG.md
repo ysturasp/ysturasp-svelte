@@ -1,3 +1,4 @@
+- add modal for transfer on new domain to layout and add migration data (ysturasp, 2025-12-07) [5 files changed, 215 insertions(+)]
 - implement countdown timer for pending payments in PaymentHistory component, allowing users to see time remaining before automatic cancellation (ysturasp, 2025-12-07) [4 files changed, 195 insertions(+), 15 deletions(-)]
 - enhance payment processing by add schedule checks for pending payments and updating status handling in webhook and API endpoints (ysturasp, 2025-12-06) [9 files changed, 198 insertions(+)]
 - implement active tab persistence in profile component using localStorage (ysturasp, 2025-12-05) [3 files changed, 23 insertions(+), 1 deletion(-)]

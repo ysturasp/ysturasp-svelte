@@ -16,19 +16,26 @@
 	onMount(() => {
 		if (browser && isNetlifyDomain()) {
 			const migrationCompleted = localStorage.getItem('migration_completed');
-			if (!migrationCompleted) {
-				showModal = true;
+			if (migrationCompleted) {
+				const currentPath = $page.url.pathname + $page.url.search;
+				const newUrl = getNewDomainUrl(currentPath);
+				window.location.href = newUrl;
+				return;
 			}
+			showModal = true;
 		}
 	});
 
 	async function handleRedirect() {
 		isRedirecting = true;
+		localStorage.setItem('migration_completed', 'true');
 		const userData = collectAllUserData();
 		const encodedData = await encodeMigrationData(userData);
 		const currentPath = $page.url.pathname + $page.url.search;
 		const newUrl = getNewDomainUrl(currentPath, encodedData);
-		window.location.href = newUrl;
+		setTimeout(() => {
+			window.location.href = newUrl;
+		}, 50);
 	}
 
 	function handleClose() {
