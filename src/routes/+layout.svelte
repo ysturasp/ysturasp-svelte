@@ -4,6 +4,7 @@
 	import YandexMetrica from '$lib/components/common/YandexMetrica.svelte';
 	import OfflineModal from '$lib/components/offline/OfflineModal.svelte';
 	import ServiceStatusModal from '$lib/components/notifications/ServiceStatusModal.svelte';
+	import DomainMigrationModal from '$lib/components/modals/DomainMigrationModal.svelte';
 	import { onMount } from 'svelte';
 	import { afterNavigate } from '$app/navigation';
 	import { init } from '@telegram-apps/sdk-svelte';
@@ -14,6 +15,8 @@
 		getDownServices,
 		type UptimeRobotMonitor
 	} from '$lib/utils/uptimerobot';
+	import { browser } from '$app/environment';
+	import { decodeMigrationData, restoreUserData, isNetlifyDomain } from '$lib/utils/migration';
 
 	let { children } = $props();
 
@@ -49,6 +52,25 @@
 	}
 
 	onMount(() => {
+		if (browser) {
+			const hash = window.location.hash;
+			const migrationMatch = hash.match(/#migration=(.+)/);
+			if (migrationMatch) {
+				decodeMigrationData(migrationMatch[1]).then((decodedData) => {
+					if (decodedData) {
+						restoreUserData(decodedData);
+						localStorage.setItem('migration_completed', 'true');
+						const newUrl = window.location.pathname + window.location.search;
+						window.history.replaceState(null, '', newUrl);
+						setTimeout(() => {
+							window.location.reload();
+						}, 100);
+						return;
+					}
+				});
+			}
+		}
+
 		let cleanupOffline: (() => void) | undefined;
 
 		offlineStore.init().then((cleanup) => {
@@ -98,4 +120,5 @@
 		showServiceStatusModal = false;
 	}}
 />
+<DomainMigrationModal />
 {@render children()}
