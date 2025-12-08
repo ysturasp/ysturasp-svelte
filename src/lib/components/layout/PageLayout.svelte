@@ -4,7 +4,7 @@
 	import '$lib/styles/global.css';
 	import '$lib/styles/fonts.css';
 	import { haptic } from '$lib/actions/haptic';
-	import { init } from '@telegram-apps/sdk-svelte';
+	import { init } from '@tma.js/sdk-svelte';
 	import { checkIsTelegramMiniApp } from '$lib/utils/telegram';
 
 	let isLowercase = false;

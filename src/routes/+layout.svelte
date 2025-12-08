@@ -7,8 +7,7 @@
 	import DomainMigrationModal from '$lib/components/modals/DomainMigrationModal.svelte';
 	import { onMount } from 'svelte';
 	import { afterNavigate } from '$app/navigation';
-	import { init } from '@telegram-apps/sdk-svelte';
-	import { backButton } from '@telegram-apps/sdk';
+	import { init, backButton } from '@tma.js/sdk-svelte';
 	import { offlineStore, showOfflineModal } from '$lib/stores/offline';
 	import {
 		checkServiceStatus,

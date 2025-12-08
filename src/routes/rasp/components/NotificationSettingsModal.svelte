@@ -4,7 +4,7 @@
 	import { onMount } from 'svelte';
 	import { checkIsTelegramMiniApp } from '$lib/utils/telegram';
 	import { checkNotificationStatus, toggleNotifications } from '../api-notifications';
-	import { hapticFeedback } from '@telegram-apps/sdk-svelte';
+	import { hapticFeedback } from '@tma.js/sdk-svelte';
 	import type { ScheduleData } from '../types';
 	import { LessonTypes } from '$lib/types/schedule';
 

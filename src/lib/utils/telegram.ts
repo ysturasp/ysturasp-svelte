@@ -1,5 +1,5 @@
 import { browser } from '$app/environment';
-import { retrieveLaunchParams } from '@telegram-apps/sdk-svelte';
+import { retrieveLaunchParams } from '@tma.js/sdk-svelte';
 
 let isTelegramMiniApp: boolean | null = null;
 

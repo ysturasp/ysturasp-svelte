@@ -2,7 +2,7 @@
 	import type { SemesterInfo } from '$lib/utils/semester';
 	import { getCurrentSemester } from '$lib/utils/semester';
 	import ScheduleSettings from './ScheduleSettings.svelte';
-	import { hapticFeedback, init } from '@telegram-apps/sdk-svelte';
+	import { hapticFeedback, init } from '@tma.js/sdk-svelte';
 	import { onMount } from 'svelte';
 	import { settings } from '$lib/stores/settings';
 	import type { Settings } from '$lib/stores/settings';

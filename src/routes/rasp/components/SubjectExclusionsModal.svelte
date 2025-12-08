@@ -2,7 +2,7 @@
 	import BottomModal from '$lib/components/ui/BottomModal.svelte';
 	import type { ScheduleData } from '../types';
 	import { LessonTypes } from '$lib/types/schedule';
-	import { hapticFeedback } from '@telegram-apps/sdk-svelte';
+	import { hapticFeedback } from '@tma.js/sdk-svelte';
 
 	export let isOpen = false;
 	export let onClose: () => void;

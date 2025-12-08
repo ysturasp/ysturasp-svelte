@@ -1,10 +1,31 @@
 import { browser } from '$app/environment';
 import { checkIsTelegramMiniApp } from '$lib/utils/telegram';
+import { retrieveLaunchParams } from '@tma.js/sdk-svelte';
 
 const NOTIFICATIONS_API_URL =
 	'https://script.google.com/macros/s/AKfycbwKX1p_hTC3UQG4zC_Ero4OpH97ABTJ0_xOoc-0jDIgrcHsY1Wv9rOvhSTiTWTJ57uq/exec';
 
 function getTelegramUserData(): { id: string; username?: string } | null {
+	if (!browser) {
+		return null;
+	}
+
+	try {
+		const launchParams = retrieveLaunchParams();
+
+		const user =
+			(launchParams as any).initData?.user ||
+			launchParams.tgWebAppData?.user ||
+			(launchParams as any).tgWebAppInitData?.user;
+
+		if (user?.id) {
+			return {
+				id: user.id.toString(),
+				username: user.username || user.userName || 'admin'
+			};
+		}
+	} catch (error) {}
+
 	const tg = (window as any).Telegram?.WebApp;
 
 	if (tg?.initDataUnsafe?.user?.id) {
@@ -12,32 +33,6 @@ function getTelegramUserData(): { id: string; username?: string } | null {
 			id: tg.initDataUnsafe.user.id.toString(),
 			username: tg.initDataUnsafe.user.username || 'admin'
 		};
-	}
-
-	const hash = window.location.hash;
-	const tgWebAppDataMatch = hash.match(/tgWebAppData=([^&]+)/);
-
-	if (tgWebAppDataMatch) {
-		try {
-			const encodedData = tgWebAppDataMatch[1];
-
-			let decodedData = decodeURIComponent(encodedData);
-
-			if (decodedData.includes('%')) {
-				decodedData = decodeURIComponent(decodedData);
-			}
-
-			const userMatch = decodedData.match(/user=(\{[^}]+\})/);
-
-			if (userMatch) {
-				const userDataStr = userMatch[1];
-				const userData = JSON.parse(userDataStr);
-				return {
-					id: userData.id?.toString() || null,
-					username: userData.username || 'admin'
-				};
-			}
-		} catch (parseError) {}
 	}
 
 	return null;

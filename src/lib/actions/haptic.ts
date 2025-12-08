@@ -1,4 +1,4 @@
-import { hapticFeedback } from '@telegram-apps/sdk-svelte';
+import { hapticFeedback } from '@tma.js/sdk-svelte';
 import { settings } from '$lib/stores/settings';
 import type { Settings } from '$lib/stores/settings';
 import { checkIsTelegramMiniApp } from '$lib/utils/telegram';
