@@ -17,7 +17,7 @@
 		if (count >= 20) return 1500;
 		if (count >= 10) return 850;
 		if (count >= 5) return 500;
-		return count * 10;
+		return count * 125;
 	}
 
 	function getPricePerFormat(count: number): number {
