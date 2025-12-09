@@ -28,7 +28,7 @@
 	let formatParams: FormatParams = JSON.parse(JSON.stringify(defaultFormatParams));
 	let isSettingsOpen = false;
 	let isPaymentModalOpen = false;
-	let selectedFormatsCount = 10;
+	let selectedFormatsCount = import.meta.env.DEV ? 1 : 10;
 	let formatLimit: FormatLimit = { can: true, remaining: 0 };
 	let isSuccessModalOpen = false;
 	let successModalMessage = '';

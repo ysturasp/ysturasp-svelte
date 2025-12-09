@@ -1,3 +1,4 @@
+- update package-lock.json for fix building deploy (ysturasp, 2025-12-08) [3 files changed, 2262 insertions(+), 162 deletions(-)]
 - refactor SDK integration by replace @telegram-apps/sdk-svelte with @tma.js/sdk-svelte and fix not work sdk features without params in hash query (ysturasp, 2025-12-08) [12 files changed, 299 insertions(+), 2351 deletions(-)]
 - refactor DomainMigrationModal to redirect users after migration completion and update localStorage handling (ysturasp, 2025-12-07) [3 files changed, 12 insertions(+), 3 deletions(-)]
 - add modal for transfer on new domain to layout and add migration data (ysturasp, 2025-12-07) [5 files changed, 215 insertions(+)]

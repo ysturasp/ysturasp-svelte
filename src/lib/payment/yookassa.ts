@@ -25,12 +25,15 @@ export interface CreatePaymentParams {
 	description: string;
 	returnUrl: string;
 	metadata?: Record<string, string>;
+	receipt?: any;
+	paymentMethodType?: string;
+	clientIp?: string;
 }
 
 export async function createPayment(params: CreatePaymentParams) {
 	const checkout = getCheckout();
 
-	const payment = await checkout.createPayment({
+	const paymentData: any = {
 		amount: {
 			value: params.amount.toFixed(2),
 			currency: 'RUB'
@@ -42,7 +45,23 @@ export async function createPayment(params: CreatePaymentParams) {
 		},
 		description: params.description,
 		metadata: params.metadata || {}
-	});
+	};
+
+	if (params.clientIp) {
+		paymentData.client_ip = params.clientIp;
+	}
+
+	if (params.receipt) {
+		paymentData.receipt = params.receipt;
+	}
+
+	if (params.paymentMethodType) {
+		paymentData.payment_method_data = {
+			type: params.paymentMethodType
+		};
+	}
+
+	const payment = await checkout.createPayment(paymentData);
 
 	return payment;
 }

@@ -5,10 +5,12 @@ import { createPayment as createPaymentRecord } from '$lib/db/payments';
 import { getSessionContext } from '$lib/server/sessionContext';
 import { getRealIp } from '$lib/server/ip';
 import { schedulePaymentCheck } from '$lib/payment/payment-scheduler';
+import { dev } from '$app/environment';
 
 const FORMATS_COUNT = 10;
 
 function calculatePrice(count: number): number {
+	if (dev && count === 1) return 10;
 	if (count >= 50) return 3000;
 	if (count >= 20) return 1500;
 	if (count >= 10) return 850;
@@ -34,9 +36,28 @@ export const POST: RequestHandler = async ({ request, cookies, url, getClientAdd
 			amount,
 			description: `Покупка ${count} форматирований`,
 			returnUrl: `${url.origin}/formatt?payment=success`,
+			clientIp: ipAddress,
 			metadata: {
 				userId: user.id,
 				formatsCount: count.toString()
+			},
+			receipt: {
+				customer: {
+					email: user.email
+				},
+				items: [
+					{
+						description: `Покупка ${count} форматирований`,
+						quantity: '1.00',
+						amount: {
+							value: amount.toFixed(2),
+							currency: 'RUB'
+						},
+						vat_code: '1',
+						payment_mode: 'full_payment',
+						payment_subject: 'service'
+					}
+				]
 			}
 		});
 

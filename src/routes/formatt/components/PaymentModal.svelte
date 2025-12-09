@@ -12,6 +12,7 @@
 	let isProcessing = false;
 
 	function calculatePrice(count: number): number {
+		if (import.meta.env.DEV && count === 1) return 10;
 		if (count >= 50) return 3000;
 		if (count >= 20) return 1500;
 		if (count >= 10) return 850;
@@ -26,7 +27,8 @@
 		{ id: 5, label: `5 форматирований · 500 ₽ (${getPricePerFormat(5)} ₽/шт)` },
 		{ id: 10, label: `10 форматирований · 850 ₽ (${getPricePerFormat(10)} ₽/шт)` },
 		{ id: 20, label: `20 форматирований · 1500 ₽ (${getPricePerFormat(20)} ₽/шт)` },
-		{ id: 50, label: `50 форматирований · 3000 ₽ (${getPricePerFormat(50)} ₽/шт)` }
+		{ id: 50, label: `50 форматирований · 3000 ₽ (${getPricePerFormat(50)} ₽/шт)` },
+		...(import.meta.env.DEV ? [{ id: 1, label: `Тест · 10 ₽ (10 ₽/шт)` }] : [])
 	];
 
 	function canClose() {
