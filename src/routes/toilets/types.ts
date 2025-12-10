@@ -21,4 +21,5 @@ export interface ToiletSearchResult {
 	message: string;
 	alternativeToilets?: Toilet[];
 	userFloor?: number;
+	error?: 'format' | 'out_of_range';
 }

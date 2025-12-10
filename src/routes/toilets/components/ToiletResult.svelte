@@ -10,10 +10,7 @@
 
 	function getDistanceLabel(distance: number, userFloor?: number, toiletFloor?: number): string {
 		if (distance === 0) {
-			return 'На вашем этаже';
-		}
-		if (distance < 0.5) {
-			return 'В той же секции';
+			return 'В вашей секции';
 		}
 		if (distance < 1) {
 			return 'В соседней секции';
@@ -22,6 +19,9 @@
 		if (userFloor && toiletFloor) {
 			const diff = toiletFloor - userFloor;
 			const absDiff = Math.abs(diff);
+			if (absDiff === 0) {
+				return 'На вашем этаже';
+			}
 			const direction = diff > 0 ? 'выше' : 'ниже';
 
 			if (absDiff === 1) {
@@ -41,56 +41,37 @@
 {#if result}
 	<div class="mt-4" transition:fade={{ duration: 300 }}>
 		{#if hasResult}
-			<div class="rounded-2xl bg-slate-800">
-				<div class="mb-2 flex items-start gap-3">
-					<div class="flex-1">
-						<h3 class="mb-1 text-xl font-semibold text-white">Туалет найден</h3>
-						<p class="text-sm text-slate-400">{result.message}</p>
-					</div>
+			<div class="space-y-1 rounded-2xl bg-slate-800 p-1 text-center">
+				<div
+					class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-green-600/20"
+				>
+					<svg
+						class="h-7 w-7 text-green-400"
+						fill="none"
+						stroke="currentColor"
+						viewBox="0 0 24 24"
+					>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M5 13l4 4L19 7"
+						/>
+					</svg>
 				</div>
-
-				<div class="space-y-1 rounded-xl bg-slate-700/50 p-3 md:p-4">
-					<div class="flex items-center justify-between">
-						<span class="text-slate-400">Этаж:</span>
-						<span class="font-semibold text-white">{result.toilet!.floor}</span>
-					</div>
-					<div class="flex items-center justify-between">
-						<span class="text-slate-400">Секция:</span>
-						<span class="font-semibold text-white">{result.toilet!.section}</span>
-					</div>
-					<div class="flex items-center justify-between">
-						<span class="text-slate-400">Расположение:</span>
-						<span class="font-semibold text-white">{result.toilet!.location}</span>
-					</div>
-					<div class="flex items-center justify-between">
-						<span class="text-slate-400">Расстояние:</span>
-						<span class="font-semibold text-green-400"
-							>{getDistanceLabel(
-								result.distance,
-								result.userFloor,
-								result.toilet!.floor
-							)}</span
-						>
-					</div>
-				</div>
-
+				<h3 class="text-xl font-semibold text-white">Туалет найден</h3>
+				<p class="text-sm text-slate-300">{result.message}</p>
+				<p class="text-xs text-slate-400">
+					{getDistanceLabel(result.distance, result.userFloor, result.toilet!.floor)}
+				</p>
 				{#if hasAlternatives}
-					<div class="mt-4">
-						<h4 class="mb-2 text-sm font-semibold text-slate-300">
-							Альтернативные варианты:
-						</h4>
-						<div class="space-y-2">
-							{#each result.alternativeToilets as alternative}
-								<div class="rounded-lg border border-slate-600 bg-slate-700/30 p-3">
-									<div class="flex items-center justify-between text-sm">
-										<span class="text-slate-400">
-											{alternative.floor} этаж, секция {alternative.section}
-										</span>
-										<span class="text-slate-300">{alternative.location}</span>
-									</div>
-								</div>
-							{/each}
-						</div>
+					<div class="space-y-1 text-xs text-slate-400">
+						<p class="font-semibold text-slate-300">Альтернативы:</p>
+						{#each result.alternativeToilets as alternative}
+							<p>
+								{alternative.floor} этаж, секция {alternative.section} — {alternative.location}
+							</p>
+						{/each}
 					</div>
 				{/if}
 			</div>
@@ -115,7 +96,15 @@
 						</svg>
 					</div>
 					<div class="flex-1">
-						<h3 class="mb-1 text-xl font-semibold text-white">Туалет не найден</h3>
+						<h3 class="mb-1 text-xl font-semibold text-white">
+							{#if result.error === 'format'}
+								Аудитория введена некорректно
+							{:else if result.error === 'out_of_range'}
+								Такой аудитории не существует
+							{:else}
+								Туалет не найден
+							{/if}
+						</h3>
 						<p class="text-sm text-slate-400">{result.message}</p>
 					</div>
 				</div>

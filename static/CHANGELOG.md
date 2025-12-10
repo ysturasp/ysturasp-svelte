@@ -1,3 +1,4 @@
+- remove manual login functionality and associated API endpoint for test user authentication (ysturasp, 2025-12-10) [5 files changed, 3 insertions(+), 178 deletions(-)]
 - uncomment SupportSection in main layout and payment support link in Header (ysturasp, 2025-12-10) [4 files changed, 5 insertions(+), 3 deletions(-)]
 - fix price for 1 format document from 10 to 125 (ysturasp, 2025-12-09) [4 files changed, 4 insertions(+), 2 deletions(-)]
 - add payment 1 format document (ysturasp, 2025-12-09) [4 files changed, 12 insertions(+), 4 deletions(-)]
