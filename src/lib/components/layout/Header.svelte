@@ -131,12 +131,12 @@
 
 		<div class="flex gap-x-2">
 			<slot name="online-counter-desktop" />
-			<!-- <a
+			<a
 				href="https://pay.cloudtips.ru/p/582d48d6"
 				class="hero-button rounded-xl border-2 border-blue-700 bg-gradient-to-r from-blue-600 to-blue-700 p-1 px-2 text-sm text-white transition-all hover:border-blue-400 md:p-2 md:text-sm"
 			>
 				Поддержать проект <span class="align-middle text-xl">💸</span>
-			</a> -->
+			</a>
 			<slot name="personal-account-ystu" />
 		</div>
 	</div>

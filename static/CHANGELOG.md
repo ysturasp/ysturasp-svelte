@@ -1,3 +1,4 @@
+- fix price for 1 format document from 10 to 125 (ysturasp, 2025-12-09) [4 files changed, 4 insertions(+), 2 deletions(-)]
 - add payment 1 format document (ysturasp, 2025-12-09) [4 files changed, 12 insertions(+), 4 deletions(-)]
 - add client IP for sberpay and detailed receipt information to yookassa payments and introduce dev-mode pricing (ysturasp, 2025-12-09) [6 files changed, 48 insertions(+), 4 deletions(-)]
 - update package-lock.json for fix building deploy (ysturasp, 2025-12-08) [3 files changed, 2262 insertions(+), 162 deletions(-)]
