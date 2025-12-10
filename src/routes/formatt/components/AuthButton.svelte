@@ -6,11 +6,6 @@
 	import { browser } from '$app/environment';
 
 	let privacySettings = loadPrivacySettings();
-	let manualLoginVisible = false;
-	let manualEmail = '';
-	let manualPassword = '';
-	let manualLoading = false;
-	let manualError = '';
 
 	onMount(() => {
 		auth.checkAuth();
@@ -33,21 +28,6 @@
 
 	function handleProfileClick() {
 		goto('/profile');
-	}
-
-	async function handleManualLogin() {
-		manualError = '';
-		manualLoading = true;
-		try {
-			await auth.loginWithCredentials(manualEmail, manualPassword);
-			manualEmail = '';
-			manualPassword = '';
-			manualLoginVisible = false;
-		} catch (error) {
-			manualError = error instanceof Error ? error.message : 'Не удалось войти';
-		} finally {
-			manualLoading = false;
-		}
 	}
 
 	$: displayName = privacySettings.hideName
@@ -128,46 +108,6 @@
 				</svg>
 				Войти через Google
 			</button>
-			<button
-				on:click={() => {
-					manualLoginVisible = !manualLoginVisible;
-					manualError = '';
-				}}
-				class="rounded-lg border border-slate-600 px-4 py-2 text-sm font-medium text-slate-100 transition-colors hover:border-slate-500 hover:text-white"
-			>
-				{manualLoginVisible ? 'Скрыть тестовый вход' : 'Тестовый вход'}
-			</button>
 		</div>
-		{#if manualLoginVisible}
-			<form
-				class="flex w-full flex-col gap-2 rounded-lg border border-slate-700 bg-slate-800/60 p-3"
-				on:submit|preventDefault={handleManualLogin}
-			>
-				<input
-					class="rounded-md border border-slate-600 bg-slate-900/40 px-3 py-2 text-sm text-white transition-colors outline-none focus:border-blue-500"
-					type="email"
-					placeholder="Логин"
-					bind:value={manualEmail}
-					required
-				/>
-				<input
-					class="rounded-md border border-slate-600 bg-slate-900/40 px-3 py-2 text-sm text-white transition-colors outline-none focus:border-blue-500"
-					type="password"
-					placeholder="Пароль"
-					bind:value={manualPassword}
-					required
-				/>
-				{#if manualError}
-					<p class="text-sm text-red-400">{manualError}</p>
-				{/if}
-				<button
-					class="rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-70"
-					type="submit"
-					disabled={manualLoading}
-				>
-					{manualLoading ? 'Входим…' : 'Войти тестовым аккаунтом'}
-				</button>
-			</form>
-		{/if}
 	</div>
 {/if}

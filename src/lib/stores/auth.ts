@@ -69,34 +69,11 @@ function createAuthStore() {
 		window.location.href = `/api/auth/google?returnUrl=${encodeURIComponent(returnUrl)}`;
 	};
 
-	const loginWithCredentials = async (email: string, password: string) => {
-		if (!browser) return;
-		const response = await fetch('/api/auth/test', {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ email, password })
-		});
-
-		if (!response.ok) {
-			let message = 'Не удалось войти';
-			try {
-				const payload = await response.json();
-				if (typeof payload?.error === 'string') {
-					message = payload.error;
-				}
-			} catch {}
-			throw new Error(message);
-		}
-
-		await checkAuth();
-	};
-
 	return {
 		subscribe,
 		checkAuth,
 		logout,
-		login,
-		loginWithCredentials
+		login
 	};
 }
 
