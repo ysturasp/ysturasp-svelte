@@ -88,6 +88,14 @@
 
 	<main class="container mx-auto mt-5 px-3 md:mt-7 md:px-0">
 		<section class="mt-8 rounded-2xl bg-slate-800 p-4 sm:p-6">
+			<div class="mb-1 flex justify-center">
+				<p
+					class="inline-flex items-center gap-2 rounded-full bg-blue-700/20 px-3 py-1 text-xs font-semibold text-blue-100"
+				>
+					special for Andrei Chervochkin
+				</p>
+			</div>
+
 			<div class="flex items-center gap-3">
 				<div
 					class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-blue-600/20"
