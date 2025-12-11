@@ -12,7 +12,6 @@ const KNOWN_ROUTE_PREFIXES = [
 	'/raspaudience',
 	'/raspprep',
 	'/yspu',
-	'/formatt',
 	'/format',
 	'/stat',
 	'/groups',

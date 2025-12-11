@@ -55,7 +55,7 @@
 
 	$: if (!$auth.loading) {
 		if (!$auth.authenticated) {
-			goto('/formatt');
+			goto('/format');
 		} else {
 			checkLimit();
 		}
@@ -84,7 +84,7 @@
 
 	async function handleLogout() {
 		await auth.logout();
-		goto('/formatt');
+		goto('/format');
 	}
 
 	$: displayName = privacySettings.hideName
@@ -120,7 +120,7 @@
 			<div class="mt-8 rounded-2xl bg-slate-800 p-6 text-center">
 				<p class="text-slate-300">Необходима авторизация</p>
 				<button
-					on:click={() => goto('/formatt')}
+					on:click={() => goto('/format')}
 					class="mt-4 rounded-lg bg-blue-600 px-4 py-2 text-white transition-colors hover:bg-blue-700"
 				>
 					Вернуться на страницу форматирования

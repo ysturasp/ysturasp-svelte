@@ -65,7 +65,7 @@ function createAuthStore() {
 	const login = () => {
 		const currentPath = window.location.pathname;
 		const returnUrl =
-			currentPath === '/stat' || currentPath.startsWith('/stat') ? '/stat' : '/formatt';
+			currentPath === '/stat' || currentPath.startsWith('/stat') ? '/stat' : '/format';
 		window.location.href = `/api/auth/google?returnUrl=${encodeURIComponent(returnUrl)}`;
 	};
 

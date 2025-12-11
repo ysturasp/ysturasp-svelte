@@ -35,7 +35,7 @@ export const POST: RequestHandler = async ({ request, cookies, url, getClientAdd
 		const payment = await createPayment({
 			amount,
 			description: `Покупка ${count} форматирований`,
-			returnUrl: `${url.origin}/formatt?payment=success`,
+			returnUrl: `${url.origin}/format?payment=success`,
 			clientIp: ipAddress,
 			metadata: {
 				userId: user.id,

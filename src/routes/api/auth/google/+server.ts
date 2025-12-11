@@ -138,6 +138,6 @@ export const GET: RequestHandler = async (event) => {
 	cookies.delete(RETURN_URL_COOKIE_NAME, { path: '/' });
 
 	const redirectTo =
-		savedReturnUrl && savedReturnUrl.startsWith('/') ? savedReturnUrl : '/formatt';
+		savedReturnUrl && savedReturnUrl.startsWith('/') ? savedReturnUrl : '/format';
 	throw redirect(302, redirectTo);
 };

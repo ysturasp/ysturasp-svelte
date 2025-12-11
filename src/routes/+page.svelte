@@ -39,7 +39,7 @@
 
 	<main class="relative container mx-auto mt-8 px-4">
 		<HeroSection />
-		<FormatDocumentPromo href="/formatt" class_name="mb-12" />
+		<FormatDocumentPromo href="/format" class_name="mb-12" />
 		<SupportSection />
 		<StatsSection />
 		<FeaturesSection />

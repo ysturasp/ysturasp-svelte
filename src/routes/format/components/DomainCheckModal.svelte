@@ -4,7 +4,7 @@
 	export let isOpen = false;
 
 	function redirectToMain() {
-		window.location.href = 'https://ysturasp.ru/formatt';
+		window.location.href = 'https://ysturasp.ru/format';
 	}
 
 	function goBack() {
