@@ -1,14 +1,16 @@
 <script lang="ts">
-	import { formatDocument, type FormatParams } from '../api';
+	import { formatDocument, type FormatParams, checkFormatLimit } from '../api';
 	import { createEventDispatcher } from 'svelte';
 	import ProcessingSteps from './ProcessingSteps.svelte';
 	import { formattingComplete } from '../stores';
+	import { auth } from '$lib/stores/auth';
 
 	const dispatch = createEventDispatcher<{
 		error: string;
 		processing: boolean;
 		downloadReady: { base64: string; fileName: string };
 		complete: void;
+		limitExceeded: { remaining: number };
 	}>();
 
 	export let formatParams: FormatParams | undefined = undefined;
@@ -19,21 +21,11 @@
 	let isProcessing = false;
 	let currentStep = '';
 	let isComplete = false;
-	let responseReceived = false;
-
-	const TOTAL_TIME = 40000;
-	const stepTimes = {
-		upload: 5000,
-		analyze: 10000,
-		format: 15000,
-		save: 1500
-	};
 
 	function reset() {
 		isProcessing = false;
 		currentStep = '';
 		isComplete = false;
-		responseReceived = false;
 		dispatch('processing', false);
 	}
 
@@ -62,70 +54,56 @@
 		}
 	}
 
-	async function finishSaving() {
-		currentStep = 'save';
-		await new Promise((resolve) => setTimeout(resolve, stepTimes.save));
-		isComplete = true;
-		isProcessing = false;
-		dispatch('complete');
-		formattingComplete.set(true);
-	}
-
-	async function runAnimation() {
-		const startTime = Date.now();
-
-		currentStep = 'upload';
-		await new Promise((resolve) => setTimeout(resolve, stepTimes.upload));
-
-		currentStep = 'analyze';
-		await new Promise((resolve) => setTimeout(resolve, stepTimes.analyze));
-
-		currentStep = 'format';
-
-		while (
-			!responseReceived &&
-			Date.now() - startTime < stepTimes.upload + stepTimes.analyze + stepTimes.format
-		) {
-			await new Promise((resolve) => setTimeout(resolve, 100));
-		}
-
-		while (!responseReceived) {
-			await new Promise((resolve) => setTimeout(resolve, 100));
-		}
-
-		await finishSaving();
-	}
-
 	async function handleFile(file: File) {
 		if (!file.name.endsWith('.docx')) {
 			dispatch('error', 'Пожалуйста, загрузите файл формата .docx');
 			return;
 		}
 
+		if (!$auth.authenticated) {
+			dispatch('error', 'Необходима авторизация для форматирования документов');
+			return;
+		}
+
 		try {
+			const limit = await checkFormatLimit();
+			if (!limit.can) {
+				dispatch('limitExceeded', { remaining: limit.remaining || 0 });
+				dispatch('error', limit.reason || 'Лимит форматирований исчерпан');
+				return;
+			}
+
 			reset();
 			isProcessing = true;
 			dispatch('error', '');
 			dispatch('downloadReady', { base64: '', fileName: '' });
 			dispatch('processing', true);
 
+			currentStep = 'upload';
 			const base64 = await readFileAsBase64(file);
-			const formatPromise = formatDocument(base64, formatParams, file.name);
-			const animationPromise = runAnimation();
 
-			const result = await formatPromise;
+			currentStep = 'analyze';
+			await new Promise((resolve) => setTimeout(resolve, 300));
+
+			currentStep = 'format';
+			const result = await formatDocument(base64, formatParams, file.name);
 
 			if (!result.success || !result.formattedBase64) {
 				throw new Error(result.error || 'Ошибка при обработке файла');
 			}
 
-			responseReceived = true;
+			currentStep = 'save';
+			await new Promise((resolve) => setTimeout(resolve, 300));
+
 			dispatch('downloadReady', {
 				base64: result.formattedBase64,
 				fileName: file.name
 			});
 
-			await animationPromise;
+			isComplete = true;
+			isProcessing = false;
+			dispatch('complete');
+			formattingComplete.set(true);
 		} catch (err) {
 			dispatch('error', err instanceof Error ? err.message : 'Неизвестная ошибка');
 			reset();
@@ -173,7 +151,7 @@
 		on:drop={handleDrop}
 	>
 		{#if isProcessing || isComplete}
-			<ProcessingSteps {currentStep} {isProcessing} {isComplete} />
+			<ProcessingSteps {currentStep} {isComplete} />
 			<div class="mt-2 text-center">
 				<span class="text-sm text-slate-400">
 					{#if isComplete}

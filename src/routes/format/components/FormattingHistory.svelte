@@ -1,17 +1,37 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { getUserFiles, type FormattedFile } from '../api';
 	import { formattingComplete } from '../stores';
+	import { auth } from '$lib/stores/auth';
 
-	let files: FormattedFile[] = [];
-	let isLoading = true;
+	interface HistoryFile {
+		fileName: string;
+		isPaid: boolean;
+		timestamp: string;
+	}
+
+	let files: HistoryFile[] = [];
+	let isLoading = false;
 	let error = '';
+	let isLoaded = false;
 
 	async function loadFiles() {
+		if (!$auth.authenticated || isLoading || isLoaded) {
+			if (!$auth.authenticated) {
+				isLoading = false;
+			}
+			return;
+		}
+
 		try {
 			isLoading = true;
 			error = '';
-			files = await getUserFiles();
+			const response = await fetch('/api/format/history');
+			if (!response.ok) {
+				throw new Error('Ошибка при загрузке истории');
+			}
+			const data = await response.json();
+			files = data.files || [];
+			isLoaded = true;
 		} catch (err) {
 			error = err instanceof Error ? err.message : 'Ошибка при загрузке файлов';
 		} finally {
@@ -19,47 +39,20 @@
 		}
 	}
 
-	function downloadFile(base64: string, fileName: string) {
-		const binStr = atob(base64);
-		const bytes = new Uint8Array(binStr.length);
-		for (let i = 0; i < binStr.length; i++) {
-			bytes[i] = binStr.charCodeAt(i);
-		}
-		const blob = new Blob([bytes], {
-			type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-		});
-		const url = URL.createObjectURL(blob);
-		const a = document.createElement('a');
-		a.href = url;
-		a.download = `formatted_${fileName}`;
-		document.body.appendChild(a);
-		a.click();
-		document.body.removeChild(a);
-		URL.revokeObjectURL(url);
-	}
-
 	formattingComplete.subscribe((complete) => {
 		if (complete) {
+			isLoaded = false;
 			loadFiles();
 			formattingComplete.set(false);
 		}
 	});
 
-	onMount(() => {
+	$: if (!$auth.loading && $auth.authenticated && !isLoaded && !isLoading) {
 		loadFiles();
-	});
+	}
 </script>
 
-<div class="mt-8 rounded-2xl bg-slate-800 p-4 md:p-6">
-	<div class="mb-6 flex items-center border-b border-slate-700 pb-4">
-		<div class="flex items-center">
-			<h2 class="text-4xl font-semibold text-white">📋</h2>
-			<h2 class="ml-3 text-xl font-semibold text-white md:text-3xl">
-				История форматирования
-			</h2>
-		</div>
-	</div>
-
+<div>
 	{#if isLoading}
 		<div class="flex justify-center py-8 text-slate-400">Загрузка...</div>
 	{:else if error}
@@ -71,25 +64,19 @@
 			У вас пока нет отформатированных файлов
 		</div>
 	{:else}
-		<div class="space-y-4">
+		<div class="space-y-3">
 			{#each files as file}
-				<div class="rounded-lg bg-slate-700/30 p-4">
-					<div class="flex items-center justify-between">
-						<div>
-							<h3 class="font-medium text-white">{file.fileName}</h3>
-							<div class="mt-1 text-sm text-slate-400">
-								{new Date(file.timestamp).toLocaleString()}
-							</div>
-							<div class="mt-1 flex gap-4 text-sm text-slate-300">
-								<span>Размер: {(file.formattedSize / 1024).toFixed(1)} КБ</span>
-							</div>
+				<div
+					class="flex items-center justify-between border-b border-slate-700 pb-3 last:border-0"
+				>
+					<div class="flex-1">
+						<h3 class="font-medium text-white">{file.fileName}</h3>
+						<div class="mt-1 flex items-center gap-3 text-sm text-slate-400">
+							<span>{new Date(file.timestamp).toLocaleString()}</span>
+							<span class={file.isPaid ? 'text-green-400' : 'text-blue-400'}>
+								{file.isPaid ? 'Платное' : 'Бесплатное'}
+							</span>
 						</div>
-						<button
-							class="rounded-lg bg-blue-500 px-4 py-2 text-sm text-white transition-colors hover:bg-blue-400"
-							on:click={() => downloadFile(file.base64, file.fileName)}
-						>
-							Скачать
-						</button>
 					</div>
 				</div>
 			{/each}

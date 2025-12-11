@@ -3,17 +3,22 @@ import type { FormatParams } from '$lib/types/formatting';
 
 export type { FormatParams };
 
-function generateUserId(): string {
-	return 'user_' + Math.random().toString(36).substring(2) + Date.now().toString(36);
+export interface FormatLimit {
+	can: boolean;
+	reason?: string;
+	remaining?: number;
 }
 
-function getUserId(): string {
-	let userId = localStorage.getItem('format_user_id');
-	if (!userId) {
-		userId = generateUserId();
-		localStorage.setItem('format_user_id', userId);
+export async function checkFormatLimit(): Promise<FormatLimit> {
+	try {
+		const response = await fetch('/api/format/check-limit');
+		if (!response.ok) {
+			return { can: false, reason: 'Ошибка проверки лимита' };
+		}
+		return await response.json();
+	} catch (error) {
+		return { can: false, reason: 'Ошибка проверки лимита' };
 	}
-	return userId;
 }
 
 export interface FormattedFile {
@@ -27,38 +32,27 @@ export interface FormattedFile {
 
 const FORMAT_API_URL = '/api/format';
 
-export async function getUserFiles(): Promise<FormattedFile[]> {
-	try {
-		const userId = getUserId();
-		const response = await fetch(`${FORMAT_API_URL}?userId=${userId}`, {
-			method: 'GET'
-		});
-
-		if (!response.ok) {
-			throw new Error('Ошибка при получении файлов');
-		}
-
-		const data = await response.json();
-		return data.files || [];
-	} catch (error) {
-		console.error('Ошибка при получении файлов:', error);
-		return [];
-	}
-}
-
 export async function formatDocument(
 	base64: string,
 	formatParams?: FormatParams,
 	fileName?: string
 ): Promise<FormatResponse> {
 	try {
-		const userId = getUserId();
+		const limit = await checkFormatLimit();
+		if (!limit.can) {
+			return { success: false, error: limit.reason || 'Лимит форматирований исчерпан' };
+		}
+
+		if (!fileName) {
+			return { success: false, error: 'Имя файла не указано' };
+		}
+
 		const response = await fetch(FORMAT_API_URL, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
 			body: formatParams
-				? JSON.stringify({ file: base64, formatParams, fileName, userId })
-				: JSON.stringify({ file: base64, fileName, userId })
+				? JSON.stringify({ file: base64, formatParams, fileName })
+				: JSON.stringify({ file: base64, fileName })
 		});
 
 		if (!response.ok) {

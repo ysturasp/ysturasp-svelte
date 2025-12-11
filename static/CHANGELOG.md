@@ -1,3 +1,4 @@
+- add badge message in toilets page (ysturasp, 2025-12-10) [3 files changed, 10 insertions(+)]
 - refactor toilet location handling and update UI for improve user experience in ToiletResult component (ysturasp, 2025-12-10) [6 files changed, 151 insertions(+), 78 deletions(-)]
 - remove manual login functionality and associated API endpoint for test user authentication (ysturasp, 2025-12-10) [5 files changed, 3 insertions(+), 178 deletions(-)]
 - uncomment SupportSection in main layout and payment support link in Header (ysturasp, 2025-12-10) [4 files changed, 5 insertions(+), 3 deletions(-)]

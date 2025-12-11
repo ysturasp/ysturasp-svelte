@@ -5,12 +5,12 @@
 	import Footer from '$lib/components/layout/Footer.svelte';
 	import PageLayout from '$lib/components/layout/PageLayout.svelte';
 	import { goto } from '$app/navigation';
-	import SessionManager from '../formatt/components/SessionManager.svelte';
-	import FormattingHistory from '../formatt/components/FormattingHistory.svelte';
-	import PaymentHistory from '../formatt/components/PaymentHistory.svelte';
-	import PaymentModal from '../formatt/components/PaymentModal.svelte';
-	import { checkFormatLimit } from '../formatt/api';
-	import type { FormatLimit } from '../formatt/api';
+	import SessionManager from '../format/components/SessionManager.svelte';
+	import FormattingHistory from '../format/components/FormattingHistory.svelte';
+	import PaymentHistory from '../format/components/PaymentHistory.svelte';
+	import PaymentModal from '../format/components/PaymentModal.svelte';
+	import { checkFormatLimit } from '../format/api';
+	import type { FormatLimit } from '../format/api';
 	import BottomModal from '$lib/components/ui/BottomModal.svelte';
 	import { browser } from '$app/environment';
 	import {
