@@ -4,6 +4,7 @@
 	import { createEventDispatcher } from 'svelte';
 	import { slide, fade } from 'svelte/transition';
 	import { quintOut } from 'svelte/easing';
+	import CustomSelect from '$lib/components/ui/CustomSelect.svelte';
 
 	const dispatch = createEventDispatcher<{
 		change: FormatParams;
@@ -16,6 +17,36 @@
 	$: localParams = formatParams;
 	$: hasChanges = JSON.stringify(localParams) !== JSON.stringify(defaultFormatParams);
 
+	const marginFields = [
+		{ key: 'top', label: 'Верх' },
+		{ key: 'bottom', label: 'Низ' },
+		{ key: 'left', label: 'Лево' },
+		{ key: 'right', label: 'Право' }
+	] as const;
+
+	const textToggles = [
+		{ key: 'removeBold', label: 'Убрать жирный' },
+		{ key: 'removeItalic', label: 'Убрать курсив' },
+		{ key: 'removeUnderline', label: 'Убрать подчеркивание' }
+	] as const;
+
+	const headerLevels = [
+		{ key: 'h1', label: 'Уровень 1' },
+		{ key: 'h2', label: 'Уровень 2' },
+		{ key: 'h3', label: 'Уровень 3' }
+	] as const;
+
+	const fontOptions = [
+		{ id: 'Times New Roman', label: 'Times New Roman' },
+		{ id: 'Arial', label: 'Arial' }
+	];
+
+	const lineHeightOptions = [
+		{ id: 1, label: 'Одинарный' },
+		{ id: 1.5, label: 'Полуторный' },
+		{ id: 2, label: 'Двойной' }
+	];
+
 	function handleChange() {
 		dispatch('change', localParams);
 	}
@@ -24,9 +55,19 @@
 		localParams = JSON.parse(JSON.stringify(defaultFormatParams));
 		handleChange();
 	}
+
+	function updateText(field: keyof FormatParams['text'], value: number | string | boolean) {
+		localParams = {
+			...localParams,
+			text: { ...localParams.text, [field]: value }
+		};
+		handleChange();
+	}
 </script>
 
-<div class="rounded-xl bg-slate-700/30 transition-all hover:bg-slate-700/60">
+<div
+	class="relative z-20 rounded-2xl border border-slate-800/40 bg-slate-700/30 backdrop-blur transition-all"
+>
 	<div class="flex items-center justify-between p-4">
 		<button class="flex-1 text-left" on:click={() => (isOpen = !isOpen)}>
 			<div class="flex flex-col">
@@ -95,7 +136,7 @@
 				{#if hasChanges}
 					<div transition:slide={{ duration: 200, easing: quintOut }}>
 						<button
-							class="mb-2 flex w-full items-center justify-center gap-2 rounded-lg bg-slate-600/50 py-2 text-sm text-slate-300 transition-all hover:bg-red-500/20 hover:text-red-400 md:hidden"
+							class="mb-3 flex w-full items-center justify-center gap-2 rounded-lg border border-slate-600/50 bg-slate-800/40 px-3 py-2 text-sm text-slate-200 transition hover:border-red-400/60 hover:bg-red-500/10 hover:text-red-300 md:hidden"
 							on:click={resetParams}
 						>
 							<svg
@@ -115,226 +156,278 @@
 					</div>
 				{/if}
 			</div>
-			<div class="grid gap-3 md:grid-cols-3">
-				<div class="space-y-3">
-					<h3 class="text-base font-medium text-slate-300">Поля страницы (см)</h3>
-					<div class="grid grid-cols-2">
-						<label class="flex items-center justify-between gap-3 rounded p-2">
-							<span class="text-sm text-slate-300">Верх</span>
-							<input
-								type="number"
-								bind:value={localParams.margins.top}
-								on:change={handleChange}
-								min="0"
-								max="10"
-								step="0.1"
-								class="w-16 rounded-md bg-slate-600/50 px-2 py-1 text-right text-sm text-white"
-							/>
-						</label>
-						<label class="flex items-center justify-between gap-3 rounded p-2">
-							<span class="text-sm text-slate-300">Низ</span>
-							<input
-								type="number"
-								bind:value={localParams.margins.bottom}
-								on:change={handleChange}
-								min="0"
-								max="10"
-								step="0.1"
-								class="w-16 rounded-md bg-slate-600/50 px-2 py-1 text-right text-sm text-white"
-							/>
-						</label>
-						<label class="flex items-center justify-between gap-3 rounded p-2">
-							<span class="text-sm text-slate-300">Лево</span>
-							<input
-								type="number"
-								bind:value={localParams.margins.left}
-								on:change={handleChange}
-								min="0"
-								max="10"
-								step="0.1"
-								class="w-16 rounded-md bg-slate-600/50 px-2 py-1 text-right text-sm text-white"
-							/>
-						</label>
-						<label class="flex items-center justify-between gap-3 rounded p-2">
-							<span class="text-sm text-slate-300">Право</span>
-							<input
-								type="number"
-								bind:value={localParams.margins.right}
-								on:change={handleChange}
-								min="0"
-								max="10"
-								step="0.1"
-								class="w-16 rounded-md bg-slate-600/50 px-2 py-1 text-right text-sm text-white"
-							/>
-						</label>
-					</div>
+			<div class="flex flex-col gap-3">
+				<div class="grid gap-3 lg:grid-cols-2">
+					<section class="pb-2">
+						<div class="flex items-center justify-between text-slate-100">
+							<h2 class="text-base font-semibold tracking-tight text-slate-100">
+								Поля страницы
+							</h2>
+							<span
+								class="rounded-full border border-slate-600/50 px-2 py-0.5 text-[11px] text-slate-400"
+								>см</span
+							>
+						</div>
+						<div class="grid gap-3 sm:grid-cols-2">
+							{#each marginFields as field}
+								<div class="flex flex-col gap-2">
+									<span class="text-sm font-medium text-slate-200"
+										>{field.label}</span
+									>
+									<div
+										class="flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-800 px-2 py-1.5"
+									>
+										<button
+											type="button"
+											class="flex h-9 w-9 items-center justify-center rounded-md border border-blue-500/70 bg-blue-900/40 text-lg text-slate-50 transition hover:border-blue-500 hover:text-blue-300 active:translate-y-px"
+											on:click={() => {
+												const next = Math.max(
+													0,
+													Number(
+														(localParams.margins[field.key] || 0) - 0.1
+													)
+												);
+												localParams.margins[field.key] = Number(
+													next.toFixed(1)
+												);
+												handleChange();
+											}}>−</button
+										>
+										<input
+											type="number"
+											bind:value={localParams.margins[field.key]}
+											on:change={handleChange}
+											min="0"
+											max="10"
+											step="0.1"
+											inputmode="decimal"
+											class="w-full rounded-md border border-slate-700 bg-slate-800 px-2 py-1 text-center text-sm text-slate-100 transition focus:border-blue-500 focus:ring-1 focus:ring-blue-500/60"
+										/>
+										<button
+											type="button"
+											class="flex h-9 w-9 items-center justify-center rounded-md border border-blue-500/70 bg-blue-900/40 text-lg text-slate-50 transition hover:border-blue-500 hover:text-blue-300 active:translate-y-px"
+											on:click={() => {
+												const next =
+													Number(localParams.margins[field.key] || 0) +
+													0.1;
+												localParams.margins[field.key] = Number(
+													next.toFixed(1)
+												);
+												handleChange();
+											}}>+</button
+										>
+									</div>
+								</div>
+							{/each}
+						</div>
+					</section>
+
+					<section
+						class="border-t border-slate-600/60 pt-3 pb-2 lg:ml-2 lg:border-0 lg:border-l lg:border-slate-600/60 lg:pt-0 lg:pl-4"
+					>
+						<div class="flex items-center justify-between text-slate-100">
+							<h2 class="text-base font-semibold tracking-tight text-slate-100">
+								Заголовки
+							</h2>
+							<span
+								class="rounded-full border border-slate-600/50 px-2 py-0.5 text-[11px] text-slate-400"
+								>пт</span
+							>
+						</div>
+						<div class="grid gap-3 sm:grid-cols-3">
+							{#each headerLevels as level}
+								<div class="flex flex-col gap-2">
+									<span class="text-sm font-medium text-slate-200"
+										>{level.label}</span
+									>
+									<div
+										class="flex flex-col gap-2 rounded-lg border border-slate-700 bg-slate-800 p-3"
+									>
+										<div class="flex items-center gap-2">
+											<span
+												class="text-xs tracking-wide text-slate-400 uppercase"
+												>до</span
+											>
+											<input
+												type="number"
+												bind:value={
+													localParams.headers[level.key].spacingBefore
+												}
+												on:change={(event) => {
+													localParams.headers[level.key].spacingBefore =
+														Number(
+															(event.target as HTMLInputElement).value
+														);
+													handleChange();
+												}}
+												min="0"
+												max="72"
+												class="w-full rounded-md border border-slate-700 bg-slate-800 px-2 py-1 text-center text-sm text-slate-100 transition focus:border-blue-500 focus:ring-1 focus:ring-blue-500/60"
+											/>
+										</div>
+										<div class="flex items-center gap-2">
+											<span
+												class="text-xs tracking-wide text-slate-400 uppercase"
+												>после</span
+											>
+											<input
+												type="number"
+												bind:value={
+													localParams.headers[level.key].spacingAfter
+												}
+												on:change={(event) => {
+													localParams.headers[level.key].spacingAfter =
+														Number(
+															(event.target as HTMLInputElement).value
+														);
+													handleChange();
+												}}
+												min="0"
+												max="72"
+												class="w-full rounded-md border border-slate-700 bg-slate-800 px-2 py-1 text-center text-sm text-slate-100 transition focus:border-blue-500 focus:ring-1 focus:ring-blue-500/60"
+											/>
+										</div>
+									</div>
+								</div>
+							{/each}
+						</div>
+					</section>
 				</div>
 
-				<div class="space-y-3">
-					<h3 class="text-base font-medium text-slate-300">Текст</h3>
-					<div class="grid">
-						<label class="flex items-center justify-between gap-3 rounded p-2">
-							<span class="text-sm text-slate-300">Шрифт</span>
-							<select
-								bind:value={localParams.text.font}
-								on:change={handleChange}
-								class="w-40 rounded-md bg-slate-600/50 px-2 py-1 text-sm text-white"
-							>
-								<option value="Times New Roman">Times New Roman</option>
-								<option value="Arial">Arial</option>
-							</select>
-						</label>
-						<div class="grid grid-cols-2">
-							<label class="flex items-center justify-between gap-3 rounded p-2">
-								<span class="text-sm text-slate-300">Размер</span>
-								<input
-									type="number"
-									bind:value={localParams.text.size}
-									on:change={handleChange}
-									min="8"
-									max="72"
-									class="w-16 rounded-md bg-slate-600/50 px-2 py-1 text-right text-sm text-white"
-								/>
-							</label>
-							<label class="flex items-center justify-between gap-3 rounded p-2">
-								<span class="text-sm text-slate-300">Отступ</span>
-								<input
-									type="number"
-									bind:value={localParams.text.indent}
-									on:change={handleChange}
-									min="0"
-									max="5"
-									step="0.05"
-									class="w-16 rounded-md bg-slate-600/50 px-2 py-1 text-right text-sm text-white"
-								/>
-							</label>
-						</div>
-						<label class="flex items-center justify-between gap-3 rounded p-2">
-							<span class="text-sm text-slate-300">Интервал</span>
-							<select
-								bind:value={localParams.text.lineHeight}
-								on:change={handleChange}
-								class="w-40 rounded-md bg-slate-600/50 px-2 py-1 text-sm text-white"
-							>
-								<option value={1}>Одинарный</option>
-								<option value={1.5}>Полуторный</option>
-								<option value={2}>Двойной</option>
-							</select>
-						</label>
-						<div class="grid grid-cols-3 gap-2">
-							<label class="flex items-center justify-between gap-3 rounded p-2">
-								<span class="text-sm text-slate-300">Убрать жирный</span>
-								<input
-									type="checkbox"
-									bind:checked={localParams.text.removeBold}
-									on:change={handleChange}
-									class="h-4 w-4 rounded border-slate-600 bg-slate-600/50 text-blue-500"
-								/>
-							</label>
-							<label class="flex items-center justify-between gap-3 rounded p-2">
-								<span class="text-sm text-slate-300">Убрать курсив</span>
-								<input
-									type="checkbox"
-									bind:checked={localParams.text.removeItalic}
-									on:change={handleChange}
-									class="h-4 w-4 rounded border-slate-600 bg-slate-600/50 text-blue-500"
-								/>
-							</label>
-							<label class="flex items-center justify-between gap-3 rounded p-2">
-								<span class="text-sm text-slate-300">Убрать подчеркивание</span>
-								<input
-									type="checkbox"
-									bind:checked={localParams.text.removeUnderline}
-									on:change={handleChange}
-									class="h-4 w-4 rounded border-slate-600 bg-slate-600/50 text-blue-500"
-								/>
-							</label>
-						</div>
-					</div>
-				</div>
+				<div class="h-px w-full bg-slate-600/60"></div>
 
-				<div class="space-y-3">
-					<h3 class="text-base font-medium text-slate-300">Заголовки (пт)</h3>
-					<div class="grid gap-4">
-						<div class="grid grid-cols-3 gap-3">
-							<div class="space-y-1">
-								<div class="text-center text-sm text-slate-300">Уровень 1</div>
-								<div class="grid gap-1">
+				<section>
+					<div class="flex items-center justify-between text-slate-100">
+						<h2 class="text-base font-semibold tracking-tight text-slate-100">Текст</h2>
+					</div>
+					<div class="flex flex-col gap-4">
+						<div class="flex flex-col gap-2">
+							<span class="text-sm font-medium text-slate-200">Шрифт</span>
+							<CustomSelect
+								items={fontOptions}
+								selectedId={localParams.text.font}
+								width="100%"
+								on:select={({ detail }) => updateText('font', detail.id as string)}
+							/>
+						</div>
+
+						<div class="grid gap-3 sm:grid-cols-2">
+							<div class="flex flex-col gap-2">
+								<span class="text-sm font-medium text-slate-200">Размер</span>
+								<div
+									class="flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-800 px-2 py-1.5"
+								>
+									<button
+										type="button"
+										class="flex h-9 w-9 items-center justify-center rounded-md border border-blue-500/70 bg-blue-900/40 text-lg text-slate-50 transition hover:border-blue-500 hover:text-blue-300 active:translate-y-px"
+										on:click={() => {
+											const next = Math.max(
+												8,
+												Number(localParams.text.size || 0) - 1
+											);
+											updateText('size', Number(next.toFixed(0)));
+										}}>−</button
+									>
 									<input
 										type="number"
-										bind:value={localParams.headers.h1.spacingBefore}
-										on:change={handleChange}
-										min="0"
+										bind:value={localParams.text.size}
+										on:change={(event) =>
+											updateText(
+												'size',
+												Number((event.target as HTMLInputElement).value)
+											)}
+										min="8"
 										max="72"
-										class="w-full rounded bg-slate-600/50 px-2 py-1 text-center text-sm text-white"
-										title="Отступ до"
+										class="w-full rounded-md border border-slate-700 bg-slate-800 px-2 py-1 text-center text-sm text-slate-100 transition focus:border-blue-500 focus:ring-1 focus:ring-blue-500/60"
 									/>
-									<div class="text-center text-xs text-slate-400">до</div>
-									<input
-										type="number"
-										bind:value={localParams.headers.h1.spacingAfter}
-										on:change={handleChange}
-										min="0"
-										max="72"
-										class="w-full rounded bg-slate-600/50 px-2 py-1 text-center text-sm text-white"
-										title="Отступ после"
-									/>
-									<div class="text-center text-xs text-slate-400">после</div>
+									<button
+										type="button"
+										class="flex h-9 w-9 items-center justify-center rounded-md border border-blue-500/70 bg-blue-900/40 text-lg text-slate-50 transition hover:border-blue-500 hover:text-blue-300 active:translate-y-px"
+										on:click={() => {
+											const next = Math.min(
+												72,
+												Number(localParams.text.size || 0) + 1
+											);
+											updateText('size', Number(next.toFixed(0)));
+										}}>+</button
+									>
 								</div>
 							</div>
-							<div class="space-y-1">
-								<div class="text-center text-sm text-slate-300">Уровень 2</div>
-								<div class="grid gap-1">
+							<div class="flex flex-col gap-2">
+								<span class="text-sm font-medium text-slate-200">Отступ</span>
+								<div
+									class="flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-800 px-2 py-1.5"
+								>
+									<button
+										type="button"
+										class="flex h-9 w-9 items-center justify-center rounded-md border border-blue-500/70 bg-blue-900/40 text-lg text-slate-50 transition hover:border-blue-500 hover:text-blue-300 active:translate-y-px"
+										on:click={() => {
+											const next = Math.max(
+												0,
+												Number((localParams.text.indent || 0) - 0.05)
+											);
+											updateText('indent', Number(next.toFixed(2)));
+										}}>−</button
+									>
 									<input
 										type="number"
-										bind:value={localParams.headers.h2.spacingBefore}
-										on:change={handleChange}
+										bind:value={localParams.text.indent}
+										on:change={(event) =>
+											updateText(
+												'indent',
+												Number((event.target as HTMLInputElement).value)
+											)}
 										min="0"
-										max="72"
-										class="w-full rounded bg-slate-600/50 px-2 py-1 text-center text-sm text-white"
-										title="Отступ до"
+										max="5"
+										step="0.05"
+										inputmode="decimal"
+										class="w-full rounded-md border border-slate-700 bg-slate-800 px-2 py-1 text-center text-sm text-slate-100 transition focus:border-blue-500 focus:ring-1 focus:ring-blue-500/60"
 									/>
-									<div class="text-center text-xs text-slate-400">до</div>
-									<input
-										type="number"
-										bind:value={localParams.headers.h2.spacingAfter}
-										on:change={handleChange}
-										min="0"
-										max="72"
-										class="w-full rounded bg-slate-600/50 px-2 py-1 text-center text-sm text-white"
-										title="Отступ после"
-									/>
-									<div class="text-center text-xs text-slate-400">после</div>
-								</div>
-							</div>
-							<div class="space-y-1">
-								<div class="text-center text-sm text-slate-300">Уровень 3</div>
-								<div class="grid gap-1">
-									<input
-										type="number"
-										bind:value={localParams.headers.h3.spacingBefore}
-										on:change={handleChange}
-										min="0"
-										max="72"
-										class="w-full rounded bg-slate-600/50 px-2 py-1 text-center text-sm text-white"
-										title="Отступ до"
-									/>
-									<div class="text-center text-xs text-slate-400">до</div>
-									<input
-										type="number"
-										bind:value={localParams.headers.h3.spacingAfter}
-										on:change={handleChange}
-										min="0"
-										max="72"
-										class="w-full rounded bg-slate-600/50 px-2 py-1 text-center text-sm text-white"
-										title="Отступ после"
-									/>
-									<div class="text-center text-xs text-slate-400">после</div>
+									<button
+										type="button"
+										class="flex h-9 w-9 items-center justify-center rounded-md border border-blue-500/70 bg-blue-900/40 text-lg text-slate-50 transition hover:border-blue-500 hover:text-blue-300 active:translate-y-px"
+										on:click={() => {
+											const next = Math.min(
+												5,
+												Number(localParams.text.indent || 0) + 0.05
+											);
+											updateText('indent', Number(next.toFixed(2)));
+										}}>+</button
+									>
 								</div>
 							</div>
 						</div>
+
+						<div class="flex flex-col gap-2">
+							<span class="text-sm font-medium text-slate-200">Интервал</span>
+							<CustomSelect
+								items={lineHeightOptions}
+								selectedId={localParams.text.lineHeight}
+								width="100%"
+								on:select={({ detail }) =>
+									updateText('lineHeight', Number(detail.id))}
+							/>
+						</div>
+
+						<div class="grid gap-2 sm:grid-cols-3">
+							{#each textToggles as toggle}
+								<button
+									type="button"
+									class={`flex w-full items-center justify-center rounded-lg px-3 py-2 text-sm transition active:translate-y-px active:opacity-90 ${
+										localParams.text[toggle.key]
+											? 'border border-blue-500/70 bg-blue-900/40 text-slate-50 shadow-[0_0_0_1px_rgba(59,130,246,0.35)]'
+											: 'border border-slate-700/60 bg-slate-800 text-slate-200 hover:border-blue-500/60 hover:text-slate-50'
+									}`}
+									on:click={() =>
+										updateText(toggle.key, !localParams.text[toggle.key])}
+									aria-pressed={localParams.text[toggle.key]}
+								>
+									<span>{toggle.label}</span>
+								</button>
+							{/each}
+						</div>
 					</div>
-				</div>
+				</section>
 			</div>
 		</div>
 	{/if}

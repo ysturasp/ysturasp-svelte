@@ -1,3 +1,4 @@
+- replace all redirect instances of /formatt with /format (ysturasp, 2025-12-11) [9 files changed, 10 insertions(+), 9 deletions(-)]
 - transfer /formatt --> /format (ysturasp, 2025-12-11) [24 files changed, 375 insertions(+), 1783 deletions(-)]
 - add badge message in toilets page (ysturasp, 2025-12-10) [3 files changed, 10 insertions(+)]
 - refactor toilet location handling and update UI for improve user experience in ToiletResult component (ysturasp, 2025-12-10) [6 files changed, 151 insertions(+), 78 deletions(-)]
