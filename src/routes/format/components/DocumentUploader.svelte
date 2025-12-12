@@ -14,6 +14,7 @@
 	}>();
 
 	export let formatParams: FormatParams | undefined = undefined;
+	export let agreedToTerms = false;
 
 	let dropZone: HTMLDivElement;
 	let fileInput: HTMLInputElement;
@@ -62,6 +63,11 @@
 
 		if (!$auth.authenticated) {
 			dispatch('error', 'Необходима авторизация для форматирования документов');
+			return;
+		}
+
+		if (!agreedToTerms) {
+			dispatch('error', 'Необходимо согласие с условиями использования');
 			return;
 		}
 

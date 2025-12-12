@@ -22,6 +22,7 @@
 	import DeleteDataModal from '$lib/components/modals/DeleteDataModal.svelte';
 	import ApplySettingsModal from '$lib/components/modals/ApplySettingsModal.svelte';
 	import { notifications } from '$lib/stores/notifications';
+	import Checkbox from '$lib/components/ui/Checkbox.svelte';
 
 	const SCRIPT_URL =
 		'https://script.google.com/macros/s/AKfycby_96MwIj8oq9qdVcjFz6lRL9XM3EAV_XV8I25ZykDh4FEWqaum6ev_GmDjort26MkbsQ/exec';
@@ -510,59 +511,17 @@
 						<h3 class="mb-2 text-lg font-semibold text-white">Мои настройки</h3>
 						<div class="mb-4 flex flex-wrap gap-4">
 							<div class="flex items-center">
-								<label class="inline-flex cursor-pointer items-center">
-									<input
-										type="checkbox"
-										bind:checked={shareHiddenSubjects}
-										class="peer hidden"
-									/>
-									<div
-										class="mr-2 flex h-5 w-5 items-center justify-center rounded-md border-2 border-slate-500 transition-colors peer-checked:border-blue-500"
-									>
-										<svg
-											class="h-3 w-3 text-blue-500 {shareHiddenSubjects
-												? ''
-												: 'hidden'}"
-											viewBox="0 0 20 20"
-											fill="currentColor"
-										>
-											<path
-												fill-rule="evenodd"
-												d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-												clip-rule="evenodd"
-											/>
-										</svg>
-									</div>
-									<span class="text-slate-400">Скрытые предметы</span>
-								</label>
+								<Checkbox
+									bind:checked={shareHiddenSubjects}
+									label="Скрытые предметы"
+								/>
 							</div>
 
 							<div class="flex items-center">
-								<label class="inline-flex cursor-pointer items-center">
-									<input
-										type="checkbox"
-										bind:checked={shareSubgroupSettings}
-										class="peer hidden"
-									/>
-									<div
-										class="mr-2 flex h-5 w-5 items-center justify-center rounded-md border-2 border-slate-500 transition-colors peer-checked:border-blue-500"
-									>
-										<svg
-											class="h-3 w-3 text-blue-500 {shareSubgroupSettings
-												? ''
-												: 'hidden'}"
-											viewBox="0 0 20 20"
-											fill="currentColor"
-										>
-											<path
-												fill-rule="evenodd"
-												d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-												clip-rule="evenodd"
-											/>
-										</svg>
-									</div>
-									<span class="text-slate-400">Настройки подгрупп</span>
-								</label>
+								<Checkbox
+									bind:checked={shareSubgroupSettings}
+									label="Настройки подгрупп"
+								/>
 							</div>
 						</div>
 

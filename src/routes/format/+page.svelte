@@ -20,6 +20,7 @@
 	import { notifications } from '$lib/stores/notifications';
 	import NotificationsContainer from '$lib/components/notifications/NotificationsContainer.svelte';
 	import BottomModal from '$lib/components/ui/BottomModal.svelte';
+	import Checkbox from '$lib/components/ui/Checkbox.svelte';
 
 	let isProcessing = false;
 	let errorMessage = '';
@@ -36,6 +37,10 @@
 	let errorModalMessage = '';
 	let isDomainCheckModalOpen = false;
 	let authSectionRef: HTMLDivElement | null = null;
+	let agreedToTerms = false;
+	let isMounted = false;
+
+	const TERMS_AGREEMENT_KEY = 'format_terms_agreement';
 
 	onMount(() => {
 		if (
@@ -50,7 +55,26 @@
 		if (page.url.searchParams.get('payment') === 'success') {
 			handlePaymentReturn();
 		}
+
+		try {
+			const saved = localStorage.getItem(TERMS_AGREEMENT_KEY);
+			if (saved === 'true') {
+				agreedToTerms = true;
+			}
+		} catch (error) {
+			console.warn('Не удалось загрузить согласие:', error);
+		}
+
+		isMounted = true;
 	});
+
+	$: if (isMounted && typeof window !== 'undefined') {
+		try {
+			localStorage.setItem(TERMS_AGREEMENT_KEY, String(agreedToTerms));
+		} catch (error) {
+			console.warn('Не удалось сохранить согласие:', error);
+		}
+	}
 
 	$: if (!$auth.loading && $auth.authenticated) {
 		checkLimit();
@@ -288,6 +312,7 @@
 				<div class="mt-4">
 					<DocumentUploader
 						{formatParams}
+						{agreedToTerms}
 						on:error={handleError}
 						on:processing={handleProcessing}
 						on:downloadReady={handleDownloadReady}
@@ -334,20 +359,20 @@
 					</div>
 				{/if}
 
-				<div
-					class="mt-4 flex items-center gap-2 rounded-lg bg-blue-500/10 p-3 text-sm text-blue-300"
-				>
-					<svg class="h-5 w-5 shrink-0" viewBox="0 0 20 20" fill="currentColor">
-						<path
-							fill-rule="evenodd"
-							d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-							clip-rule="evenodd"
-						/>
-					</svg>
-					<span>
-						ysturasp может использовать загруженные документы для улучшения работы
-						алгоритма форматирования
-					</span>
+				<div class="mt-4 rounded-lg bg-blue-500/10 p-3 text-sm">
+					<Checkbox
+						bind:checked={agreedToTerms}
+						id="terms-agreement"
+						labelClass="text-blue-300"
+					>
+						Я согласен с
+						<a
+							href="/legal/terms"
+							target="_blank"
+							rel="noopener noreferrer"
+							class="underline hover:text-blue-200">условиями использования</a
+						>
+					</Checkbox>
 				</div>
 			</div>
 
