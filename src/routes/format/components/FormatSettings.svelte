@@ -5,6 +5,7 @@
 	import { slide, fade } from 'svelte/transition';
 	import { quintOut } from 'svelte/easing';
 	import CustomSelect from '$lib/components/ui/CustomSelect.svelte';
+	import NumberInput from '$lib/components/ui/NumberInput.svelte';
 
 	const dispatch = createEventDispatcher<{
 		change: FormatParams;
@@ -174,49 +175,15 @@
 									<span class="text-sm font-medium text-slate-200"
 										>{field.label}</span
 									>
-									<div
-										class="flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-800 px-2 py-1.5"
-									>
-										<button
-											type="button"
-											class="flex h-9 w-9 items-center justify-center rounded-md border border-blue-500/70 bg-blue-900/40 text-lg text-slate-50 transition hover:border-blue-500 hover:text-blue-300 active:translate-y-px"
-											on:click={() => {
-												const next = Math.max(
-													0,
-													Number(
-														(localParams.margins[field.key] || 0) - 0.1
-													)
-												);
-												localParams.margins[field.key] = Number(
-													next.toFixed(1)
-												);
-												handleChange();
-											}}>−</button
-										>
-										<input
-											type="number"
-											bind:value={localParams.margins[field.key]}
-											on:change={handleChange}
-											min="0"
-											max="10"
-											step="0.1"
-											inputmode="decimal"
-											class="w-full rounded-md border border-slate-700 bg-slate-800 px-2 py-1 text-center text-sm text-slate-100 transition focus:border-blue-500 focus:ring-1 focus:ring-blue-500/60"
-										/>
-										<button
-											type="button"
-											class="flex h-9 w-9 items-center justify-center rounded-md border border-blue-500/70 bg-blue-900/40 text-lg text-slate-50 transition hover:border-blue-500 hover:text-blue-300 active:translate-y-px"
-											on:click={() => {
-												const next =
-													Number(localParams.margins[field.key] || 0) +
-													0.1;
-												localParams.margins[field.key] = Number(
-													next.toFixed(1)
-												);
-												handleChange();
-											}}>+</button
-										>
-									</div>
+									<NumberInput
+										bind:value={localParams.margins[field.key]}
+										on:change={handleChange}
+										min={0}
+										max={10}
+										step={0.1}
+										decimals={1}
+										inputmode="decimal"
+									/>
 								</div>
 							{/each}
 						</div>
@@ -243,48 +210,36 @@
 									<div
 										class="flex flex-col gap-2 rounded-lg border border-slate-700 bg-slate-800 p-3"
 									>
-										<div class="flex items-center gap-2">
+										<div class="flex flex-col gap-2">
 											<span
 												class="text-xs tracking-wide text-slate-400 uppercase"
 												>до</span
 											>
-											<input
-												type="number"
+											<NumberInput
 												bind:value={
 													localParams.headers[level.key].spacingBefore
 												}
-												on:change={(event) => {
-													localParams.headers[level.key].spacingBefore =
-														Number(
-															(event.target as HTMLInputElement).value
-														);
-													handleChange();
-												}}
-												min="0"
-												max="72"
-												class="w-full rounded-md border border-slate-700 bg-slate-800 px-2 py-1 text-center text-sm text-slate-100 transition focus:border-blue-500 focus:ring-1 focus:ring-blue-500/60"
+												on:change={handleChange}
+												min={0}
+												max={72}
+												step={1}
+												decimals={0}
 											/>
 										</div>
-										<div class="flex items-center gap-2">
+										<div class="flex flex-col gap-2">
 											<span
 												class="text-xs tracking-wide text-slate-400 uppercase"
 												>после</span
 											>
-											<input
-												type="number"
+											<NumberInput
 												bind:value={
 													localParams.headers[level.key].spacingAfter
 												}
-												on:change={(event) => {
-													localParams.headers[level.key].spacingAfter =
-														Number(
-															(event.target as HTMLInputElement).value
-														);
-													handleChange();
-												}}
-												min="0"
-												max="72"
-												class="w-full rounded-md border border-slate-700 bg-slate-800 px-2 py-1 text-center text-sm text-slate-100 transition focus:border-blue-500 focus:ring-1 focus:ring-blue-500/60"
+												on:change={handleChange}
+												min={0}
+												max={72}
+												step={1}
+												decimals={0}
 											/>
 										</div>
 									</div>
@@ -314,87 +269,26 @@
 						<div class="grid gap-3 sm:grid-cols-2">
 							<div class="flex flex-col gap-2">
 								<span class="text-sm font-medium text-slate-200">Размер</span>
-								<div
-									class="flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-800 px-2 py-1.5"
-								>
-									<button
-										type="button"
-										class="flex h-9 w-9 items-center justify-center rounded-md border border-blue-500/70 bg-blue-900/40 text-lg text-slate-50 transition hover:border-blue-500 hover:text-blue-300 active:translate-y-px"
-										on:click={() => {
-											const next = Math.max(
-												8,
-												Number(localParams.text.size || 0) - 1
-											);
-											updateText('size', Number(next.toFixed(0)));
-										}}>−</button
-									>
-									<input
-										type="number"
-										bind:value={localParams.text.size}
-										on:change={(event) =>
-											updateText(
-												'size',
-												Number((event.target as HTMLInputElement).value)
-											)}
-										min="8"
-										max="72"
-										class="w-full rounded-md border border-slate-700 bg-slate-800 px-2 py-1 text-center text-sm text-slate-100 transition focus:border-blue-500 focus:ring-1 focus:ring-blue-500/60"
-									/>
-									<button
-										type="button"
-										class="flex h-9 w-9 items-center justify-center rounded-md border border-blue-500/70 bg-blue-900/40 text-lg text-slate-50 transition hover:border-blue-500 hover:text-blue-300 active:translate-y-px"
-										on:click={() => {
-											const next = Math.min(
-												72,
-												Number(localParams.text.size || 0) + 1
-											);
-											updateText('size', Number(next.toFixed(0)));
-										}}>+</button
-									>
-								</div>
+								<NumberInput
+									bind:value={localParams.text.size}
+									on:change={({ detail }) => updateText('size', detail)}
+									min={8}
+									max={72}
+									step={1}
+									decimals={0}
+								/>
 							</div>
 							<div class="flex flex-col gap-2">
 								<span class="text-sm font-medium text-slate-200">Отступ</span>
-								<div
-									class="flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-800 px-2 py-1.5"
-								>
-									<button
-										type="button"
-										class="flex h-9 w-9 items-center justify-center rounded-md border border-blue-500/70 bg-blue-900/40 text-lg text-slate-50 transition hover:border-blue-500 hover:text-blue-300 active:translate-y-px"
-										on:click={() => {
-											const next = Math.max(
-												0,
-												Number((localParams.text.indent || 0) - 0.05)
-											);
-											updateText('indent', Number(next.toFixed(2)));
-										}}>−</button
-									>
-									<input
-										type="number"
-										bind:value={localParams.text.indent}
-										on:change={(event) =>
-											updateText(
-												'indent',
-												Number((event.target as HTMLInputElement).value)
-											)}
-										min="0"
-										max="5"
-										step="0.05"
-										inputmode="decimal"
-										class="w-full rounded-md border border-slate-700 bg-slate-800 px-2 py-1 text-center text-sm text-slate-100 transition focus:border-blue-500 focus:ring-1 focus:ring-blue-500/60"
-									/>
-									<button
-										type="button"
-										class="flex h-9 w-9 items-center justify-center rounded-md border border-blue-500/70 bg-blue-900/40 text-lg text-slate-50 transition hover:border-blue-500 hover:text-blue-300 active:translate-y-px"
-										on:click={() => {
-											const next = Math.min(
-												5,
-												Number(localParams.text.indent || 0) + 0.05
-											);
-											updateText('indent', Number(next.toFixed(2)));
-										}}>+</button
-									>
-								</div>
+								<NumberInput
+									bind:value={localParams.text.indent}
+									on:change={({ detail }) => updateText('indent', detail)}
+									min={0}
+									max={5}
+									step={0.05}
+									decimals={2}
+									inputmode="decimal"
+								/>
 							</div>
 						</div>
 

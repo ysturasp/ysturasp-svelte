@@ -1,3 +1,4 @@
+- redesign FormatSettings component with components and integrate CustomSelect instead of system menu (ysturasp, 2025-12-11) [3 files changed, 297 insertions(+), 202 deletions(-)]
 - replace all redirect instances of /formatt with /format (ysturasp, 2025-12-11) [9 files changed, 10 insertions(+), 9 deletions(-)]
 - transfer /formatt --> /format (ysturasp, 2025-12-11) [24 files changed, 375 insertions(+), 1783 deletions(-)]
 - add badge message in toilets page (ysturasp, 2025-12-10) [3 files changed, 10 insertions(+)]
