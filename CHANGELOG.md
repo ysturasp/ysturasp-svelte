@@ -1,3 +1,4 @@
+- update legal page with new last updated date to 12 december 2025 (ysturasp, 2025-12-13) [3 files changed, 3 insertions(+), 1 deletion(-)]
 - implement Checkbox component for user settings and terms agreement in format and DocumentUploader pages (ysturasp, 2025-12-12) [7 files changed, 120 insertions(+), 65 deletions(-)]
 - refactor FormatSettings component to utilize NumberInput for margin, spacing, and text size adjustments (ysturasp, 2025-12-12) [4 files changed, 136 insertions(+), 147 deletions(-)]
 - redesign FormatSettings component with components and integrate CustomSelect instead of system menu (ysturasp, 2025-12-11) [3 files changed, 297 insertions(+), 202 deletions(-)]

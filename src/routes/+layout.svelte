@@ -1,6 +1,7 @@
 <script lang="ts">
 	import '../app.css';
 	import Preloader from '$lib/components/Preloader.svelte';
+	import Snow from '$lib/components/Snow.svelte';
 	import YandexMetrica from '$lib/components/common/YandexMetrica.svelte';
 	import OfflineModal from '$lib/components/offline/OfflineModal.svelte';
 	import ServiceStatusModal from '$lib/components/notifications/ServiceStatusModal.svelte';
@@ -110,6 +111,7 @@
 </script>
 
 <Preloader />
+<Snow />
 <YandexMetrica id={97705826} />
 <OfflineModal isOpen={$showOfflineModal} />
 <ServiceStatusModal

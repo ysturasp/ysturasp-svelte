@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import Garland from '$lib/components/Garland.svelte';
 	let isMobileMenuOpen = false;
 	let isClosing = false;
 	let mobileMenu: HTMLElement;
@@ -139,6 +140,7 @@
 			</a>
 			<slot name="personal-account-ystu" />
 		</div>
+		<Garland />
 	</div>
 
 	<slot name="online-counter-mobile" />
