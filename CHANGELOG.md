@@ -1,3 +1,4 @@
+- update script for installing git hooks (ysturasp, 2025-12-16) [3 files changed, 29 insertions(+), 6 deletions(-)]
 - feat: require authentication to view statistics and notify unauthenticated users (ysturasp, 2025-12-16) [1 file changed, 6 insertions(+)]
 - update package lock file (ysturasp, 2025-12-16) [4 files changed, 2797 insertions(+), 1611 deletions(-)]
 - add snow and garland decorative effects to UI (ysturasp, 2025-12-15) [6 files changed, 199 insertions(+)]
