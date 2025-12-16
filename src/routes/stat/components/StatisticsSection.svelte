@@ -162,6 +162,12 @@
 	}
 
 	async function getStatistics() {
+		if (!$auth.authenticated) {
+			notifications.add('Для просмотра статистики необходимо авторизоваться', 'warning');
+			dispatch('loading', { value: false });
+			return;
+		}
+
 		if (!selectedDiscipline) {
 			notifications.add('Пожалуйста, выберите дисциплину', 'error');
 			return;
