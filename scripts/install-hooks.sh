@@ -1,13 +1,29 @@
 #!/bin/bash
 
-echo "Установка git hooks..."
+GIT_DIR=$(git rev-parse --git-dir)
+PROJECT_ROOT=$(git rev-parse --show-toplevel)
 
-cat > .git/hooks/pre-commit << 'EOF'
+if [ -z "$GIT_DIR" ]; then
+    echo "Ошибка: не найден git репозиторий"
+    exit 1
+fi
+
+echo "Установка git hooks..."
+HOOK_PATH="$GIT_DIR/hooks/pre-commit"
+
+cat > "$HOOK_PATH" << EOF
 #!/bin/bash
 
 echo "Генерация changelog перед коммитом..."
 
-./scripts/generate-changelog.sh
+# Переходим в корень проекта для корректного выполнения скриптов
+cd "$PROJECT_ROOT"
+
+if [ -f "./scripts/generate-changelog.sh" ]; then
+    ./scripts/generate-changelog.sh
+else
+    echo "Предупреждение: скрипт ./scripts/generate-changelog.sh не найден"
+fi
 
 if git diff --cached --quiet CHANGELOG.md && git diff --quiet CHANGELOG.md && ! git ls-files --others --exclude-standard | grep -q "CHANGELOG.md"; then
     echo "Changelog не изменился"
@@ -19,7 +35,8 @@ fi
 exit 0
 EOF
 
-chmod +x .git/hooks/pre-commit
+chmod +x "$HOOK_PATH"
 
 echo "Git hooks установлены!"
-echo "Теперь changelog будет автоматически генерироваться перед каждым коммитом" 
+echo "Теперь changelog будет автоматически генерироваться перед каждым коммитом"
+ 
