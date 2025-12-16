@@ -56,6 +56,7 @@
 	},
 	"dependencies": {
 		"@a2seven/yoo-checkout": "^1.1.4",
+		"@rollup/rollup-darwin-arm64": "^4.53.5",
 		"@sentry/sveltekit": "^10.4.0",
 		"@tma.js/sdk-svelte": "^1.0.11",
 		"@types/animejs": "^3.1.13",
