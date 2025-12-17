@@ -3,11 +3,12 @@
 	import { getCurrentSemester } from '$lib/utils/semester';
 	import ScheduleSettings from './ScheduleSettings.svelte';
 	import { hapticFeedback, init } from '@tma.js/sdk-svelte';
-	import { onMount } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 	import { settings } from '$lib/stores/settings';
 	import type { Settings } from '$lib/stores/settings';
 	import { checkIsTelegramMiniApp } from '$lib/utils/telegram';
 	import { reachGoal } from '$lib/utils/metrika';
+	import { fade } from 'svelte/transition';
 
 	export let selectedSemester: SemesterInfo | null = null;
 	export let onSemesterChange: (semester: SemesterInfo) => void;
@@ -17,6 +18,8 @@
 	let isSettingsOpen = false;
 	let currentSettings: Settings;
 	let isTelegram = false;
+	let activeBanner: 'aeza' | 'toilets' = 'aeza';
+	let bannerInterval: ReturnType<typeof setInterval> | null = null;
 
 	settings.subscribe((value) => {
 		currentSettings = value;
@@ -50,54 +53,82 @@
 				console.warn('Not in Telegram Mini App:', error);
 			}
 		}
+
+		bannerInterval = setInterval(() => {
+			activeBanner = activeBanner === 'aeza' ? 'toilets' : 'aeza';
+		}, 5000);
+	});
+
+	onDestroy(() => {
+		if (bannerInterval) {
+			clearInterval(bannerInterval);
+			bannerInterval = null;
+		}
 	});
 </script>
 
 <div class="fixed bottom-4 left-1/2 z-50 -translate-x-1/2">
-	<div
-		class="rounded-2xl bg-slate-900/95 p-1.5 shadow-lg ring-1 shadow-slate-900/20 ring-blue-500/30 backdrop-blur-sm"
-	>
+		<div class="rounded-2xl bg-slate-900/95 p-1.5 shadow-lg ring-1 ring-blue-500/30 backdrop-blur-sm">
 		<div class="flex flex-col items-center gap-1.5 md:flex-row">
-			{#if selectedSemester && selectedSemester.id !== getCurrentSemester().id}
-				<button
-					class="flex w-full items-center justify-center rounded-lg bg-amber-500/90 px-2.5 py-1 text-sm transition-opacity hover:opacity-80 md:w-auto md:justify-start md:py-2"
-					on:click={() => onSemesterChange(getCurrentSemester())}
-				>
-					<span class="text-black">{selectedSemester.name}</span>
-					<span class="mr-1 ml-1 text-black/60">→</span>
-					<span class="text-black/60">текущий</span>
-				</button>
-
-				<div class="hidden h-4 w-[1px] bg-slate-700/50 md:block"></div>
-			{:else}
-				<a
-					href="https://aeza.net/?ref=538988"
-					target="_blank"
-					rel="noopener noreferrer"
-					class="group relative flex w-full items-center justify-center gap-1.5 rounded-lg bg-white/95 px-2.5 py-1.5 text-sm transition-opacity hover:opacity-80 md:w-auto md:py-2"
-					on:click={() => {
-						reachGoal('aeza_affiliate_click');
-						handleNavClick();
-					}}
-				>
-					<img
-						src="https://my.aeza.net/assets/images/logo-dark.svg"
-						alt="Aeza"
-						class="h-4 w-auto"
-					/>
-					<span class="text-xs whitespace-nowrap text-slate-700"
-						>🤝 Серверы от €4.94/мес</span
+				{#if selectedSemester && selectedSemester.id !== getCurrentSemester().id}
+					<button
+						class="flex w-full items-center justify-center rounded-lg bg-amber-500/90 px-2.5 py-1 text-sm transition-opacity hover:opacity-80 md:w-auto md:justify-start md:py-2"
+						on:click={() => onSemesterChange(getCurrentSemester())}
 					>
+						<span class="text-black">{selectedSemester.name}</span>
+						<span class="mr-1 ml-1 text-black/60">→</span>
+						<span class="text-black/60">текущий</span>
+					</button>
 
-					<div
-						class="absolute -top-9 left-1/2 z-10 hidden -translate-x-1/2 translate-y-1 transform rounded-lg border border-slate-600 bg-slate-900 px-2 py-1 text-xs text-white opacity-0 shadow-lg transition-all duration-200 ease-in-out group-hover:translate-y-0 group-hover:opacity-100 md:block"
-					>
-						Партнёрское предложение
+					<div class="hidden h-4 w-[1px] bg-slate-700/50 md:block"></div>
+				{:else}
+					<div class="relative flex w-full min-h-[28px] items-center justify-center md:w-auto md:min-w-[240px]">
+						{#if activeBanner === 'aeza' || currentPage !== 'students' || university !== 'ystu'}
+							<a
+								href="https://aeza.net/?ref=538988"
+								target="_blank"
+								rel="noopener noreferrer"
+								class="group absolute left-1/2 top-1/2 flex w-full -translate-x-1/2 -translate-y-1/2 items-center justify-center gap-1.5 rounded-lg bg-white/95 px-2.5 py-1.5 md:py-2 text-sm transition-opacity hover:opacity-80 md:w-[240px]"
+								on:click={() => {
+									reachGoal('aeza_affiliate_click');
+									handleNavClick();
+								}}
+								in:fade={{ duration: 300 }}
+								out:fade={{ duration: 300 }}
+							>
+								<img
+									src="https://my.aeza.net/assets/images/logo-dark.svg"
+									alt="Aeza"
+									class="h-4 w-auto"
+								/>
+								<span class="text-xs whitespace-nowrap text-center text-slate-700">
+									🤝 Серверы от €4.94/мес
+								</span>
+
+								<div
+									class="absolute -top-9 left-1/2 z-10 hidden -translate-x-1/2 translate-y-1 transform rounded-lg border border-slate-600 bg-slate-900 px-2 py-1 text-xs text-white opacity-0 shadow-lg transition-all duration-200 ease-in-out group-hover:translate-y-0 group-hover:opacity-100 md:block"
+								>
+									Партнёрское предложение
+								</div>
+							</a>
+						{/if}
+						{#if activeBanner === 'toilets' && currentPage === 'students' && university === 'ystu'}
+							<a
+								href="/toilets"
+								class="absolute left-1/2 top-1/2 flex w-full -translate-x-1/2 -translate-y-1/2 items-center justify-center gap-1.5 rounded-lg bg-blue-900 px-2.5 py-1.5 md:py-2 text-xs text-blue-200 transition-colors hover:bg-blue-700 md:w-[240px] md:text-sm"
+								on:click={() => handleNavClick()}
+								in:fade={{ duration: 300 }}
+								out:fade={{ duration: 300 }}
+							>
+								<span class="font-medium leading-tight text-center">
+									Поиск туалетов в Г корпусе
+								</span>
+							</a>
+						{/if}
 					</div>
-				</a>
 
-				<div class="hidden h-4 w-[1px] bg-slate-700/50 md:block"></div>
-			{/if}
+					<div class="hidden h-4 w-[1px] bg-slate-700/50 md:block"></div>
+				{/if}
 
 			<div class="flex items-center gap-1.5">
 				<a

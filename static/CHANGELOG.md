@@ -1,3 +1,4 @@
+- hot fix: remove unused `@rollup/rollup-darwin-arm64` dependency (ysturasp, 2025-12-16) [4 files changed, 1624 insertions(+), 2808 deletions(-)]
 - update script for installing git hooks (ysturasp, 2025-12-16) [3 files changed, 29 insertions(+), 6 deletions(-)]
 - feat: require authentication to view statistics and notify unauthenticated users (ysturasp, 2025-12-16) [1 file changed, 6 insertions(+)]
 - update package lock file (ysturasp, 2025-12-16) [4 files changed, 2797 insertions(+), 1611 deletions(-)]
