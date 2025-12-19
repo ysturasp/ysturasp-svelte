@@ -1,3 +1,4 @@
+- add new apps page to showcase all services and hubs (ysturasp, 2025-12-19) [3 files changed, 271 insertions(+)]
 - extract ad banner logic from ScheduleSwitcher into a new AdsBanner component (ysturasp, 2025-12-18) [4 files changed, 82 insertions(+), 55 deletions(-)]
 - refactor schedule switcher component to include dynamic banners (ysturasp, 2025-12-17) [3 files changed, 74 insertions(+), 41 deletions(-)]
 - hot fix: remove unused `@rollup/rollup-darwin-arm64` dependency (ysturasp, 2025-12-16) [4 files changed, 1624 insertions(+), 2808 deletions(-)]
