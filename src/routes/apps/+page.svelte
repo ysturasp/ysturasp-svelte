@@ -98,7 +98,22 @@
 </script>
 
 <svelte:head>
-	<title>Hub | ysturasp ecosystem</title>
+	<title>core.ysturasp | all services ecosystem</title>
+	<meta
+		name="description"
+		content="Все сервисы и инструменты ysturasp: расписание студентов, преподавателей и аудиторий ЯГТУ/ЯГПУ, форматирование отчётов по ГОСТ, статистика оценок, карта кампуса, установка PWA и другое."
+	/>
+	<meta
+		name="keywords"
+		content="ysturasp, сервисы ysturasp, экосистема ysturasp, расписание ЯГТУ, расписание ЯГПУ, форматирование отчётов, ГОСТ форматирование, статистика оценок, карта кампуса, PWA приложение"
+	/>
+	<meta property="og:title" content="Все сервисы ysturasp | Экосистема" />
+	<meta
+		property="og:description"
+		content="Все сервисы и инструменты ysturasp: расписание студентов, преподавателей и аудиторий ЯГТУ/ЯГПУ, форматирование отчётов по ГОСТ, статистика оценок, карта кампуса, установка PWA и другое."
+	/>
+	<meta property="og:type" content="website" />
+	<meta property="og:locale" content="ru_RU" />
 </svelte:head>
 
 <PageLayout>

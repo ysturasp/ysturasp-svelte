@@ -1,3 +1,4 @@
+- add apps link in AdsBanner component (ysturasp, 2025-12-19) [5 files changed, 38 insertions(+), 19 deletions(-)]
 - add new apps page to showcase all services and hubs (ysturasp, 2025-12-19) [3 files changed, 271 insertions(+)]
 - extract ad banner logic from ScheduleSwitcher into a new AdsBanner component (ysturasp, 2025-12-18) [4 files changed, 82 insertions(+), 55 deletions(-)]
 - refactor schedule switcher component to include dynamic banners (ysturasp, 2025-12-17) [3 files changed, 74 insertions(+), 41 deletions(-)]
