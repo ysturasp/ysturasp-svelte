@@ -117,124 +117,215 @@
 </svelte:head>
 
 <PageLayout>
-	<div class="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
-		<div class="absolute inset-0 opacity-[0.03] mix-blend-overlay" style="background-image: url('https://grainy-gradients.vercel.app/noise.svg');"></div>
+	<div class="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+		<div
+			class="absolute inset-0 opacity-[0.03] mix-blend-overlay"
+			style="background-image: url('https://grainy-gradients.vercel.app/noise.svg');"
+		></div>
 		<div class="blob b-1"></div>
 		<div class="blob b-2"></div>
-		<div class="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[length:60px_60px] [mask-image:radial-gradient(circle_at_50%_50%,black,transparent_80%)]"></div>
+		<div
+			class="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] [mask-image:radial-gradient(circle_at_50%_50%,black,transparent_80%)] bg-[length:60px_60px]"
+		></div>
 	</div>
 
 	<Header />
 
 	<main class="relative container mx-auto px-4 py-14 md:py-24">
 		<header class="mb-8 md:mb-16" in:fade={{ duration: 1200 }}>
-			<div class="flex items-end gap-4 overflow-hidden border-b border-white/20 pb-6 md:pb-12">
-				<h1 class="font-unbounded text-4xl md:text-7xl lg:text-8xl text-white tracking-tighter leading-none">
+			<div
+				class="flex items-end gap-4 overflow-hidden border-b border-white/20 pb-6 md:pb-12"
+			>
+				<h1
+					class="font-unbounded text-4xl leading-none tracking-tighter text-white md:text-7xl lg:text-8xl"
+				>
 					core.ysturasp
 				</h1>
 			</div>
-			<p class="mt-8 text-xl md:text-3xl text-slate-500 max-w-2xl font-light">
+			<p class="mt-8 max-w-2xl text-xl font-light text-slate-500 md:text-3xl">
 				Все наши сервисы в одном месте
 			</p>
 		</header>
 
 		<div class="flex flex-col gap-16 md:gap-32">
-			
 			<section>
-				<div class="flex items-center gap-4 mb-8">
-					<span class="w-1.5 h-1.5 bg-blue-500 rounded-full shadow-[0_0_10px_#3b82f6] animate-pulse"></span>
-					<h2 class="font-unbounded text-xl text-slate-500 uppercase tracking-xl font-medium leading-none">хабы расписания</h2>
+				<div class="mb-8 flex items-center gap-4">
+					<span
+						class="h-1.5 w-1.5 animate-pulse rounded-full bg-blue-500 shadow-[0_0_10px_#3b82f6]"
+					></span>
+					<h2
+						class="font-unbounded tracking-xl text-xl leading-none font-medium text-slate-500 uppercase"
+					>
+						хабы расписания
+					</h2>
 				</div>
 
-				<div class="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
+				<div class="grid grid-cols-2 gap-4 md:gap-8 lg:grid-cols-4">
 					{#each hubs as hub, i}
-						<div 
-							class="relative group bg-white/[0.02] border border-white/[0.05] rounded-[2.5rem] overflow-hidden backdrop-blur-[40px] transition-all duration-500 hover:border-white/10 hover:-translate-y-1 
-							{hub.size === 'lg' ? 'col-span-2 lg:col-span-3 min-h-[300px] md:min-h-[400px]' : 'col-span-2 min-h-[300px] md:min-h-[350px]'}" 
+						<div
+							class="group relative overflow-hidden rounded-[2.5rem] border border-white/[0.05] bg-white/[0.02] backdrop-blur-[40px] transition-all duration-500 hover:-translate-y-1 hover:border-white/10
+							{hub.size === 'lg'
+								? 'col-span-2 min-h-[300px] md:min-h-[400px] lg:col-span-3'
+								: 'col-span-2 min-h-[300px] md:min-h-[350px]'}"
 							style="--theme-color: {hub.color}"
 							on:mousemove={handleMouseMove}
 							in:fly={{ y: 50, duration: 800, delay: i * 100, easing: quintOut }}
 						>
-							<div class="beam absolute inset-[-1px] pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity z-20"></div>
-							
-							<div class="absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.03)_1px,transparent_0)] bg-[length:24px_24px] pointer-events-none z-0"></div>
+							<div
+								class="beam pointer-events-none absolute inset-[-1px] z-20 opacity-0 transition-opacity group-hover:opacity-100"
+							></div>
 
-							<div class="flex flex-col justify-between h-full p-6 md:p-12 relative z-10">
-								<div class="transition-transform duration-500 group-hover:scale-110 group-hover:-rotate-6" style="color: {hub.color}">
-									<svg class="w-10 h-10 md:w-12 md:h-12 opacity-60 group-hover:opacity-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d={hub.icon} />
+							<div
+								class="pointer-events-none absolute inset-0 z-0 bg-[radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.03)_1px,transparent_0)] bg-[length:24px_24px]"
+							></div>
+
+							<div
+								class="relative z-10 flex h-full flex-col justify-between p-6 md:p-12"
+							>
+								<div
+									class="transition-transform duration-500 group-hover:scale-110 group-hover:-rotate-6"
+									style="color: {hub.color}"
+								>
+									<svg
+										class="h-10 w-10 opacity-60 group-hover:opacity-100 md:h-12 md:w-12"
+										fill="none"
+										stroke="currentColor"
+										viewBox="0 0 24 24"
+									>
+										<path
+											stroke-linecap="round"
+											stroke-linejoin="round"
+											stroke-width="1"
+											d={hub.icon}
+										/>
 									</svg>
 								</div>
-								
+
 								<div>
-									<h2 class="font-unbounded text-xl md:text-3xl lg:text-4xl text-white uppercase leading-tight">{hub.name}</h2>
-									<p class="text-slate-400 mt-2 text-xs md:text-base max-w-sm font-light leading-relaxed">{hub.desc}</p>
-									
-									<div class="grid grid-cols-2 gap-3 mt-6 md:mt-8">
+									<h2
+										class="font-unbounded text-xl leading-tight text-white uppercase md:text-3xl lg:text-4xl"
+									>
+										{hub.name}
+									</h2>
+									<p
+										class="mt-2 max-w-sm text-xs leading-relaxed font-light text-slate-400 md:text-base"
+									>
+										{hub.desc}
+									</p>
+
+									<div class="mt-6 grid grid-cols-2 gap-3 md:mt-8">
 										{#each hub.links as link}
-											<a href={link.href} class="flex items-center justify-center p-3 md:p-4 bg-white/[0.03] border border-white/5 rounded-2xl text-white text-xs md:text-base font-medium transition-all hover:bg-white/[0.08] hover:border-current hover:-translate-y-0.5 group/link" style="color: {hub.color}">
-												<span class="group-hover/link:text-white transition-colors">{link.name}</span>
+											<a
+												href={link.href}
+												class="group/link flex items-center justify-center rounded-2xl border border-white/5 bg-white/[0.03] p-3 text-xs font-medium text-white transition-all hover:-translate-y-0.5 hover:border-current hover:bg-white/[0.08] md:p-4 md:text-base"
+												style="color: {hub.color}"
+											>
+												<span
+													class="transition-colors group-hover/link:text-white"
+													>{link.name}</span
+												>
 											</a>
 										{/each}
 									</div>
 								</div>
 							</div>
-							
-							<div class="absolute inset-0 pointer-events-none mix-blend-soft-light opacity-0 group-hover:opacity-[0.15] transition-opacity duration-500 z-10" style="background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), var(--theme-color), transparent 80%)"></div>
+
+							<div
+								class="pointer-events-none absolute inset-0 z-10 opacity-0 mix-blend-soft-light transition-opacity duration-500 group-hover:opacity-[0.15]"
+								style="background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), var(--theme-color), transparent 80%)"
+							></div>
 						</div>
 					{/each}
 				</div>
 			</section>
 
 			<section>
-				<div class="flex items-center gap-4 mb-8">
-					<span class="w-1.5 h-1.5 bg-blue-500 rounded-full shadow-[0_0_10px_#3b82f6] animate-pulse"></span>
-					<h2 class="font-unbounded text-xl text-slate-500 uppercase tracking-xl font-medium leading-none">сервисы и инструменты</h2>
+				<div class="mb-8 flex items-center gap-4">
+					<span
+						class="h-1.5 w-1.5 animate-pulse rounded-full bg-blue-500 shadow-[0_0_10px_#3b82f6]"
+					></span>
+					<h2
+						class="font-unbounded tracking-xl text-xl leading-none font-medium text-slate-500 uppercase"
+					>
+						сервисы и инструменты
+					</h2>
 				</div>
 
-				<div class="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+				<div class="grid grid-cols-2 gap-4 md:gap-6 lg:grid-cols-4">
 					{#each tools as tool, i}
-						<a 
-							href={tool.link} 
-							class="relative group bg-white/[0.02] border border-white/[0.05] rounded-[2rem] min-h-[180px] md:min-h-[220px] backdrop-blur-[40px] transition-all duration-500 hover:bg-white/[0.05] hover:border-white/10 hover:-translate-y-1 overflow-hidden" 
+						<a
+							href={tool.link}
+							class="group relative min-h-[180px] overflow-hidden rounded-[2rem] border border-white/[0.05] bg-white/[0.02] backdrop-blur-[40px] transition-all duration-500 hover:-translate-y-1 hover:border-white/10 hover:bg-white/[0.05] md:min-h-[220px]"
 							style="--theme-color: {tool.color}"
 							on:mousemove={handleMouseMove}
 							in:fly={{ y: 40, duration: 800, delay: 500 + i * 50, easing: quintOut }}
 						>
-							<div class="flex flex-col justify-between h-full p-6 md:p-8 relative z-10">
-								<div class="flex justify-between items-start">
-									<div class="opacity-60 group-hover:opacity-100 transition-opacity" style="color: {tool.color}">
-										<svg class="w-7 h-7 md:w-8 md:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d={tool.icon} />
+							<div
+								class="relative z-10 flex h-full flex-col justify-between p-6 md:p-8"
+							>
+								<div class="flex items-start justify-between">
+									<div
+										class="opacity-60 transition-opacity group-hover:opacity-100"
+										style="color: {tool.color}"
+									>
+										<svg
+											class="h-7 w-7 md:h-8 md:w-8"
+											fill="none"
+											stroke="currentColor"
+											viewBox="0 0 24 24"
+										>
+											<path
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												stroke-width="1.5"
+												d={tool.icon}
+											/>
 										</svg>
 									</div>
-									<div class="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full shadow-[0_0_10px_currentColor] transition-transform group-hover:scale-125" style="background: {tool.color}; color: {tool.color}"></div>
+									<div
+										class="h-1.5 w-1.5 rounded-full shadow-[0_0_10px_currentColor] transition-transform group-hover:scale-125 md:h-2 md:w-2"
+										style="background: {tool.color}; color: {tool.color}"
+									></div>
 								</div>
-								
+
 								<div>
-									<h3 class="font-unbounded text-sm md:text-lg text-white leading-tight">{tool.name}</h3>
-									<p class="text-slate-500 text-[0.65rem] md:text-sm mt-1 font-light leading-snug">{tool.desc}</p>
+									<h3
+										class="font-unbounded text-sm leading-tight text-white md:text-lg"
+									>
+										{tool.name}
+									</h3>
+									<p
+										class="mt-1 text-[0.65rem] leading-snug font-light text-slate-500 md:text-sm"
+									>
+										{tool.desc}
+									</p>
 								</div>
 							</div>
-							<div class="absolute inset-0 bg-gradient-to-br from-white/[0.05] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-0"></div>
-							<div class="absolute inset-0 pointer-events-none mix-blend-soft-light opacity-0 group-hover:opacity-[0.15] transition-opacity duration-500 z-10" style="background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), var(--theme-color), transparent 80%)"></div>
+							<div
+								class="absolute inset-0 z-0 bg-gradient-to-br from-white/[0.05] to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+							></div>
+							<div
+								class="pointer-events-none absolute inset-0 z-10 opacity-0 mix-blend-soft-light transition-opacity duration-500 group-hover:opacity-[0.15]"
+								style="background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), var(--theme-color), transparent 80%)"
+							></div>
 						</a>
 					{/each}
 				</div>
 			</section>
-
 		</div>
 
-		<div class="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-4 mt-20 md:mt-40 border-t border-white/5 pt-12">
-			{#each [
-				{ label: 'About Project', href: '/about' },
-				{ label: 'Customer Care', href: '/support' },
-				{ label: 'Open Source', href: 'https://github.com/ysturasp/ysturasp-svelte' },
-				{ label: 'History', href: '/changelog' }
-			] as item, i}
-				<a href={item.href} class="flex flex-col gap-2 group">
-					<span class="font-unbounded text-[0.6rem] text-slate-700 tracking-widest">0{i+1}</span>
-					<span class="text-white font-medium group-hover:text-blue-500 transition-colors uppercase text-sm md:text-base">{item.label}</span>
+		<div
+			class="mt-20 grid grid-cols-2 gap-8 border-t border-white/5 pt-12 md:mt-40 md:grid-cols-4 md:gap-4"
+		>
+			{#each [{ label: 'About Project', href: '/about' }, { label: 'Customer Care', href: '/support' }, { label: 'Open Source', href: 'https://github.com/ysturasp/ysturasp-svelte' }, { label: 'History', href: '/changelog' }] as item, i}
+				<a href={item.href} class="group flex flex-col gap-2">
+					<span class="font-unbounded text-[0.6rem] tracking-widest text-slate-700"
+						>0{i + 1}</span
+					>
+					<span
+						class="text-sm font-medium text-white uppercase transition-colors group-hover:text-blue-500 md:text-base"
+						>{item.label}</span
+					>
 				</a>
 			{/each}
 		</div>
@@ -256,18 +347,42 @@
 		animation: blob-drift 30s infinite alternate linear;
 		z-index: -1;
 	}
-	.b-1 { width: 60vw; height: 60vw; background: #3b82f6; top: -20%; left: -10%; }
-	.b-2 { width: 50vw; height: 50vw; background: #8b5cf6; bottom: -10%; right: -10%; animation-delay: -10s; }
+	.b-1 {
+		width: 60vw;
+		height: 60vw;
+		background: #3b82f6;
+		top: -20%;
+		left: -10%;
+	}
+	.b-2 {
+		width: 50vw;
+		height: 50vw;
+		background: #8b5cf6;
+		bottom: -10%;
+		right: -10%;
+		animation-delay: -10s;
+	}
 
 	@keyframes blob-drift {
-		from { transform: translate(0, 0) scale(1); }
-		to { transform: translate(100px, 50px) scale(1.2); }
+		from {
+			transform: translate(0, 0) scale(1);
+		}
+		to {
+			transform: translate(100px, 50px) scale(1.2);
+		}
 	}
 
 	.beam {
-		mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+		mask:
+			linear-gradient(#fff 0 0) content-box,
+			linear-gradient(#fff 0 0);
 		mask-composite: exclude;
-		background: conic-gradient(from var(--angle, 0deg), transparent, var(--theme-color), transparent 30%);
+		background: conic-gradient(
+			from var(--angle, 0deg),
+			transparent,
+			var(--theme-color),
+			transparent 30%
+		);
 		animation: rotate-beam 4s linear infinite;
 	}
 
@@ -278,7 +393,11 @@
 	}
 
 	@keyframes rotate-beam {
-		from { --angle: 0deg; }
-		to { --angle: 360deg; }
+		from {
+			--angle: 0deg;
+		}
+		to {
+			--angle: 360deg;
+		}
 	}
 </style>
