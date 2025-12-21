@@ -1,13 +1,21 @@
-<script>
+<script lang="ts">
 	import { onMount } from 'svelte';
 
-	let canvas;
-	let ctx;
-	let w, h;
-	let particles = [];
-	let animationFrame;
+	let canvas!: HTMLCanvasElement;
+	let ctx!: CanvasRenderingContext2D;
+	let w: number = 0,
+		h: number = 0;
+	let particles: Flake[] = [];
+	let animationFrame: number = 0;
 
 	class Flake {
+		x!: number;
+		y!: number;
+		r!: number;
+		d!: number;
+		vx!: number;
+		vy!: number;
+		opacity!: number;
 		constructor() {
 			this.init();
 		}
@@ -45,7 +53,11 @@
 	}
 
 	onMount(() => {
-		ctx = canvas.getContext('2d');
+		const context = canvas.getContext('2d');
+		if (!context) {
+			return () => {};
+		}
+		ctx = context;
 
 		const resize = () => {
 			w = window.innerWidth;
