@@ -1,3 +1,4 @@
+- format code with prettier (ysturasp, 2025-12-21) [6 files changed, 230 insertions(+), 95 deletions(-)]
 - refactor Snow component to use TypeScript for better type safety (ysturasp, 2025-12-21) [3 files changed, 21 insertions(+), 7 deletions(-)]
 - update /apps page meta tags for improve seo (ysturasp, 2025-12-19) [3 files changed, 18 insertions(+), 1 deletion(-)]
 - add apps link in AdsBanner component (ysturasp, 2025-12-19) [5 files changed, 38 insertions(+), 19 deletions(-)]

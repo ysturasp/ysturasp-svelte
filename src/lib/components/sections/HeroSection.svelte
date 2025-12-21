@@ -69,7 +69,7 @@
 </script>
 
 <section
-	class="hero-gradient relative mb-16 overflow-hidden rounded-2xl p-2 py-4 text-center md:p-8 md:py-16"
+	class="hero-gradient relative mb-16 overflow-hidden rounded-2xl p-2 py-4 text-center md:p-8 md:py-12"
 >
 	<div
 		class="absolute inset-0 animate-pulse bg-gradient-to-r from-blue-600/10 to-purple-600/10"
@@ -133,5 +133,56 @@
 				></div>
 			</a>
 		{/each}
+	</div>
+
+	<div class="mx-auto mt-5 max-w-2xl text-start md:mt-10">
+		<a
+			href="/apps"
+			class="group relative block w-full overflow-hidden border-white/10 px-2 py-0 transition-colors duration-300 hover:border-white/25 md:rounded-xl md:border md:border-y md:border-white/10 md:px-5 md:py-5"
+		>
+			<div class="flex flex-col gap-2 md:flex-row md:items-end md:justify-between md:gap-5">
+				<div>
+					<div class="flex items-center gap-3">
+						<span
+							class="h-1.5 w-1.5 rounded-full bg-white/25 transition-colors duration-300 group-hover:bg-white/50"
+						></span>
+						<p class="text-xs tracking-[0.3em] text-slate-500 uppercase">все сервисы</p>
+					</div>
+					<h2
+						class="text-2xl leading-tight font-bold tracking-tight text-white md:text-4xl"
+					>
+						Открыть экосистему
+					</h2>
+					<p class="max-w-2xl text-sm text-slate-400 md:text-base">
+						Познакомьтесь со всеми нашими сервисами в одном месте
+					</p>
+				</div>
+
+				<div class="flex items-center gap-3 self-start md:self-auto">
+					<span
+						class="font-mono text-sm text-white/65 transition-colors duration-300 group-hover:text-white"
+					>
+						/apps
+					</span>
+					<span
+						class="text-2xl text-white/50 transition duration-300 group-hover:translate-x-1 group-hover:text-white/80"
+					>
+						→
+					</span>
+				</div>
+			</div>
+
+			<div class="mt-2 flex items-center gap-4 md:mt-6" aria-hidden="true">
+				<div
+					class="h-px flex-1 bg-white/10 transition-colors duration-300 group-hover:bg-white/20"
+				></div>
+				<div class="text-[0.65rem] tracking-[0.45em] text-white/15 uppercase">
+					rasp • stat • format • campus • support
+				</div>
+				<div
+					class="h-px flex-1 bg-white/10 transition-colors duration-300 group-hover:bg-white/20"
+				></div>
+			</div>
+		</a>
 	</div>
 </section>

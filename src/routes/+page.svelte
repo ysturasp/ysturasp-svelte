@@ -7,7 +7,6 @@
 	import StatsSection from '$lib/components/sections/StatsSection.svelte';
 	import FeaturesSection from '$lib/components/sections/FeatureSection.svelte';
 	import PageLayout from '$lib/components/layout/PageLayout.svelte';
-	import FormatDocumentPromo from '../routes/rasp/components/FormatDocumentPromo.svelte';
 </script>
 
 <svelte:head>
@@ -39,7 +38,6 @@
 
 	<main class="relative container mx-auto mt-8 px-4">
 		<HeroSection />
-		<FormatDocumentPromo href="/format" class_name="mb-12" />
 		<SupportSection />
 		<StatsSection />
 		<FeaturesSection />
