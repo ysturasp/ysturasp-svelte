@@ -163,6 +163,7 @@
 				<div class="grid grid-cols-2 gap-4 md:gap-8 lg:grid-cols-4">
 					{#each hubs as hub, i}
 						<div
+							role="group"
 							class="group relative overflow-hidden rounded-[2.5rem] border border-white/[0.05] bg-white/[0.02] backdrop-blur-[40px] transition-all duration-500 hover:-translate-y-1 hover:border-white/10
 							{hub.size === 'lg'
 								? 'col-span-2 min-h-[300px] md:min-h-[400px] lg:col-span-3'
