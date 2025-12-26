@@ -1,3 +1,4 @@
+- add role attribute to hub group for accessibility (ysturasp, 2025-12-22) [3 files changed, 3 insertions(+)]
 - add link on /apps on general page (ysturasp, 2025-12-21) [4 files changed, 54 insertions(+), 3 deletions(-)]
 - format code with prettier (ysturasp, 2025-12-21) [6 files changed, 230 insertions(+), 95 deletions(-)]
 - refactor Snow component to use TypeScript for better type safety (ysturasp, 2025-12-21) [3 files changed, 21 insertions(+), 7 deletions(-)]

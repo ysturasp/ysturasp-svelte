@@ -108,7 +108,7 @@
 		<div class="preloader-particles" bind:this={particlesContainer}></div>
 		<div class="preloader-cat">
 			<div class="preloader-glow"></div>
-			<img src="/images/cat.png" alt="ysturasp Cat" />
+			<img src="/images/cat_new_year.png" alt="ysturasp Cat" />
 		</div>
 		<div class="preloader-text">Загрузка ysturasp...</div>
 		<div class="preloader-progress">

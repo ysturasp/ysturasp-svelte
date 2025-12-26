@@ -41,7 +41,7 @@
 			? 'Нет подключения к интернету. Проверьте соединение и попробуйте снова. Некоторые функции могут работать в офлайн режиме.'
 			: 'Узнайте статистику оценок студентов ЯГТУ, средние баллы и распределение оценок по различным дисциплинам. ysturasp'}
 	/>
-	<link rel="icon" href="images/cat.png" type="image/png" />
+	<link rel="icon" href="images/cat_new_year.png" type="image/png" />
 </svelte:head>
 
 <PageLayout>
