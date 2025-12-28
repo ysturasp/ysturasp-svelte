@@ -1,38 +1,29 @@
 import { browser } from '$app/environment';
 import { checkIsTelegramMiniApp } from '$lib/utils/telegram';
-import { retrieveLaunchParams } from '@tma.js/sdk-svelte';
+import { retrieveRawInitData } from '@tma.js/sdk-svelte';
 
-const NOTIFICATIONS_API_URL =
-	'https://script.google.com/macros/s/AKfycbwKX1p_hTC3UQG4zC_Ero4OpH97ABTJ0_xOoc-0jDIgrcHsY1Wv9rOvhSTiTWTJ57uq/exec';
+const API_BASE_URL =
+	import.meta.env.VITE_NOTIFICATIONS_API_URL;
 
-function getTelegramUserData(): { id: string; username?: string } | null {
+function getTelegramInitData(): string | null {
 	if (!browser) {
 		return null;
 	}
 
 	try {
-		const launchParams = retrieveLaunchParams();
-
-		const user =
-			(launchParams as any).initData?.user ||
-			launchParams.tgWebAppData?.user ||
-			(launchParams as any).tgWebAppInitData?.user;
-
-		if (user?.id) {
-			return {
-				id: user.id.toString(),
-				username: user.username || user.userName || 'admin'
-			};
+		const initData = retrieveRawInitData();
+		if (initData && typeof initData === 'string' && initData.length > 0) {
+			return initData;
 		}
-	} catch (error) {}
+	} catch (error) {
+		console.error('Error getting initData from retrieveRawInitData', error);
+	}
 
 	const tg = (window as any).Telegram?.WebApp;
-
-	if (tg?.initDataUnsafe?.user?.id) {
-		return {
-			id: tg.initDataUnsafe.user.id.toString(),
-			username: tg.initDataUnsafe.user.username || 'admin'
-		};
+	if (tg) {
+		if (tg.initData && typeof tg.initData === 'string' && tg.initData.length > 0) {
+			return tg.initData;
+		}
 	}
 
 	return null;
@@ -73,44 +64,53 @@ export async function checkNotificationStatus(
 	}
 
 	try {
-		const userData = getTelegramUserData();
-		if (!userData?.id) {
+		const initData = getTelegramInitData();
+		if (!initData) {
+			console.error('initData not available - проверьте, что приложение открыто в Telegram Web App');
 			return null;
 		}
 
-		const response = await fetch(NOTIFICATIONS_API_URL, {
+		const response = await fetch(`${API_BASE_URL}/check-status`, {
 			method: 'POST',
 			headers: {
-				'Content-Type': 'text/plain;charset=utf-8'
+				'Content-Type': 'application/json'
 			},
 			body: JSON.stringify({
-				action: 'checkNotificationStatus',
-				userId: userData.id
+				initData,
+				groupName
 			})
 		});
 
-		if (response.ok) {
-			const data: NotificationResponse = await response.json();
+		if (!response.ok) {
+			if (response.status === 401) {
+				console.error('Unauthorized: Invalid initData');
+				return null;
+			}
+			throw new Error(`HTTP error! status: ${response.status}`);
+		}
 
-			if (data.success) {
-				if (groupName && data.subscriptions) {
-					const groupSubscription = data.subscriptions.find(
-						(sub) => sub.groupName === groupName
-					);
-					return {
-						subscribed: !!groupSubscription,
-						notifyMinutes: groupSubscription?.notifyMinutes,
-						subscriptions: data.subscriptions
-					};
-				}
+		const data: NotificationResponse = await response.json();
 
+		if (data.success) {
+			if (groupName && data.subscriptions) {
+				const groupSubscription = data.subscriptions.find(
+					(sub) => sub.groupName === groupName
+				);
 				return {
-					subscribed: !!(data.subscriptions && data.subscriptions.length > 0),
-					subscriptions: data.subscriptions || []
+					subscribed: !!groupSubscription,
+					notifyMinutes: groupSubscription?.notifyMinutes,
+					subscriptions: data.subscriptions
 				};
 			}
+
+			return {
+				subscribed: !!(data.subscriptions && data.subscriptions.length > 0),
+				subscriptions: data.subscriptions || []
+			};
 		}
-	} catch (error) {}
+	} catch (error) {
+		console.error('Error checking notification status', error);
+	}
 
 	return null;
 }
@@ -120,7 +120,8 @@ export async function toggleNotifications(
 	notifyMinutes: number = 0,
 	hiddenSubjects: any[] | null = null,
 	update: boolean = false,
-	manuallyExcludedSubjects: string[] = []
+	manuallyExcludedSubjects: string[] = [],
+	excludeHidden?: boolean
 ): Promise<boolean> {
 	if (!browser) {
 		return false;
@@ -132,33 +133,47 @@ export async function toggleNotifications(
 	}
 
 	try {
-		const userData = getTelegramUserData();
-		if (!userData?.id) {
+		const initData = getTelegramInitData();
+		if (!initData) {
+			console.error('initData not available');
 			return false;
 		}
 
-		const response = await fetch(NOTIFICATIONS_API_URL, {
+		const finalNotifyMinutes = notifyMinutes >= 1 ? notifyMinutes : notifyMinutes === 0 ? 0 : 1;
+
+		const finalExcludeHidden =
+			excludeHidden !== undefined
+				? excludeHidden
+				: hiddenSubjects !== null && hiddenSubjects.length > 0;
+
+		const response = await fetch(`${API_BASE_URL}/toggle`, {
 			method: 'POST',
 			headers: {
-				'Content-Type': 'text/plain;charset=utf-8'
+				'Content-Type': 'application/json'
 			},
 			body: JSON.stringify({
-				action: 'toggleNotification',
-				userId: userData.id,
-				username: userData.username || 'admin',
-				groupName: groupName,
-				notifyMinutes: notifyMinutes.toString(),
+				initData,
+				groupName,
+				notifyMinutes: finalNotifyMinutes,
 				hiddenSubjects: hiddenSubjects || [],
-				update: update,
+				excludeHidden: finalExcludeHidden,
+				update,
 				manuallyExcludedSubjects: manuallyExcludedSubjects || []
 			})
 		});
 
-		if (response.ok) {
-			const data: NotificationResponse = await response.json();
-			return data.success || false;
+		if (!response.ok) {
+			if (response.status === 401) {
+				console.error('Unauthorized: Invalid initData');
+				return false;
+			}
+			throw new Error(`HTTP error! status: ${response.status}`);
 		}
-	} catch (error) {}
 
-	return false;
+		const data: NotificationResponse = await response.json();
+		return data.success || false;
+	} catch (error) {
+		console.error('Error toggling notifications', error);
+		return false;
+	}
 }

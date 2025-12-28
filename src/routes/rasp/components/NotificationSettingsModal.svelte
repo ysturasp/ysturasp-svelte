@@ -110,7 +110,8 @@
 				selectedMinutes,
 				baseHidden,
 				true,
-				manuallyExcludedSubjects
+				manuallyExcludedSubjects,
+				excludeHiddenSubjects
 			);
 			if (success) {
 				triggerHapticFeedback('success');
