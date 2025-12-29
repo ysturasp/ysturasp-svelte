@@ -6,6 +6,7 @@
 	import PageLayout from '$lib/components/layout/PageLayout.svelte';
 	import { page } from '$app/state';
 	import { browser } from '$app/environment';
+	import { createSupportRequest, getSupportRequests, replyToSupportRequest } from './api-support';
 
 	let message = '';
 	let replyMessage = '';
@@ -29,9 +30,6 @@
 	if (!userId) {
 		userId = crypto.randomUUID();
 	}
-
-	const SCRIPT_URL =
-		'https://script.google.com/macros/s/AKfycbwKX1p_hTC3UQG4zC_Ero4OpH97ABTJ0_xOoc-0jDIgrcHsY1Wv9rOvhSTiTWTJ57uq/exec';
 
 	async function encryptMessage(msg: string): Promise<string> {
 		const response = await fetch('/api/encrypt', {
@@ -79,22 +77,12 @@
 
 	onMount(async () => {
 		try {
-			const response = await fetch(SCRIPT_URL, {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'text/plain;charset=utf-8'
-				},
-				body: JSON.stringify({
-					action: 'getRequests',
-					source: 'web',
-					userId
-				})
-			});
-
-			if (!response.ok) throw new Error('Ошибка загрузки');
-
-			const data = await response.json();
-			requests = data.requests;
+			const result = await getSupportRequests(userId || undefined, 'web');
+			if (result.success && result.requests) {
+				requests = result.requests;
+			} else {
+				console.error('Ошибка загрузки запросов:', result.message);
+			}
 		} catch (e) {
 			console.error(e);
 		} finally {
@@ -120,31 +108,26 @@
 					finalMessage = `[SECURITY] ${encrypted}`;
 				} catch (e) {
 					error = 'Ошибка шифрования сообщения';
+					isLoading = false;
 					return;
 				}
 			}
 
-			const response = await fetch(SCRIPT_URL, {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'text/plain;charset=utf-8'
-				},
-				body: JSON.stringify({
-					action: 'support',
-					message: finalMessage,
-					source: 'web',
-					isSecurityReport,
-					userId
-				})
+			const result = await createSupportRequest({
+				message: finalMessage,
+				source: 'web',
+				isSecurityReport,
+				userId: userId || undefined
 			});
 
-			if (!response.ok) throw new Error('Ошибка отправки');
-
-			const data = await response.json();
-			requests = [data.request, ...requests];
-			success = 'Сообщение успешно отправлено';
-			message = '';
-			isSecurityReport = false;
+			if (result.success && result.request) {
+				requests = [result.request, ...requests];
+				success = 'Сообщение успешно отправлено';
+				message = '';
+				isSecurityReport = false;
+			} else {
+				error = result.message || 'Произошла ошибка при отправке сообщения';
+			}
 		} catch (e) {
 			error = 'Произошла ошибка при отправке сообщения';
 			console.error(e);
@@ -164,27 +147,21 @@
 		success = '';
 
 		try {
-			const response = await fetch(SCRIPT_URL, {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'text/plain;charset=utf-8'
-				},
-				body: JSON.stringify({
-					action: 'reply',
-					requestId,
-					message: replyMessage,
-					source: 'web',
-					userId
-				})
+			const result = await replyToSupportRequest({
+				requestId,
+				message: replyMessage,
+				source: 'web',
+				userId: userId || undefined
 			});
 
-			if (!response.ok) throw new Error('Ошибка отправки');
-
-			const data = await response.json();
-			requests = requests.map((req) => (req.id === requestId ? data.request : req));
-			success = 'Сообщение успешно отправлено';
-			replyMessage = '';
-			selectedRequestId = null;
+			if (result.success && result.request) {
+				requests = requests.map((req) => (req.id === requestId ? result.request! : req));
+				success = 'Сообщение успешно отправлено';
+				replyMessage = '';
+				selectedRequestId = null;
+			} else {
+				error = result.message || 'Произошла ошибка при отправке сообщения';
+			}
 		} catch (e) {
 			error = 'Произошла ошибка при отправке сообщения';
 			console.error(e);

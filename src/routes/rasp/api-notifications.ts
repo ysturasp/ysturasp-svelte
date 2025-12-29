@@ -2,8 +2,7 @@ import { browser } from '$app/environment';
 import { checkIsTelegramMiniApp } from '$lib/utils/telegram';
 import { retrieveRawInitData } from '@tma.js/sdk-svelte';
 
-const API_BASE_URL =
-	import.meta.env.VITE_NOTIFICATIONS_API_URL;
+const API_BASE_URL = import.meta.env.VITE_NOTIFICATIONS_API_URL;
 
 function getTelegramInitData(): string | null {
 	if (!browser) {
@@ -66,7 +65,9 @@ export async function checkNotificationStatus(
 	try {
 		const initData = getTelegramInitData();
 		if (!initData) {
-			console.error('initData not available - проверьте, что приложение открыто в Telegram Web App');
+			console.error(
+				'initData not available - проверьте, что приложение открыто в Telegram Web App'
+			);
 			return null;
 		}
 
