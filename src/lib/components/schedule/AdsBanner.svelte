@@ -3,7 +3,6 @@
 	import { reachGoal } from '$lib/utils/metrika';
 	import { onMount, onDestroy } from 'svelte';
 
-	export let currentPage: 'students' | 'teachers' | 'audiences' = 'students';
 	export let university: 'ystu' | 'yspu' = 'ystu';
 	export let handleNavClick: () => void;
 
