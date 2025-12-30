@@ -1,3 +1,4 @@
+- refactor support page to use new API for support requests, replacing Google Apps Script calls with bot API (ysturasp, 2025-12-29) [5 files changed, 265 insertions(+), 60 deletions(-)]
 - update api and notification modal for requesting on new api instead of google app script (ysturasp, 2025-12-28) [7 files changed, 87 insertions(+), 64 deletions(-)]
 - update icon for new year vibe)) (ysturasp, 2025-12-26) [9 files changed, 8 insertions(+), 6 deletions(-)]
 - add role attribute to hub group for accessibility (ysturasp, 2025-12-22) [3 files changed, 3 insertions(+)]
