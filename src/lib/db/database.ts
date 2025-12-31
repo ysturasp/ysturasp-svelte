@@ -189,6 +189,17 @@ export async function initDatabase(isTelegram: boolean = false) {
 			console.log('Таблица stat_limits создана/проверена в БД бота');
 
 			await pool.query(`
+				CREATE TABLE IF NOT EXISTS referrals (
+					id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+					referrer_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+					referred_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+					created_at TIMESTAMP DEFAULT NOW(),
+					UNIQUE(referred_id)
+				)
+			`);
+			console.log('Таблица referrals создана/проверена в БД бота');
+
+			await pool.query(`
 				CREATE INDEX IF NOT EXISTS idx_user_limits_user_id ON user_limits(user_id);
 				CREATE INDEX IF NOT EXISTS idx_format_history_user_id ON format_history(user_id);
 				CREATE INDEX IF NOT EXISTS idx_payments_user_id ON payments(user_id);
@@ -198,6 +209,8 @@ export async function initDatabase(isTelegram: boolean = false) {
 				CREATE INDEX IF NOT EXISTS idx_stat_views_user_id ON stat_views(user_id);
 				CREATE INDEX IF NOT EXISTS idx_stat_views_created_at ON stat_views(created_at);
 				CREATE INDEX IF NOT EXISTS idx_stat_limits_user_id ON stat_limits(user_id);
+				CREATE INDEX IF NOT EXISTS idx_referrals_referrer_id ON referrals(referrer_id);
+				CREATE INDEX IF NOT EXISTS idx_referrals_referred_id ON referrals(referred_id);
 			`);
 			console.log('Индексы созданы/проверены в БД бота');
 			console.log('Инициализация БД бота завершена успешно');

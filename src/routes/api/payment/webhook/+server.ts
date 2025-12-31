@@ -77,7 +77,7 @@ export const POST: RequestHandler = async ({ request }) => {
 
 			if (status === 'succeeded' && payment.status !== 'succeeded') {
 				if (updatedPayment && updatedPayment.status === 'succeeded') {
- 					let isTelegram = false;
+					let isTelegram = false;
 					const userInMainDb = await getUserById(payment.user_id, false);
 					if (!userInMainDb) {
 						const userInBotDb = await getUserById(payment.user_id, true);
