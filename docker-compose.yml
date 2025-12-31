@@ -23,6 +23,8 @@ services:
             - YOOKASSA_SHOP_ID=${YOOKASSA_SHOP_ID}
             - YOOKASSA_SECRET_KEY=${YOOKASSA_SECRET_KEY}
             - SESSION_SECRET=${SESSION_SECRET}
+            - BOT_DATABASE=${BOT_DATABASE}
+            - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
         depends_on:
             - db
         restart: unless-stopped
