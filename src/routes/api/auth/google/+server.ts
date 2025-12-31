@@ -26,7 +26,7 @@ export const GET: RequestHandler = async (event) => {
 	const stateParam = url.searchParams.get('state');
 	const returnUrl = url.searchParams.get('returnUrl');
 
-	const baseUrl = 'https://ahah.ysturasp.ru';
+	const baseUrl = url.origin;
 	const redirectUri = `${baseUrl}/api/auth/google`;
 
 	if (!code) {
