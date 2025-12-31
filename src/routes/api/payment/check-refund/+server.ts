@@ -17,7 +17,7 @@ export const GET: RequestHandler = async ({ url, cookies }) => {
 	}
 
 	try {
-		const result = await canRefundPayment(user.id, paymentId);
+		const result = await canRefundPayment(user.id, paymentId, context.isTelegram);
 		return json(result);
 	} catch (error) {
 		console.error('Ошибка проверки возможности возврата:', error);

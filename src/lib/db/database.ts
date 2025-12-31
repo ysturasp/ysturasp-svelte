@@ -93,7 +93,114 @@ export async function initDatabase(isTelegram: boolean = false) {
 
 	try {
 		if (isTelegram) {
-			console.log('БД бота подключена, структура управляется ботом');
+			console.log('Создание таблиц в БД бота...');
+
+			const usersTableExists = await pool.query(`
+				SELECT EXISTS (
+					SELECT FROM information_schema.tables 
+					WHERE table_name = 'users'
+				)
+			`);
+
+			if (!usersTableExists.rows[0]?.exists) {
+				console.log(
+					'Таблица users не найдена в БД бота. Убедитесь, что бот запущен и создал таблицы через TypeORM.'
+				);
+				return;
+			}
+
+			await pool.query(`
+				CREATE TABLE IF NOT EXISTS user_limits (
+					id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+					user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+					free_formats_used INTEGER DEFAULT 0,
+					paid_formats_used INTEGER DEFAULT 0,
+					paid_formats_purchased INTEGER DEFAULT 0,
+					updated_at TIMESTAMP DEFAULT NOW(),
+					UNIQUE(user_id)
+				)
+			`);
+			console.log('Таблица user_limits создана/проверена в БД бота');
+
+			await pool.query(`
+				CREATE TABLE IF NOT EXISTS format_history (
+					id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+					user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+					file_name TEXT NOT NULL,
+					is_paid BOOLEAN DEFAULT false,
+					created_at TIMESTAMP DEFAULT NOW()
+				)
+			`);
+			console.log('Таблица format_history создана/проверена в БД бота');
+
+			await pool.query(`
+				CREATE TABLE IF NOT EXISTS payments (
+					id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+					user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+					yookassa_payment_id TEXT UNIQUE NOT NULL,
+					amount DECIMAL(10, 2) NOT NULL,
+					currency TEXT DEFAULT 'RUB',
+					status TEXT NOT NULL,
+					formats_count INTEGER NOT NULL,
+					created_at TIMESTAMP DEFAULT NOW(),
+					updated_at TIMESTAMP DEFAULT NOW()
+				)
+			`);
+			console.log('Таблица payments создана/проверена в БД бота');
+
+			await pool.query(`
+				CREATE TABLE IF NOT EXISTS user_sessions (
+					id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+					user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+					token_hash TEXT NOT NULL,
+					device_name TEXT,
+					ip_address TEXT,
+					user_agent TEXT,
+					metadata JSONB,
+					created_at TIMESTAMP DEFAULT NOW(),
+					last_seen TIMESTAMP DEFAULT NOW(),
+					expires_at TIMESTAMP NOT NULL,
+					revoked_at TIMESTAMP
+				)
+			`);
+			console.log('Таблица user_sessions создана/проверена в БД бота');
+
+			await pool.query(`
+				CREATE TABLE IF NOT EXISTS stat_views (
+					id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+					user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+					discipline TEXT NOT NULL,
+					institute TEXT NOT NULL,
+					created_at TIMESTAMP DEFAULT NOW()
+				)
+			`);
+			console.log('Таблица stat_views создана/проверена в БД бота');
+
+			await pool.query(`
+				CREATE TABLE IF NOT EXISTS stat_limits (
+					id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+					user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+					monthly_limit INTEGER DEFAULT 10,
+					referral_bonus INTEGER DEFAULT 0,
+					updated_at TIMESTAMP DEFAULT NOW(),
+					UNIQUE(user_id)
+				)
+			`);
+			console.log('Таблица stat_limits создана/проверена в БД бота');
+
+			await pool.query(`
+				CREATE INDEX IF NOT EXISTS idx_user_limits_user_id ON user_limits(user_id);
+				CREATE INDEX IF NOT EXISTS idx_format_history_user_id ON format_history(user_id);
+				CREATE INDEX IF NOT EXISTS idx_payments_user_id ON payments(user_id);
+				CREATE INDEX IF NOT EXISTS idx_payments_yookassa_id ON payments(yookassa_payment_id);
+				CREATE INDEX IF NOT EXISTS idx_user_sessions_user_id ON user_sessions(user_id);
+				CREATE INDEX IF NOT EXISTS idx_user_sessions_token_hash ON user_sessions(token_hash);
+				CREATE INDEX IF NOT EXISTS idx_stat_views_user_id ON stat_views(user_id);
+				CREATE INDEX IF NOT EXISTS idx_stat_views_created_at ON stat_views(created_at);
+				CREATE INDEX IF NOT EXISTS idx_stat_limits_user_id ON stat_limits(user_id);
+			`);
+			console.log('Индексы созданы/проверены в БД бота');
+			console.log('Инициализация БД бота завершена успешно');
 			return;
 		}
 

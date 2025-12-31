@@ -9,6 +9,6 @@ export const GET: RequestHandler = async ({ cookies }) => {
 		return json({ error: 'Не авторизован' }, { status: 401 });
 	}
 
-	const result = await canFormat(context.user.id);
+	const result = await canFormat(context.user.id, context.isTelegram);
 	return json(result);
 };

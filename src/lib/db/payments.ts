@@ -132,7 +132,8 @@ export async function getUsedFormatsCountForPayment(
 
 export async function canRefundPayment(
 	userId: string,
-	paymentId: string
+	paymentId: string,
+	isTelegram: boolean = false
 ): Promise<{ can: boolean; reason?: string; usedCount?: number; purchasedCount?: number }> {
 	const payment = await getPaymentById(paymentId);
 
@@ -168,7 +169,7 @@ export async function canRefundPayment(
 		};
 	}
 
-	const limits = await getUserLimits(userId);
+	const limits = await getUserLimits(userId, isTelegram);
 	const purchasedCount = Number(payment.formats_count);
 	const usedCount = limits.paid_formats_used;
 	const totalPurchased = limits.paid_formats_purchased;

@@ -3,6 +3,7 @@ import type { RequestHandler } from './$types';
 import { getPaymentByYookassaId, updatePaymentStatus } from '$lib/db/payments';
 import { addPaidFormats } from '$lib/db/limits';
 import { cancelPaymentCheck } from '$lib/payment/payment-scheduler';
+import { getUserById } from '$lib/db/users';
 import ipaddr from 'ipaddr.js';
 
 const ALLOWED_YOOKASSA_IPS = [
@@ -76,7 +77,15 @@ export const POST: RequestHandler = async ({ request }) => {
 
 			if (status === 'succeeded' && payment.status !== 'succeeded') {
 				if (updatedPayment && updatedPayment.status === 'succeeded') {
-					await addPaidFormats(payment.user_id, payment.formats_count);
+ 					let isTelegram = false;
+					const userInMainDb = await getUserById(payment.user_id, false);
+					if (!userInMainDb) {
+						const userInBotDb = await getUserById(payment.user_id, true);
+						if (userInBotDb) {
+							isTelegram = true;
+						}
+					}
+					await addPaidFormats(payment.user_id, payment.formats_count, isTelegram);
 				}
 			}
 		}

@@ -77,7 +77,7 @@ export const POST: RequestHandler = async ({ request, cookies, getClientAddress 
 	const mergedParams = mergeFormatParams(body.formatParams);
 
 	if (context) {
-		const can = await canFormat(context.user.id);
+		const can = await canFormat(context.user.id, context.isTelegram);
 		if (!can.can) {
 			return buildErrorResponse(
 				can.reason || 'Лимит форматирований исчерпан',
@@ -94,7 +94,7 @@ export const POST: RequestHandler = async ({ request, cookies, getClientAddress 
 		const formattedBase64 = formattedBuffer.toString('base64');
 
 		if (context) {
-			const used = await useFormat(context.user.id, fileName);
+			const used = await useFormat(context.user.id, fileName, false, context.isTelegram);
 			if (!used) {
 				console.error('Не удалось списать форматирование после успешного форматирования', {
 					userId: context.user.id,

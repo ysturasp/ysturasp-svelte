@@ -1,3 +1,4 @@
+- fix base url for auth google (ysturasp, 2025-12-31) [3 files changed, 3 insertions(+), 1 deletion(-)]
 - add BOT_DATABASE and TELEGRAM_BOT_TOKEN environment variables to docker configuration (ysturasp, 2025-12-31) [4 files changed, 9 insertions(+), 2 deletions(-)]
 - update work login in web and telegram mini app, support multiple database (main and bot) (ysturasp, 2025-12-31) [23 files changed, 1004 insertions(+), 177 deletions(-)]
 - add promotion management and add modal for layout for transfer users on format page (ysturasp, 2025-12-31) [9 files changed, 316 insertions(+), 13 deletions(-)]

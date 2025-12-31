@@ -65,7 +65,7 @@ export const GET: RequestHandler = async ({ url, cookies }) => {
 	if (previousStatus !== 'succeeded' && currentStatus === 'succeeded') {
 		const paymentToCheck = updatedPayment || payment;
 		if (paymentToCheck.status === 'succeeded') {
-			await addPaidFormats(user.id, payment.formats_count);
+			await addPaidFormats(user.id, payment.formats_count, context.isTelegram);
 			formatsAdded = payment.formats_count;
 		}
 	}

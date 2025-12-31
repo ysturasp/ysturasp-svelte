@@ -11,8 +11,11 @@ export interface UserLimits {
 
 const FREE_FORMATS_LIMIT = 3;
 
-export async function getUserLimits(userId: string): Promise<UserLimits> {
-	const pool = getPool();
+export async function getUserLimits(
+	userId: string,
+	isTelegram: boolean = false
+): Promise<UserLimits> {
+	const pool = getPool(isTelegram);
 	if (!pool) throw new Error('База данных недоступна');
 	let result = await pool.query('SELECT * FROM user_limits WHERE user_id = $1', [userId]);
 
@@ -25,9 +28,10 @@ export async function getUserLimits(userId: string): Promise<UserLimits> {
 }
 
 export async function canFormat(
-	userId: string
+	userId: string,
+	isTelegram: boolean = false
 ): Promise<{ can: boolean; reason?: string; remaining?: number }> {
-	const limits = await getUserLimits(userId);
+	const limits = await getUserLimits(userId, isTelegram);
 	const totalAvailable =
 		limits.free_formats_used < FREE_FORMATS_LIMIT
 			? FREE_FORMATS_LIMIT - limits.free_formats_used
@@ -49,10 +53,11 @@ export async function canFormat(
 export async function useFormat(
 	userId: string,
 	fileName: string,
-	isPaid: boolean = false
+	isPaid: boolean = false,
+	isTelegram: boolean = false
 ): Promise<boolean> {
-	const limits = await getUserLimits(userId);
-	const pool = getPool();
+	const limits = await getUserLimits(userId, isTelegram);
+	const pool = getPool(isTelegram);
 	if (!pool) throw new Error('База данных недоступна');
 
 	if (limits.free_formats_used < FREE_FORMATS_LIMIT) {
@@ -78,8 +83,12 @@ export async function useFormat(
 	return true;
 }
 
-export async function addPaidFormats(userId: string, count: number): Promise<void> {
-	const pool = getPool();
+export async function addPaidFormats(
+	userId: string,
+	count: number,
+	isTelegram: boolean = false
+): Promise<void> {
+	const pool = getPool(isTelegram);
 	if (!pool) throw new Error('База данных недоступна');
 	await pool.query(
 		'UPDATE user_limits SET paid_formats_purchased = paid_formats_purchased + $1, updated_at = NOW() WHERE user_id = $2',
@@ -90,11 +99,12 @@ export async function addPaidFormats(userId: string, count: number): Promise<voi
 export async function removePaidFormats(
 	userId: string,
 	purchasedCount: number,
-	usedCount: number = 0
+	usedCount: number = 0,
+	isTelegram: boolean = false
 ): Promise<void> {
-	const pool = getPool();
+	const pool = getPool(isTelegram);
 	if (!pool) throw new Error('База данных недоступна');
-	const limits = await getUserLimits(userId);
+	const limits = await getUserLimits(userId, isTelegram);
 
 	const totalCount = purchasedCount;
 

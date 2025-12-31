@@ -20,7 +20,7 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 			return json({ error: 'ID платежа не указан' }, { status: 400 });
 		}
 
-		const canRefund = await canRefundPayment(user.id, paymentId);
+		const canRefund = await canRefundPayment(user.id, paymentId, context.isTelegram);
 
 		if (!canRefund.can) {
 			return json(
@@ -70,7 +70,12 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 
 		await markPaymentAsRefunded(paymentId, Number(payment.amount));
 
-		await removePaidFormats(user.id, purchasedCount, usedCountForThisPayment);
+		await removePaidFormats(
+			user.id,
+			purchasedCount,
+			usedCountForThisPayment,
+			context.isTelegram
+		);
 
 		return json({
 			success: true,
