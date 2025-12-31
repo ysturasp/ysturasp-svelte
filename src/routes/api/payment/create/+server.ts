@@ -6,16 +6,23 @@ import { getSessionContext } from '$lib/server/sessionContext';
 import { getRealIp } from '$lib/server/ip';
 import { schedulePaymentCheck } from '$lib/payment/payment-scheduler';
 import { dev } from '$app/environment';
+import { getPriceWithPromotion } from '$lib/utils/promotions';
 
 const FORMATS_COUNT = 10;
 
-function calculatePrice(count: number): number {
+function calculateBasePrice(count: number): number {
 	if (dev && count === 1) return 10;
 	if (count >= 50) return 3000;
 	if (count >= 20) return 1500;
 	if (count >= 10) return 850;
 	if (count >= 5) return 500;
 	return count * 125;
+}
+
+function calculatePrice(count: number): number {
+	const basePrice = calculateBasePrice(count);
+	const { finalPrice } = getPriceWithPromotion(basePrice);
+	return finalPrice;
 }
 
 export const POST: RequestHandler = async ({ request, cookies, url, getClientAddress }) => {

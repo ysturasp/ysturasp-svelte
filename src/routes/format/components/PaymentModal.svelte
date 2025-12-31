@@ -2,6 +2,7 @@
 	import { createEventDispatcher } from 'svelte';
 	import BottomModal from '$lib/components/ui/BottomModal.svelte';
 	import CustomSelect from '$lib/components/ui/CustomSelect.svelte';
+	import { getPriceWithPromotion, getCurrentPromotion } from '$lib/utils/promotions';
 
 	export let isOpen = false;
 	export let remaining = 0;
@@ -10,8 +11,9 @@
 	const dispatch = createEventDispatcher();
 
 	let isProcessing = false;
+	const promotion = getCurrentPromotion();
 
-	function calculatePrice(count: number): number {
+	function calculateBasePrice(count: number): number {
 		if (import.meta.env.DEV && count === 1) return 10;
 		if (count >= 50) return 3000;
 		if (count >= 20) return 1500;
@@ -20,21 +22,35 @@
 		return count * 125;
 	}
 
+	function calculatePrice(count: number): number {
+		const basePrice = calculateBasePrice(count);
+		const { finalPrice } = getPriceWithPromotion(basePrice);
+		return finalPrice;
+	}
+
 	function getPricePerFormat(count: number): number {
 		return Math.round(calculatePrice(count) / count);
 	}
 
+	function getFormatOptionLabel(count: number): string {
+		const basePrice = calculateBasePrice(count);
+		const price = calculatePrice(count);
+		const perDoc = getPricePerFormat(count);
+
+		if (import.meta.env.DEV && count === 1) {
+			return `Тест · 10 ₽ (10 ₽/шт)`;
+		}
+
+		const countText = count === 1 ? '1 форматирование' : `${count} форматирований`;
+		return `${countText} · ${price} ₽ (${perDoc} ₽/шт)`;
+	}
+
 	const formatOptions = [
-		{
-			id: 1,
-			label: import.meta.env.DEV
-				? `Тест · 10 ₽ (10 ₽/шт)`
-				: `1 форматирование · ${calculatePrice(1)} ₽ (${getPricePerFormat(1)} ₽/шт)`
-		},
-		{ id: 5, label: `5 форматирований · 500 ₽ (${getPricePerFormat(5)} ₽/шт)` },
-		{ id: 10, label: `10 форматирований · 850 ₽ (${getPricePerFormat(10)} ₽/шт)` },
-		{ id: 20, label: `20 форматирований · 1500 ₽ (${getPricePerFormat(20)} ₽/шт)` },
-		{ id: 50, label: `50 форматирований · 3000 ₽ (${getPricePerFormat(50)} ₽/шт)` }
+		{ id: 1, label: getFormatOptionLabel(1) },
+		{ id: 5, label: getFormatOptionLabel(5) },
+		{ id: 10, label: getFormatOptionLabel(10) },
+		{ id: 20, label: getFormatOptionLabel(20) },
+		{ id: 50, label: getFormatOptionLabel(50) }
 	];
 
 	function canClose() {
@@ -94,6 +110,23 @@
 	contentClass="px-4 overflow-visible"
 >
 	<div class="space-y-4">
+		{#if promotion && promotion.isActive}
+			<div
+				class="rounded-lg border border-yellow-500/30 bg-gradient-to-r from-yellow-500/20 to-orange-500/20 p-3"
+			>
+				<div class="mb-1 flex items-center gap-2">
+					<span class="text-xl">🎄</span>
+					<span class="text-sm font-bold text-yellow-300">{promotion.name}</span>
+					<span
+						class="ml-auto rounded-full bg-yellow-500/30 px-2 py-0.5 text-xs font-bold text-yellow-200"
+					>
+						-{promotion.discountPercent}%
+					</span>
+				</div>
+				<p class="text-xs text-yellow-100/90">{promotion.description}</p>
+			</div>
+		{/if}
+
 		<div class="rounded-lg bg-slate-700/50 p-4">
 			<div class="text-sm text-slate-400">Выберите пакет</div>
 			<div class="mt-3">
@@ -109,6 +142,11 @@
 
 		<div class="rounded-lg bg-blue-500/10 p-4">
 			<div class="text-sm text-slate-400">К оплате</div>
+			{#if promotion && promotion.isActive && calculateBasePrice(formatsCount) > calculatePrice(formatsCount)}
+				<div class="mb-1 text-xs text-slate-500 line-through">
+					{calculateBasePrice(formatsCount)} ₽
+				</div>
+			{/if}
 			<div class="text-2xl font-bold text-blue-400">{calculatePrice(formatsCount)} ₽</div>
 			<div class="mt-1 text-xs text-slate-500">
 				{getPricePerFormat(formatsCount)} ₽ за форматирование

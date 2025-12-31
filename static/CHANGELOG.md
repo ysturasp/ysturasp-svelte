@@ -1,3 +1,4 @@
+- remove unused currentPage prop from AdsBanner component (ysturasp, 2025-12-30) [3 files changed, 2 insertions(+), 1 deletion(-)]
 - replace external image on SVG in AdsBanner (ysturasp, 2025-12-30) [3 files changed, 45 insertions(+), 4 deletions(-)]
 - refactor support page to use new API for support requests, replacing Google Apps Script calls with bot API (ysturasp, 2025-12-29) [5 files changed, 265 insertions(+), 60 deletions(-)]
 - update api and notification modal for requesting on new api instead of google app script (ysturasp, 2025-12-28) [7 files changed, 87 insertions(+), 64 deletions(-)]

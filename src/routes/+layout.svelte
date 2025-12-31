@@ -6,6 +6,7 @@
 	import OfflineModal from '$lib/components/offline/OfflineModal.svelte';
 	import ServiceStatusModal from '$lib/components/notifications/ServiceStatusModal.svelte';
 	import DomainMigrationModal from '$lib/components/modals/DomainMigrationModal.svelte';
+	import NewYearPromoBanner from '$lib/components/promotions/NewYearPromoBanner.svelte';
 	import { onMount } from 'svelte';
 	import { afterNavigate } from '$app/navigation';
 	import { init, backButton } from '@tma.js/sdk-svelte';
@@ -17,6 +18,7 @@
 	} from '$lib/utils/uptimerobot';
 	import { browser } from '$app/environment';
 	import { decodeMigrationData, restoreUserData, isNetlifyDomain } from '$lib/utils/migration';
+	import { page } from '$app/stores';
 
 	let { children } = $props();
 
@@ -122,4 +124,5 @@
 	}}
 />
 <DomainMigrationModal />
+<NewYearPromoBanner />
 {@render children()}
