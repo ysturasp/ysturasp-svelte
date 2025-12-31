@@ -9,26 +9,32 @@ export interface Referral {
 
 export async function createReferralByCode(
 	referralCode: string,
-	referredId: string
+	referredId: string,
+	isTelegram: boolean = false
 ): Promise<Referral | null> {
-	const pool = getPool();
+	const pool = getPool(isTelegram);
 	if (!pool) return null;
 
 	const { getUserByReferralCode } = await import('./users');
-	const referrer = await getUserByReferralCode(referralCode);
+	let referrer = await getUserByReferralCode(referralCode, false);
+	if (!referrer) {
+		referrer = await getUserByReferralCode(referralCode, true);
+	}
 
 	if (!referrer) {
 		return null;
 	}
 
-	return await createReferral(referrer.id, referredId);
+	const referrerIsTelegram = !!(referrer as any).chatId;
+	return await createReferral(referrer.id, referredId, referrerIsTelegram);
 }
 
 export async function createReferral(
 	referrerId: string,
-	referredId: string
+	referredId: string,
+	isTelegram: boolean = false
 ): Promise<Referral | null> {
-	const pool = getPool();
+	const pool = getPool(isTelegram);
 	if (!pool) return null;
 
 	if (referrerId === referredId) {
@@ -49,14 +55,17 @@ export async function createReferral(
 	);
 
 	if (result.rows.length > 0) {
-		await updateReferralBonus(referrerId);
+		await updateReferralBonus(referrerId, isTelegram);
 	}
 
 	return result.rows[0] || null;
 }
 
-export async function getReferralCount(userId: string): Promise<number> {
-	const pool = getPool();
+export async function getReferralCount(
+	userId: string,
+	isTelegram: boolean = false
+): Promise<number> {
+	const pool = getPool(isTelegram);
 	if (!pool) return 0;
 
 	const result = await pool.query(
@@ -67,8 +76,11 @@ export async function getReferralCount(userId: string): Promise<number> {
 	return parseInt(result.rows[0]?.count || '0', 10);
 }
 
-export async function getReferralByReferredId(referredId: string): Promise<Referral | null> {
-	const pool = getPool();
+export async function getReferralByReferredId(
+	referredId: string,
+	isTelegram: boolean = false
+): Promise<Referral | null> {
+	const pool = getPool(isTelegram);
 	if (!pool) return null;
 
 	const result = await pool.query('SELECT * FROM referrals WHERE referred_id = $1', [referredId]);
@@ -76,11 +88,11 @@ export async function getReferralByReferredId(referredId: string): Promise<Refer
 	return result.rows[0] || null;
 }
 
-async function updateReferralBonus(userId: string): Promise<void> {
-	const pool = getPool();
+async function updateReferralBonus(userId: string, isTelegram: boolean = false): Promise<void> {
+	const pool = getPool(isTelegram);
 	if (!pool) return;
 
-	const referralCount = await getReferralCount(userId);
+	const referralCount = await getReferralCount(userId, isTelegram);
 	const bonusLimit = 10 + referralCount * 10;
 
 	await pool.query(
@@ -93,9 +105,10 @@ async function updateReferralBonus(userId: string): Promise<void> {
 }
 
 export async function getStatLimit(
-	userId: string
+	userId: string,
+	isTelegram: boolean = false
 ): Promise<{ monthlyLimit: number; referralBonus: number }> {
-	const pool = getPool();
+	const pool = getPool(isTelegram);
 	if (!pool) return { monthlyLimit: 10, referralBonus: 0 };
 
 	const result = await pool.query(
@@ -110,7 +123,7 @@ export async function getStatLimit(
 		};
 	}
 
-	const referralCount = await getReferralCount(userId);
+	const referralCount = await getReferralCount(userId, isTelegram);
 	const monthlyLimit = 10 + referralCount * 10;
 
 	await pool.query(

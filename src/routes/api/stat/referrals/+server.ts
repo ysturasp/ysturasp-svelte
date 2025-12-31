@@ -14,9 +14,9 @@ export const GET: RequestHandler = async (event) => {
 		return json({ error: 'Не авторизован' }, { status: 401 });
 	}
 
-	const { user } = sessionContext;
-	const referralCount = await getReferralCount(user.id);
-	const { monthlyLimit, referralBonus } = await getStatLimit(user.id);
+	const { user, isTelegram } = sessionContext;
+	const referralCount = await getReferralCount(user.id, isTelegram);
+	const { monthlyLimit, referralBonus } = await getStatLimit(user.id, isTelegram);
 
 	return json({
 		referralCount,
@@ -43,18 +43,19 @@ export const POST: RequestHandler = async (event) => {
 		return json({ error: 'Нельзя пригласить самого себя' }, { status: 400 });
 	}
 
-	const existingReferral = await getReferralByReferredId(referredUserId);
+	const { isTelegram } = sessionContext;
+	const existingReferral = await getReferralByReferredId(referredUserId, isTelegram);
 	if (existingReferral) {
 		return json({ error: 'Пользователь уже был приглашен' }, { status: 400 });
 	}
 
-	const referral = await createReferral(user.id, referredUserId);
+	const referral = await createReferral(user.id, referredUserId, isTelegram);
 	if (!referral) {
 		return json({ error: 'Не удалось создать реферал' }, { status: 400 });
 	}
 
-	const referralCount = await getReferralCount(user.id);
-	const { monthlyLimit } = await getStatLimit(user.id);
+	const referralCount = await getReferralCount(user.id, isTelegram);
+	const { monthlyLimit } = await getStatLimit(user.id, isTelegram);
 
 	return json({
 		success: true,

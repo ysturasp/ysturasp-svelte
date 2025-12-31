@@ -198,9 +198,10 @@ const initDbHandle: Handle = async ({ event, resolve }) => {
 	console.log('[initDbHandle] Запуск инициализации БД...');
 	dbInitPromise = (async () => {
 		try {
-			await initDatabase();
+			await initDatabase(false);
+			await initDatabase(true);
 			dbInitialized = true;
-			console.log('[initDbHandle] БД успешно инициализирована');
+			console.log('[initDbHandle] БД успешно инициализированы');
 		} catch (error) {
 			console.error('[initDbHandle] Ошибка инициализации БД:', error);
 			dbInitPromise = null;
@@ -352,7 +353,8 @@ console.log('[hooks.server] Модуль загружен, запуск иниц
 dbInitPromise = (async () => {
 	try {
 		console.log('[hooks.server] Фоновая инициализация БД...');
-		await initDatabase();
+		await initDatabase(false);
+		await initDatabase(true);
 		dbInitialized = true;
 		console.log('[hooks.server] Фоновая инициализация БД завершена успешно');
 

@@ -9,7 +9,7 @@
 	import NewYearPromoBanner from '$lib/components/promotions/NewYearPromoBanner.svelte';
 	import { onMount } from 'svelte';
 	import { afterNavigate } from '$app/navigation';
-	import { init, backButton } from '@tma.js/sdk-svelte';
+	import { init, backButton, retrieveRawInitData } from '@tma.js/sdk-svelte';
 	import { offlineStore, showOfflineModal } from '$lib/stores/offline';
 	import {
 		checkServiceStatus,
@@ -19,6 +19,8 @@
 	import { browser } from '$app/environment';
 	import { decodeMigrationData, restoreUserData, isNetlifyDomain } from '$lib/utils/migration';
 	import { page } from '$app/stores';
+	import { auth } from '$lib/stores/auth';
+	import { checkIsTelegramMiniApp } from '$lib/utils/telegram';
 
 	let { children } = $props();
 
@@ -94,6 +96,68 @@
 				entryPath = window.location.pathname;
 				updateBack(window.location.pathname);
 			} catch {}
+
+			(async () => {
+				try {
+					await auth.checkAuth();
+					if ($auth.authenticated) {
+						return;
+					}
+
+					let initData: string | null = null;
+					try {
+						const rawInitData = retrieveRawInitData();
+						if (
+							rawInitData &&
+							typeof rawInitData === 'string' &&
+							rawInitData.length > 0
+						) {
+							initData = rawInitData;
+						}
+					} catch (error) {
+						console.warn('Не удалось получить initData из SDK:', error);
+					}
+
+					if (!initData && typeof window !== 'undefined') {
+						const tg = (window as any).Telegram?.WebApp;
+						if (
+							tg?.initData &&
+							typeof tg.initData === 'string' &&
+							tg.initData.length > 0
+						) {
+							initData = tg.initData;
+						}
+					}
+
+					if (!initData) {
+						console.warn('Не удалось получить initData для автоматической авторизации');
+						return;
+					}
+
+					const response = await fetch('/api/auth/telegram', {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json'
+						},
+						body: JSON.stringify({ initData })
+					});
+
+					if (response.ok) {
+						await auth.checkAuth();
+					} else {
+						const errorData = await response.json().catch(() => ({}));
+						console.error(
+							'Ошибка при автоматической авторизации через Telegram:',
+							errorData.error || 'Неизвестная ошибка'
+						);
+					}
+				} catch (error) {
+					console.error(
+						'Критическая ошибка при автоматической авторизации через Telegram:',
+						error
+					);
+				}
+			})();
 		}
 
 		return () => {

@@ -12,6 +12,7 @@ export interface SessionContext {
 	user: User;
 	session: UserSession;
 	payload: SessionPayload;
+	isTelegram: boolean;
 }
 
 export async function getSessionContext(
@@ -29,7 +30,14 @@ export async function getSessionContext(
 		return null;
 	}
 
-	const session = await getSessionById(payload.sessionId);
+	let session = await getSessionById(payload.sessionId, false);
+	let isTelegram = false;
+
+	if (!session) {
+		session = await getSessionById(payload.sessionId, true);
+		isTelegram = true;
+	}
+
 	if (!session || session.user_id !== payload.userId) {
 		cookies.delete('session_token', { path: '/' });
 		return null;
@@ -46,7 +54,15 @@ export async function getSessionContext(
 		return null;
 	}
 
-	const user = await getUserById(payload.userId);
+	if (
+		session.metadata &&
+		typeof session.metadata === 'object' &&
+		'isTelegram' in session.metadata
+	) {
+		isTelegram = Boolean(session.metadata.isTelegram);
+	}
+
+	const user = await getUserById(payload.userId, isTelegram);
 	if (!user) {
 		cookies.delete('session_token', { path: '/' });
 		return null;
@@ -57,8 +73,8 @@ export async function getSessionContext(
 		if (ipAddress !== undefined && session.ip_address !== ipAddress) {
 			updateOptions.ipAddress = ipAddress;
 		}
-		await updateSessionActivity(session.id, updateOptions);
+		await updateSessionActivity(session.id, updateOptions, isTelegram);
 	}
 
-	return { user, session, payload };
+	return { user, session, payload, isTelegram };
 }

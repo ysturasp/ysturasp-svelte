@@ -9,8 +9,8 @@ export const GET: RequestHandler = async (event) => {
 		return json({ error: 'Не авторизован' }, { status: 401 });
 	}
 
-	const { user } = sessionContext;
-	const referralCode = await ensureReferralCode(user.id);
+	const { user, isTelegram } = sessionContext;
+	const referralCode = await ensureReferralCode(user.id, isTelegram);
 
 	return json({ referralCode });
 };

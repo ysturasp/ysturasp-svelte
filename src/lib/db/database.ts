@@ -1,27 +1,61 @@
 import { Pool, type Pool as PoolType } from 'pg';
 import { env } from '$env/dynamic/private';
 
-let pool: PoolType | null = null;
+let mainPool: PoolType | null = null;
+let botPool: PoolType | null = null;
 
-export function getPool(): PoolType | null {
-	if (!pool) {
-		if (!env.DATABASE_URL) {
-			return null;
-		}
-		pool = new Pool({
-			connectionString: env.DATABASE_URL,
-			ssl: false
-		});
+function createConnectionString(databaseName?: string): string {
+	if (!env.DATABASE_URL) {
+		throw new Error('DATABASE_URL не задан');
 	}
-	return pool;
+
+	if (!databaseName) {
+		return env.DATABASE_URL;
+	}
+
+	try {
+		const url = new URL(env.DATABASE_URL);
+		url.pathname = `/${databaseName}`;
+		return url.toString();
+	} catch (error) {
+		return env.DATABASE_URL.replace(/\/[^\/]+$/, `/${databaseName}`);
+	}
 }
 
-async function waitForDatabase(maxRetries = 10, delayMs = 1000): Promise<void> {
-	const pool = getPool();
-	if (!pool) {
-		throw new Error('DATABASE_URL не задан в переменных окружения');
-	}
+export function getPool(isTelegram: boolean = false): PoolType | null {
+	if (isTelegram) {
+		if (!botPool) {
+			if (!env.DATABASE_URL) {
+				return null;
+			}
 
+			const botDatabase = env.BOT_DATABASE;
+			const connectionString = createConnectionString(botDatabase);
+
+			botPool = new Pool({
+				connectionString,
+				ssl: false
+			});
+		}
+		return botPool;
+	} else {
+		if (!mainPool) {
+			if (!env.DATABASE_URL) {
+				return null;
+			}
+
+			const connectionString = createConnectionString();
+
+			mainPool = new Pool({
+				connectionString,
+				ssl: false
+			});
+		}
+		return mainPool;
+	}
+}
+
+async function waitForDatabase(pool: PoolType, maxRetries = 10, delayMs = 1000): Promise<void> {
 	for (let i = 0; i < maxRetries; i++) {
 		try {
 			await pool.query('SELECT 1');
@@ -40,54 +74,75 @@ async function waitForDatabase(maxRetries = 10, delayMs = 1000): Promise<void> {
 	}
 }
 
-export async function initDatabase() {
-	const pool = getPool();
+export async function initDatabase(isTelegram: boolean = false) {
+	const pool = getPool(isTelegram);
 	if (!pool) {
-		console.log('[initDatabase] DATABASE_URL не задан, инициализация БД пропущена');
+		console.log(
+			`[initDatabase] DATABASE_URL не задан, инициализация БД ${isTelegram ? 'бота' : 'основной'} пропущена`
+		);
 		return;
 	}
 
 	try {
-		await waitForDatabase();
-		console.log('Подключение к БД установлено');
+		await waitForDatabase(pool);
+		console.log(`Подключение к БД ${isTelegram ? 'бота' : 'основной'} установлено`);
 	} catch (error) {
-		console.error('Ошибка подключения к БД:', error);
+		console.error(`Ошибка подключения к БД ${isTelegram ? 'бота' : 'основной'}:`, error);
 		throw error;
 	}
 
 	try {
-		await pool.query(`
-			CREATE TABLE IF NOT EXISTS users (
-				id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-				google_id TEXT UNIQUE NOT NULL,
-				email TEXT NOT NULL,
-				name TEXT,
-				picture TEXT,
-				referral_code TEXT UNIQUE,
-				created_at TIMESTAMP DEFAULT NOW(),
-				updated_at TIMESTAMP DEFAULT NOW()
+		if (isTelegram) {
+			console.log('БД бота подключена, структура управляется ботом');
+			return;
+		}
+
+		const tableExists = await pool.query(`
+			SELECT EXISTS (
+				SELECT FROM information_schema.tables 
+				WHERE table_name = 'users'
 			)
 		`);
-		console.log('Таблица users создана/проверена');
+
+		const usersTableExists = tableExists.rows[0]?.exists || false;
+
+		if (!usersTableExists) {
+			await pool.query(`
+				CREATE TABLE users (
+					id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+					google_id TEXT UNIQUE,
+					email TEXT NOT NULL,
+					name TEXT,
+					picture TEXT,
+					referral_code TEXT UNIQUE,
+					created_at TIMESTAMP DEFAULT NOW(),
+					updated_at TIMESTAMP DEFAULT NOW()
+				)
+			`);
+			console.log('Таблица users создана в основной БД');
+		} else {
+			console.log('Таблица users уже существует в основной БД');
+		}
 
 		try {
 			await pool.query(`
 				DO $$
 				BEGIN
+					-- Добавляем referral_code если его нет
 					IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
 						WHERE table_name='users' AND column_name='referral_code') THEN
 						ALTER TABLE users ADD COLUMN referral_code TEXT UNIQUE;
 						CREATE INDEX IF NOT EXISTS idx_users_referral_code ON users(referral_code);
 					END IF;
+					
+					-- Генерируем referral_code для пользователей без него
+					UPDATE users SET referral_code = gen_random_uuid()::TEXT 
+					WHERE referral_code IS NULL;
 				END $$;
 			`);
-			await pool.query(`
-				UPDATE users SET referral_code = gen_random_uuid()::TEXT 
-				WHERE referral_code IS NULL;
-			`);
-			console.log('Миграция users.referral_code выполнена');
+			console.log('Миграция основной БД выполнена');
 		} catch (error) {
-			console.log('Миграция users.referral_code пропущена');
+			console.log('Миграция основной БД пропущена:', error);
 		}
 
 		await pool.query(`
@@ -213,8 +268,31 @@ export async function initDatabase() {
 		}
 
 		await pool.query(`
-			CREATE INDEX IF NOT EXISTS idx_users_google_id ON users(google_id);
-			CREATE INDEX IF NOT EXISTS idx_users_referral_code ON users(referral_code);
+			DO $$
+			BEGIN
+				IF EXISTS (SELECT 1 FROM information_schema.columns 
+					WHERE table_name='users' AND column_name='google_id') THEN
+					CREATE INDEX IF NOT EXISTS idx_users_google_id ON users(google_id);
+				END IF;
+				
+				IF EXISTS (SELECT 1 FROM information_schema.columns 
+					WHERE table_name='users' AND column_name='telegram_id') THEN
+					CREATE INDEX IF NOT EXISTS idx_users_telegram_id ON users(telegram_id);
+				END IF;
+				
+				IF EXISTS (SELECT 1 FROM information_schema.columns 
+					WHERE table_name='users' AND column_name='chatId') THEN
+					CREATE INDEX IF NOT EXISTS idx_users_chatId ON users("chatId");
+				END IF;
+				
+				IF EXISTS (SELECT 1 FROM information_schema.columns 
+					WHERE table_name='users' AND column_name='referral_code') THEN
+					CREATE INDEX IF NOT EXISTS idx_users_referral_code ON users(referral_code);
+				END IF;
+			END $$;
+		`);
+
+		await pool.query(`
 			CREATE INDEX IF NOT EXISTS idx_user_limits_user_id ON user_limits(user_id);
 			CREATE INDEX IF NOT EXISTS idx_format_history_user_id ON format_history(user_id);
 			CREATE INDEX IF NOT EXISTS idx_public_format_history_user_key ON public_format_history(user_key);

@@ -26,7 +26,7 @@ export const GET: RequestHandler = async (event) => {
 	const stateParam = url.searchParams.get('state');
 	const returnUrl = url.searchParams.get('returnUrl');
 
-	const baseUrl = url.origin;
+	const baseUrl = 'https://ahah.ysturasp.ru';
 	const redirectUri = `${baseUrl}/api/auth/google`;
 
 	if (!code) {
@@ -98,10 +98,13 @@ export const GET: RequestHandler = async (event) => {
 	}
 
 	const user = await getOrCreateUser(
-		userInfo.id,
-		userInfo.email,
-		userInfo.name,
-		userInfo.picture
+		{
+			googleId: userInfo.id,
+			email: userInfo.email,
+			name: userInfo.name,
+			picture: userInfo.picture
+		},
+		false
 	);
 
 	const sessionKey = randomBytes(32).toString('hex');
@@ -111,14 +114,17 @@ export const GET: RequestHandler = async (event) => {
 	const deviceName = detectDevice(userAgent);
 	const ipAddress = getRealIp(request, getClientAddress);
 
-	const userSession = await createUserSession({
-		userId: user.id,
-		tokenHash,
-		deviceName,
-		ipAddress,
-		userAgent,
-		expiresAt
-	});
+	const userSession = await createUserSession(
+		{
+			userId: user.id,
+			tokenHash,
+			deviceName,
+			ipAddress,
+			userAgent,
+			expiresAt
+		},
+		false
+	);
 
 	const session = createSessionToken({
 		userId: user.id,

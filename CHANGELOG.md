@@ -1,3 +1,4 @@
+- add promotion management and add modal for layout for transfer users on format page (ysturasp, 2025-12-31) [9 files changed, 316 insertions(+), 13 deletions(-)]
 - remove unused currentPage prop from AdsBanner component (ysturasp, 2025-12-30) [3 files changed, 2 insertions(+), 1 deletion(-)]
 - replace external image on SVG in AdsBanner (ysturasp, 2025-12-30) [3 files changed, 45 insertions(+), 4 deletions(-)]
 - refactor support page to use new API for support requests, replacing Google Apps Script calls with bot API (ysturasp, 2025-12-29) [5 files changed, 265 insertions(+), 60 deletions(-)]

@@ -16,7 +16,7 @@ export const GET: RequestHandler = async ({ cookies, getClientAddress, request }
 		return json({ error: 'Не авторизован' }, { status: 401 });
 	}
 
-	const sessions = await listUserSessions(context.user.id);
+	const sessions = await listUserSessions(context.user.id, context.isTelegram);
 
 	return json({
 		currentSessionId: context.session.id,
@@ -57,12 +57,18 @@ export const POST: RequestHandler = async ({ cookies, request, getClientAddress 
 			return json({ error: 'sessionId обязателен' }, { status: 400 });
 		}
 
-		const target = await getSessionById(body.sessionId);
+		let target = await getSessionById(body.sessionId, false);
+		let targetIsTelegram = false;
+		if (!target) {
+			target = await getSessionById(body.sessionId, true);
+			targetIsTelegram = true;
+		}
+
 		if (!target || target.user_id !== context.user.id) {
 			return json({ error: 'Сессия не найдена' }, { status: 404 });
 		}
 
-		await revokeSession(target.id);
+		await revokeSession(target.id, targetIsTelegram);
 
 		const revokedCurrent = target.id === context.session.id;
 		if (revokedCurrent) {
@@ -73,12 +79,16 @@ export const POST: RequestHandler = async ({ cookies, request, getClientAddress 
 	}
 
 	if (body.action === 'revokeOthers') {
-		await revokeSessionsByUser(context.user.id, { excludeSessionId: context.session.id });
+		await revokeSessionsByUser(
+			context.user.id,
+			{ excludeSessionId: context.session.id },
+			context.isTelegram
+		);
 		return json({ success: true });
 	}
 
 	if (body.action === 'revokeAll') {
-		await revokeSessionsByUser(context.user.id);
+		await revokeSessionsByUser(context.user.id, {}, context.isTelegram);
 		cookies.delete('session_token', { path: '/' });
 		return json({ success: true, revokedCurrent: true });
 	}

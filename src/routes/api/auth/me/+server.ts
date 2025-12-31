@@ -12,7 +12,7 @@ export const GET: RequestHandler = async ({ cookies, getClientAddress, request }
 		return json({ authenticated: false }, { status: 401 });
 	}
 
-	const { user, session, payload } = context;
+	const { user, session, payload, isTelegram } = context;
 
 	if (shouldRefreshSession(payload)) {
 		const refreshed = createSessionToken({
@@ -29,18 +29,46 @@ export const GET: RequestHandler = async ({ cookies, getClientAddress, request }
 			maxAge: DEFAULT_SESSION_TTL
 		});
 
-		await updateSessionActivity(session.id, {
-			expiresAt: new Date(refreshed.expiresAt * 1000)
-		});
+		await updateSessionActivity(
+			session.id,
+			{
+				expiresAt: new Date(refreshed.expiresAt * 1000)
+			},
+			isTelegram
+		);
+	}
+
+	let email = user.email;
+	let name = user.name;
+	let picture = user.picture;
+
+	if (isTelegram && !email) {
+		const botUser = user as any;
+		if (botUser.username) {
+			email = `${botUser.username}@telegram.local`;
+		} else if (botUser.chatId) {
+			email = `tg_${botUser.chatId}@telegram.local`;
+		}
+	}
+
+	if (isTelegram && !name) {
+		const botUser = user as any;
+		if (botUser.firstName && botUser.lastName) {
+			name = `${botUser.firstName} ${botUser.lastName}`;
+		} else if (botUser.firstName) {
+			name = botUser.firstName;
+		} else if (botUser.username) {
+			name = botUser.username;
+		}
 	}
 
 	return json({
 		authenticated: true,
 		user: {
 			id: user.id,
-			email: user.email,
-			name: user.name,
-			picture: user.picture
+			email: email || null,
+			name: name || null,
+			picture: picture || null
 		}
 	});
 };

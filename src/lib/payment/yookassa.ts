@@ -51,7 +51,7 @@ export async function createPayment(params: CreatePaymentParams) {
 		paymentData.client_ip = params.clientIp;
 	}
 
-	if (params.receipt) {
+	if (params.receipt && !paymentData.capture) {
 		paymentData.receipt = params.receipt;
 	}
 

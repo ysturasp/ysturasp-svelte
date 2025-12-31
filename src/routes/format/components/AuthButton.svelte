@@ -4,12 +4,15 @@
 	import { goto } from '$app/navigation';
 	import { loadPrivacySettings, maskEmail, maskName } from '$lib/utils/privacy';
 	import { browser } from '$app/environment';
+	import { checkIsTelegramMiniApp } from '$lib/utils/telegram';
 
 	let privacySettings = loadPrivacySettings();
+	let isTelegram = false;
 
 	onMount(() => {
 		auth.checkAuth();
 		if (browser) {
+			isTelegram = checkIsTelegramMiniApp();
 			const updatePrivacy = () => {
 				privacySettings = loadPrivacySettings();
 			};
@@ -81,7 +84,7 @@
 			/>
 		</svg>
 	</button>
-{:else}
+{:else if !isTelegram}
 	<div class="flex flex-col gap-3">
 		<div class="flex flex-wrap gap-2">
 			<button

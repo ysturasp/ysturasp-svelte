@@ -3,77 +3,292 @@ import { randomBytes } from 'crypto';
 
 export interface User {
 	id: string;
-	google_id: string;
-	email: string;
+	google_id: string | null;
+	telegram_id: string | null;
+	email: string | null;
 	name: string | null;
 	picture: string | null;
 	referral_code: string | null;
 	created_at: Date;
 	updated_at: Date;
+	chatId?: string | null;
+	username?: string | null;
+	firstName?: string | null;
+	lastName?: string | null;
+	state?: string | null;
+	preferredGroup?: string | null;
+	stateData?: Record<string, any> | null;
+	isAdmin?: boolean;
 }
 
 function generateReferralCode(): string {
 	return randomBytes(8).toString('base64url').substring(0, 12).toUpperCase();
 }
 
-export async function getUserByGoogleId(googleId: string): Promise<User | null> {
-	const pool = getPool();
+export async function getUserByGoogleId(
+	googleId: string,
+	isTelegram: boolean = false
+): Promise<User | null> {
+	const pool = getPool(isTelegram);
 	if (!pool) return null;
 	const result = await pool.query('SELECT * FROM users WHERE google_id = $1', [googleId]);
 	return result.rows[0] || null;
 }
 
-export async function createUser(
-	googleId: string,
-	email: string,
-	name?: string,
-	picture?: string
-): Promise<User> {
-	const pool = getPool();
-	if (!pool) throw new Error('База данных недоступна');
-
-	let referralCode = generateReferralCode();
-	let attempts = 0;
-
-	while (attempts < 10) {
-		const existing = await pool.query('SELECT id FROM users WHERE referral_code = $1', [
-			referralCode
-		]);
-
-		if (existing.rows.length === 0) {
-			break;
-		}
-
-		referralCode = generateReferralCode();
-		attempts++;
+export async function getUserByTelegramId(
+	telegramId: string,
+	isTelegram: boolean = true
+): Promise<User | null> {
+	const pool = getPool(isTelegram);
+	if (!pool) return null;
+	if (isTelegram) {
+		const result = await pool.query('SELECT * FROM users WHERE "chatId" = $1', [telegramId]);
+		return result.rows[0] || null;
+	} else {
+		const result = await pool.query('SELECT * FROM users WHERE telegram_id = $1', [telegramId]);
+		return result.rows[0] || null;
 	}
-
-	const result = await pool.query(
-		'INSERT INTO users (google_id, email, name, picture, referral_code) VALUES ($1, $2, $3, $4, $5) RETURNING *',
-		[googleId, email, name || null, picture || null, referralCode]
-	);
-	return result.rows[0];
 }
 
-export async function getUserById(id: string): Promise<User | null> {
-	const pool = getPool();
+export async function createUser(
+	params: {
+		googleId?: string;
+		telegramId?: string;
+		email?: string;
+		name?: string;
+		picture?: string;
+		username?: string;
+		firstName?: string;
+		lastName?: string;
+	},
+	isTelegram: boolean = false
+): Promise<User> {
+	const pool = getPool(isTelegram);
+	if (!pool) throw new Error('База данных недоступна');
+
+	if (!params.googleId && !params.telegramId) {
+		throw new Error('Необходимо указать либо googleId, либо telegramId');
+	}
+
+	if (isTelegram) {
+		if (params.telegramId) {
+			const chatIdCheck = await pool.query('SELECT * FROM users WHERE "chatId" = $1', [
+				params.telegramId
+			]);
+			if (chatIdCheck.rows.length > 0) {
+				const existing = chatIdCheck.rows[0];
+
+				const columnCheck = await pool.query(`
+					SELECT column_name 
+					FROM information_schema.columns 
+					WHERE table_name='users' 
+					AND column_name IN ('email', 'name', 'picture', 'username', 'firstName', 'lastName', 'updated_at')
+				`);
+				const existingColumns = new Set(columnCheck.rows.map((r: any) => r.column_name));
+
+				const updateFields: string[] = [];
+				const updateParams: any[] = [];
+
+				if (existingColumns.has('email') && params.email && !existing.email) {
+					updateFields.push('email = $' + (updateParams.length + 1));
+					updateParams.push(params.email);
+				}
+
+				if (existingColumns.has('name') && params.name && !existing.name) {
+					updateFields.push('name = $' + (updateParams.length + 1));
+					updateParams.push(params.name);
+				}
+
+				if (existingColumns.has('picture') && params.picture && !existing.picture) {
+					updateFields.push('picture = $' + (updateParams.length + 1));
+					updateParams.push(params.picture);
+				}
+
+				if (existingColumns.has('username') && params.username) {
+					const currentUsername = (existing as any).username;
+					if (
+						currentUsername === null ||
+						currentUsername === undefined ||
+						currentUsername !== params.username
+					) {
+						updateFields.push('username = $' + (updateParams.length + 1));
+						updateParams.push(params.username);
+					}
+				}
+
+				if (existingColumns.has('firstName') && params.firstName) {
+					const currentFirstName = (existing as any).firstName;
+					if (
+						currentFirstName === null ||
+						currentFirstName === undefined ||
+						currentFirstName !== params.firstName
+					) {
+						updateFields.push('"firstName" = $' + (updateParams.length + 1));
+						updateParams.push(params.firstName);
+					}
+				}
+
+				if (existingColumns.has('lastName') && params.lastName) {
+					const currentLastName = (existing as any).lastName;
+					if (
+						currentLastName === null ||
+						currentLastName === undefined ||
+						currentLastName !== params.lastName
+					) {
+						updateFields.push('"lastName" = $' + (updateParams.length + 1));
+						updateParams.push(params.lastName);
+					}
+				}
+
+				if (updateFields.length > 0) {
+					if (existingColumns.has('updated_at')) {
+						updateFields.push('updated_at = NOW()');
+					}
+					updateParams.push(existing.id);
+					await pool.query(
+						`UPDATE users SET ${updateFields.join(', ')} WHERE id = $${updateParams.length}`,
+						updateParams
+					);
+				}
+
+				const updated = await pool.query('SELECT * FROM users WHERE id = $1', [
+					existing.id
+				]);
+				return updated.rows[0];
+			}
+		}
+
+		const columnCheck = await pool.query(`
+			SELECT column_name 
+			FROM information_schema.columns 
+			WHERE table_name='users' 
+			AND column_name IN ('email', 'name', 'picture', 'username', 'firstName', 'lastName')
+		`);
+		const existingColumns = new Set(columnCheck.rows.map((r: any) => r.column_name));
+
+		const columns: string[] = ['"chatId"'];
+		const values: any[] = [params.telegramId];
+
+		if (existingColumns.has('email') && params.email) {
+			columns.push('email');
+			values.push(params.email);
+		}
+		if (existingColumns.has('name') && params.name) {
+			columns.push('name');
+			values.push(params.name);
+		}
+		if (existingColumns.has('picture') && params.picture) {
+			columns.push('picture');
+			values.push(params.picture);
+		}
+		if (existingColumns.has('username') && params.username) {
+			columns.push('username');
+			values.push(params.username);
+		}
+		if (existingColumns.has('firstName') && params.firstName) {
+			columns.push('"firstName"');
+			values.push(params.firstName);
+		}
+		if (existingColumns.has('lastName') && params.lastName) {
+			columns.push('"lastName"');
+			values.push(params.lastName);
+		}
+
+		const placeholders = values.map((_, i) => `$${i + 1}`).join(', ');
+		const columnsStr = columns.join(', ');
+
+		const result = await pool.query(
+			`INSERT INTO users (${columnsStr}) VALUES (${placeholders}) RETURNING *`,
+			values
+		);
+		return result.rows[0];
+	} else {
+		let referralCode = generateReferralCode();
+		let attempts = 0;
+
+		while (attempts < 10) {
+			const existing = await pool.query('SELECT id FROM users WHERE referral_code = $1', [
+				referralCode
+			]);
+
+			if (existing.rows.length === 0) {
+				break;
+			}
+
+			referralCode = generateReferralCode();
+			attempts++;
+		}
+
+		const columns: string[] = ['google_id', 'email', 'name', 'picture', 'referral_code'];
+		const values: any[] = [
+			params.googleId || null,
+			params.email || null,
+			params.name || null,
+			params.picture || null,
+			referralCode
+		];
+
+		const placeholders = values.map((_, i) => `$${i + 1}`).join(', ');
+		const columnsStr = columns.join(', ');
+
+		const result = await pool.query(
+			`INSERT INTO users (${columnsStr}) VALUES (${placeholders}) RETURNING *`,
+			values
+		);
+		return result.rows[0];
+	}
+}
+
+export async function getUserById(id: string, isTelegram: boolean = false): Promise<User | null> {
+	const pool = getPool(isTelegram);
 	if (!pool) return null;
 	const result = await pool.query('SELECT * FROM users WHERE id = $1', [id]);
 	return result.rows[0] || null;
 }
 
-export async function getUserByReferralCode(referralCode: string): Promise<User | null> {
-	const pool = getPool();
+export async function getUserByReferralCode(
+	referralCode: string,
+	isTelegram: boolean = false
+): Promise<User | null> {
+	const pool = getPool(isTelegram);
 	if (!pool) return null;
+
+	if (isTelegram) {
+		const columnCheck = await pool.query(`
+			SELECT EXISTS (
+				SELECT 1 FROM information_schema.columns 
+				WHERE table_name='users' AND column_name='referral_code'
+			)
+		`);
+		if (!columnCheck.rows[0]?.exists) {
+			return null;
+		}
+	}
+
 	const result = await pool.query('SELECT * FROM users WHERE referral_code = $1', [referralCode]);
 	return result.rows[0] || null;
 }
 
-export async function ensureReferralCode(userId: string): Promise<string> {
-	const pool = getPool();
+export async function ensureReferralCode(
+	userId: string,
+	isTelegram: boolean = false
+): Promise<string> {
+	const pool = getPool(isTelegram);
 	if (!pool) throw new Error('База данных недоступна');
 
-	const user = await getUserById(userId);
+	if (isTelegram) {
+		const columnCheck = await pool.query(`
+			SELECT EXISTS (
+				SELECT 1 FROM information_schema.columns 
+				WHERE table_name='users' AND column_name='referral_code'
+			)
+		`);
+		if (!columnCheck.rows[0]?.exists) {
+			throw new Error('Колонка referral_code не существует в БД бота');
+		}
+	}
+
+	const user = await getUserById(userId, isTelegram);
 	if (!user) throw new Error('Пользователь не найден');
 
 	if (user.referral_code) {
@@ -102,20 +317,160 @@ export async function ensureReferralCode(userId: string): Promise<string> {
 }
 
 export async function getOrCreateUser(
-	googleId: string,
-	email: string,
-	name?: string,
-	picture?: string
+	params: {
+		googleId?: string;
+		telegramId?: string;
+		email?: string;
+		name?: string;
+		picture?: string;
+		username?: string;
+		firstName?: string;
+		lastName?: string;
+	},
+	isTelegram: boolean = false
 ): Promise<User> {
-	const existing = await getUserByGoogleId(googleId);
-	if (existing) {
-		const pool = getPool();
-		if (!pool) throw new Error('База данных недоступна');
-		await pool.query(
-			'UPDATE users SET email = $1, name = $2, picture = $3, updated_at = NOW() WHERE google_id = $4',
-			[email, name || null, picture || null, googleId]
-		);
-		return { ...existing, email, name: name || null, picture: picture || null };
+	if (!params.googleId && !params.telegramId) {
+		throw new Error('Необходимо указать либо googleId, либо telegramId');
 	}
-	return await createUser(googleId, email, name, picture);
+
+	const pool = getPool(isTelegram);
+	if (!pool) throw new Error('База данных недоступна');
+
+	let existing: User | null = null;
+
+	if (isTelegram && params.telegramId) {
+		existing = await getUserByTelegramId(params.telegramId, true);
+	} else if (!isTelegram && params.googleId) {
+		existing = await getUserByGoogleId(params.googleId, false);
+	} else if (params.telegramId) {
+		existing = await getUserByTelegramId(params.telegramId, isTelegram);
+	}
+
+	if (existing) {
+		const updateParams: any[] = [];
+		const updateFields: string[] = [];
+
+		if (isTelegram) {
+			const columnCheck = await pool.query(`
+				SELECT column_name 
+				FROM information_schema.columns 
+				WHERE table_name='users' 
+				AND column_name IN ('email', 'name', 'picture', 'username', 'firstName', 'lastName')
+			`);
+			const existingColumns = new Set(columnCheck.rows.map((r: any) => r.column_name));
+
+			if (existingColumns.has('email') && params.email) {
+				const currentEmail = (existing as any).email;
+				if (
+					currentEmail === null ||
+					currentEmail === undefined ||
+					currentEmail !== params.email
+				) {
+					updateFields.push('email = $' + (updateParams.length + 1));
+					updateParams.push(params.email);
+				}
+			}
+
+			if (existingColumns.has('name') && params.name) {
+				const currentName = (existing as any).name;
+				if (
+					currentName === null ||
+					currentName === undefined ||
+					currentName !== params.name
+				) {
+					updateFields.push('name = $' + (updateParams.length + 1));
+					updateParams.push(params.name || null);
+				}
+			}
+
+			if (existingColumns.has('picture') && params.picture) {
+				const currentPicture = (existing as any).picture;
+				if (
+					currentPicture === null ||
+					currentPicture === undefined ||
+					currentPicture !== params.picture
+				) {
+					updateFields.push('picture = $' + (updateParams.length + 1));
+					updateParams.push(params.picture || null);
+				}
+			}
+
+			if (existingColumns.has('username') && params.username) {
+				const currentUsername = (existing as any).username;
+				if (
+					currentUsername === null ||
+					currentUsername === undefined ||
+					currentUsername !== params.username
+				) {
+					updateFields.push('username = $' + (updateParams.length + 1));
+					updateParams.push(params.username);
+				}
+			}
+
+			if (existingColumns.has('firstName') && params.firstName) {
+				const currentFirstName = (existing as any).firstName;
+				if (
+					currentFirstName === null ||
+					currentFirstName === undefined ||
+					currentFirstName !== params.firstName
+				) {
+					updateFields.push('"firstName" = $' + (updateParams.length + 1));
+					updateParams.push(params.firstName);
+				}
+			}
+
+			if (existingColumns.has('lastName') && params.lastName) {
+				const currentLastName = (existing as any).lastName;
+				if (
+					currentLastName === null ||
+					currentLastName === undefined ||
+					currentLastName !== params.lastName
+				) {
+					updateFields.push('"lastName" = $' + (updateParams.length + 1));
+					updateParams.push(params.lastName);
+				}
+			}
+		} else {
+			if (params.email && !existing.email) {
+				updateFields.push('email = $' + (updateParams.length + 1));
+				updateParams.push(params.email);
+			}
+
+			if (params.name !== undefined && params.name !== existing.name) {
+				updateFields.push('name = $' + (updateParams.length + 1));
+				updateParams.push(params.name || null);
+			}
+
+			if (params.picture !== undefined && params.picture !== existing.picture) {
+				updateFields.push('picture = $' + (updateParams.length + 1));
+				updateParams.push(params.picture || null);
+			}
+		}
+
+		if (updateFields.length > 0) {
+			if (isTelegram) {
+				const columnCheck = await pool.query(`
+					SELECT EXISTS (
+						SELECT 1 FROM information_schema.columns 
+						WHERE table_name='users' AND column_name='updated_at'
+					)
+				`);
+				if (columnCheck.rows[0]?.exists) {
+					updateFields.push('updated_at = NOW()');
+				}
+			} else {
+				updateFields.push('updated_at = NOW()');
+			}
+			updateParams.push(existing.id);
+			await pool.query(
+				`UPDATE users SET ${updateFields.join(', ')} WHERE id = $${updateParams.length}`,
+				updateParams
+			);
+		}
+
+		const updated = await pool.query('SELECT * FROM users WHERE id = $1', [existing.id]);
+		return updated.rows[0];
+	}
+
+	return await createUser(params, isTelegram);
 }

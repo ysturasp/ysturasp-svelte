@@ -29,9 +29,18 @@ export function hashSessionKey(sessionKey: string): string {
 	return createHash('sha256').update(sessionKey).digest('hex');
 }
 
-export async function createUserSession(params: CreateUserSessionParams): Promise<UserSession> {
-	const pool = getPool();
+export async function createUserSession(
+	params: CreateUserSessionParams,
+	isTelegram: boolean = false
+): Promise<UserSession> {
+	const pool = getPool(isTelegram);
 	if (!pool) throw new Error('База данных недоступна');
+
+	const metadata = {
+		...(params.metadata || {}),
+		isTelegram
+	};
+
 	const result = await pool.query(
 		`INSERT INTO user_sessions (user_id, token_hash, device_name, ip_address, user_agent, metadata, expires_at)
 		 VALUES ($1, $2, $3, $4, $5, $6, $7)
@@ -42,7 +51,7 @@ export async function createUserSession(params: CreateUserSessionParams): Promis
 			params.deviceName || null,
 			params.ipAddress || null,
 			params.userAgent || null,
-			params.metadata || null,
+			JSON.stringify(metadata),
 			params.expiresAt
 		]
 	);
@@ -50,8 +59,11 @@ export async function createUserSession(params: CreateUserSessionParams): Promis
 	return result.rows[0];
 }
 
-export async function getSessionById(sessionId: string): Promise<UserSession | null> {
-	const pool = getPool();
+export async function getSessionById(
+	sessionId: string,
+	isTelegram: boolean = false
+): Promise<UserSession | null> {
+	const pool = getPool(isTelegram);
 	if (!pool) return null;
 	const result = await pool.query('SELECT * FROM user_sessions WHERE id = $1', [sessionId]);
 	return result.rows[0] || null;
@@ -59,9 +71,10 @@ export async function getSessionById(sessionId: string): Promise<UserSession | n
 
 export async function updateSessionActivity(
 	sessionId: string,
-	options: { lastSeen?: Date; expiresAt?: Date; ipAddress?: string | null } = {}
+	options: { lastSeen?: Date; expiresAt?: Date; ipAddress?: string | null } = {},
+	isTelegram: boolean = false
 ): Promise<void> {
-	const pool = getPool();
+	const pool = getPool(isTelegram);
 	if (!pool) return;
 	const fields: string[] = [];
 	const values: Array<string | Date | null> = [];
@@ -94,17 +107,18 @@ export async function updateSessionActivity(
 	);
 }
 
-export async function revokeSession(sessionId: string): Promise<void> {
-	const pool = getPool();
+export async function revokeSession(sessionId: string, isTelegram: boolean = false): Promise<void> {
+	const pool = getPool(isTelegram);
 	if (!pool) return;
 	await pool.query('UPDATE user_sessions SET revoked_at = NOW() WHERE id = $1', [sessionId]);
 }
 
 export async function revokeSessionsByUser(
 	userId: string,
-	options: { excludeSessionId?: string } = {}
+	options: { excludeSessionId?: string } = {},
+	isTelegram: boolean = false
 ): Promise<void> {
-	const pool = getPool();
+	const pool = getPool(isTelegram);
 	if (!pool) return;
 	if (options.excludeSessionId) {
 		await pool.query(
@@ -118,8 +132,11 @@ export async function revokeSessionsByUser(
 	}
 }
 
-export async function listUserSessions(userId: string): Promise<UserSession[]> {
-	const pool = getPool();
+export async function listUserSessions(
+	userId: string,
+	isTelegram: boolean = false
+): Promise<UserSession[]> {
+	const pool = getPool(isTelegram);
 	if (!pool) return [];
 	const result = await pool.query(
 		'SELECT * FROM user_sessions WHERE user_id = $1 ORDER BY revoked_at IS NULL DESC, last_seen DESC',

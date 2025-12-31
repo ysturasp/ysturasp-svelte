@@ -10,7 +10,7 @@ export const POST: RequestHandler = async (event) => {
 		return json({ error: 'Не авторизован' }, { status: 401 });
 	}
 
-	const { user } = sessionContext;
+	const { user, isTelegram } = sessionContext;
 	const data = await event.request.json();
 	const { discipline, institute } = data;
 
@@ -18,8 +18,8 @@ export const POST: RequestHandler = async (event) => {
 		return json({ error: 'Не указаны дисциплина или институт' }, { status: 400 });
 	}
 
-	const { monthlyLimit } = await getStatLimit(user.id);
-	const viewCount = await getMonthlyViewCount(user.id);
+	const { monthlyLimit } = await getStatLimit(user.id, isTelegram);
+	const viewCount = await getMonthlyViewCount(user.id, isTelegram);
 
 	if (viewCount >= monthlyLimit) {
 		return json({
@@ -30,8 +30,8 @@ export const POST: RequestHandler = async (event) => {
 		});
 	}
 
-	await createStatView(user.id, discipline, institute);
-	const newViewCount = await getMonthlyViewCount(user.id);
+	await createStatView(user.id, discipline, institute, isTelegram);
+	const newViewCount = await getMonthlyViewCount(user.id, isTelegram);
 
 	return json({
 		success: true,
@@ -46,9 +46,9 @@ export const GET: RequestHandler = async (event) => {
 		return json({ error: 'Не авторизован' }, { status: 401 });
 	}
 
-	const { user } = sessionContext;
-	const { monthlyLimit } = await getStatLimit(user.id);
-	const viewCount = await getMonthlyViewCount(user.id);
+	const { user, isTelegram } = sessionContext;
+	const { monthlyLimit } = await getStatLimit(user.id, isTelegram);
+	const viewCount = await getMonthlyViewCount(user.id, isTelegram);
 	const remaining = Math.max(0, monthlyLimit - viewCount);
 
 	return json({

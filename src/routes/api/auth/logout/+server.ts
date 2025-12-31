@@ -7,7 +7,7 @@ export const POST: RequestHandler = async ({ cookies }) => {
 	const context = await getSessionContext(cookies, { touch: false });
 
 	if (context) {
-		await revokeSession(context.session.id);
+		await revokeSession(context.session.id, context.isTelegram);
 	}
 
 	cookies.delete('session_token', { path: '/' });

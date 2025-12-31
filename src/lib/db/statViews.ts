@@ -11,9 +11,10 @@ export interface StatView {
 export async function createStatView(
 	userId: string,
 	discipline: string,
-	institute: string
+	institute: string,
+	isTelegram: boolean = false
 ): Promise<StatView | null> {
-	const pool = getPool();
+	const pool = getPool(isTelegram);
 	if (!pool) return null;
 
 	const result = await pool.query(
@@ -24,8 +25,11 @@ export async function createStatView(
 	return result.rows[0] || null;
 }
 
-export async function getMonthlyViewCount(userId: string): Promise<number> {
-	const pool = getPool();
+export async function getMonthlyViewCount(
+	userId: string,
+	isTelegram: boolean = false
+): Promise<number> {
+	const pool = getPool(isTelegram);
 	if (!pool) return 0;
 
 	const now = new Date();

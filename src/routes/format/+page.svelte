@@ -286,7 +286,7 @@
 								<AuthButton />
 							</div>
 						</div>
-					{:else}
+					{:else if !$auth.loading}
 						<div
 							class="flex flex-col items-center justify-center gap-4 py-2 text-center"
 						>
@@ -464,6 +464,8 @@
 	</div>
 </BottomModal>
 
-<DomainCheckModal isOpen={isDomainCheckModalOpen} />
+{#if !import.meta.env.DEV}
+	<DomainCheckModal isOpen={isDomainCheckModalOpen} />
+{/if}
 
 <NotificationsContainer />

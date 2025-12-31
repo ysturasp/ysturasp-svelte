@@ -9,7 +9,7 @@ export const POST: RequestHandler = async (event) => {
 		return json({ error: 'Не авторизован' }, { status: 401 });
 	}
 
-	const { user } = sessionContext;
+	const { user, isTelegram } = sessionContext;
 	const url = new URL(event.request.url);
 	const referralCode = url.searchParams.get('ref');
 
@@ -17,12 +17,12 @@ export const POST: RequestHandler = async (event) => {
 		return json({ success: false, error: 'Не указан реферальный код' });
 	}
 
-	const existingReferral = await getReferralByReferredId(user.id);
+	const existingReferral = await getReferralByReferredId(user.id, isTelegram);
 	if (existingReferral) {
 		return json({ success: false, error: 'Вы уже были приглашены другим пользователем' });
 	}
 
-	const referral = await createReferralByCode(referralCode, user.id);
+	const referral = await createReferralByCode(referralCode, user.id, isTelegram);
 	if (!referral) {
 		return json({
 			success: false,
