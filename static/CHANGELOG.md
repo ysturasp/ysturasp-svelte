@@ -1,3 +1,4 @@
+- add referrals table and indexes to database initialization for user referral tracking (ysturasp, 2025-12-31) [4 files changed, 16 insertions(+), 1 deletion(-)]
 - implement user limits and payment management for tg integration, include database table creation and updates to existing functions for handling user limits and payments (ysturasp, 2025-12-31) [11 files changed, 157 insertions(+), 23 deletions(-)]
 - fix base url for auth google (ysturasp, 2025-12-31) [3 files changed, 3 insertions(+), 1 deletion(-)]
 - add BOT_DATABASE and TELEGRAM_BOT_TOKEN environment variables to docker configuration (ysturasp, 2025-12-31) [4 files changed, 9 insertions(+), 2 deletions(-)]
