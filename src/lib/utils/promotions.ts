@@ -22,7 +22,7 @@ export function getCurrentPromotion(): Promotion | null {
 			isActive: true,
 			discountPercent: 80,
 			name: 'Предновогодняя акция',
-			description: 'Скидка на все пакеты форматирований!',
+			description: 'Скидка на всё!',
 			startDate: preNewYearStart,
 			endDate: preNewYearEnd
 		};
@@ -32,8 +32,8 @@ export function getCurrentPromotion(): Promotion | null {
 		return {
 			isActive: true,
 			discountPercent: 75,
-			name: 'Посленовогодняя акция',
-			description: 'Скидка на все пакеты форматирований!',
+			name: 'Новогодняя акция',
+			description: 'Скидка на всё!',
 			startDate: postNewYearStart,
 			endDate: postNewYearEnd
 		};
