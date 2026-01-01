@@ -61,13 +61,13 @@ async function checkPaymentStatus(yookassaPaymentId: string): Promise<void> {
 			const remoteStatus = remotePayment?.status;
 
 			if (remoteStatus && remoteStatus !== payment.status) {
-				await updatePaymentStatus(yookassaPaymentId, remoteStatus);
+				await updatePaymentStatus(yookassaPaymentId, remoteStatus, 'yookassa');
 			} else if (remoteStatus === 'pending' || !remoteStatus) {
-				await updatePaymentStatus(yookassaPaymentId, 'canceled');
+				await updatePaymentStatus(yookassaPaymentId, 'canceled', 'yookassa');
 			}
 		} catch (error) {
 			console.error(`Ошибка при проверке платежа ${yookassaPaymentId} от ЮKassa:`, error);
-			await updatePaymentStatus(yookassaPaymentId, 'canceled');
+			await updatePaymentStatus(yookassaPaymentId, 'canceled', 'yookassa');
 		}
 	} catch (error) {
 		console.error(`Ошибка при проверке платежа ${yookassaPaymentId}:`, error);
@@ -79,7 +79,11 @@ export async function checkOldPendingPayments(): Promise<void> {
 		const oldPendingPayments = await getPendingPaymentsOlderThan(PENDING_TIMEOUT_MINUTES);
 
 		for (const payment of oldPendingPayments) {
-			if (!scheduledChecks.has(payment.yookassa_payment_id)) {
+			if (
+				payment.payment_type === 'yookassa' &&
+				payment.yookassa_payment_id &&
+				!scheduledChecks.has(payment.yookassa_payment_id)
+			) {
 				await checkPaymentStatus(payment.yookassa_payment_id);
 			}
 		}

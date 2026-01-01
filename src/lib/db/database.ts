@@ -137,16 +137,38 @@ export async function initDatabase(isTelegram: boolean = false) {
 				CREATE TABLE IF NOT EXISTS payments (
 					id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 					user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-					yookassa_payment_id TEXT UNIQUE NOT NULL,
+					yookassa_payment_id TEXT UNIQUE,
+					telegram_payment_id TEXT UNIQUE,
+					payment_type TEXT DEFAULT 'yookassa' CHECK (payment_type IN ('yookassa', 'telegram_stars')),
 					amount DECIMAL(10, 2) NOT NULL,
 					currency TEXT DEFAULT 'RUB',
 					status TEXT NOT NULL,
 					formats_count INTEGER NOT NULL,
 					created_at TIMESTAMP DEFAULT NOW(),
-					updated_at TIMESTAMP DEFAULT NOW()
+					updated_at TIMESTAMP DEFAULT NOW(),
+					CONSTRAINT payment_id_check CHECK (
+						(yookassa_payment_id IS NOT NULL AND telegram_payment_id IS NULL AND payment_type = 'yookassa') OR
+						(telegram_payment_id IS NOT NULL AND yookassa_payment_id IS NULL AND payment_type = 'telegram_stars')
+					)
 				)
 			`);
 			console.log('Таблица payments создана/проверена в БД бота');
+
+			await pool.query(`
+				DO $$
+				BEGIN
+					IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+						WHERE table_name='payments' AND column_name='payment_type') THEN
+						ALTER TABLE payments 
+							ADD COLUMN payment_type TEXT DEFAULT 'yookassa',
+							ADD COLUMN telegram_payment_id TEXT UNIQUE;
+						ALTER TABLE payments 
+							ADD CONSTRAINT payment_type_check CHECK (payment_type IN ('yookassa', 'telegram_stars'));
+						CREATE INDEX IF NOT EXISTS idx_payments_telegram_id ON payments(telegram_payment_id);
+					END IF;
+				END $$;
+			`);
+			console.log('Миграция payments выполнена в БД бота');
 
 			await pool.query(`
 				CREATE TABLE IF NOT EXISTS user_sessions (
@@ -204,6 +226,7 @@ export async function initDatabase(isTelegram: boolean = false) {
 				CREATE INDEX IF NOT EXISTS idx_format_history_user_id ON format_history(user_id);
 				CREATE INDEX IF NOT EXISTS idx_payments_user_id ON payments(user_id);
 				CREATE INDEX IF NOT EXISTS idx_payments_yookassa_id ON payments(yookassa_payment_id);
+				CREATE INDEX IF NOT EXISTS idx_payments_telegram_id ON payments(telegram_payment_id);
 				CREATE INDEX IF NOT EXISTS idx_user_sessions_user_id ON user_sessions(user_id);
 				CREATE INDEX IF NOT EXISTS idx_user_sessions_token_hash ON user_sessions(token_hash);
 				CREATE INDEX IF NOT EXISTS idx_stat_views_user_id ON stat_views(user_id);
@@ -248,14 +271,12 @@ export async function initDatabase(isTelegram: boolean = false) {
 			await pool.query(`
 				DO $$
 				BEGIN
-					-- Добавляем referral_code если его нет
 					IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
 						WHERE table_name='users' AND column_name='referral_code') THEN
 						ALTER TABLE users ADD COLUMN referral_code TEXT UNIQUE;
 						CREATE INDEX IF NOT EXISTS idx_users_referral_code ON users(referral_code);
 					END IF;
 					
-					-- Генерируем referral_code для пользователей без него
 					UPDATE users SET referral_code = gen_random_uuid()::TEXT 
 					WHERE referral_code IS NULL;
 				END $$;
@@ -306,16 +327,39 @@ export async function initDatabase(isTelegram: boolean = false) {
 			CREATE TABLE IF NOT EXISTS payments (
 				id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 				user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-				yookassa_payment_id TEXT UNIQUE NOT NULL,
+				yookassa_payment_id TEXT UNIQUE,
+				telegram_payment_id TEXT UNIQUE,
+				payment_type TEXT DEFAULT 'yookassa' CHECK (payment_type IN ('yookassa', 'telegram_stars')),
 				amount DECIMAL(10, 2) NOT NULL,
 				currency TEXT DEFAULT 'RUB',
 				status TEXT NOT NULL,
 				formats_count INTEGER NOT NULL,
 				created_at TIMESTAMP DEFAULT NOW(),
-				updated_at TIMESTAMP DEFAULT NOW()
+				updated_at TIMESTAMP DEFAULT NOW(),
+				CONSTRAINT payment_id_check CHECK (
+					(yookassa_payment_id IS NOT NULL AND telegram_payment_id IS NULL AND payment_type = 'yookassa') OR
+					(telegram_payment_id IS NOT NULL AND yookassa_payment_id IS NULL AND payment_type = 'telegram_stars')
+				)
 			)
 		`);
 		console.log('Таблица payments создана/проверена');
+
+		await pool.query(`
+			DO $$
+			BEGIN
+				IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+					WHERE table_name='payments' AND column_name='payment_type') THEN
+					ALTER TABLE payments ALTER COLUMN yookassa_payment_id DROP NOT NULL;
+					ALTER TABLE payments 
+						ADD COLUMN payment_type TEXT DEFAULT 'yookassa',
+						ADD COLUMN telegram_payment_id TEXT UNIQUE;
+					ALTER TABLE payments 
+						ADD CONSTRAINT payment_type_check CHECK (payment_type IN ('yookassa', 'telegram_stars'));
+					CREATE INDEX IF NOT EXISTS idx_payments_telegram_id ON payments(telegram_payment_id);
+				END IF;
+			END $$;
+		`);
+		console.log('Миграция payments выполнена');
 
 		await pool.query(`
 			CREATE TABLE IF NOT EXISTS user_sessions (
@@ -418,6 +462,7 @@ export async function initDatabase(isTelegram: boolean = false) {
 			CREATE INDEX IF NOT EXISTS idx_public_format_history_user_key ON public_format_history(user_key);
 			CREATE INDEX IF NOT EXISTS idx_payments_user_id ON payments(user_id);
 			CREATE INDEX IF NOT EXISTS idx_payments_yookassa_id ON payments(yookassa_payment_id);
+			CREATE INDEX IF NOT EXISTS idx_payments_telegram_id ON payments(telegram_payment_id);
 			CREATE INDEX IF NOT EXISTS idx_user_sessions_user_id ON user_sessions(user_id);
 			CREATE INDEX IF NOT EXISTS idx_user_sessions_token_hash ON user_sessions(token_hash);
 			CREATE INDEX IF NOT EXISTS idx_referrals_referrer_id ON referrals(referrer_id);

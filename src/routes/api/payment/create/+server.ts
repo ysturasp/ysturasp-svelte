@@ -34,11 +34,27 @@ export const POST: RequestHandler = async ({ request, cookies, url, getClientAdd
 
 	const { user } = context;
 
-	const { formatsCount } = await request.json().catch(() => ({}) as { formatsCount?: number });
+	const { formatsCount, paymentType } = await request.json().catch(
+		() =>
+			({}) as {
+				formatsCount?: number;
+				paymentType?: 'yookassa' | 'telegram_stars';
+			}
+	);
 	const count = Math.min(Math.max(formatsCount ?? FORMATS_COUNT, 1), 500);
 	const amount = calculatePrice(count);
+	const selectedPaymentType = paymentType || 'yookassa';
 
 	try {
+		if (selectedPaymentType === 'telegram_stars') {
+			return json(
+				{
+					error: 'Используйте /api/payment/create-telegram для оплаты через Telegram Stars'
+				},
+				{ status: 400 }
+			);
+		}
+
 		const payment = await createPayment({
 			amount,
 			description: `Покупка ${count} форматирований`,
@@ -68,7 +84,14 @@ export const POST: RequestHandler = async ({ request, cookies, url, getClientAdd
 			}
 		});
 
-		await createPaymentRecord(user.id, payment.id, amount, count, payment.status || 'pending');
+		await createPaymentRecord(
+			user.id,
+			payment.id,
+			amount,
+			count,
+			'yookassa',
+			payment.status || 'pending'
+		);
 
 		if (payment.status === 'pending') {
 			schedulePaymentCheck(payment.id);
@@ -76,7 +99,8 @@ export const POST: RequestHandler = async ({ request, cookies, url, getClientAdd
 
 		return json({
 			paymentId: payment.id,
-			confirmationUrl: payment.confirmation?.confirmation_url
+			confirmationUrl: payment.confirmation?.confirmation_url,
+			paymentType: 'yookassa'
 		});
 	} catch (error) {
 		console.error('Ошибка создания платежа:', error);

@@ -54,7 +54,7 @@ export const GET: RequestHandler = async ({ url, cookies }) => {
 	let updatedPayment: typeof payment | null = null;
 
 	if (remoteStatus && remoteStatus !== payment.status) {
-		updatedPayment = await updatePaymentStatus(paymentId, remoteStatus);
+		updatedPayment = await updatePaymentStatus(paymentId, remoteStatus, 'yookassa');
 		currentStatus = updatedPayment?.status ?? remoteStatus;
 	} else {
 		currentStatus = payment.status;

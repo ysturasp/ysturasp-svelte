@@ -4,7 +4,9 @@ import { getUserLimits } from './limits';
 export interface Payment {
 	id: string;
 	user_id: string;
-	yookassa_payment_id: string;
+	yookassa_payment_id: string | null;
+	telegram_payment_id: string | null;
+	payment_type: 'yookassa' | 'telegram_stars';
 	amount: number;
 	currency: string;
 	status: string;
@@ -15,31 +17,43 @@ export interface Payment {
 
 export async function createPayment(
 	userId: string,
-	yookassaPaymentId: string,
+	paymentId: string,
 	amount: number,
 	formatsCount: number,
+	paymentType: 'yookassa' | 'telegram_stars' = 'yookassa',
 	status: string = 'pending'
 ): Promise<Payment> {
 	const pool = getPool();
 	if (!pool) throw new Error('База данных недоступна');
+
+	const yookassaPaymentId = paymentType === 'yookassa' ? paymentId : null;
+	const telegramPaymentId = paymentType === 'telegram_stars' ? paymentId : null;
+
 	const result = await pool.query(
-		`INSERT INTO payments (user_id, yookassa_payment_id, amount, formats_count, status) 
-		 VALUES ($1, $2, $3, $4, $5) RETURNING *`,
-		[userId, yookassaPaymentId, amount, formatsCount, status]
+		`INSERT INTO payments (user_id, yookassa_payment_id, telegram_payment_id, payment_type, amount, formats_count, status) 
+		 VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
+		[userId, yookassaPaymentId, telegramPaymentId, paymentType, amount, formatsCount, status]
 	);
 	return result.rows[0];
 }
 
 export async function updatePaymentStatus(
-	yookassaPaymentId: string,
-	status: string
+	paymentId: string,
+	status: string,
+	paymentType: 'yookassa' | 'telegram_stars' = 'yookassa'
 ): Promise<Payment | null> {
 	const pool = getPool();
 	if (!pool) return null;
-	const result = await pool.query(
-		'UPDATE payments SET status = $1, updated_at = NOW() WHERE yookassa_payment_id = $2 RETURNING *',
-		[status, yookassaPaymentId]
-	);
+	const result =
+		paymentType === 'yookassa'
+			? await pool.query(
+					'UPDATE payments SET status = $1, updated_at = NOW() WHERE yookassa_payment_id = $2 RETURNING *',
+					[status, paymentId]
+				)
+			: await pool.query(
+					'UPDATE payments SET status = $1, updated_at = NOW() WHERE telegram_payment_id = $2 RETURNING *',
+					[status, paymentId]
+				);
 	return result.rows[0] || null;
 }
 
@@ -48,6 +62,15 @@ export async function getPaymentByYookassaId(yookassaPaymentId: string): Promise
 	if (!pool) return null;
 	const result = await pool.query('SELECT * FROM payments WHERE yookassa_payment_id = $1', [
 		yookassaPaymentId
+	]);
+	return result.rows[0] || null;
+}
+
+export async function getPaymentByTelegramId(telegramPaymentId: string): Promise<Payment | null> {
+	const pool = getPool();
+	if (!pool) return null;
+	const result = await pool.query('SELECT * FROM payments WHERE telegram_payment_id = $1', [
+		telegramPaymentId
 	]);
 	return result.rows[0] || null;
 }

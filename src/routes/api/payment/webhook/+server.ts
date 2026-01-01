@@ -69,7 +69,7 @@ export const POST: RequestHandler = async ({ request }) => {
 
 		if (status) {
 			const previousStatus = payment.status;
-			const updatedPayment = await updatePaymentStatus(paymentId, status);
+			const updatedPayment = await updatePaymentStatus(paymentId, status, 'yookassa');
 
 			if (previousStatus === 'pending' && status !== 'pending') {
 				cancelPaymentCheck(paymentId);
