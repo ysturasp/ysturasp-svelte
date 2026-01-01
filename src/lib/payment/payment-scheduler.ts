@@ -4,6 +4,7 @@ import {
 	getPaymentByYookassaId
 } from '$lib/db/payments';
 import { getPayment as fetchPayment } from '$lib/payment/yookassa';
+import { getUserById } from '$lib/db/users';
 
 const PENDING_TIMEOUT_MINUTES = 10;
 
@@ -47,6 +48,15 @@ async function checkPaymentStatus(yookassaPaymentId: string): Promise<void> {
 			return;
 		}
 
+		let isTelegram = false;
+		const userInMainDb = await getUserById(payment.user_id, false);
+		if (!userInMainDb) {
+			const userInBotDb = await getUserById(payment.user_id, true);
+			if (userInBotDb) {
+				isTelegram = true;
+			}
+		}
+
 		const paymentCreatedAt = new Date(payment.created_at);
 		const now = new Date();
 		const minutesSinceCreation = (now.getTime() - paymentCreatedAt.getTime()) / (1000 * 60);
@@ -61,13 +71,13 @@ async function checkPaymentStatus(yookassaPaymentId: string): Promise<void> {
 			const remoteStatus = remotePayment?.status;
 
 			if (remoteStatus && remoteStatus !== payment.status) {
-				await updatePaymentStatus(yookassaPaymentId, remoteStatus, 'yookassa');
+				await updatePaymentStatus(yookassaPaymentId, remoteStatus, 'yookassa', isTelegram);
 			} else if (remoteStatus === 'pending' || !remoteStatus) {
-				await updatePaymentStatus(yookassaPaymentId, 'canceled', 'yookassa');
+				await updatePaymentStatus(yookassaPaymentId, 'canceled', 'yookassa', isTelegram);
 			}
 		} catch (error) {
 			console.error(`Ошибка при проверке платежа ${yookassaPaymentId} от ЮKassa:`, error);
-			await updatePaymentStatus(yookassaPaymentId, 'canceled', 'yookassa');
+			await updatePaymentStatus(yookassaPaymentId, 'canceled', 'yookassa', isTelegram);
 		}
 	} catch (error) {
 		console.error(`Ошибка при проверке платежа ${yookassaPaymentId}:`, error);

@@ -1,3 +1,4 @@
+- refactor vite config to dynamic load allowed hosts from env (ysturasp, 2026-01-01) [3 files changed, 37 insertions(+), 15 deletions(-)]
 - add payment with telegram stars in tg mini app and refactor database for support 2 format payments (ysturasp, 2026-01-01) [13 files changed, 484 insertions(+), 45 deletions(-)]
 - update promotion name and descriptions (ysturasp, 2026-01-01) [3 files changed, 5 insertions(+), 3 deletions(-)]
 - update .env.example to include BOT_DATABASE and TELEGRAM_BOT_TOKEN variables (ysturasp, 2026-01-01) [3 files changed, 5 insertions(+), 1 deletion(-)]

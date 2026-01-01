@@ -65,11 +65,25 @@ export const POST: RequestHandler = async ({ request }) => {
 			return json({ error: 'Платеж не найден' }, { status: 404 });
 		}
 
+		let isTelegram = false;
+		const userInMainDb = await getUserById(payment.user_id, false);
+		if (!userInMainDb) {
+			const userInBotDb = await getUserById(payment.user_id, true);
+			if (userInBotDb) {
+				isTelegram = true;
+			}
+		}
+
 		const status = event.object?.status;
 
 		if (status) {
 			const previousStatus = payment.status;
-			const updatedPayment = await updatePaymentStatus(paymentId, status, 'yookassa');
+			const updatedPayment = await updatePaymentStatus(
+				paymentId,
+				status,
+				'yookassa',
+				isTelegram
+			);
 
 			if (previousStatus === 'pending' && status !== 'pending') {
 				cancelPaymentCheck(paymentId);
@@ -77,14 +91,6 @@ export const POST: RequestHandler = async ({ request }) => {
 
 			if (status === 'succeeded' && payment.status !== 'succeeded') {
 				if (updatedPayment && updatedPayment.status === 'succeeded') {
-					let isTelegram = false;
-					const userInMainDb = await getUserById(payment.user_id, false);
-					if (!userInMainDb) {
-						const userInBotDb = await getUserById(payment.user_id, true);
-						if (userInBotDb) {
-							isTelegram = true;
-						}
-					}
 					await addPaidFormats(payment.user_id, payment.formats_count, isTelegram);
 				}
 			}

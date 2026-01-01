@@ -16,9 +16,9 @@ export const GET: RequestHandler = async ({ url, cookies }) => {
 		return json({ error: 'Не авторизован' }, { status: 401 });
 	}
 
-	const { user } = context;
+	const { user, isTelegram } = context;
 
-	const payment = await getPaymentByYookassaId(paymentId);
+	const payment = await getPaymentByYookassaId(paymentId, isTelegram);
 	if (!payment) {
 		return json({ error: 'Платеж не найден' }, { status: 404 });
 	}

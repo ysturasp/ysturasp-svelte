@@ -57,7 +57,8 @@ export const POST: RequestHandler = async ({ request, cookies, url }) => {
 			rubAmount,
 			count,
 			'telegram_stars',
-			'pending'
+			'pending',
+			true
 		);
 
 		const telegramPaymentId = paymentRecord.telegram_payment_id || paymentId;

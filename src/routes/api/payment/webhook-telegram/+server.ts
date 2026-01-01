@@ -13,12 +13,17 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 			return json({ error: 'ID платежа не найден' }, { status: 400 });
 		}
 
-		const payment = await getPaymentByTelegramId(paymentId);
+		const payment = await getPaymentByTelegramId(paymentId, true);
 		if (!payment) {
 			return json({ error: 'Платеж не найден' }, { status: 404 });
 		}
 
-		const updatedPayment = await updatePaymentStatus(paymentId, 'succeeded', 'telegram_stars');
+		const updatedPayment = await updatePaymentStatus(
+			paymentId,
+			'succeeded',
+			'telegram_stars',
+			true
+		);
 
 		if (updatedPayment && updatedPayment.status === 'succeeded') {
 			let isTelegram = false;

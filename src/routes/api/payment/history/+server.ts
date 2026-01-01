@@ -9,7 +9,7 @@ export const GET: RequestHandler = async ({ cookies }) => {
 		return json({ error: 'Не авторизован' }, { status: 401 });
 	}
 
-	const pool = getPool();
+	const pool = getPool(context.isTelegram);
 	if (!pool) {
 		return json({ error: 'База данных недоступна' }, { status: 503 });
 	}
@@ -18,6 +18,8 @@ export const GET: RequestHandler = async ({ cookies }) => {
 		`SELECT 
 			id,
 			yookassa_payment_id,
+			telegram_payment_id,
+			payment_type,
 			amount,
 			currency,
 			status,
@@ -34,7 +36,8 @@ export const GET: RequestHandler = async ({ cookies }) => {
 	return json({
 		payments: result.rows.map((row) => ({
 			id: row.id,
-			paymentId: row.yookassa_payment_id,
+			paymentId: row.yookassa_payment_id || row.telegram_payment_id,
+			paymentType: row.payment_type || 'yookassa',
 			amount: Number(row.amount),
 			currency: row.currency || 'RUB',
 			status: row.status,

@@ -32,7 +32,7 @@ export const POST: RequestHandler = async ({ request, cookies, url, getClientAdd
 		return json({ error: 'Не авторизован' }, { status: 401 });
 	}
 
-	const { user } = context;
+	const { user, isTelegram } = context;
 
 	const { formatsCount, paymentType } = await request.json().catch(
 		() =>
@@ -90,7 +90,8 @@ export const POST: RequestHandler = async ({ request, cookies, url, getClientAdd
 			amount,
 			count,
 			'yookassa',
-			payment.status || 'pending'
+			payment.status || 'pending',
+			isTelegram
 		);
 
 		if (payment.status === 'pending') {

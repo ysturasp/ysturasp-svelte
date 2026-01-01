@@ -33,7 +33,7 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 			);
 		}
 
-		const payment = await getPaymentById(paymentId);
+		const payment = await getPaymentById(paymentId, context.isTelegram);
 		if (!payment) {
 			return json({ error: 'Платеж не найден' }, { status: 404 });
 		}
@@ -54,21 +54,24 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 		const refundedCount = purchasedCount;
 		const usedCountForThisPayment = 0;
 
-		try {
-			await refundPayment({
-				paymentId: payment.yookassa_payment_id,
-				amount: Number(payment.amount),
-				description: `Возврат за ${refundedCount} неиспользованных форматирований из платежа ${payment.yookassa_payment_id}`
-			});
-		} catch (error) {
-			console.error('Ошибка возврата через YooKassa:', error);
-			return json(
-				{ error: 'Ошибка при выполнении возврата через платежную систему' },
-				{ status: 500 }
-			);
+		if (payment.payment_type === 'yookassa' && payment.yookassa_payment_id) {
+			try {
+				await refundPayment({
+					paymentId: payment.yookassa_payment_id,
+					amount: Number(payment.amount),
+					description: `Возврат за ${refundedCount} неиспользованных форматирований из платежа ${payment.yookassa_payment_id}`
+				});
+			} catch (error) {
+				console.error('Ошибка возврата через YooKassa:', error);
+				return json(
+					{ error: 'Ошибка при выполнении возврата через платежную систему' },
+					{ status: 500 }
+				);
+			}
+		} else if (payment.payment_type === 'telegram_stars') {
 		}
 
-		await markPaymentAsRefunded(paymentId, Number(payment.amount));
+		await markPaymentAsRefunded(paymentId, Number(payment.amount), context.isTelegram);
 
 		await removePaidFormats(
 			user.id,

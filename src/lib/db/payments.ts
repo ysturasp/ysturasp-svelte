@@ -21,9 +21,10 @@ export async function createPayment(
 	amount: number,
 	formatsCount: number,
 	paymentType: 'yookassa' | 'telegram_stars' = 'yookassa',
-	status: string = 'pending'
+	status: string = 'pending',
+	isTelegram: boolean = false
 ): Promise<Payment> {
-	const pool = getPool();
+	const pool = getPool(isTelegram);
 	if (!pool) throw new Error('База данных недоступна');
 
 	const yookassaPaymentId = paymentType === 'yookassa' ? paymentId : null;
@@ -40,9 +41,10 @@ export async function createPayment(
 export async function updatePaymentStatus(
 	paymentId: string,
 	status: string,
-	paymentType: 'yookassa' | 'telegram_stars' = 'yookassa'
+	paymentType: 'yookassa' | 'telegram_stars' = 'yookassa',
+	isTelegram: boolean = false
 ): Promise<Payment | null> {
-	const pool = getPool();
+	const pool = getPool(isTelegram);
 	if (!pool) return null;
 	const result =
 		paymentType === 'yookassa'
@@ -57,17 +59,49 @@ export async function updatePaymentStatus(
 	return result.rows[0] || null;
 }
 
-export async function getPaymentByYookassaId(yookassaPaymentId: string): Promise<Payment | null> {
-	const pool = getPool();
-	if (!pool) return null;
-	const result = await pool.query('SELECT * FROM payments WHERE yookassa_payment_id = $1', [
-		yookassaPaymentId
-	]);
-	return result.rows[0] || null;
+export async function getPaymentByYookassaId(
+	yookassaPaymentId: string,
+	isTelegram?: boolean
+): Promise<Payment | null> {
+	if (isTelegram !== undefined) {
+		const pool = getPool(isTelegram);
+		if (!pool) return null;
+		const result = await pool.query('SELECT * FROM payments WHERE yookassa_payment_id = $1', [
+			yookassaPaymentId
+		]);
+		return result.rows[0] || null;
+	}
+
+	const mainPool = getPool(false);
+	if (mainPool) {
+		const result = await mainPool.query(
+			'SELECT * FROM payments WHERE yookassa_payment_id = $1',
+			[yookassaPaymentId]
+		);
+		if (result.rows[0]) {
+			return result.rows[0];
+		}
+	}
+
+	const botPool = getPool(true);
+	if (botPool) {
+		const result = await botPool.query(
+			'SELECT * FROM payments WHERE yookassa_payment_id = $1',
+			[yookassaPaymentId]
+		);
+		if (result.rows[0]) {
+			return result.rows[0];
+		}
+	}
+
+	return null;
 }
 
-export async function getPaymentByTelegramId(telegramPaymentId: string): Promise<Payment | null> {
-	const pool = getPool();
+export async function getPaymentByTelegramId(
+	telegramPaymentId: string,
+	isTelegram: boolean = true
+): Promise<Payment | null> {
+	const pool = getPool(isTelegram);
 	if (!pool) return null;
 	const result = await pool.query('SELECT * FROM payments WHERE telegram_payment_id = $1', [
 		telegramPaymentId
@@ -75,8 +109,11 @@ export async function getPaymentByTelegramId(telegramPaymentId: string): Promise
 	return result.rows[0] || null;
 }
 
-export async function getPaymentById(paymentId: string): Promise<Payment | null> {
-	const pool = getPool();
+export async function getPaymentById(
+	paymentId: string,
+	isTelegram: boolean = false
+): Promise<Payment | null> {
+	const pool = getPool(isTelegram);
 	if (!pool) return null;
 	const result = await pool.query('SELECT * FROM payments WHERE id = $1', [paymentId]);
 	return result.rows[0] || null;
@@ -94,12 +131,13 @@ export async function getUserPayments(userId: string): Promise<Payment[]> {
 
 export async function getUsedFormatsCountForPayment(
 	userId: string,
-	paymentId: string
+	paymentId: string,
+	isTelegram: boolean = false
 ): Promise<number> {
-	const pool = getPool();
+	const pool = getPool(isTelegram);
 	if (!pool) return 0;
 
-	const payment = await getPaymentById(paymentId);
+	const payment = await getPaymentById(paymentId, isTelegram);
 	if (!payment) {
 		return 0;
 	}
@@ -158,7 +196,7 @@ export async function canRefundPayment(
 	paymentId: string,
 	isTelegram: boolean = false
 ): Promise<{ can: boolean; reason?: string; usedCount?: number; purchasedCount?: number }> {
-	const payment = await getPaymentById(paymentId);
+	const payment = await getPaymentById(paymentId, isTelegram);
 
 	if (!payment) {
 		return { can: false, reason: 'Платеж не найден' };
@@ -217,9 +255,10 @@ export async function canRefundPayment(
 
 export async function markPaymentAsRefunded(
 	paymentId: string,
-	refundedAmount: number
+	refundedAmount: number,
+	isTelegram: boolean = false
 ): Promise<Payment | null> {
-	const pool = getPool();
+	const pool = getPool(isTelegram);
 	if (!pool) return null;
 	const result = await pool.query(
 		`UPDATE payments 
@@ -232,17 +271,32 @@ export async function markPaymentAsRefunded(
 }
 
 export async function getPendingPaymentsOlderThan(minutes: number): Promise<Payment[]> {
-	const pool = getPool();
-	if (!pool) return [];
-
 	const cutoffTime = new Date(Date.now() - minutes * 60 * 1000);
+	const allPayments: Payment[] = [];
 
-	const result = await pool.query(
-		`SELECT * FROM payments 
-		 WHERE status = 'pending' 
-		 AND created_at < $1
-		 ORDER BY created_at ASC`,
-		[cutoffTime]
-	);
-	return result.rows;
+	const mainPool = getPool(false);
+	if (mainPool) {
+		const mainResult = await mainPool.query(
+			`SELECT * FROM payments 
+			 WHERE status = 'pending' 
+			 AND created_at < $1
+			 ORDER BY created_at ASC`,
+			[cutoffTime]
+		);
+		allPayments.push(...mainResult.rows);
+	}
+
+	const botPool = getPool(true);
+	if (botPool) {
+		const botResult = await botPool.query(
+			`SELECT * FROM payments 
+			 WHERE status = 'pending' 
+			 AND created_at < $1
+			 ORDER BY created_at ASC`,
+			[cutoffTime]
+		);
+		allPayments.push(...botResult.rows);
+	}
+
+	return allPayments;
 }
