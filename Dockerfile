@@ -52,6 +52,10 @@ ARG GROQ_API_KEY
 ARG SESSION_SECRET
 ARG BOT_DATABASE
 ARG TELEGRAM_BOT_TOKEN
+ARG REDIS_HOST
+ARG REDIS_PORT
+ARG REDIS_PASSWORD
+ARG ONLINE_SECRET
 WORKDIR /app
 
 ENV NODE_ENV=production \
@@ -65,8 +69,12 @@ ENV NODE_ENV=production \
     GROQ_API_KEY=${GROQ_API_KEY:-} \
     SESSION_SECRET=${SESSION_SECRET:-} \
     BOT_DATABASE=${BOT_DATABASE:-} \
-    TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN:-}
-
+    TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN:-} \
+    REDIS_HOST=${REDIS_HOST:-} \
+    REDIS_PORT=${REDIS_PORT:-} \
+    REDIS_PASSWORD=${REDIS_PASSWORD:-} \
+    ONLINE_SECRET=${ONLINE_SECRET:-}
+    
 COPY --chown=nonroot:nonroot --from=prod-deps /app/node_modules ./node_modules
 COPY --chown=nonroot:nonroot --from=build /app/build ./build
 

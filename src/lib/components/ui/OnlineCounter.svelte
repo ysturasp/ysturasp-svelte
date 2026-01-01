@@ -1,19 +1,6 @@
 <script lang="ts">
-	import { onMount, onDestroy } from 'svelte';
-	import {
-		getDatabase,
-		ref,
-		onValue,
-		set,
-		remove,
-		onDisconnect,
-		serverTimestamp,
-		get,
-		update,
-		type Database
-	} from 'firebase/database';
+	import { onMount, onDestroy, tick } from 'svelte';
 	import { browser } from '$app/environment';
-	import { database as defaultDatabase } from '$lib/config/firebase';
 	import { isOnline, offlineStore } from '$lib/stores/offline';
 
 	export let variant: 'desktop' | 'mobile' = 'desktop';
@@ -25,17 +12,50 @@
 	let userId: string = browser
 		? sessionStorage.getItem('onlineUserId') || Math.random().toString(36).substr(2, 9)
 		: '';
-	let database: Database = defaultDatabase;
-	let unsubscribeConnected: (() => void) | null = null;
-	let unsubscribeOnline: (() => void) | null = null;
+	let sessionToken: string | null = null;
+	let browserFingerprint: string = '';
 	let initialized = false;
 	let lastActivityTimestamp = Date.now();
+	let activityEventCount = 0;
 	let activityCheckInterval: ReturnType<typeof setInterval> | undefined;
 	let heartbeatInterval: ReturnType<typeof setInterval> | undefined;
+	let eventSource: EventSource | null = null;
+	let groupChangeTimeout: ReturnType<typeof setTimeout> | undefined;
 
 	if (browser && !sessionStorage.getItem('onlineUserId')) {
 		sessionStorage.setItem('onlineUserId', userId);
 	}
+
+	const generateFingerprint = (): string => {
+		if (!browser) return '';
+
+		const canvas = document.createElement('canvas');
+		const ctx = canvas.getContext('2d');
+		if (ctx) {
+			ctx.textBaseline = 'top';
+			ctx.font = '14px Arial';
+			ctx.fillText('Browser fingerprint', 2, 2);
+		}
+
+		const fingerprint = [
+			navigator.userAgent,
+			navigator.language,
+			screen.width + 'x' + screen.height,
+			new Date().getTimezoneOffset(),
+			canvas.toDataURL(),
+			navigator.hardwareConcurrency || 0,
+			(navigator as any).deviceMemory || 0,
+			window.devicePixelRatio || 1
+		].join('|');
+
+		let hash = 0;
+		for (let i = 0; i < fingerprint.length; i++) {
+			const char = fingerprint.charCodeAt(i);
+			hash = (hash << 5) - hash + char;
+			hash = hash & hash;
+		}
+		return Math.abs(hash).toString(36);
+	};
 
 	const getGroupFromSelect = () => {
 		if (!browser) return 'Гость';
@@ -53,21 +73,26 @@
 
 	const updateLastActivity = () => {
 		lastActivityTimestamp = Date.now();
+		activityEventCount++;
 	};
 
 	const setupActivityListeners = () => {
 		if (!browser) return;
 
-		const events = ['mousemove', 'keydown', 'touchstart', 'scroll'];
+		activityCheckInterval = setInterval(() => {
+			activityEventCount = 0;
+		}, 30000);
+
+		const events = ['mousemove', 'keydown', 'touchstart', 'scroll', 'click', 'mousedown'];
 		events.forEach((event) => {
-			window.addEventListener(event, updateLastActivity);
+			window.addEventListener(event, updateLastActivity, { passive: true });
 		});
 	};
 
 	const removeActivityListeners = () => {
 		if (!browser) return;
 
-		const events = ['mousemove', 'keydown', 'touchstart', 'scroll'];
+		const events = ['mousemove', 'keydown', 'touchstart', 'scroll', 'click', 'mousedown'];
 		events.forEach((event) => {
 			window.removeEventListener(event, updateLastActivity);
 		});
@@ -77,14 +102,175 @@
 		}
 	};
 
-	const setupHeartbeat = () => {
-		if (!browser || !database || !userId) return;
-		const userStatusRef = ref(database, '/online/' + userId);
-		heartbeatInterval = setInterval(() => {
-			if (document.visibilityState === 'visible') {
-				update(userStatusRef, { lastActivity: serverTimestamp() }).catch(() => {});
+	const setupEventSource = () => {
+		if (!browser) return;
+
+		if (eventSource) {
+			eventSource.close();
+		}
+
+		eventSource = new EventSource('/api/online/stream');
+
+		eventSource.onmessage = (event) => {
+			try {
+				const data = JSON.parse(event.data);
+				count = data.count || 0;
+				groupStats = data.groupStats || {};
+			} catch (error) {
+				console.error('Ошибка парсинга SSE данных:', error);
 			}
-		}, 30000);
+		};
+
+		eventSource.onerror = (error) => {
+			console.error('SSE connection error:', error);
+			setTimeout(() => {
+				if (browser) {
+					setupEventSource();
+				}
+			}, 3000);
+		};
+	};
+
+	const closeEventSource = () => {
+		if (eventSource) {
+			eventSource.close();
+			eventSource = null;
+		}
+	};
+
+	const signChallenge = async (
+		challenge: string,
+		userId: string,
+		fingerprint: string
+	): Promise<string> => {
+		if (!browser || !crypto?.subtle) {
+			throw new Error('Web Crypto API not available');
+		}
+
+		const keyMaterial = `${challenge}:${userId}:${fingerprint}`;
+		const encoder = new TextEncoder();
+		const keyData = encoder.encode(keyMaterial);
+
+		const cryptoKey = await crypto.subtle.importKey(
+			'raw',
+			keyData,
+			{ name: 'HMAC', hash: 'SHA-256' },
+			false,
+			['sign']
+		);
+
+		const signature = await crypto.subtle.sign('HMAC', cryptoKey, encoder.encode(challenge));
+
+		const signatureArray = Array.from(new Uint8Array(signature));
+		const base64 = btoa(String.fromCharCode(...signatureArray));
+		return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+	};
+
+	const initializeSession = async (): Promise<boolean> => {
+		if (!browser || !userId) return false;
+
+		try {
+			browserFingerprint = generateFingerprint();
+
+			const challengeResponse = await fetch(
+				`/api/online/challenge?userId=${encodeURIComponent(userId)}&fingerprint=${encodeURIComponent(browserFingerprint)}`
+			);
+
+			if (!challengeResponse.ok) {
+				console.error('Ошибка получения challenge:', challengeResponse.statusText);
+				return false;
+			}
+
+			const challengeData = await challengeResponse.json();
+			const { challenge } = challengeData;
+
+			if (!challenge) {
+				console.error('Challenge не получен');
+				return false;
+			}
+
+			const signature = await signChallenge(challenge, userId, browserFingerprint);
+
+			const response = await fetch('/api/online/init', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({
+					userId,
+					fingerprint: browserFingerprint,
+					userAgent: navigator.userAgent,
+					challenge,
+					signature
+				})
+			});
+
+			if (response.ok) {
+				const data = await response.json();
+				sessionToken = data.sessionToken;
+				return true;
+			} else {
+				const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+				console.error(
+					'Ошибка инициализации сессии:',
+					errorData.error || response.statusText
+				);
+			}
+		} catch (error) {
+			console.error('Ошибка инициализации сессии:', error);
+		}
+		return false;
+	};
+
+	const sendHeartbeat = async (force = false) => {
+		if (!browser || !userId || !sessionToken || !browserFingerprint) return;
+
+		if (!force && document.visibilityState !== 'visible') {
+			return;
+		}
+
+		if (!force) {
+			const timeSinceActivity = Date.now() - lastActivityTimestamp;
+			if (timeSinceActivity > 30000 || activityEventCount < 2) {
+				return;
+			}
+		}
+
+		try {
+			const group = getGroupFromSelect();
+			const response = await fetch('/api/online/heartbeat', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({
+					userId,
+					group,
+					sessionToken,
+					fingerprint: browserFingerprint,
+					forceUpdate: force,
+					activityProof: {
+						lastActivityTime: lastActivityTimestamp,
+						eventCount: activityEventCount,
+						visibilityState: document.visibilityState
+					},
+					userAgent: navigator.userAgent
+				})
+			});
+
+			if (response.status === 401) {
+				await initializeSession();
+			}
+		} catch (error) {
+			console.error('Ошибка отправки heartbeat:', error);
+		}
+	};
+
+	const setupHeartbeat = () => {
+		if (!browser || !userId) return;
+		heartbeatInterval = setInterval(() => {
+			sendHeartbeat();
+		}, 25000);
 	};
 
 	const removeHeartbeat = () => {
@@ -93,58 +279,84 @@
 		}
 	};
 
-	const cleanupUser = async () => {
-		if (!browser || !database || !userId) return;
+	const cleanupUser = async (useBeacon = false) => {
+		if (!browser || !userId) return;
 
 		try {
-			const userStatusRef = ref(database, '/online/' + userId);
-			await remove(userStatusRef);
+			if (useBeacon && navigator.sendBeacon) {
+				const url = `/api/online/user/${userId}`;
+				const success = navigator.sendBeacon(
+					url,
+					new Blob([], { type: 'application/json' })
+				);
+				if (success) {
+					return;
+				}
+			}
+
+			await fetch(`/api/online/user/${userId}`, {
+				method: 'DELETE',
+				keepalive: true
+			});
 		} catch (error) {
-			console.error('Ошибка удаления пользователя:', error);
+			if (!useBeacon) {
+				console.error('Ошибка удаления пользователя:', error);
+			}
 		}
 	};
 
 	const updateUserStatus = async (online: boolean, forceUpdate = false) => {
-		if (!browser || !database || !userId) return;
-
-		const userStatusRef = ref(database, '/online/' + userId);
+		if (!browser || !userId) return;
 
 		if (online) {
-			try {
-				const snapshot = await get(userStatusRef);
-				if (!snapshot.exists() || forceUpdate) {
-					const group = getGroupFromSelect();
-					await set(userStatusRef, {
-						online: true,
-						group,
-						timestamp: serverTimestamp(),
-						lastActivity: serverTimestamp()
-					});
+			if (!sessionToken || !browserFingerprint) {
+				const success = await initializeSession();
+				if (!success) {
+					console.error('Не удалось инициализировать сессию');
+					return;
+				}
+			}
 
-					onDisconnect(userStatusRef)
-						.remove()
-						.catch(() => {});
+			initialized = true;
 
-					if (!initialized) {
-						window.addEventListener('beforeunload', () => {
-							const cleanupRef = ref(database, '/online/' + userId);
-							remove(cleanupRef).catch(console.error);
-						});
+			await tick();
 
-						window.addEventListener('pagehide', () => {
-							const cleanupRef = ref(database, '/online/' + userId);
-							remove(cleanupRef).catch(console.error);
-						});
+			sendHeartbeat(true);
 
-						initialized = true;
+			const handleUnload = () => {
+				cleanupUser(true);
+			};
+
+			window.addEventListener('beforeunload', handleUnload);
+
+			window.addEventListener('pagehide', (event) => {
+				if (event.persisted === false) {
+					handleUnload();
+				}
+			});
+
+			document.addEventListener('visibilitychange', () => {
+				if (document.visibilityState === 'hidden') {
+					cleanupUser(true);
+				} else if (document.visibilityState === 'visible') {
+					if (userId && browserFingerprint) {
+						if (!sessionToken) {
+							initializeSession().then((success) => {
+								if (success) {
+									sendHeartbeat(true);
+								}
+							});
+						} else {
+							sendHeartbeat(true);
+						}
 					}
 				}
-			} catch (error) {
-				console.error('Ошибка установки статуса:', error);
-			}
+			});
+
+			window.addEventListener('unload', handleUnload);
 		} else {
 			try {
-				await remove(userStatusRef);
+				await cleanupUser();
 			} catch (error) {
 				console.error('Ошибка удаления статуса:', error);
 			}
@@ -152,61 +364,38 @@
 	};
 
 	const handleGroupChange = () => {
-		if (!browser || !database || !userId) return;
+		if (!browser || !userId || !sessionToken || !browserFingerprint) return;
 
-		const userStatusRef = ref(database, '/online/' + userId);
-		const group = getGroupFromSelect();
+		if (groupChangeTimeout) {
+			clearTimeout(groupChangeTimeout);
+		}
 
-		set(userStatusRef, {
-			online: true,
-			group,
-			timestamp: serverTimestamp(),
-			lastActivity: serverTimestamp()
-		}).catch((error) => console.error('Ошибка обновления группы:', error));
+		groupChangeTimeout = setTimeout(() => {
+			sendHeartbeat(true);
+		}, 300);
 	};
 
 	onMount(async () => {
 		if (!browser) return;
 
 		try {
-			const connectedRef = ref(database, '.info/connected');
-			unsubscribeConnected = onValue(connectedRef, (snap) => {
-				if (snap.val() === true) {
-					updateUserStatus(true, true);
-				}
-			});
-
-			const onlineRef = ref(database, '/online');
-			unsubscribeOnline = onValue(onlineRef, (snapshot) => {
-				const users = snapshot.val() || {};
-
-				const activeUsers = Object.entries(users).filter(([_, userData]: [string, any]) => {
-					const lastActivity = userData.lastActivity || 0;
-					return Date.now() - lastActivity < 5 * 60 * 1000;
-				});
-
-				count = activeUsers.length;
-
-				groupStats = {};
-				activeUsers.forEach(([_, userData]: [string, any]) => {
-					if (userData.group) {
-						groupStats[userData.group] = (groupStats[userData.group] || 0) + 1;
-					}
-				});
-			});
-
 			await updateUserStatus(true, true);
+
+			setupEventSource();
+
 			setupActivityListeners();
 			setupHeartbeat();
 		} catch (error) {
-			console.error('Ошибка инициализации Firebase:', error);
+			console.error('Ошибка инициализации онлайн каунтера:', error);
 		}
 	});
 
 	onDestroy(() => {
 		if (browser) {
-			unsubscribeConnected?.();
-			unsubscribeOnline?.();
+			if (groupChangeTimeout) {
+				clearTimeout(groupChangeTimeout);
+			}
+			closeEventSource();
 			removeActivityListeners();
 			removeHeartbeat();
 			cleanupUser();
@@ -214,7 +403,12 @@
 	});
 
 	$: {
-		if (selectedDirectionLabel || selectedGroupLabel) {
+		if (
+			(selectedDirectionLabel || selectedGroupLabel) &&
+			initialized &&
+			sessionToken &&
+			browserFingerprint
+		) {
 			handleGroupChange();
 		}
 	}
