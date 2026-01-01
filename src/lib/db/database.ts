@@ -159,6 +159,7 @@ export async function initDatabase(isTelegram: boolean = false) {
 				BEGIN
 					IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
 						WHERE table_name='payments' AND column_name='payment_type') THEN
+						ALTER TABLE payments ALTER COLUMN yookassa_payment_id DROP NOT NULL;
 						ALTER TABLE payments 
 							ADD COLUMN payment_type TEXT DEFAULT 'yookassa',
 							ADD COLUMN telegram_payment_id TEXT UNIQUE;
@@ -169,6 +170,21 @@ export async function initDatabase(isTelegram: boolean = false) {
 				END $$;
 			`);
 			console.log('Миграция payments выполнена в БД бота');
+
+			await pool.query(`
+				DO $$
+				BEGIN
+					IF EXISTS (
+						SELECT 1 FROM information_schema.columns 
+						WHERE table_name='payments' 
+						AND column_name='yookassa_payment_id' 
+						AND is_nullable='NO'
+					) THEN
+						ALTER TABLE payments ALTER COLUMN yookassa_payment_id DROP NOT NULL;
+					END IF;
+				END $$;
+			`);
+			console.log('Проверка NOT NULL для yookassa_payment_id выполнена в БД бота');
 
 			await pool.query(`
 				CREATE TABLE IF NOT EXISTS user_sessions (
@@ -360,6 +376,21 @@ export async function initDatabase(isTelegram: boolean = false) {
 			END $$;
 		`);
 		console.log('Миграция payments выполнена');
+
+		await pool.query(`
+			DO $$
+			BEGIN
+				IF EXISTS (
+					SELECT 1 FROM information_schema.columns 
+					WHERE table_name='payments' 
+					AND column_name='yookassa_payment_id' 
+					AND is_nullable='NO'
+				) THEN
+					ALTER TABLE payments ALTER COLUMN yookassa_payment_id DROP NOT NULL;
+				END IF;
+			END $$;
+		`);
+		console.log('Проверка NOT NULL для yookassa_payment_id выполнена');
 
 		await pool.query(`
 			CREATE TABLE IF NOT EXISTS user_sessions (
