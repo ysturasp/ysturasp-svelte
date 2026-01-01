@@ -1,3 +1,4 @@
+- update database migration to conditionally drop NOT NULL constraint on yookassa_payment_id (ysturasp, 2026-01-01) [3 files changed, 33 insertions(+)]
 - refactor payment handling to support telegram integration (ysturasp, 2026-01-01) [13 files changed, 199 insertions(+), 75 deletions(-)]
 - refactor vite config to dynamic load allowed hosts from env (ysturasp, 2026-01-01) [3 files changed, 37 insertions(+), 15 deletions(-)]
 - add payment with telegram stars in tg mini app and refactor database for support 2 format payments (ysturasp, 2026-01-01) [13 files changed, 484 insertions(+), 45 deletions(-)]

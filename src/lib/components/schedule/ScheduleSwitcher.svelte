@@ -1,14 +1,12 @@
 <script lang="ts">
 	import type { SemesterInfo } from '$lib/utils/semester';
-	import { getCurrentSemester } from '$lib/utils/semester';
+	import { getCurrentSemester, shouldShowPreviousSemesterSwitch } from '$lib/utils/semester';
 	import ScheduleSettings from './ScheduleSettings.svelte';
 	import { hapticFeedback, init } from '@tma.js/sdk-svelte';
 	import { onDestroy, onMount } from 'svelte';
 	import { settings } from '$lib/stores/settings';
 	import type { Settings } from '$lib/stores/settings';
 	import { checkIsTelegramMiniApp } from '$lib/utils/telegram';
-	import { reachGoal } from '$lib/utils/metrika';
-	import { fade } from 'svelte/transition';
 	import AdsBanner from './AdsBanner.svelte';
 
 	export let selectedSemester: SemesterInfo | null = null;
@@ -70,7 +68,7 @@
 		class="rounded-2xl bg-slate-900/95 p-1.5 shadow-lg ring-1 ring-blue-500/30 backdrop-blur-sm"
 	>
 		<div class="flex flex-col items-center gap-1.5 md:flex-row">
-			{#if selectedSemester && selectedSemester.id !== getCurrentSemester().id}
+			{#if selectedSemester && shouldShowPreviousSemesterSwitch(selectedSemester)}
 				<button
 					class="flex w-full items-center justify-center rounded-lg bg-amber-500/90 px-2.5 py-1 text-sm transition-opacity hover:opacity-80 md:w-auto md:justify-start md:py-2"
 					on:click={() => onSemesterChange(getCurrentSemester())}
@@ -82,7 +80,7 @@
 
 				<div class="hidden h-4 w-[1px] bg-slate-700/50 md:block"></div>
 			{:else}
-				<AdsBanner {currentPage} {university} {handleNavClick} />
+				<AdsBanner {university} {handleNavClick} />
 
 				<div class="hidden h-4 w-[1px] bg-slate-700/50 md:block"></div>
 			{/if}

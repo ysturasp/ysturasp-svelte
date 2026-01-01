@@ -240,3 +240,20 @@ export function getCurrentWeekMessage(): string {
 		return `Сегодня ${currentDate}, каникулы!`;
 	}
 }
+
+export function shouldShowPreviousSemesterSwitch(selectedSemester: SemesterInfo | null): boolean {
+	if (!selectedSemester) return false;
+
+	const currentSemester = getCurrentSemester();
+	if (selectedSemester.id === currentSemester.id) return false;
+
+	const currentDate = getCurrentDate();
+	const currentMonth = currentDate.getMonth();
+	const currentDay = currentDate.getDate();
+
+	if (currentSemester.type === 'spring' && currentMonth === 0 && currentDay < 25) {
+		return false;
+	}
+
+	return true;
+}
