@@ -1,3 +1,4 @@
+- update AdsBanner component to adjust SVG attributes for better responsiveness (ysturasp, 2026-01-02) [3 files changed, 4 insertions(+), 1 deletion(-)]
 - refactor PaymentHistory component to exclude telegram stars from pending payment checks and optimize timer logic (ysturasp, 2026-01-02) [3 files changed, 43 insertions(+), 26 deletions(-)]
 - implement restrictions for refunds on telegram stars payments and enhance payment handling in webhook and API routes (ysturasp, 2026-01-02) [8 files changed, 177 insertions(+), 77 deletions(-)]
 - add promo codes and usage tables to database, and integrate PromoCodeInput component in profile page (ysturasp, 2026-01-02) [9 files changed, 628 insertions(+), 62 deletions(-)]
