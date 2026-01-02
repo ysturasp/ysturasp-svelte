@@ -5,21 +5,29 @@
 	import BottomModal from '$lib/components/ui/BottomModal.svelte';
 	import { browser } from '$app/environment';
 	import TgsSticker from '$lib/components/common/TgsSticker.svelte';
+	import { auth } from '$lib/stores/auth';
 
 	const promotion = getCurrentPromotion();
 	let isOpen = $state(false);
+	let timer: ReturnType<typeof setTimeout> | null = null;
 
-	const shouldShow = $derived(promotion !== null && promotion.isActive);
+	const shouldShow = $derived(
+		promotion !== null && promotion.isActive && !$auth.hasPaidService && !$auth.loading
+	);
 
 	onMount(() => {
 		if (browser && typeof window !== 'undefined') {
 			if (shouldShow) {
-				const timer = setTimeout(() => {
+				timer = setTimeout(() => {
 					isOpen = true;
 				}, 1000);
-
-				return () => clearTimeout(timer);
 			}
+
+			return () => {
+				if (timer) {
+					clearTimeout(timer);
+				}
+			};
 		}
 	});
 

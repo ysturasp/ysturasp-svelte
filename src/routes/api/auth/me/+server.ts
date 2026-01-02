@@ -4,6 +4,7 @@ import { createSessionToken, shouldRefreshSession, DEFAULT_SESSION_TTL } from '$
 import { getSessionContext } from '$lib/server/sessionContext';
 import { updateSessionActivity } from '$lib/db/userSessions';
 import { getRealIp } from '$lib/server/ip';
+import { getUserLimits } from '$lib/db/limits';
 
 export const GET: RequestHandler = async ({ cookies, getClientAddress, request }) => {
 	const ipAddress = getRealIp(request, getClientAddress);
@@ -62,6 +63,9 @@ export const GET: RequestHandler = async ({ cookies, getClientAddress, request }
 		}
 	}
 
+	const limits = await getUserLimits(user.id, isTelegram);
+	const hasPaidService = limits.paid_formats_purchased > 0;
+
 	return json({
 		authenticated: true,
 		user: {
@@ -69,6 +73,7 @@ export const GET: RequestHandler = async ({ cookies, getClientAddress, request }
 			email: email || null,
 			name: name || null,
 			picture: picture || null
-		}
+		},
+		hasPaidService
 	});
 };

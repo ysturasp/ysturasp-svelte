@@ -12,12 +12,14 @@ interface AuthState {
 	authenticated: boolean;
 	user: User | null;
 	loading: boolean;
+	hasPaidService: boolean;
 }
 
 const initialState: AuthState = {
 	authenticated: false,
 	user: null,
-	loading: true
+	loading: true,
+	hasPaidService: false
 };
 
 function createAuthStore() {
@@ -35,12 +37,14 @@ function createAuthStore() {
 				set({
 					authenticated: data.authenticated,
 					user: data.user || null,
+					hasPaidService: data.hasPaidService || false,
 					loading: false
 				});
 			} else {
 				set({
 					authenticated: false,
 					user: null,
+					hasPaidService: false,
 					loading: false
 				});
 			}
@@ -48,6 +52,7 @@ function createAuthStore() {
 			set({
 				authenticated: false,
 				user: null,
+				hasPaidService: false,
 				loading: false
 			});
 		}
@@ -58,6 +63,7 @@ function createAuthStore() {
 		set({
 			authenticated: false,
 			user: null,
+			hasPaidService: false,
 			loading: false
 		});
 	};
