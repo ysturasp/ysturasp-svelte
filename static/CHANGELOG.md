@@ -1,3 +1,4 @@
+- remove unused comments from support api (ysturasp, 2026-01-02) [3 files changed, 2 insertions(+), 19 deletions(-)]
 - refactor NewYearPromoBanner and AuthButton components to enhance authentication logic (ysturasp, 2026-01-02) [4 files changed, 25 insertions(+), 6 deletions(-)]
 - refactor auth store to prevent multiple simultaneous authentication requests and improve error handling (ysturasp, 2026-01-02) [5 files changed, 51 insertions(+), 41 deletions(-)]
 - improve user auth by adding hasPaidService state and integrating it into the NewYearPromoBanner logic (ysturasp, 2026-01-02) [5 files changed, 27 insertions(+), 6 deletions(-)]

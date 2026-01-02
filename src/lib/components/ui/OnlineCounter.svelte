@@ -170,7 +170,9 @@
 		if (!browser || !userId) return false;
 
 		try {
-			browserFingerprint = generateFingerprint();
+			if (!browserFingerprint) {
+				browserFingerprint = generateFingerprint();
+			}
 
 			const challengeResponse = await fetch(
 				`/api/online/challenge?userId=${encodeURIComponent(userId)}&fingerprint=${encodeURIComponent(browserFingerprint)}`
@@ -340,15 +342,18 @@
 					cleanupUser(true);
 				} else if (document.visibilityState === 'visible') {
 					if (userId && browserFingerprint) {
-						if (!sessionToken) {
-							initializeSession().then((success) => {
-								if (success) {
-									sendHeartbeat(true);
-								}
-							});
-						} else {
-							sendHeartbeat(true);
+						updateLastActivity();
+						updateLastActivity();
+
+						if (!eventSource || eventSource.readyState === EventSource.CLOSED) {
+							setupEventSource();
 						}
+
+						initializeSession().then((success) => {
+							if (success) {
+								sendHeartbeat(true);
+							}
+						});
 					}
 				}
 			});
