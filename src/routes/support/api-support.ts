@@ -61,13 +61,6 @@ export interface ReplyToSupportRequestResponse {
 	message?: string;
 }
 
-/**
- * Создает новый запрос в поддержку
- * Поддерживает три варианта авторизации:
- * 1. С initData (Telegram авторизация)
- * 2. С userId (без авторизации, но с идентификатором)
- * 3. Без параметров (анонимно, userId будет сгенерирован на сервере)
- */
 export async function createSupportRequest(
 	params: CreateSupportRequestParams
 ): Promise<CreateSupportRequestResponse> {
@@ -113,12 +106,6 @@ export async function createSupportRequest(
 	}
 }
 
-/**
- * Получает список запросов поддержки
- * Поддерживает два варианта:
- * 1. С initData (Telegram авторизация)
- * 2. С userId (без авторизации)
- */
 export async function getSupportRequests(
 	userId?: string,
 	source?: string
@@ -171,12 +158,6 @@ export async function getSupportRequests(
 	}
 }
 
-/**
- * Отправляет ответ на запрос поддержки
- * Поддерживает два варианта:
- * 1. С initData (Telegram авторизация)
- * 2. С userId (без авторизации)
- */
 export async function replyToSupportRequest(
 	params: ReplyToSupportRequestParams
 ): Promise<ReplyToSupportRequestResponse> {
