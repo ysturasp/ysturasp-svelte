@@ -16,18 +16,35 @@
 	);
 
 	onMount(() => {
-		if (browser && typeof window !== 'undefined') {
-			if (shouldShow) {
-				timer = setTimeout(() => {
-					isOpen = true;
-				}, 1000);
+		if (browser) {
+			if ($auth.loading) {
+				auth.checkAuth();
 			}
+		}
+	});
+
+	$effect(() => {
+		if (browser && typeof window !== 'undefined' && shouldShow) {
+			if (timer) {
+				clearTimeout(timer);
+			}
+
+			timer = setTimeout(() => {
+				isOpen = true;
+			}, 1000);
 
 			return () => {
 				if (timer) {
 					clearTimeout(timer);
+					timer = null;
 				}
 			};
+		} else {
+			if (timer) {
+				clearTimeout(timer);
+				timer = null;
+			}
+			isOpen = false;
 		}
 	});
 
