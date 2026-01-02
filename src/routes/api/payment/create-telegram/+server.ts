@@ -51,22 +51,11 @@ export const POST: RequestHandler = async ({ request, cookies, url }) => {
 	try {
 		const paymentId = generatePaymentId();
 
-		const paymentRecord = await createPaymentRecord(
-			user.id,
-			paymentId,
-			rubAmount,
-			count,
-			'telegram_stars',
-			'pending',
-			true
-		);
-
-		const telegramPaymentId = paymentRecord.telegram_payment_id || paymentId;
 		const invoiceLink = await createTelegramInvoice({
 			title: `Покупка ${count} форматирований`,
 			description: `Оплата ${count} форматирований через Telegram Stars`,
 			payload: JSON.stringify({
-				paymentId: telegramPaymentId,
+				paymentId: paymentId,
 				userId: user.id,
 				formatsCount: count
 			}),
@@ -80,7 +69,7 @@ export const POST: RequestHandler = async ({ request, cookies, url }) => {
 		});
 
 		return json({
-			paymentId: telegramPaymentId,
+			paymentId: paymentId,
 			invoiceLink,
 			starsAmount,
 			rubAmount,

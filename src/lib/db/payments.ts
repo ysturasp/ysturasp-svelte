@@ -214,6 +214,10 @@ export async function canRefundPayment(
 		return { can: false, reason: 'Можно вернуть только успешные платежи' };
 	}
 
+	if (payment.payment_type === 'telegram_stars') {
+		return { can: false, reason: 'Возврат для платежей через Telegram Stars невозможен' };
+	}
+
 	const paymentDate = new Date(payment.created_at);
 	const now = new Date();
 	const daysSincePayment = Math.floor(

@@ -50,6 +50,13 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 			return json({ error: 'Можно вернуть только успешные платежи' }, { status: 400 });
 		}
 
+		if (payment.payment_type === 'telegram_stars') {
+			return json(
+				{ error: 'Возврат для платежей через Telegram Stars невозможен' },
+				{ status: 400 }
+			);
+		}
+
 		const purchasedCount = Number(payment.formats_count);
 		const refundedCount = purchasedCount;
 		const usedCountForThisPayment = 0;
@@ -68,7 +75,8 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 					{ status: 500 }
 				);
 			}
-		} else if (payment.payment_type === 'telegram_stars') {
+		} else {
+			return json({ error: 'Неподдерживаемый тип платежа для возврата' }, { status: 400 });
 		}
 
 		await markPaymentAsRefunded(paymentId, Number(payment.amount), context.isTelegram);

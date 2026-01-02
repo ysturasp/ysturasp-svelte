@@ -111,11 +111,21 @@
 
 					if (status === 'paid') {
 						try {
-							await fetch('/api/payment/webhook-telegram', {
+							const webhookResponse = await fetch('/api/payment/webhook-telegram', {
 								method: 'POST',
 								headers: { 'Content-Type': 'application/json' },
-								body: JSON.stringify({ paymentId: data.paymentId })
+								body: JSON.stringify({
+									paymentId: data.paymentId,
+									formatsCount: formatsCount
+								})
 							});
+
+							if (!webhookResponse.ok) {
+								console.error(
+									'Ошибка при вызове webhook:',
+									await webhookResponse.text()
+								);
+							}
 						} catch (error) {
 							console.error('Ошибка уведомления сервера об оплате:', error);
 						}
@@ -133,42 +143,6 @@
 					}
 				} catch (invoiceError) {
 					console.error('Ошибка при открытии invoice:', invoiceError);
-					const tg = (window as any).Telegram?.WebApp;
-
-					if (tg && typeof tg.openInvoice === 'function') {
-						try {
-							tg.openInvoice(invoiceLink, async (status: string) => {
-								if (status === 'paid') {
-									try {
-										await fetch('/api/payment/webhook-telegram', {
-											method: 'POST',
-											headers: { 'Content-Type': 'application/json' },
-											body: JSON.stringify({ paymentId: data.paymentId })
-										});
-									} catch (error) {
-										console.error(
-											'Ошибка уведомления сервера об оплате:',
-											error
-										);
-									}
-									dispatch('success', { message: 'Платеж успешно завершен!' });
-									isProcessing = false;
-									close();
-								} else if (status === 'failed') {
-									dispatch('error', {
-										message: 'Ошибка оплаты. Попробуйте позже.'
-									});
-									isProcessing = false;
-								} else {
-									isProcessing = false;
-								}
-							});
-							return;
-						} catch (fallbackError) {
-							console.error('Ошибка при fallback вызове openInvoice:', fallbackError);
-						}
-					}
-
 					dispatch('error', {
 						message: 'Не удалось открыть окно оплаты. Попробуйте позже.'
 					});

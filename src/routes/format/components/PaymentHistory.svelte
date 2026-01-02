@@ -324,7 +324,7 @@
 					</div>
 					{#if payment.type === 'payment'}
 						<div class="ml-4 flex gap-2">
-							{#if payment.status === 'pending'}
+							{#if payment.status === 'pending' && payment.paymentType !== 'telegram_stars'}
 								<button
 									on:click={() => goToPayment(payment)}
 									disabled={isGettingPaymentUrl}
@@ -333,7 +333,7 @@
 								>
 									{isGettingPaymentUrl ? 'Загрузка...' : 'Оплатить'}
 								</button>
-							{:else if payment.status === 'succeeded'}
+							{:else if payment.status === 'succeeded' && payment.paymentType !== 'telegram_stars'}
 								<button
 									on:click={() => checkRefund(payment)}
 									disabled={isCheckingRefund}
@@ -385,8 +385,8 @@
 						<div class="flex justify-between">
 							<span class="text-slate-400">Сумма возврата:</span>
 							<span class="font-semibold text-white">
-								{selectedPayment.amount.toLocaleString('ru-RU')}
-								{selectedPayment.currency}
+								{selectedPayment.amount?.toLocaleString('ru-RU') || '0'}
+								{selectedPayment.currency || 'RUB'}
 							</span>
 						</div>
 					</div>
