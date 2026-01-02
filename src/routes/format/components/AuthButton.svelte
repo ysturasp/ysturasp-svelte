@@ -52,7 +52,7 @@
 			class="h-8 w-8 animate-spin rounded-full border-2 border-blue-500 border-t-transparent"
 		></div>
 	</div>
-{:else if $auth.authenticated && $auth.user && $auth.hasPaidService}
+{:else if $auth.authenticated && $auth.user}
 	<button
 		onclick={handleProfileClick}
 		class="flex items-center gap-3 rounded-lg bg-slate-700/50 px-3 py-2 text-white transition-colors hover:bg-slate-600"
