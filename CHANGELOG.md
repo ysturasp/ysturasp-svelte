@@ -1,3 +1,4 @@
+- implement restrictions for refunds on telegram stars payments and enhance payment handling in webhook and API routes (ysturasp, 2026-01-02) [8 files changed, 177 insertions(+), 77 deletions(-)]
 - add promo codes and usage tables to database, and integrate PromoCodeInput component in profile page (ysturasp, 2026-01-02) [9 files changed, 628 insertions(+), 62 deletions(-)]
 - improve work online counter for secure and anti-bypass system with automatizated adding online users (ysturasp, 2026-01-02) [14 files changed, 1129 insertions(+), 109 deletions(-)]
 - refactor ScheduleSwitcher to use shouldShowPreviousSemesterSwitch for conditional rendering (ysturasp, 2026-01-01) [4 files changed, 22 insertions(+), 5 deletions(-)]

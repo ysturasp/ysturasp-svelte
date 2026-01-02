@@ -214,7 +214,11 @@
 		const now = $currentTime;
 		const times: Record<string, number> = {};
 		payments.forEach((payment) => {
-			if (payment.type === 'payment' && payment.status === 'pending') {
+			if (
+				payment.type === 'payment' &&
+				payment.status === 'pending' &&
+				payment.paymentType !== 'telegram_stars'
+			) {
 				const createdAt = new Date(payment.createdAt);
 				const cancelTime = new Date(
 					createdAt.getTime() + PENDING_TIMEOUT_MINUTES * 60 * 1000
@@ -226,31 +230,42 @@
 		return times;
 	})();
 
-	$: if (payments.some((p) => p.type === 'payment' && p.status === 'pending')) {
-		if (!timerInterval) {
-			timerInterval = setInterval(async () => {
-				const now = Date.now();
-				currentTime.set(now);
+	$: {
+		const hasPendingPayments = payments.some(
+			(p) =>
+				p.type === 'payment' && p.status === 'pending' && p.paymentType !== 'telegram_stars'
+		);
+		if (hasPendingPayments) {
+			if (!timerInterval) {
+				timerInterval = setInterval(async () => {
+					const now = Date.now();
+					currentTime.set(now);
 
-				const hasExpiredPayments = payments.some((payment) => {
-					if (payment.type !== 'payment' || payment.status !== 'pending') return false;
-					const createdAt = new Date(payment.createdAt);
-					const cancelTime = new Date(
-						createdAt.getTime() + PENDING_TIMEOUT_MINUTES * 60 * 1000
-					);
-					return cancelTime.getTime() <= now;
-				});
+					const hasExpiredPayments = payments.some((payment) => {
+						if (
+							payment.type !== 'payment' ||
+							payment.status !== 'pending' ||
+							payment.paymentType === 'telegram_stars'
+						)
+							return false;
+						const createdAt = new Date(payment.createdAt);
+						const cancelTime = new Date(
+							createdAt.getTime() + PENDING_TIMEOUT_MINUTES * 60 * 1000
+						);
+						return cancelTime.getTime() <= now;
+					});
 
-				if (hasExpiredPayments) {
-					isLoaded = false;
-					await loadPayments();
-				}
-			}, 1000);
-		}
-	} else {
-		if (timerInterval) {
-			clearInterval(timerInterval);
-			timerInterval = null;
+					if (hasExpiredPayments && !isLoading) {
+						isLoaded = false;
+						await loadPayments();
+					}
+				}, 1000);
+			}
+		} else {
+			if (timerInterval) {
+				clearInterval(timerInterval);
+				timerInterval = null;
+			}
 		}
 	}
 
