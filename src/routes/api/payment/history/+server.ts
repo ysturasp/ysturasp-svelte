@@ -2,6 +2,7 @@ import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { getPool } from '$lib/db/database';
 import { getSessionContext } from '$lib/server/sessionContext';
+import { getUserPromoCodes } from '$lib/db/promo-codes';
 
 export const GET: RequestHandler = async ({ cookies }) => {
 	const context = await getSessionContext(cookies);
@@ -14,7 +15,8 @@ export const GET: RequestHandler = async ({ cookies }) => {
 		return json({ error: 'База данных недоступна' }, { status: 503 });
 	}
 
-	const result = await pool.query(
+	const mainPool = getPool(false);
+	const paymentsResult = await pool.query(
 		`SELECT 
 			id,
 			yookassa_payment_id,
@@ -33,17 +35,34 @@ export const GET: RequestHandler = async ({ cookies }) => {
 		[context.user.id]
 	);
 
+	const payments = paymentsResult.rows.map((row) => ({
+		id: row.id,
+		type: 'payment' as const,
+		paymentId: row.yookassa_payment_id || row.telegram_payment_id,
+		paymentType: row.payment_type || 'yookassa',
+		amount: Number(row.amount),
+		currency: row.currency || 'RUB',
+		status: row.status,
+		formatsCount: row.formats_count,
+		createdAt: row.created_at,
+		updatedAt: row.updated_at
+	}));
+
+	const promoCodes = await getUserPromoCodes(context.user.id, context.isTelegram);
+	const promoCodeItems = promoCodes.map((pc) => ({
+		id: pc.id,
+		type: 'promo_code' as const,
+		code: pc.code,
+		description: pc.description,
+		formatsCount: pc.formats_count,
+		createdAt: pc.created_at
+	}));
+
+	const allItems = [...payments, ...promoCodeItems].sort(
+		(a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+	);
+
 	return json({
-		payments: result.rows.map((row) => ({
-			id: row.id,
-			paymentId: row.yookassa_payment_id || row.telegram_payment_id,
-			paymentType: row.payment_type || 'yookassa',
-			amount: Number(row.amount),
-			currency: row.currency || 'RUB',
-			status: row.status,
-			formatsCount: row.formats_count,
-			createdAt: row.created_at,
-			updatedAt: row.updated_at
-		}))
+		payments: allItems
 	});
 };

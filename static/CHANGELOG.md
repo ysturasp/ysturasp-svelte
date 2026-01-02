@@ -1,3 +1,4 @@
+- improve work online counter for secure and anti-bypass system with automatizated adding online users (ysturasp, 2026-01-02) [14 files changed, 1129 insertions(+), 109 deletions(-)]
 - refactor ScheduleSwitcher to use shouldShowPreviousSemesterSwitch for conditional rendering (ysturasp, 2026-01-01) [4 files changed, 22 insertions(+), 5 deletions(-)]
 - update database migration to conditionally drop NOT NULL constraint on yookassa_payment_id (ysturasp, 2026-01-01) [3 files changed, 33 insertions(+)]
 - refactor payment handling to support telegram integration (ysturasp, 2026-01-01) [13 files changed, 199 insertions(+), 75 deletions(-)]

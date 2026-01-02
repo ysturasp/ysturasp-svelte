@@ -9,6 +9,7 @@
 	import FormattingHistory from '../format/components/FormattingHistory.svelte';
 	import PaymentHistory from '../format/components/PaymentHistory.svelte';
 	import PaymentModal from '../format/components/PaymentModal.svelte';
+	import PromoCodeInput from './components/PromoCodeInput.svelte';
 	import { checkFormatLimit } from '../format/api';
 	import type { FormatLimit } from '../format/api';
 	import BottomModal from '$lib/components/ui/BottomModal.svelte';
@@ -303,6 +304,14 @@
 							>
 								Пополнить баланс
 							</button>
+						</div>
+
+						<div class="border-t border-slate-700 pt-6">
+							<h2 class="text-lg font-semibold text-white">Промокод</h2>
+							<p class="mb-4 text-sm text-slate-400">
+								Введите для получения бесплатных плюшек
+							</p>
+							<PromoCodeInput on:success={checkLimit} />
 						</div>
 
 						<div class="border-t border-slate-700 pt-6">

@@ -9,13 +9,17 @@
 
 	interface Payment {
 		id: string;
-		paymentId: string;
-		amount: number;
-		currency: string;
-		status: string;
+		type: 'payment' | 'promo_code';
+		paymentId?: string;
+		paymentType?: string;
+		amount?: number;
+		currency?: string;
+		status?: string;
 		formatsCount: number;
 		createdAt: string;
-		updatedAt: string;
+		updatedAt?: string;
+		code?: string;
+		description?: string | null;
 	}
 
 	interface RefundCheck {
@@ -100,6 +104,8 @@
 	}
 
 	async function checkRefund(payment: Payment) {
+		if (payment.type !== 'payment') return;
+
 		try {
 			isCheckingRefund = true;
 			const response = await fetch(`/api/payment/check-refund?paymentId=${payment.id}`);
@@ -163,6 +169,8 @@
 	}
 
 	async function goToPayment(payment: Payment) {
+		if (payment.type !== 'payment' || !payment.paymentId) return;
+
 		try {
 			isGettingPaymentUrl = true;
 			const response = await fetch(
@@ -196,7 +204,7 @@
 	}
 
 	function getTimeUntilCancel(payment: Payment): number | null {
-		if (payment.status !== 'pending') {
+		if (payment.type !== 'payment' || payment.status !== 'pending') {
 			return null;
 		}
 		return paymentTimes[payment.id] ?? null;
@@ -206,7 +214,7 @@
 		const now = $currentTime;
 		const times: Record<string, number> = {};
 		payments.forEach((payment) => {
-			if (payment.status === 'pending') {
+			if (payment.type === 'payment' && payment.status === 'pending') {
 				const createdAt = new Date(payment.createdAt);
 				const cancelTime = new Date(
 					createdAt.getTime() + PENDING_TIMEOUT_MINUTES * 60 * 1000
@@ -218,14 +226,14 @@
 		return times;
 	})();
 
-	$: if (payments.some((p) => p.status === 'pending')) {
+	$: if (payments.some((p) => p.type === 'payment' && p.status === 'pending')) {
 		if (!timerInterval) {
 			timerInterval = setInterval(async () => {
 				const now = Date.now();
 				currentTime.set(now);
 
 				const hasExpiredPayments = payments.some((payment) => {
-					if (payment.status !== 'pending') return false;
+					if (payment.type !== 'payment' || payment.status !== 'pending') return false;
 					const createdAt = new Date(payment.createdAt);
 					const cancelTime = new Date(
 						createdAt.getTime() + PENDING_TIMEOUT_MINUTES * 60 * 1000
@@ -273,55 +281,72 @@
 							<span class="font-medium text-white">
 								{payment.formatsCount} форматирований
 							</span>
-							<span class={getStatusColor(payment.status)}>
-								{getStatusText(payment.status)}
-							</span>
-							{#if payment.status === 'pending'}
-								{@const timeRemaining = paymentTimes[payment.id]}
-								{#if timeRemaining !== null && timeRemaining !== undefined && timeRemaining > 0}
-									<span
-										class="-mt-2 block w-full text-xs text-slate-400 sm:mt-0 sm:inline sm:w-auto"
-									>
-										(отменится через {formatTimeRemaining(timeRemaining)})
-									</span>
-								{:else}
-									<span
-										class="block w-full text-xs text-slate-400 sm:inline sm:w-auto"
-									>
-										(отменится автоматически)
-									</span>
+							{#if payment.type === 'promo_code'}
+								<span
+									class="rounded-full bg-green-500/20 px-2.5 py-0.5 text-xs font-medium text-green-400"
+								>
+									Промокод: {payment.code}
+								</span>
+							{:else}
+								<span class={getStatusColor(payment.status || '')}>
+									{getStatusText(payment.status || '')}
+								</span>
+								{#if payment.status === 'pending'}
+									{@const timeRemaining = paymentTimes[payment.id]}
+									{#if timeRemaining !== null && timeRemaining !== undefined && timeRemaining > 0}
+										<span
+											class="-mt-2 block w-full text-xs text-slate-400 sm:mt-0 sm:inline sm:w-auto"
+										>
+											(отменится через {formatTimeRemaining(timeRemaining)})
+										</span>
+									{:else}
+										<span
+											class="block w-full text-xs text-slate-400 sm:inline sm:w-auto"
+										>
+											(отменится автоматически)
+										</span>
+									{/if}
 								{/if}
 							{/if}
 						</div>
 						<div class="mt-1 flex items-center gap-3 text-sm text-slate-400">
-							<span>{payment.amount.toLocaleString('ru-RU')} {payment.currency}</span>
+							{#if payment.type === 'promo_code'}
+								<span>Бонусное начисление</span>
+							{:else}
+								<span
+									>{payment.amount?.toLocaleString('ru-RU')}
+									{payment.currency}</span
+								>
+							{/if}
 							<span>·</span>
 							<span>{new Date(payment.createdAt).toLocaleString('ru-RU')}</span>
 						</div>
 					</div>
-					<div class="ml-4 flex gap-2">
-						{#if payment.status === 'pending'}
-							<button
-								on:click={() => goToPayment(payment)}
-								disabled={isGettingPaymentUrl}
-								class="rounded-lg bg-blue-600 px-3 py-1.5 text-sm text-white transition-colors hover:bg-blue-700 disabled:opacity-50"
-								title="Перейти к оплате"
-							>
-								{isGettingPaymentUrl ? 'Загрузка...' : 'Оплатить'}
-							</button>
-						{:else if payment.status === 'succeeded'}
-							<button
-								on:click={() => checkRefund(payment)}
-								disabled={isCheckingRefund}
-								class="rounded-lg bg-slate-700 px-3 py-1.5 text-sm text-white transition-colors hover:bg-slate-600 disabled:opacity-50"
-								title="Запросить возврат"
-							>
-								{isCheckingRefund && selectedPayment?.id === payment.id
-									? 'Проверка...'
-									: 'Вернуть'}
-							</button>
-						{/if}
-					</div>
+					{#if payment.type === 'payment'}
+						<div class="ml-4 flex gap-2">
+							{#if payment.status === 'pending'}
+								<button
+									on:click={() => goToPayment(payment)}
+									disabled={isGettingPaymentUrl}
+									class="rounded-lg bg-blue-600 px-3 py-1.5 text-sm text-white transition-colors hover:bg-blue-700 disabled:opacity-50"
+									title="Перейти к оплате"
+								>
+									{isGettingPaymentUrl ? 'Загрузка...' : 'Оплатить'}
+								</button>
+							{:else if payment.status === 'succeeded'}
+								<button
+									on:click={() => checkRefund(payment)}
+									disabled={isCheckingRefund}
+									class="rounded-lg bg-slate-700 px-3 py-1.5 text-sm text-white transition-colors hover:bg-slate-600 disabled:opacity-50"
+									title="Запросить возврат"
+								>
+									{isCheckingRefund && selectedPayment?.id === payment.id
+										? 'Проверка...'
+										: 'Вернуть'}
+								</button>
+							{/if}
+						</div>
+					{/if}
 				</div>
 			{/each}
 		</div>

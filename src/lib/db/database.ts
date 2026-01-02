@@ -238,6 +238,49 @@ export async function initDatabase(isTelegram: boolean = false) {
 			console.log('Таблица referrals создана/проверена в БД бота');
 
 			await pool.query(`
+				CREATE TABLE IF NOT EXISTS promo_codes (
+					id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+					code TEXT NOT NULL UNIQUE,
+					description TEXT,
+					formats_count INTEGER NOT NULL DEFAULT 0,
+					reward_type TEXT NOT NULL DEFAULT 'formats' CHECK (reward_type IN ('formats')),
+					max_uses INTEGER,
+					used_count INTEGER DEFAULT 0,
+					valid_from TIMESTAMP DEFAULT NOW(),
+					valid_until TIMESTAMP,
+					is_active BOOLEAN DEFAULT true,
+					created_at TIMESTAMP DEFAULT NOW(),
+					updated_at TIMESTAMP DEFAULT NOW()
+				)
+			`);
+			console.log('Таблица promo_codes создана/проверена в БД бота');
+
+			await pool.query(`
+				CREATE TABLE IF NOT EXISTS promo_code_uses (
+					id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+					promo_code_id UUID NOT NULL,
+					user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+					created_at TIMESTAMP DEFAULT NOW(),
+					UNIQUE(promo_code_id, user_id)
+				)
+			`);
+			console.log('Таблица promo_code_uses создана/проверена в БД бота');
+
+			await pool.query(`
+				DO $$
+				BEGIN
+					IF EXISTS (
+						SELECT 1 FROM information_schema.table_constraints 
+						WHERE constraint_name = 'promo_code_uses_promo_code_id_fkey' 
+						AND table_name = 'promo_code_uses'
+					) THEN
+						ALTER TABLE promo_code_uses DROP CONSTRAINT promo_code_uses_promo_code_id_fkey;
+					END IF;
+				END $$;
+			`);
+			console.log('Миграция promo_code_uses выполнена в БД бота (удален внешний ключ)');
+
+			await pool.query(`
 				CREATE INDEX IF NOT EXISTS idx_user_limits_user_id ON user_limits(user_id);
 				CREATE INDEX IF NOT EXISTS idx_format_history_user_id ON format_history(user_id);
 				CREATE INDEX IF NOT EXISTS idx_payments_user_id ON payments(user_id);
@@ -250,6 +293,9 @@ export async function initDatabase(isTelegram: boolean = false) {
 				CREATE INDEX IF NOT EXISTS idx_stat_limits_user_id ON stat_limits(user_id);
 				CREATE INDEX IF NOT EXISTS idx_referrals_referrer_id ON referrals(referrer_id);
 				CREATE INDEX IF NOT EXISTS idx_referrals_referred_id ON referrals(referred_id);
+				CREATE INDEX IF NOT EXISTS idx_promo_codes_code ON promo_codes(code);
+				CREATE INDEX IF NOT EXISTS idx_promo_code_uses_user_id ON promo_code_uses(user_id);
+				CREATE INDEX IF NOT EXISTS idx_promo_code_uses_promo_code_id ON promo_code_uses(promo_code_id);
 			`);
 			console.log('Индексы созданы/проверены в БД бота');
 			console.log('Инициализация БД бота завершена успешно');
@@ -463,6 +509,35 @@ export async function initDatabase(isTelegram: boolean = false) {
 		}
 
 		await pool.query(`
+			CREATE TABLE IF NOT EXISTS promo_codes (
+				id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+				code TEXT NOT NULL UNIQUE,
+				description TEXT,
+				formats_count INTEGER NOT NULL DEFAULT 0,
+				reward_type TEXT NOT NULL DEFAULT 'formats' CHECK (reward_type IN ('formats')),
+				max_uses INTEGER,
+				used_count INTEGER DEFAULT 0,
+				valid_from TIMESTAMP DEFAULT NOW(),
+				valid_until TIMESTAMP,
+				is_active BOOLEAN DEFAULT true,
+				created_at TIMESTAMP DEFAULT NOW(),
+				updated_at TIMESTAMP DEFAULT NOW()
+			)
+		`);
+		console.log('Таблица promo_codes создана/проверена');
+
+		await pool.query(`
+			CREATE TABLE IF NOT EXISTS promo_code_uses (
+				id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+				promo_code_id UUID NOT NULL REFERENCES promo_codes(id) ON DELETE CASCADE,
+				user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+				created_at TIMESTAMP DEFAULT NOW(),
+				UNIQUE(promo_code_id, user_id)
+			)
+		`);
+		console.log('Таблица promo_code_uses создана/проверена');
+
+		await pool.query(`
 			DO $$
 			BEGIN
 				IF EXISTS (SELECT 1 FROM information_schema.columns 
@@ -501,6 +576,9 @@ export async function initDatabase(isTelegram: boolean = false) {
 			CREATE INDEX IF NOT EXISTS idx_stat_views_user_id ON stat_views(user_id);
 			CREATE INDEX IF NOT EXISTS idx_stat_views_created_at ON stat_views(created_at);
 			CREATE INDEX IF NOT EXISTS idx_stat_limits_user_id ON stat_limits(user_id);
+			CREATE INDEX IF NOT EXISTS idx_promo_codes_code ON promo_codes(code);
+			CREATE INDEX IF NOT EXISTS idx_promo_code_uses_user_id ON promo_code_uses(user_id);
+			CREATE INDEX IF NOT EXISTS idx_promo_code_uses_promo_code_id ON promo_code_uses(promo_code_id);
 		`);
 		console.log('Индексы созданы/проверены');
 		console.log('Инициализация БД завершена успешно');
