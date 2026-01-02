@@ -1,3 +1,4 @@
+- improve user auth by adding hasPaidService state and integrating it into the NewYearPromoBanner logic (ysturasp, 2026-01-02) [5 files changed, 27 insertions(+), 6 deletions(-)]
 - remove firebase config and dependencies from project, update example env and docker config (ysturasp, 2026-01-02) [8 files changed, 3 insertions(+), 1071 deletions(-)]
 - update AdsBanner component to adjust SVG attributes for better responsiveness (ysturasp, 2026-01-02) [3 files changed, 4 insertions(+), 1 deletion(-)]
 - refactor PaymentHistory component to exclude telegram stars from pending payment checks and optimize timer logic (ysturasp, 2026-01-02) [3 files changed, 43 insertions(+), 26 deletions(-)]

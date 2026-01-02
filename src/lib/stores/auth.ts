@@ -24,38 +24,49 @@ const initialState: AuthState = {
 
 function createAuthStore() {
 	const { subscribe, set, update } = writable<AuthState>(initialState);
+	let checkAuthPromise: Promise<void> | null = null;
 
 	const checkAuth = async () => {
 		if (!browser) return;
 
-		update((state) => ({ ...state, loading: true }));
+		if (checkAuthPromise) {
+			return checkAuthPromise;
+		}
 
-		try {
-			const response = await fetch('/api/auth/me');
-			if (response.ok) {
-				const data = await response.json();
-				set({
-					authenticated: data.authenticated,
-					user: data.user || null,
-					hasPaidService: data.hasPaidService || false,
-					loading: false
-				});
-			} else {
+		checkAuthPromise = (async () => {
+			update((state) => ({ ...state, loading: true }));
+
+			try {
+				const response = await fetch('/api/auth/me');
+				if (response.ok) {
+					const data = await response.json();
+					set({
+						authenticated: data.authenticated,
+						user: data.user || null,
+						hasPaidService: data.hasPaidService || false,
+						loading: false
+					});
+				} else {
+					set({
+						authenticated: false,
+						user: null,
+						hasPaidService: false,
+						loading: false
+					});
+				}
+			} catch (error) {
 				set({
 					authenticated: false,
 					user: null,
 					hasPaidService: false,
 					loading: false
 				});
+			} finally {
+				checkAuthPromise = null;
 			}
-		} catch (error) {
-			set({
-				authenticated: false,
-				user: null,
-				hasPaidService: false,
-				loading: false
-			});
-		}
+		})();
+
+		return checkAuthPromise;
 	};
 
 	const logout = async () => {

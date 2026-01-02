@@ -6,13 +6,13 @@
 	import { browser } from '$app/environment';
 	import { checkIsTelegramMiniApp } from '$lib/utils/telegram';
 
-	let privacySettings = loadPrivacySettings();
-	let isTelegram = false;
+	let privacySettings = $state(loadPrivacySettings());
+	let isTelegram = $state(false);
 
 	onMount(() => {
-		auth.checkAuth();
 		if (browser) {
-			isTelegram = checkIsTelegramMiniApp();
+			isTelegram = checkIsTelegramMiniApp() || !!(window as any).Telegram?.WebApp;
+
 			const updatePrivacy = () => {
 				privacySettings = loadPrivacySettings();
 			};
@@ -33,15 +33,17 @@
 		goto('/profile');
 	}
 
-	$: displayName = privacySettings.hideName
-		? maskName($auth.user?.name || null)
-		: $auth.user?.name || $auth.user?.email || '';
+	const displayName = $derived(
+		privacySettings.hideName
+			? maskName($auth.user?.name || null)
+			: $auth.user?.name || $auth.user?.email || ''
+	);
 
-	$: displayEmail = privacySettings.hideEmail
-		? maskEmail($auth.user?.email || '')
-		: $auth.user?.email;
+	const displayEmail = $derived(
+		privacySettings.hideEmail ? maskEmail($auth.user?.email || '') : $auth.user?.email
+	);
 
-	$: showAvatar = !privacySettings.hideAvatar;
+	const showAvatar = $derived(!privacySettings.hideAvatar);
 </script>
 
 {#if $auth.loading}
@@ -52,7 +54,7 @@
 	</div>
 {:else if $auth.authenticated && $auth.user}
 	<button
-		on:click={handleProfileClick}
+		onclick={handleProfileClick}
 		class="flex items-center gap-3 rounded-lg bg-slate-700/50 px-3 py-2 text-white transition-colors hover:bg-slate-600"
 	>
 		{#if showAvatar && $auth.user.picture}
@@ -88,7 +90,7 @@
 	<div class="flex flex-col gap-3">
 		<div class="flex flex-wrap gap-2">
 			<button
-				on:click={handleLogin}
+				onclick={handleLogin}
 				class="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-white transition-colors hover:bg-blue-700"
 			>
 				<svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
