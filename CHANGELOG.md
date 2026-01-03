@@ -1,3 +1,4 @@
+- refactor StatisticsSection component to remove localStorage caching logic for statistics and instructors data (ysturasp, 2026-01-04) [3 files changed, 3 insertions(+), 21 deletions(-)]
 - update api from google app script on full server and database, improve design statistics section (ysturasp, 2026-01-04) [10 files changed, 766 insertions(+), 255 deletions(-)]
 - remove unused comment about firebase database from .env.example (ysturasp, 2026-01-03) [3 files changed, 2 insertions(+), 1 deletion(-)]
 - update AuthButton component to simplify authentication condition by removing hasPaidService check (ysturasp, 2026-01-02) [3 files changed, 3 insertions(+), 1 deletion(-)]

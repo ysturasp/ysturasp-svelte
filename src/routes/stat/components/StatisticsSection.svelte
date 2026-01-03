@@ -10,7 +10,6 @@
 	} from '../utils/api';
 	import StatisticsChart from './StatisticsChart.svelte';
 	import { recentlyViewedStore } from '../stores/recentlyViewedStore';
-	import ScheduleCombobox from '$lib/components/schedule/ScheduleCombobox.svelte';
 	import NotificationsContainer from '$lib/components/notifications/NotificationsContainer.svelte';
 	import { notifications } from '$lib/stores/notifications';
 	import CustomSelect from '$lib/components/ui/CustomSelect.svelte';
@@ -115,11 +114,6 @@
 				.replace(/[^a-z0-9]/g, '') + '@edu.ystu.ru'
 		);
 	}
-
-	$: items = currentDisciplines.map((discipline) => ({
-		id: discipline,
-		displayValue: discipline
-	}));
 
 	$: if (selectedDiscipline) {
 		getStatistics();
@@ -514,18 +508,24 @@
 			</div>
 		{/if}
 
-		<ScheduleCombobox
-			{items}
-			bind:selectedId={selectedDiscipline}
-			onSubmit={handleGetStatistics}
-			placeholder={isLoadingDisciplines ? 'Загрузка...' : 'Выберите дисциплину...'}
-			paramName="discipline"
-			copyLinkMessage="Ссылка на статистику скопирована"
-			submitButtonText="Показать статистику"
-			copyButtonText="Скопировать ссылку на статистику"
-			{error}
-			isLoading={isLoadingDisciplines || currentDisciplines.length === 0}
-		/>
+		<div class="flex flex-col gap-4">
+			<CustomSelect
+				items={currentDisciplines.map((d) => ({ id: d, label: d }))}
+				bind:selectedId={selectedDiscipline}
+				placeholder={isLoadingDisciplines ? 'Загрузка...' : 'Выберите дисциплину...'}
+				searchPlaceholder="Поиск дисциплины..."
+				width="100%"
+				isLoading={isLoadingDisciplines}
+				searchable={true}
+			/>
+			<button
+				class="w-full rounded-xl bg-blue-600 py-3 font-semibold text-white shadow-lg shadow-blue-900/20 transition-all hover:bg-blue-500 hover:shadow-blue-900/40 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+				on:click={handleGetStatistics}
+				disabled={!selectedDiscipline || isLoadingDisciplines}
+			>
+				Показать статистику
+			</button>
+		</div>
 	</div>
 
 	{#if statistics}
