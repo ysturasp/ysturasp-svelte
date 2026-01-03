@@ -117,10 +117,6 @@
 		);
 	}
 
-	$: if (selectedDiscipline) {
-		getStatistics();
-	}
-
 	async function loadDisciplines(institute: InstituteId, preserveSelection = false) {
 		isLoadingDisciplines = true;
 		try {
