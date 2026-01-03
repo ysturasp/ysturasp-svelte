@@ -168,6 +168,7 @@
 				disabled={!selectedTeacher || !selectedWeek}
 				params={{ teacher: selectedTeacher }}
 				successMessage="Ссылка на расписание преподавателя скопирована"
+				verticalOnMobile={false}
 			>
 				{copyButtonText}
 			</CopyLinkButton>

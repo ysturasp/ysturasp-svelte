@@ -9,6 +9,7 @@
 	export let onSuccess: (() => void) | undefined = undefined;
 
 	export let iconOnly = false;
+	export let verticalOnMobile = true;
 
 	async function copyLink() {
 		const url = new URL(window.location.href);
@@ -68,7 +69,11 @@
 
 <button
 	type="button"
-	class="flex items-center justify-center gap-1.5 rounded-lg bg-slate-700 px-3 py-2 text-xs text-blue-400 transition-all hover:bg-slate-600 disabled:cursor-not-allowed disabled:opacity-50 {className}"
+	class="flex {iconOnly
+		? 'items-center justify-center px-3'
+		: verticalOnMobile
+			? 'h-12 flex-col items-center justify-center gap-0.5 px-1.5 sm:h-auto sm:flex-row sm:items-center sm:gap-1.5 sm:px-3'
+			: 'items-center justify-center gap-1.5 px-3'} rounded-lg bg-slate-700 py-2 text-[10px] text-blue-400 transition-all hover:bg-slate-600 disabled:cursor-not-allowed disabled:opacity-50 sm:text-xs {className}"
 	on:click={copyLink}
 	{disabled}
 	title={iconOnly ? 'Скопировать ссылку' : ''}

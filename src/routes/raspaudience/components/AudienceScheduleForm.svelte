@@ -158,6 +158,7 @@
 				disabled={!selectedAudience || !selectedWeek}
 				params={{ audience: selectedAudience }}
 				successMessage="Ссылка на расписание аудитории скопирована"
+				verticalOnMobile={false}
 			>
 				{copyButtonText}
 			</CopyLinkButton>
