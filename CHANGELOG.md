@@ -1,3 +1,4 @@
+- update AuthButton component to simplify authentication condition by removing hasPaidService check (ysturasp, 2026-01-02) [3 files changed, 3 insertions(+), 1 deletion(-)]
 - refactor OnlineCounter component to enhance session management and user activity tracking (ysturasp, 2026-01-02) [3 files changed, 16 insertions(+), 9 deletions(-)]
 - remove unused comments from support api (ysturasp, 2026-01-02) [3 files changed, 2 insertions(+), 19 deletions(-)]
 - refactor NewYearPromoBanner and AuthButton components to enhance authentication logic (ysturasp, 2026-01-02) [4 files changed, 25 insertions(+), 6 deletions(-)]
