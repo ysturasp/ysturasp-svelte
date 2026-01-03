@@ -171,18 +171,7 @@
 
 		try {
 			const cacheKey = `${selectedInstitute}_${selectedDiscipline}_stats`;
-			const cachedData = localStorage.getItem(cacheKey);
-
-			if (cachedData) {
-				const { stats, instructorsData, timestamp } = JSON.parse(cachedData);
-				if (Date.now() - timestamp < 24 * 60 * 60 * 1000) {
-					statistics = stats;
-					instructors = instructorsData;
-					displayedDiscipline = selectedDiscipline;
-					dispatch('loading', { value: false });
-					return;
-				}
-			}
+			localStorage.removeItem(cacheKey);
 
 			const statsPromise = getSubjectStats(selectedInstitute, selectedDiscipline);
 			const instructorsPromise = getInstructors(selectedInstitute, selectedDiscipline);
@@ -213,15 +202,6 @@
 				dispatch('loading', { value: false });
 				return;
 			}
-
-			localStorage.setItem(
-				cacheKey,
-				JSON.stringify({
-					stats: statsData,
-					instructorsData: instructorsData,
-					timestamp: Date.now()
-				})
-			);
 
 			statistics = statsData;
 			instructors = instructorsData;
