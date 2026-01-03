@@ -319,9 +319,6 @@
 		<div class="flex items-center justify-center md:justify-start">
 			<h2 class="text-4xl font-semibold text-white">👨‍💻</h2>
 			<h2 class="ml-2 text-2xl font-semibold text-white md:text-4xl">Статистика оценок</h2>
-			<span class="ml-2 flex rounded-full bg-indigo-500 px-2 py-1 text-xs font-bold uppercase"
-				>Beta</span
-			>
 		</div>
 		<p class="mt-2 text-center text-slate-400 md:text-left">
 			Узнайте статистику оценок предметов ЯГТУ, средние баллы и расписание
