@@ -17,6 +17,8 @@
 	import { goto } from '$app/navigation';
 	import { loadPrivacySettings, maskEmail, maskName } from '$lib/utils/privacy';
 	import { browser } from '$app/environment';
+	import { page } from '$app/stores';
+	import CopyLinkButton from '$lib/components/ui/CopyLinkButton.svelte';
 
 	export const institutes = [
 		{ value: 'btn-digital-systems', label: 'Институт цифровых систем' },
@@ -119,11 +121,13 @@
 		getStatistics();
 	}
 
-	async function loadDisciplines(institute: InstituteId) {
+	async function loadDisciplines(institute: InstituteId, preserveSelection = false) {
 		isLoadingDisciplines = true;
 		try {
 			currentDisciplines = await getDisciplines(institute);
-			selectedDiscipline = '';
+			if (!preserveSelection) {
+				selectedDiscipline = '';
+			}
 		} catch (error) {
 			console.error('Ошибка при загрузке дисциплин:', error);
 			notifications.add('Ошибка при загрузке списка дисциплин', 'error');
@@ -135,7 +139,7 @@
 
 	async function handleInstituteChange(institute: InstituteId) {
 		selectedInstitute = institute;
-		await loadDisciplines(institute);
+		await loadDisciplines(institute, false);
 		dispatch('instituteChange', institute);
 	}
 
@@ -245,9 +249,38 @@
 
 	onMount(() => {
 		auth.checkAuth();
-		loadDisciplines(selectedInstitute);
 
-		let cleanup = () => {};
+		const urlParams = $page.url.searchParams;
+		const instituteParam = urlParams.get('institute') as InstituteId;
+		const disciplineParam = urlParams.get('discipline');
+
+		if (instituteParam && institutes.some((i) => i.value === instituteParam)) {
+			selectedInstitute = instituteParam;
+		}
+
+		if (disciplineParam) {
+			selectedDiscipline = disciplineParam;
+		}
+
+		const unsubscribe = auth.subscribe((state) => {
+			if (!state.loading && state.authenticated) {
+				loadDisciplines(selectedInstitute, true).then(() => {
+					if (selectedDiscipline && currentDisciplines.includes(selectedDiscipline)) {
+						getStatistics();
+					} else if (disciplineParam && currentDisciplines.includes(disciplineParam)) {
+						getStatistics();
+					}
+				});
+				unsubscribe();
+			} else if (!state.loading && !state.authenticated) {
+				loadDisciplines(selectedInstitute, true);
+				unsubscribe();
+			}
+		});
+
+		let cleanup = () => {
+			unsubscribe();
+		};
 
 		if (browser) {
 			const updatePrivacy = () => {
@@ -518,13 +551,21 @@
 				isLoading={isLoadingDisciplines}
 				searchable={true}
 			/>
-			<button
-				class="w-full rounded-xl bg-blue-600 py-3 font-semibold text-white shadow-lg shadow-blue-900/20 transition-all hover:bg-blue-500 hover:shadow-blue-900/40 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
-				on:click={handleGetStatistics}
-				disabled={!selectedDiscipline || isLoadingDisciplines}
-			>
-				Показать статистику
-			</button>
+			<div class="flex gap-2">
+				<button
+					class="w-full rounded-xl bg-blue-600 py-3 font-semibold text-white shadow-lg shadow-blue-900/20 transition-all hover:bg-blue-500 hover:shadow-blue-900/40 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+					on:click={handleGetStatistics}
+					disabled={!selectedDiscipline || isLoadingDisciplines}
+				>
+					Показать статистику
+				</button>
+				<CopyLinkButton
+					className="w-12 h-auto !rounded-xl bg-slate-700/50 hover:bg-slate-700 text-blue-400"
+					params={{ institute: selectedInstitute, discipline: selectedDiscipline }}
+					disabled={!selectedDiscipline}
+					iconOnly={true}
+				/>
+			</div>
 		</div>
 	</div>
 
