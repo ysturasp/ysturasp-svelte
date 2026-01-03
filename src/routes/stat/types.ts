@@ -4,6 +4,13 @@ export interface Stats {
 	count4: number;
 	count3: number;
 	count2: number;
+	totalCount: number;
+	byCourse: Array<{ course: number; average: number; count: number }>;
+	bySemester: Array<{ semester: number; average: number; count: number }>;
+	byControlType: Array<{ controlType: string; average: number; count: number }>;
+	inDiplomaCount: number;
+	inDiplomaPercent: number;
+	topGroups: Array<{ groupName: string; average: number; count: number }>;
 }
 
 export interface SubjectStats {

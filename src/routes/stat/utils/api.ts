@@ -1,59 +1,15 @@
 import type { InstituteId, Stats, Instructors } from '../types';
 
-const STATS_URLS: Record<InstituteId, string> = {
-	'btn-digital-systems':
-		'https://script.google.com/macros/s/AKfycbxdL_UC__SmYJiPHmlsD4-T1ZiglPvgnehXed1OR9Qjk_fJ3rPxrVBT5Z0Zh1CiI7sC/exec',
-	'btn-architecture-design':
-		'https://script.google.com/macros/s/AKfycbyN0A6BDc-w1yUVLkn25J_fW7s3wpdaR6SgL6s3uBeUAfrBsxJb0pYKuWr3M03mkzGWrA/exec',
-	'btn-civil-transport':
-		'https://script.google.com/macros/s/AKfycbzbxLrOI2rA8ZzVfrT6RXIG5ADMl_5NdAQd8NEIYfg-qKkWVe_fGyB5pDolsCOtH14Mxw/exec',
-	'btn-chemistry':
-		'https://script.google.com/macros/s/AKfycbwF5HYRZ4k2Eg25VjtHgmlEznjyFOBRj2ZOqQch5z7f_mJ5rJ8LmfOzawS7Kwsv3xiZXg/exec',
-	'btn-economics-management':
-		'https://script.google.com/macros/s/AKfycbyr3n31rcxeR-uG9UjrbYwNaEKQqm695ZIU8y1h5uAQ1Dr8sRt5gkT3_T9eCA250-Pf/exec',
-	'btn-engineering-machinery':
-		'https://script.google.com/macros/s/AKfycby9OL8AdcmXOz9pcZVs2yVShTABPtVIDTRW4Fo4rawK-HkLtuacH_2uclmCQpDzcUrG/exec'
-};
-
-const INSTRUCTOR_URLS: Record<InstituteId, string> = {
-	'btn-digital-systems':
-		'https://script.google.com/macros/s/AKfycby2mh-j-haUvit8bfirQ7fOGh-8S_VFJ3c-DvIc25XM0zgjJPcJYVgc_tEeLJ-h9aaj7w/exec',
-	'btn-architecture-design':
-		'https://script.google.com/macros/s/AKfycbxKdSyy9JZAlFfj8KivDJbDsWyOWy1yRzUSI2TYeGBLitVsbpBxbIAaw0sz3STy9mpu/exec',
-	'btn-civil-transport':
-		'https://script.google.com/macros/s/AKfycbzIby7Zm8Jk_LdtCQEPib4aYnvjqv1ucyH3a9aghfwNDu9QyMbCflmolCpd8uK-joPasw/exec',
-	'btn-chemistry':
-		'https://script.google.com/macros/s/AKfycbwF5HYRZ4k2Eg25VjtHgmlEznjyFOBRj2ZOqQch5z7f_mJ5rJ8LmfOzawS7Kwsv3xiZXg/exec', // temp plug prepods link for chemistry institute
-	'btn-economics-management':
-		'https://script.google.com/macros/s/AKfycbyr3n31rcxeR-uG9UjrbYwNaEKQqm695ZIU8y1h5uAQ1Dr8sRt5gkT3_T9eCA250-Pf/exec', // temp plug prepods link for economics institute
-	'btn-engineering-machinery':
-		'https://script.google.com/macros/s/AKfycby9OL8AdcmXOz9pcZVs2yVShTABPtVIDTRW4Fo4rawK-HkLtuacH_2uclmCQpDzcUrG/exec' // temp plug prepods link for engineering machinery institute
-};
-
-const TOP_ANTITOP_URLS: Record<InstituteId, string> = {
-	'btn-digital-systems':
-		'https://script.google.com/macros/s/AKfycbwGCkkHXW776ydUQZETrk9_zYv_ZYvz7MsPQ0p0AdYNjWe8iTems3pxgdpsT7rP7-bg/exec',
-	'btn-architecture-design':
-		'https://script.google.com/macros/s/AKfycbzC6yVUPqlPRubATCOV5GdcgeaFj8O42DSFuOORCVSm6BMki4tW3tCdrTE65C1PoqeDcQ/exec',
-	'btn-civil-transport':
-		'https://script.google.com/macros/s/AKfycbz_5IGSgCYpiJ8zCx7qkwCTj2IE_IN51TlPwi5HlqYUCpnTcQegAuC3vFACV1dUnFxp/exec',
-	'btn-chemistry':
-		'https://script.google.com/macros/s/AKfycbyouqWIqob_4OsQki4-zx4Qk3aPS4MkrbXxU3TXucSlRPFu0j5R6RbgfBHcT5uikgUF0w/exec',
-	'btn-economics-management':
-		'https://script.google.com/macros/s/AKfycbwInviggJZhXAiiHqc6Ypuq-KP1uYE31CoYC6nUq70nZQ57jqAcLAMuykMPd5PynzbR/exec',
-	'btn-engineering-machinery':
-		'https://script.google.com/macros/s/AKfycbxl1Mu8QEvzqEtjy21nMOKH9LsrsdyrkotYmney8b37gylEyxTQUOP2Sx4Qi9GXQlYN/exec'
-};
-
 export async function getSubjectStats(institute: InstituteId, discipline: string): Promise<Stats> {
-	const url = `${STATS_URLS[institute]}?discipline=${encodeURIComponent(discipline)}`;
+	const url = `/api/stat/subject?institute=${encodeURIComponent(institute)}&discipline=${encodeURIComponent(discipline)}`;
 	const response = await fetch(url);
-	const data = await response.json();
 
-	if (data.error) {
-		throw new Error(data.error);
+	if (!response.ok) {
+		const errorData = await response.json().catch(() => ({}));
+		throw new Error(errorData.error || 'Ошибка при получении статистики');
 	}
 
+	const data = await response.json();
 	return data;
 }
 
@@ -61,25 +17,28 @@ export async function getInstructors(
 	institute: InstituteId,
 	subject: string
 ): Promise<Instructors> {
-	const url = `${INSTRUCTOR_URLS[institute]}?subject=${encodeURIComponent(subject)}`;
+	const url = `/api/stat/instructors?institute=${encodeURIComponent(institute)}&subject=${encodeURIComponent(subject)}`;
 	const response = await fetch(url);
-	const data = await response.json();
 
-	if (data.error) {
-		throw new Error(data.error);
+	if (!response.ok) {
+		const errorData = await response.json().catch(() => ({}));
+		throw new Error(errorData.error || 'Ошибка при получении преподавателей');
 	}
 
+	const data = await response.json();
 	return data;
 }
 
 export async function getTopAntiTop(institute: InstituteId) {
-	const response = await fetch(TOP_ANTITOP_URLS[institute]);
-	const data = await response.json();
+	const url = `/api/stat/rating?institute=${encodeURIComponent(institute)}`;
+	const response = await fetch(url);
 
-	if (data.error) {
-		throw new Error(data.error);
+	if (!response.ok) {
+		const errorData = await response.json().catch(() => ({}));
+		throw new Error(errorData.error || 'Ошибка при получении данных');
 	}
 
+	const data = await response.json();
 	return data;
 }
 
@@ -177,4 +136,17 @@ export async function registerReferral(referralCode: string) {
 		console.error('Error registering referral:', error);
 		return { success: false };
 	}
+}
+
+export async function getDisciplines(institute: InstituteId): Promise<string[]> {
+	const url = `/api/stat/disciplines?institute=${encodeURIComponent(institute)}`;
+	const response = await fetch(url);
+
+	if (!response.ok) {
+		const errorData = await response.json().catch(() => ({}));
+		throw new Error(errorData.error || 'Ошибка при получении списка дисциплин');
+	}
+
+	const data = await response.json();
+	return Array.isArray(data) ? data : [];
 }
