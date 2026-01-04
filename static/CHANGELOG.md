@@ -1,3 +1,4 @@
+- small fix style in rating section (ysturasp, 2026-01-04) [3 files changed, 6 insertions(+), 4 deletions(-)]
 - improve design for rating and recently viewed subjects (ysturasp, 2026-01-04) [6 files changed, 200 insertions(+), 140 deletions(-)]
 - improve WorkloadStatistics and StatisticsSection components with detailed statistics navigation and loading state management (ysturasp, 2026-01-04) [4 files changed, 45 insertions(+), 3 deletions(-)]
 - refactor WorkloadStatistics component for transfer api logic from google app script to full server api (ysturasp, 2026-01-04) [3 files changed, 96 insertions(+), 43 deletions(-)]

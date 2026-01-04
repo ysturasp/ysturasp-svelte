@@ -14,12 +14,14 @@
 	import { registerReferral } from './utils/api';
 	import { get } from 'svelte/store';
 	import { auth } from '$lib/stores/auth';
+	import { browser } from '$app/environment';
 
 	let showReferralModal = false;
 	let isLoading = false;
 	let selectedInstitute: InstituteId = 'btn-digital-systems';
 	let topAntiTopComponent: TopAntiTopSection;
 	let statisticsComponent: StatisticsSection;
+	let referralApplied = false;
 
 	function handleInstituteChange(institute: InstituteId) {
 		selectedInstitute = institute;
@@ -48,19 +50,60 @@
 				} else if (result.error) {
 					notifications.add(result.error, 'warning');
 				}
+				urlParams.delete('ref');
+				const newUrl = urlParams.toString()
+					? `${window.location.pathname}?${urlParams.toString()}`
+					: window.location.pathname;
+				window.history.replaceState({}, '', newUrl);
+			} else {
+				localStorage.setItem('pending_referral_code', ref);
 			}
-
-			urlParams.delete('ref');
-			const newUrl = urlParams.toString()
-				? `${window.location.pathname}?${urlParams.toString()}`
-				: window.location.pathname;
-			window.history.replaceState({}, '', newUrl);
 		}
 
 		if (subject && statisticsComponent) {
 			statisticsComponent.viewSubject(subject);
 		}
 	});
+
+	let previousAuthState = $auth.authenticated;
+	$: {
+		if (
+			browser &&
+			$auth.authenticated &&
+			$auth.user?.id &&
+			!previousAuthState &&
+			!referralApplied
+		) {
+			const pendingReferralCode = localStorage.getItem('pending_referral_code');
+			if (pendingReferralCode) {
+				referralApplied = true;
+				(async () => {
+					try {
+						const result = await registerReferral(pendingReferralCode);
+						if (result.success) {
+							notifications.add('Реферальная ссылка активирована!', 'success');
+						} else if (result.error) {
+							notifications.add(result.error, 'warning');
+						}
+						localStorage.removeItem('pending_referral_code');
+
+						const urlParams = new URLSearchParams(window.location.search);
+						if (urlParams.get('ref')) {
+							urlParams.delete('ref');
+							const newUrl = urlParams.toString()
+								? `${window.location.pathname}?${urlParams.toString()}`
+								: window.location.pathname;
+							window.history.replaceState({}, '', newUrl);
+						}
+					} catch (error) {
+						console.error('Ошибка при применении реферального кода:', error);
+						referralApplied = false;
+					}
+				})();
+			}
+		}
+		previousAuthState = $auth.authenticated;
+	}
 </script>
 
 <svelte:head>
