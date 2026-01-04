@@ -146,8 +146,6 @@
 
 	<Footer />
 
-	<Footer />
-
 	{#if isLoading}
 		<LoadingOverlay />
 	{/if}
