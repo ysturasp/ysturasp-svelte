@@ -3,25 +3,20 @@
 	import { LessonTypes } from '$lib/types/schedule';
 	import type { SemesterInfo } from '$lib/utils/semester';
 	import { isDateInSemester } from '$lib/utils/semester';
+	import type { InstituteId, Stats } from '../../stat/types';
 
 	export let scheduleData: ScheduleData | null = null;
 	export let selectedSemester: SemesterInfo | null = null;
 	export let institute: string = '';
 
-	const INSTITUTE_URLS: Record<string, string> = {
-		'Институт цифровых систем':
-			'https://script.google.com/macros/s/AKfycbxdL_UC__SmYJiPHmlsD4-T1ZiglPvgnehXed1OR9Qjk_fJ3rPxrVBT5Z0Zh1CiI7sC/exec',
-		'Институт архитектуры и дизайна':
-			'https://script.google.com/macros/s/AKfycbyN0A6BDc-w1yUVLkn25J_fW7s3wpdaR6SgL6s3uBeUAfrBsxJb0pYKuWr3M03mkzGWrA/exec',
-		'Институт инженеров строительства и транспорта':
-			'https://script.google.com/macros/s/AKfycbzbxLrOI2rA8ZzVfrT6RXIG5ADMl_5NdAQd8NEIYfg-qKkWVe_fGyB5pDolsCOtH14Mxw/exec',
-		'Институт химии и химической технологии':
-			'https://script.google.com/macros/s/AKfycbwF5HYRZ4k2Eg25VjtHgmlEznjyFOBRj2ZOqQch5z7f_mJ5rJ8LmfOzawS7Kwsv3xiZXg/exec',
-		'Институт экономики и менеджмента':
-			'https://script.google.com/macros/s/AKfycbyr3n31rcxeR-uG9UjrbYwNaEKQqm695ZIU8y1h5uAQ1Dr8sRt5gkT3_T9eCA250-Pf/exec',
-		'Институт инженерии и машиностроения':
-			'https://script.google.com/macros/s/AKfycby9OL8AdcmXOz9pcZVs2yVShTABPtVIDTRW4Fo4rawK-HkLtuacH_2uclmCQpDzcUrG/exec'
-	} as const;
+	const INSTITUTE_NAME_TO_ID: Record<string, InstituteId> = {
+		'Институт цифровых систем': 'btn-digital-systems',
+		'Институт архитектуры и дизайна': 'btn-architecture-design',
+		'Институт инженеров строительства и транспорта': 'btn-civil-transport',
+		'Институт химии и химической технологии': 'btn-chemistry',
+		'Институт экономики и менеджмента': 'btn-economics-management',
+		'Институт инженерии и машиностроения': 'btn-engineering-machinery'
+	};
 
 	interface ExamInfo {
 		date: string;
@@ -45,64 +40,117 @@
 		exams: ExamInfo[];
 	}
 
-	interface SubjectStats {
-		discipline: string;
-		average: number;
-		count5: number;
-		count4: number;
-		count3: number;
-		count2: number;
-		emptyCount: number;
-	}
-
-	const statsCache = new Map<string, SubjectStats | null>();
+	const statsCache = new Map<string, Stats | null>();
 	const pendingRequests = new Set<string>();
-	const apiUrl = INSTITUTE_URLS[institute] || INSTITUTE_URLS['Институт цифровых систем'];
+	const disciplinesCache = new Map<InstituteId, string[] | null>();
+	const pendingDisciplinesRequests = new Set<InstituteId>();
 
 	let statsTick = 0;
+
+	function getInstituteId(): InstituteId | null {
+		return INSTITUTE_NAME_TO_ID[institute] || null;
+	}
 
 	function cleanSubjectName(subject: string): string {
 		return subject?.includes('(') ? subject.split('(')[0].trim() : subject?.trim() || '';
 	}
 
-	async function fetchSubjectStats(subject: string): Promise<SubjectStats | null> {
+	async function loadDisciplinesList(instituteId: InstituteId): Promise<string[]> {
+		if (disciplinesCache.has(instituteId)) {
+			const cached = disciplinesCache.get(instituteId);
+			return cached || [];
+		}
+
+		if (pendingDisciplinesRequests.has(instituteId)) {
+			while (pendingDisciplinesRequests.has(instituteId)) {
+				await new Promise((resolve) => setTimeout(resolve, 50));
+			}
+			const cached = disciplinesCache.get(instituteId);
+			return cached || [];
+		}
+
+		pendingDisciplinesRequests.add(instituteId);
+
+		try {
+			const url = `/api/stat/disciplines?institute=${encodeURIComponent(instituteId)}`;
+			const response = await fetch(url);
+
+			if (!response.ok) {
+				disciplinesCache.set(instituteId, []);
+				return [];
+			}
+
+			const data = await response.json();
+			const disciplines = Array.isArray(data) ? data : [];
+			disciplinesCache.set(instituteId, disciplines);
+			return disciplines;
+		} catch (error) {
+			console.error('Error fetching disciplines list:', error);
+			disciplinesCache.set(instituteId, []);
+			return [];
+		} finally {
+			pendingDisciplinesRequests.delete(instituteId);
+		}
+	}
+
+	async function fetchSubjectStats(subject: string): Promise<Stats | null> {
 		const key = cleanSubjectName(subject);
 
 		if (key === 'Без названия') {
 			return null;
 		}
 
-		if (statsCache.has(key)) {
-			return statsCache.get(key) ?? null;
+		const instituteId = getInstituteId();
+		if (!instituteId) {
+			return null;
 		}
 
-		if (pendingRequests.has(key)) {
-			while (pendingRequests.has(key)) {
+		const cacheKey = `${instituteId}_${key}`;
+
+		if (statsCache.has(cacheKey)) {
+			return statsCache.get(cacheKey) ?? null;
+		}
+
+		if (pendingRequests.has(cacheKey)) {
+			while (pendingRequests.has(cacheKey)) {
 				await new Promise((resolve) => setTimeout(resolve, 50));
 			}
-			return statsCache.get(key) || null;
+			return statsCache.get(cacheKey) || null;
 		}
 
-		pendingRequests.add(key);
+		const disciplines = await loadDisciplinesList(instituteId);
+		if (!disciplines.includes(key)) {
+			statsCache.set(cacheKey, null);
+			return null;
+		}
+
+		pendingRequests.add(cacheKey);
 
 		try {
-			const response = await fetch(`${apiUrl}?discipline=${encodeURIComponent(key)}`);
-			const data = await response.json();
+			const url = `/api/stat/subject?institute=${encodeURIComponent(instituteId)}&discipline=${encodeURIComponent(key)}`;
+			const response = await fetch(url);
 
-			if (data.error) {
-				statsCache.set(key, null);
+			if (!response.ok) {
+				statsCache.set(cacheKey, null);
 				return null;
 			}
 
-			statsCache.set(key, data);
+			const data: Stats = await response.json();
+
+			if (data.totalCount === 0) {
+				statsCache.set(cacheKey, null);
+				return null;
+			}
+
+			statsCache.set(cacheKey, data);
 			statsTick += 1;
 			return data;
 		} catch (error) {
 			console.error('Error fetching stats:', error);
-			statsCache.set(key, null);
+			statsCache.set(cacheKey, null);
 			return null;
 		} finally {
-			pendingRequests.delete(key);
+			pendingRequests.delete(cacheKey);
 		}
 	}
 
@@ -358,9 +406,13 @@
 		const withAvg: { s: WorkloadStats; avg: number }[] = [];
 		const withoutAvg: WorkloadStats[] = [];
 
+		const instituteId = getInstituteId();
+
 		for (const s of items) {
 			const key = cleanSubjectName(s.subject);
-			const avg = statsCache.get(key)?.average;
+			const cacheKey = instituteId ? `${instituteId}_${key}` : key;
+			const stats = statsCache.get(cacheKey);
+			const avg = stats?.average;
 			if (avg !== undefined && avg !== null) {
 				withAvg.push({ s, avg });
 			} else {
@@ -451,8 +503,7 @@
 										</div>
 										<div class="text-[10px] text-gray-400">
 											всего: {(() => {
-												const total =
-													stats.count5 + stats.count4 + stats.count3;
+												const total = stats.totalCount;
 												return `${total} ${pluralize(total, 'оценка', 'оценки', 'оценок')}`;
 											})()}
 										</div>

@@ -1,3 +1,4 @@
+- add verticalOnMobile prop to CopyLinkButton and update usage in AudienceScheduleForm and TeacherScheduleForm (ysturasp, 2026-01-04) [5 files changed, 10 insertions(+), 1 deletion(-)]
 - remove reactive statistics fetch on discipline change (ysturasp, 2026-01-04) [3 files changed, 2 insertions(+), 4 deletions(-)]
 - remove beta tag from statistics section (ysturasp, 2026-01-04) [3 files changed, 2 insertions(+), 3 deletions(-)]
 - implement URL parameter loading for statistics and add an icon-only copy link button to share selections (ysturasp, 2026-01-04) [4 files changed, 64 insertions(+), 16 deletions(-)]
