@@ -82,10 +82,10 @@
 									>{item.subject}</span
 								>
 							</div>
-							<div class="ml-2 flex items-baseline gap-3">
+							<div class="ml-2 flex items-baseline gap-1">
 								<span class="font-mono text-xs text-slate-600">x{item.count}</span>
 								<span
-									class="w-12 text-right font-mono font-bold {isTop3
+									class="w-10 text-right font-mono font-bold {isTop3
 										? 'text-emerald-400'
 										: 'text-slate-400'}">{item.average.toFixed(2)}</span
 								>
@@ -144,10 +144,10 @@
 									>{item.subject}</span
 								>
 							</div>
-							<div class="ml-2 flex items-baseline gap-3">
+							<div class="ml-2 flex items-baseline gap-1">
 								<span class="font-mono text-xs text-slate-600">x{item.count}</span>
 								<span
-									class="w-12 text-right font-mono font-bold {isBottom3
+									class="w-10 text-right font-mono font-bold {isBottom3
 										? 'text-rose-400'
 										: 'text-slate-400'}">{item.average.toFixed(2)}</span
 								>
