@@ -252,11 +252,22 @@
 		}
 	}
 
-	export function viewSubject(subject: string) {
+	export function viewSubject(subject: string, institute?: InstituteId) {
+		if (institute) {
+			selectedInstitute = institute;
+		}
 		selectedDiscipline = subject;
-		getStatistics().then(() => {
-			scrollToStats();
-		});
+		if (institute) {
+			loadDisciplines(institute, true).then(() => {
+				getStatistics().then(() => {
+					scrollToStats();
+				});
+			});
+		} else {
+			getStatistics().then(() => {
+				scrollToStats();
+			});
+		}
 	}
 
 	onMount(() => {

@@ -28,9 +28,9 @@
 		}
 	}
 
-	function handleViewAgain(subject: string) {
+	function handleViewAgain(subject: string, institute?: InstituteId) {
 		if (statisticsComponent) {
-			statisticsComponent.viewSubject(subject);
+			statisticsComponent.viewSubject(subject, institute);
 		}
 	}
 
@@ -97,7 +97,9 @@
 			on:viewAgain={({ detail }) => handleViewAgain(detail.subject)}
 		/>
 
-		<RecentlyViewedSection on:viewAgain={({ detail }) => handleViewAgain(detail.subject)} />
+		<RecentlyViewedSection
+			on:viewAgain={({ detail }) => handleViewAgain(detail.subject, detail.institute)}
+		/>
 	</main>
 
 	<Footer />

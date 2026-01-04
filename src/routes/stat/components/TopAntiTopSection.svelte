@@ -33,88 +33,132 @@
 	});
 </script>
 
-<section class="mt-8 rounded-2xl bg-slate-800 p-6">
-	<h2 class="mb-4 text-2xl font-semibold text-white">📊 Рейтинг предметов</h2>
+<section class="mt-8 rounded-2xl bg-slate-800 p-4 md:p-6">
+	<h2 class="text-2xl font-semibold text-white md:text-3xl">Рейтинг предметов</h2>
+
 	<div class="grid grid-cols-1 gap-6 md:grid-cols-2">
-		<div>
-			<h3 class="mb-2 text-xl font-bold text-emerald-400">🏆 Лучшие предметы</h3>
-			<ul class="space-y-4">
+		<div class="flex flex-col gap-3">
+			<h4
+				class="border-b border-white/10 pb-2 text-[20px] font-bold tracking-wider text-slate-500 uppercase"
+			>
+				Лучшие предметы
+			</h4>
+			<div class="flex flex-col">
 				{#if isLoading}
-					<li class="mb-4 rounded-2xl bg-gray-900 p-4 shadow-md">
-						<div class="mb-2 h-5 w-4/5 animate-pulse rounded bg-gray-600"></div>
-						<div class="h-4 w-3/5 animate-pulse rounded bg-gray-600"></div>
-					</li>
-					<li class="rounded-2xl bg-gray-900 p-4 shadow-md">
-						<div class="mb-2 h-5 w-4/5 animate-pulse rounded bg-gray-600"></div>
-						<div class="h-4 w-3/5 animate-pulse rounded bg-gray-600"></div>
-					</li>
-				{:else}
-					{#each top10 as item}
-						<li
-							class="mb-4 rounded-2xl bg-gray-900 p-4 shadow-md transition-all duration-300 last:mb-0 hover:shadow-xl"
+					{#each Array(10) as _}
+						<div
+							class="group flex items-baseline justify-between border-l-2 border-transparent py-1.5 pl-3 text-sm"
 						>
-							<div
-								class="cursor-pointer font-semibold text-emerald-500 transition-colors duration-200 hover:text-emerald-400"
-								aria-label="Открыть модальное окно с предметом"
-								role="button"
-								tabindex="0"
-								on:click={() => dispatch('viewAgain', { subject: item.subject })}
-								on:keydown={(e) => {
-									if (e.key === 'Enter' || e.key === ' ') {
-										dispatch('viewAgain', { subject: item.subject });
-									}
-								}}
-							>
-								{item.position}. {item.subject}
+							<div class="mb-2 h-5 w-4/5 animate-pulse rounded bg-slate-700"></div>
+							<div class="h-4 w-3/5 animate-pulse rounded bg-slate-700"></div>
+						</div>
+					{/each}
+				{:else}
+					{#each top10 as item, i}
+						{@const isTop3 = item.position <= 3}
+						<div
+							class="group flex items-baseline justify-between border-l-2 {isTop3
+								? 'border-emerald-500/50'
+								: 'border-transparent'} cursor-pointer py-1.5 pl-3 text-sm transition-all hover:border-emerald-500/30 hover:bg-slate-800/30"
+							aria-label="Открыть модальное окно с предметом"
+							role="button"
+							tabindex="0"
+							on:click={() => dispatch('viewAgain', { subject: item.subject })}
+							on:keydown={(e) => {
+								if (e.key === 'Enter' || e.key === ' ') {
+									dispatch('viewAgain', { subject: item.subject });
+								}
+							}}
+						>
+							<div class="flex min-w-0 items-baseline gap-3 overflow-hidden">
+								<span
+									class="w-5 font-mono text-[10px] {isTop3
+										? 'font-bold text-emerald-400'
+										: 'text-slate-600'} transition-colors group-hover:text-slate-400"
+									>{item.position}.</span
+								>
+								<span
+									class="truncate font-medium text-slate-300 transition-colors group-hover:text-white"
+									>{item.subject}</span
+								>
 							</div>
-							<div class="text-slate-400">
-								Средний балл: {item.average.toFixed(2)}
+							<div class="ml-2 flex items-baseline gap-3">
+								<span class="font-mono text-xs text-slate-600">x{item.count}</span>
+								<span
+									class="w-12 text-right font-mono font-bold {isTop3
+										? 'text-emerald-400'
+										: 'text-slate-400'}">{item.average.toFixed(2)}</span
+								>
 							</div>
-							<div class="text-slate-400">Оценок: {item.count}</div>
-						</li>
+						</div>
+						{#if i === 2 && top10.length > 3}
+							<div class="my-1 border-t border-white/5"></div>
+						{/if}
 					{/each}
 				{/if}
-			</ul>
+			</div>
 		</div>
-		<div>
-			<h3 class="mb-2 text-xl font-bold text-red-400">👎 Худшие предметы</h3>
-			<ul class="space-y-4">
+
+		<div class="flex flex-col gap-3">
+			<h4
+				class="border-b border-white/10 pb-2 text-[20px] font-bold tracking-wider text-slate-500 uppercase"
+			>
+				Худшие предметы
+			</h4>
+			<div class="flex flex-col">
 				{#if isLoading}
-					<li class="mb-4 rounded-2xl bg-gray-900 p-4 shadow-md">
-						<div class="mb-2 h-5 w-4/5 animate-pulse rounded bg-gray-600"></div>
-						<div class="h-4 w-3/5 animate-pulse rounded bg-gray-600"></div>
-					</li>
-					<li class="rounded-2xl bg-gray-900 p-4 shadow-md">
-						<div class="mb-2 h-5 w-4/5 animate-pulse rounded bg-gray-600"></div>
-						<div class="h-4 w-3/5 animate-pulse rounded bg-gray-600"></div>
-					</li>
-				{:else}
-					{#each antitop10 as item}
-						<li
-							class="mb-4 rounded-2xl bg-gray-900 p-4 shadow-md transition-all duration-300 last:mb-0 hover:shadow-xl"
+					{#each Array(10) as _}
+						<div
+							class="group flex items-baseline justify-between border-l-2 border-transparent py-1.5 pl-3 text-sm"
 						>
-							<div
-								class="cursor-pointer font-semibold text-red-500 transition-colors duration-200 hover:text-red-400"
-								aria-label="Открыть модальное окно с предметом"
-								role="button"
-								tabindex="0"
-								on:click={() => dispatch('viewAgain', { subject: item.subject })}
-								on:keydown={(e) => {
-									if (e.key === 'Enter' || e.key === ' ') {
-										dispatch('viewAgain', { subject: item.subject });
-									}
-								}}
-							>
-								{item.position}. {item.subject}
+							<div class="mb-2 h-5 w-4/5 animate-pulse rounded bg-slate-700"></div>
+							<div class="h-4 w-3/5 animate-pulse rounded bg-slate-700"></div>
+						</div>
+					{/each}
+				{:else}
+					{#each antitop10 as item, i}
+						{@const isBottom3 = item.position <= 3}
+						<div
+							class="group flex items-baseline justify-between border-l-2 {isBottom3
+								? 'border-rose-500/50'
+								: 'border-transparent'} cursor-pointer py-1.5 pl-3 text-sm transition-all hover:border-rose-500/30 hover:bg-slate-800/30"
+							aria-label="Открыть модальное окно с предметом"
+							role="button"
+							tabindex="0"
+							on:click={() => dispatch('viewAgain', { subject: item.subject })}
+							on:keydown={(e) => {
+								if (e.key === 'Enter' || e.key === ' ') {
+									dispatch('viewAgain', { subject: item.subject });
+								}
+							}}
+						>
+							<div class="flex min-w-0 items-baseline gap-3 overflow-hidden">
+								<span
+									class="w-5 font-mono text-[10px] {isBottom3
+										? 'font-bold text-rose-400'
+										: 'text-slate-600'} transition-colors group-hover:text-slate-400"
+									>{item.position}.</span
+								>
+								<span
+									class="truncate font-medium text-slate-300 transition-colors group-hover:text-white"
+									>{item.subject}</span
+								>
 							</div>
-							<div class="text-slate-400">
-								Средний балл: {item.average.toFixed(2)}
+							<div class="ml-2 flex items-baseline gap-3">
+								<span class="font-mono text-xs text-slate-600">x{item.count}</span>
+								<span
+									class="w-12 text-right font-mono font-bold {isBottom3
+										? 'text-rose-400'
+										: 'text-slate-400'}">{item.average.toFixed(2)}</span
+								>
 							</div>
-							<div class="text-slate-400">Оценок: {item.count}</div>
-						</li>
+						</div>
+						{#if i === 2 && antitop10.length > 3}
+							<div class="my-1 border-t border-white/5"></div>
+						{/if}
 					{/each}
 				{/if}
-			</ul>
+			</div>
 		</div>
 	</div>
 </section>
