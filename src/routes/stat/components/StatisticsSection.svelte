@@ -47,6 +47,7 @@
 	let error = false;
 	let privacySettings = loadPrivacySettings();
 	let isLoadingDisciplines = false;
+	let isFetchingStatistics = false;
 
 	$: displayName = privacySettings.hideName
 		? maskName($auth.user?.name || null)
@@ -145,6 +146,15 @@
 			notifications.add('Пожалуйста, выберите дисциплину', 'error');
 			return;
 		}
+
+		if (isFetchingStatistics) {
+			return;
+		}
+
+		if (statistics && displayedDiscipline === selectedDiscipline && !error) {
+			return;
+		}
+
 		error = false;
 		await getStatistics();
 	}
@@ -161,6 +171,11 @@
 			return;
 		}
 
+		if (isFetchingStatistics) {
+			return;
+		}
+
+		isFetchingStatistics = true;
 		dispatch('loading', { value: true });
 
 		try {
@@ -218,6 +233,7 @@
 			statistics = null;
 			instructors = null;
 		} finally {
+			isFetchingStatistics = false;
 			setTimeout(() => {
 				dispatch('loading', { value: false });
 			}, 0);
@@ -546,9 +562,12 @@
 			/>
 			<div class="flex gap-2">
 				<button
-					class="w-full rounded-xl bg-blue-600 py-3 font-semibold text-white shadow-lg shadow-blue-900/20 transition-all hover:bg-blue-500 hover:shadow-blue-900/40 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+					class="w-full rounded-xl bg-blue-600 py-3 font-semibold text-white shadow-lg shadow-blue-900/20 transition-all hover:bg-blue-500 hover:shadow-blue-900/40 active:scale-[0.98] disabled:opacity-50"
 					on:click={handleGetStatistics}
-					disabled={!selectedDiscipline || isLoadingDisciplines}
+					disabled={!selectedDiscipline ||
+						isLoadingDisciplines ||
+						isFetchingStatistics ||
+						(statistics && displayedDiscipline === selectedDiscipline && !error)}
 				>
 					Показать статистику
 				</button>

@@ -4,6 +4,7 @@
 	import type { SemesterInfo } from '$lib/utils/semester';
 	import { isDateInSemester } from '$lib/utils/semester';
 	import type { InstituteId, Stats } from '../../stat/types';
+	import { goto } from '$app/navigation';
 
 	export let scheduleData: ScheduleData | null = null;
 	export let selectedSemester: SemesterInfo | null = null;
@@ -439,6 +440,18 @@
 	function handleMouseLeave(card: HTMLElement) {
 		card.style.background = '';
 	}
+
+	function viewDetailedStats(subject: string, event: Event) {
+		event.stopPropagation();
+		const instituteId = getInstituteId();
+		if (!instituteId) {
+			return;
+		}
+
+		const key = cleanSubjectName(subject);
+		const url = `/stat?institute=${encodeURIComponent(instituteId)}&discipline=${encodeURIComponent(key)}`;
+		goto(url);
+	}
 </script>
 
 {#if workloadStats.length > 0}
@@ -469,7 +482,15 @@
 							<div
 								class="{getGradeBackground(
 									stats.average
-								)} -mx-4 -mt-4 rounded-t-lg px-4 py-2"
+								)} -mx-4 -mt-4 cursor-pointer rounded-t-lg px-4 py-2 transition-all hover:opacity-90 active:scale-[0.98]"
+								on:click={(e) => viewDetailedStats(stat.subject, e)}
+								role="button"
+								tabindex="0"
+								on:keydown={(e) => {
+									if (e.key === 'Enter' || e.key === ' ') {
+										viewDetailedStats(stat.subject, e);
+									}
+								}}
 							>
 								<div class="flex items-center gap-3">
 									<div class="flex items-baseline gap-1.5">

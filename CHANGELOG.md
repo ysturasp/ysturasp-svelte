@@ -1,3 +1,4 @@
+- refactor WorkloadStatistics component for transfer api logic from google app script to full server api (ysturasp, 2026-01-04) [3 files changed, 96 insertions(+), 43 deletions(-)]
 - add verticalOnMobile prop to CopyLinkButton and update usage in AudienceScheduleForm and TeacherScheduleForm (ysturasp, 2026-01-04) [5 files changed, 10 insertions(+), 1 deletion(-)]
 - remove reactive statistics fetch on discipline change (ysturasp, 2026-01-04) [3 files changed, 2 insertions(+), 4 deletions(-)]
 - remove beta tag from statistics section (ysturasp, 2026-01-04) [3 files changed, 2 insertions(+), 3 deletions(-)]
