@@ -5,7 +5,6 @@
 	import StatisticsSection from './components/StatisticsSection.svelte';
 	import TopAntiTopSection from './components/TopAntiTopSection.svelte';
 	import RecentlyViewedSection from './components/RecentlyViewedSection.svelte';
-	import ReferralModal from './components/ReferralModal.svelte';
 	import LoadingOverlay from '$lib/components/loading/LoadingOverlay.svelte';
 	import { onMount } from 'svelte';
 	import type { InstituteId } from './types';
@@ -15,8 +14,8 @@
 	import { get } from 'svelte/store';
 	import { auth } from '$lib/stores/auth';
 	import { browser } from '$app/environment';
+	import { goto } from '$app/navigation';
 
-	let showReferralModal = false;
 	let isLoading = false;
 	let selectedInstitute: InstituteId = 'btn-digital-systems';
 	let topAntiTopComponent: TopAntiTopSection;
@@ -131,7 +130,7 @@
 			bind:this={statisticsComponent}
 			on:showNotification={({ detail }) => notifications.add(detail.message, detail.type)}
 			on:loading={({ detail }) => (isLoading = detail.value)}
-			on:showReferral={() => (showReferralModal = true)}
+			on:showReferral={() => goto('/profile?tab=referrals')}
 			on:instituteChange={({ detail }) => handleInstituteChange(detail)}
 		/>
 
@@ -147,11 +146,7 @@
 
 	<Footer />
 
-	<ReferralModal
-		isOpen={showReferralModal}
-		on:close={() => (showReferralModal = false)}
-		on:showNotification={({ detail }) => notifications.add(detail.message, detail.type)}
-	/>
+	<Footer />
 
 	{#if isLoading}
 		<LoadingOverlay />

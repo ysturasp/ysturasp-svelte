@@ -48,4 +48,8 @@ export interface NotificationOptions {
 export interface ReferralStats {
 	referralCount: number;
 	statsLimit: number;
+	monthlyLimit?: number;
+	referralBonus?: number;
+	history: Array<{ email: string; created_at: string }>;
+	leaderboard: Array<{ email: string; referral_count: number }>;
 }

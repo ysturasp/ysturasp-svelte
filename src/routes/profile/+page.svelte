@@ -10,6 +10,7 @@
 	import PaymentHistory from '../format/components/PaymentHistory.svelte';
 	import PaymentModal from '../format/components/PaymentModal.svelte';
 	import PromoCodeInput from './components/PromoCodeInput.svelte';
+	import ReferralSection from './components/ReferralSection.svelte';
 	import { checkFormatLimit } from '../format/api';
 	import type { FormatLimit } from '../format/api';
 	import BottomModal from '$lib/components/ui/BottomModal.svelte';
@@ -21,9 +22,10 @@
 		maskName,
 		type PrivacySettings
 	} from '$lib/utils/privacy';
+	import NotificationsContainer from '$lib/components/notifications/NotificationsContainer.svelte';
 
 	const ACTIVE_TAB_STORAGE_KEY = 'profile_active_tab';
-	const VALID_TABS = ['profile', 'sessions', 'history', 'payments'] as const;
+	const VALID_TABS = ['profile', 'sessions', 'history', 'payments', 'referrals'] as const;
 
 	function loadActiveTab(): string {
 		if (!browser) return 'profile';
@@ -47,7 +49,13 @@
 	onMount(() => {
 		auth.checkAuth();
 		privacySettings = loadPrivacySettings();
-		activeTab = loadActiveTab();
+
+		const urlTab = browser ? new URLSearchParams(window.location.search).get('tab') : null;
+		if (urlTab && VALID_TABS.includes(urlTab as any)) {
+			activeTab = urlTab;
+		} else {
+			activeTab = loadActiveTab();
+		}
 	});
 
 	$: if (browser && activeTab) {
@@ -221,6 +229,20 @@
 								></div>
 							{/if}
 						</button>
+						<button
+							class="relative shrink-0 px-4 py-2 text-sm font-medium transition-colors {activeTab ===
+							'referrals'
+								? 'text-blue-400'
+								: 'text-slate-400 hover:text-slate-300'}"
+							on:click={() => (activeTab = 'referrals')}
+						>
+							Бонусы
+							{#if activeTab === 'referrals'}
+								<div
+									class="absolute right-0 bottom-0 left-0 h-0.5 bg-blue-400"
+								></div>
+							{/if}
+						</button>
 					</div>
 				</div>
 
@@ -319,6 +341,8 @@
 							<PaymentHistory on:refund-success={checkLimit} />
 						</div>
 					</div>
+				{:else if activeTab === 'referrals'}
+					<ReferralSection />
 				{/if}
 			</div>
 		{/if}
@@ -365,6 +389,8 @@
 		</div>
 	</BottomModal>
 </PageLayout>
+
+<NotificationsContainer />
 
 <style>
 	.scrollbar-hide {

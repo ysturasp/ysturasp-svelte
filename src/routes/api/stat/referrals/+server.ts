@@ -5,7 +5,9 @@ import {
 	getReferralCount,
 	getStatLimit,
 	createReferral,
-	getReferralByReferredId
+	getReferralByReferredId,
+	getReferralHistory,
+	getTopReferrers
 } from '$lib/db/referrals';
 
 export const GET: RequestHandler = async (event) => {
@@ -17,11 +19,15 @@ export const GET: RequestHandler = async (event) => {
 	const { user, isTelegram } = sessionContext;
 	const referralCount = await getReferralCount(user.id, isTelegram);
 	const { monthlyLimit, referralBonus } = await getStatLimit(user.id, isTelegram);
+	const history = await getReferralHistory(user.id, isTelegram);
+	const leaderboard = await getTopReferrers(isTelegram);
 
 	return json({
 		referralCount,
 		monthlyLimit,
-		referralBonus
+		referralBonus,
+		history,
+		leaderboard
 	});
 };
 

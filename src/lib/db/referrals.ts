@@ -172,3 +172,45 @@ export async function getStatLimit(
 
 	return { monthlyLimit, referralBonus: referralCount };
 }
+
+export async function getReferralHistory(
+	userId: string,
+	isTelegram: boolean = false
+): Promise<Array<{ email: string; created_at: Date }>> {
+	const pool = getPool(isTelegram);
+	if (!pool) return [];
+
+	const result = await pool.query(
+		`SELECT u.email, r.created_at 
+		 FROM referrals r
+		 JOIN users u ON r.referred_id = u.id
+		 WHERE r.referrer_id = $1
+		 ORDER BY r.created_at DESC
+		 LIMIT 50`,
+		[userId]
+	);
+
+	return result.rows;
+}
+
+export async function getTopReferrers(
+	isTelegram: boolean = false
+): Promise<Array<{ email: string; referral_count: number }>> {
+	const pool = getPool(isTelegram);
+	if (!pool) return [];
+
+	const result = await pool.query(
+		`SELECT u.email, COUNT(r.id) as referral_count
+		 FROM referrals r
+		 JOIN users u ON r.referrer_id = u.id
+		 WHERE u.email IS NOT NULL
+		 GROUP BY u.id, u.email
+		 ORDER BY referral_count DESC
+		 LIMIT 10`
+	);
+
+	return result.rows.map((row) => ({
+		email: row.email,
+		referral_count: parseInt(row.referral_count, 10)
+	}));
+}

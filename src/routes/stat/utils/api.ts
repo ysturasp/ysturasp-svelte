@@ -1,4 +1,4 @@
-import type { InstituteId, Stats, Instructors } from '../types';
+import type { InstituteId, Stats, Instructors, ReferralStats } from '../types';
 
 export async function getSubjectStats(institute: InstituteId, discipline: string): Promise<Stats> {
 	const url = `/api/stat/subject?institute=${encodeURIComponent(institute)}&discipline=${encodeURIComponent(discipline)}`;
@@ -95,25 +95,31 @@ export async function registerView(discipline: string, institute: string) {
 	}
 }
 
-export async function getReferralStats() {
+export async function getReferralStats(): Promise<ReferralStats> {
 	try {
 		const response = await fetch('/api/stat/referrals');
 		if (!response.ok) {
 			return {
 				referralCount: 0,
-				statsLimit: 10
+				statsLimit: 10,
+				history: [],
+				leaderboard: []
 			};
 		}
 		const data = await response.json();
 		return {
 			referralCount: data.referralCount || 0,
-			statsLimit: data.monthlyLimit || 10
+			statsLimit: data.monthlyLimit || 10,
+			history: data.history || [],
+			leaderboard: data.leaderboard || []
 		};
 	} catch (error) {
 		console.error('Error getting referral stats:', error);
 		return {
 			referralCount: 0,
-			statsLimit: 10
+			statsLimit: 10,
+			history: [],
+			leaderboard: []
 		};
 	}
 }
