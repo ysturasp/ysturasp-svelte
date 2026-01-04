@@ -29,8 +29,14 @@ export async function getInstructors(
 	return data;
 }
 
-export async function getTopAntiTop(institute: InstituteId) {
-	const url = `/api/stat/rating?institute=${encodeURIComponent(institute)}`;
+export async function getTopAntiTop(
+	institute: InstituteId,
+	filters: { course?: number; minGrades?: number } = {}
+) {
+	let url = `/api/stat/rating?institute=${encodeURIComponent(institute)}`;
+	if (filters.course) url += `&course=${filters.course}`;
+	if (filters.minGrades) url += `&minGrades=${filters.minGrades}`;
+
 	const response = await fetch(url);
 
 	if (!response.ok) {

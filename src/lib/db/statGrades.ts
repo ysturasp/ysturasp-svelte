@@ -234,7 +234,10 @@ export async function getInstructors(
 	return { teachers: teachers.length > 0 ? [teachers.join(', ')] : [] };
 }
 
-export async function getTopAntiTop(institute: InstituteId): Promise<{
+export async function getTopAntiTop(
+	institute: InstituteId,
+	filters: { course?: number; minGrades?: number } = {}
+): Promise<{
 	top10: Array<{ position: number; subject: string; average: number; count: number }>;
 	antitop10: Array<{ position: number; subject: string; average: number; count: number }>;
 }> {
@@ -244,6 +247,7 @@ export async function getTopAntiTop(institute: InstituteId): Promise<{
 	}
 
 	const tableName = getGradesTableName(institute);
+	const minGrades = filters.minGrades || 5;
 
 	const tableExists = await pool.query(
 		`
@@ -260,19 +264,30 @@ export async function getTopAntiTop(institute: InstituteId): Promise<{
 		return { top10: [], antitop10: [] };
 	}
 
-	const result = await pool.query(
-		`
+	let query = `
 		SELECT 
 			subject,
 			AVG(grade_numeric) as average,
 			COUNT(*) as count
 		FROM "${tableName}"
 		WHERE grade_numeric IS NOT NULL
+	`;
+
+	const queryParams: any[] = [];
+
+	if (filters.course) {
+		queryParams.push(filters.course);
+		query += ` AND course = $${queryParams.length}`;
+	}
+
+	query += `
 		GROUP BY subject
-		HAVING COUNT(*) >= 5
+		HAVING COUNT(*) >= $${queryParams.length + 1}
 		ORDER BY average DESC, count DESC
-	`
-	);
+	`;
+	queryParams.push(minGrades);
+
+	const result = await pool.query(query, queryParams);
 
 	const subjects = result.rows.map((row, index) => ({
 		position: index + 1,

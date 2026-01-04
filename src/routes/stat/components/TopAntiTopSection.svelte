@@ -2,6 +2,7 @@
 	import { onMount, createEventDispatcher } from 'svelte';
 	import type { SubjectStats, InstituteId } from '../types';
 	import { getTopAntiTop } from '../utils/api';
+	import CustomSelect from '$lib/components/ui/CustomSelect.svelte';
 
 	const dispatch = createEventDispatcher<{
 		viewAgain: { subject: string };
@@ -10,10 +11,38 @@
 	let top10: SubjectStats[] = [];
 	let antitop10: SubjectStats[] = [];
 	let isLoading = true;
+	let currentInstitute: InstituteId = 'btn-digital-systems';
 
-	async function fetchData(institute: InstituteId) {
+	const institutesList = [
+		{ value: 'btn-digital-systems', label: 'Институт цифровых систем' },
+		{ value: 'btn-architecture-design', label: 'Институт архитектуры и дизайна' },
+		{ value: 'btn-civil-transport', label: 'Институт инженеров строительства и транспорта' },
+		{ value: 'btn-chemistry', label: 'Институт химии и химической технологии' },
+		{ value: 'btn-economics-management', label: 'Институт экономики и менеджмента' },
+		{ value: 'btn-engineering-machinery', label: 'Институт инженерии и машиностроения' }
+	];
+
+	let filters = {
+		course: 0,
+		minGrades: 5
+	};
+
+	const minGradesOptions = [
+		{ id: 5, label: '5+' },
+		{ id: 10, label: '10+' },
+		{ id: 25, label: '25+' },
+		{ id: 50, label: '50+' },
+		{ id: 100, label: '100+' },
+		{ id: 200, label: '200+' }
+	];
+
+	async function fetchData() {
+		isLoading = true;
 		try {
-			const data = await getTopAntiTop(institute);
+			const data = await getTopAntiTop(currentInstitute, {
+				course: filters.course || undefined,
+				minGrades: filters.minGrades
+			});
 			top10 = data.top10;
 			antitop10 = data.antitop10;
 		} catch (error) {
@@ -24,19 +53,72 @@
 	}
 
 	export function updateData(institute: InstituteId) {
-		isLoading = true;
-		fetchData(institute);
+		currentInstitute = institute;
+		fetchData();
+	}
+
+	function handleFilterChange() {
+		fetchData();
 	}
 
 	onMount(() => {
-		fetchData('btn-digital-systems');
+		fetchData();
 	});
 </script>
 
 <section class="mt-8 rounded-2xl bg-slate-800 p-4 md:p-6">
-	<h2 class="text-2xl font-semibold text-white md:text-3xl">Рейтинг предметов</h2>
+	<div class="mb-4 flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+		<div class="flex flex-col">
+			<h2 class="text-xl font-bold tracking-tight text-white md:text-2xl">
+				рейтинг предметов
+			</h2>
+			<span class="text-xs font-medium text-slate-400">
+				{institutesList.find((i) => i.value === currentInstitute)?.label || ''}
+			</span>
+		</div>
 
-	<div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+		<div class="flex w-full flex-wrap items-center gap-3 md:w-auto">
+			<div class="flex min-w-[200px] flex-1 flex-col gap-1 md:flex-initial">
+				<span class="text-[9px] font-bold tracking-wider text-slate-500 uppercase"
+					>курс</span
+				>
+				<div
+					class="flex h-[40px] items-center gap-0.5 rounded-xl border border-[#334155] bg-[#1e293b] p-1"
+				>
+					{#each [0, 1, 2, 3, 4] as course}
+						<button
+							on:click={() => {
+								filters.course = course;
+								handleFilterChange();
+							}}
+							class="flex h-full flex-1 items-center justify-center rounded-lg text-[10px] font-bold transition-all {filters.course ===
+							course
+								? 'bg-[#334155] text-white shadow-sm'
+								: 'text-slate-500 hover:text-slate-300'}"
+						>
+							{course === 0 ? 'все' : course}
+						</button>
+					{/each}
+				</div>
+			</div>
+
+			<div class="flex min-w-[100px] flex-1 flex-col gap-1 md:flex-initial">
+				<span class="text-[9px] font-bold tracking-wider text-slate-500 uppercase"
+					>мин. оценок</span
+				>
+				<CustomSelect
+					items={minGradesOptions}
+					bind:selectedId={filters.minGrades}
+					on:select={handleFilterChange}
+					width="100%"
+					maxHeight="250px"
+					searchable={false}
+				/>
+			</div>
+		</div>
+	</div>
+
+	<div class="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6">
 		<div class="flex flex-col gap-3">
 			<h4
 				class="border-b border-white/10 pb-2 text-[20px] font-bold tracking-wider text-slate-500 uppercase"

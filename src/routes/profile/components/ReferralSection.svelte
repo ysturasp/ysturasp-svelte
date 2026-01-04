@@ -275,7 +275,6 @@
 </div>
 
 <style>
-	/* Custom scrollbar for better look in dark mode if content overflows horizontally */
 	.overflow-x-auto::-webkit-scrollbar {
 		height: 4px;
 	}

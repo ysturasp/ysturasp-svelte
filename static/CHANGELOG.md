@@ -1,3 +1,4 @@
+- add referral history and leaderboard retrieval in referral statistics API, update profile and statistics sections to display referral data, and remove unused ReferralModal component (ysturasp, 2026-01-04) [11 files changed, 388 insertions(+), 205 deletions(-)]
 - refactor referral handling in createReferralByCode and add updateReferredBonus function for managing referral bonuses (ysturasp, 2026-01-04) [4 files changed, 103 insertions(+), 19 deletions(-)]
 - small fix style in rating section (ysturasp, 2026-01-04) [3 files changed, 6 insertions(+), 4 deletions(-)]
 - improve design for rating and recently viewed subjects (ysturasp, 2026-01-04) [6 files changed, 200 insertions(+), 140 deletions(-)]
