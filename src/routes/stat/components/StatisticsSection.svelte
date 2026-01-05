@@ -19,6 +19,7 @@
 	import { browser } from '$app/environment';
 	import { page } from '$app/stores';
 	import CopyLinkButton from '$lib/components/ui/CopyLinkButton.svelte';
+	import { reachGoal } from '$lib/utils/metrika';
 
 	export const institutes = [
 		{ value: 'btn-digital-systems', label: 'Институт цифровых систем' },
@@ -224,6 +225,11 @@
 			};
 
 			recentlyViewedStore.addItem(newItem);
+
+			reachGoal('view_subject_statistics', {
+				discipline: selectedDiscipline,
+				institute: selectedInstitute
+			});
 		} catch (error) {
 			console.error('Error in getStatistics:', error);
 			dispatch('showNotification', {
