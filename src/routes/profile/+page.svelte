@@ -11,6 +11,7 @@
 	import PaymentModal from '../format/components/PaymentModal.svelte';
 	import PromoCodeInput from './components/PromoCodeInput.svelte';
 	import ReferralSection from './components/ReferralSection.svelte';
+	import AcademicLink from './components/AcademicLink.svelte';
 	import { checkFormatLimit } from '../format/api';
 	import type { FormatLimit } from '../format/api';
 	import BottomModal from '$lib/components/ui/BottomModal.svelte';
@@ -48,6 +49,7 @@
 
 	onMount(() => {
 		auth.checkAuth();
+		auth.checkAcademic();
 		privacySettings = loadPrivacySettings();
 
 		const urlTab = browser ? new URLSearchParams(window.location.search).get('tab') : null;
@@ -248,49 +250,57 @@
 
 				{#if activeTab === 'profile'}
 					<div class="space-y-6">
-						<div>
-							<h2 class="mb-2 text-lg font-semibold text-white">
-								Настройки приватности
-							</h2>
-							<p class="mb-4 text-sm text-slate-400">
-								Скрывайте личные данные для защиты приватности при стриминге
-							</p>
-							<div class="space-y-4">
-								<div class="flex items-center justify-between">
-									<label for="hideEmail" class="text-white">Скрыть email</label>
-									<label class="switch">
-										<input
-											type="checkbox"
-											id="hideEmail"
-											checked={privacySettings.hideEmail}
-											on:change={() => handlePrivacyChange('hideEmail')}
-										/>
-										<span class="slider round"></span>
-									</label>
-								</div>
-								<div class="flex items-center justify-between">
-									<label for="hideName" class="text-white">Скрыть имя</label>
-									<label class="switch">
-										<input
-											type="checkbox"
-											id="hideName"
-											checked={privacySettings.hideName}
-											on:change={() => handlePrivacyChange('hideName')}
-										/>
-										<span class="slider round"></span>
-									</label>
-								</div>
-								<div class="flex items-center justify-between">
-									<label for="hideAvatar" class="text-white">Скрыть аватар</label>
-									<label class="switch">
-										<input
-											type="checkbox"
-											id="hideAvatar"
-											checked={privacySettings.hideAvatar}
-											on:change={() => handlePrivacyChange('hideAvatar')}
-										/>
-										<span class="slider round"></span>
-									</label>
+						<AcademicLink />
+
+						<div class="border-t border-slate-700 pt-6">
+							<div>
+								<h2 class="mb-2 text-lg font-semibold text-white">
+									Настройки приватности
+								</h2>
+								<p class="mb-4 text-sm text-slate-400">
+									Скрывайте личные данные для защиты приватности при стриминге
+								</p>
+								<div class="space-y-4">
+									<div class="flex items-center justify-between">
+										<label for="hideEmail" class="text-white"
+											>Скрыть email</label
+										>
+										<label class="switch">
+											<input
+												type="checkbox"
+												id="hideEmail"
+												checked={privacySettings.hideEmail}
+												on:change={() => handlePrivacyChange('hideEmail')}
+											/>
+											<span class="slider round"></span>
+										</label>
+									</div>
+									<div class="flex items-center justify-between">
+										<label for="hideName" class="text-white">Скрыть имя</label>
+										<label class="switch">
+											<input
+												type="checkbox"
+												id="hideName"
+												checked={privacySettings.hideName}
+												on:change={() => handlePrivacyChange('hideName')}
+											/>
+											<span class="slider round"></span>
+										</label>
+									</div>
+									<div class="flex items-center justify-between">
+										<label for="hideAvatar" class="text-white"
+											>Скрыть аватар</label
+										>
+										<label class="switch">
+											<input
+												type="checkbox"
+												id="hideAvatar"
+												checked={privacySettings.hideAvatar}
+												on:change={() => handlePrivacyChange('hideAvatar')}
+											/>
+											<span class="slider round"></span>
+										</label>
+									</div>
 								</div>
 							</div>
 						</div>

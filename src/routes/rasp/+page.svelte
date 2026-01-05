@@ -523,11 +523,9 @@
 		/>
 		<div slot="personal-account-ystu">
 			<a
-				on:click={() => reachGoal('ystu_lk_click')}
-				href="https://my.ysturasp.ru"
-				target="_blank"
+				href="/me"
 				class="group relative flex h-10 w-10 items-center justify-center rounded-xl bg-slate-800 text-blue-400 ring-1 ring-blue-500/50 transition-all hover:text-blue-300 hover:ring-blue-400 md:h-12 md:w-12"
-				aria-label="Открыть профиль"
+				aria-label="Личный кабинет"
 			>
 				<svg
 					class="h-5 w-5 transition-transform duration-200 group-hover:-translate-y-0.5 md:h-[22px] md:w-[22px]"

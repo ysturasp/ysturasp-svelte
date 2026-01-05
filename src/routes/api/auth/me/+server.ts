@@ -74,6 +74,7 @@ export const GET: RequestHandler = async ({ cookies, getClientAddress, request }
 			name: name || null,
 			picture: picture || null
 		},
-		hasPaidService
+		hasPaidService,
+		isTelegram
 	});
 };

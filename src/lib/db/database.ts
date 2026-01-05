@@ -109,6 +109,12 @@ export async function initDatabase(isTelegram: boolean = false) {
 				return;
 			}
 
+			await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS ystu_id INTEGER UNIQUE`);
+			await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS ystu_data JSONB`);
+			await pool.query(`CREATE INDEX IF NOT EXISTS idx_users_ystu_id ON users(ystu_id)`);
+
+			console.log('Миграция ystu_id выполнена в БД бота');
+
 			await pool.query(`
 				CREATE TABLE IF NOT EXISTS user_limits (
 					id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -297,7 +303,13 @@ export async function initDatabase(isTelegram: boolean = false) {
 				CREATE INDEX IF NOT EXISTS idx_promo_code_uses_user_id ON promo_code_uses(user_id);
 				CREATE INDEX IF NOT EXISTS idx_promo_code_uses_promo_code_id ON promo_code_uses(promo_code_id);
 			`);
-			console.log('Индексы созданы/проверены в БД бота');
+			await pool.query(`
+				ALTER TABLE users ADD COLUMN IF NOT EXISTS ystu_id INTEGER UNIQUE;
+				ALTER TABLE users ADD COLUMN IF NOT EXISTS ystu_data JSONB;
+				ALTER TABLE users ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT NOW();
+				ALTER TABLE users ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT NOW();
+			`);
+			console.log('Поля для YSTU и таймстампы проверены/созданы в БД бота');
 			console.log('Инициализация БД бота завершена успешно');
 			return;
 		}
@@ -320,6 +332,8 @@ export async function initDatabase(isTelegram: boolean = false) {
 					name TEXT,
 					picture TEXT,
 					referral_code TEXT UNIQUE,
+					ystu_id INTEGER UNIQUE,
+					ystu_data JSONB,
 					created_at TIMESTAMP DEFAULT NOW(),
 					updated_at TIMESTAMP DEFAULT NOW()
 				)
@@ -327,6 +341,23 @@ export async function initDatabase(isTelegram: boolean = false) {
 			console.log('Таблица users создана в основной БД');
 		} else {
 			console.log('Таблица users уже существует в основной БД');
+		}
+
+		try {
+			await pool.query(`
+				ALTER TABLE users ADD COLUMN IF NOT EXISTS ystu_id INTEGER UNIQUE;
+				ALTER TABLE users ADD COLUMN IF NOT EXISTS ystu_data JSONB;
+				ALTER TABLE users ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT NOW();
+				ALTER TABLE users ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT NOW();
+			`);
+			const cols = await pool.query(
+				"SELECT column_name FROM information_schema.columns WHERE table_name = 'users'"
+			);
+			console.log(
+				`[initDatabase] Колонки users: ${cols.rows.map((r: any) => r.column_name).join(', ')}`
+			);
+		} catch (e) {
+			console.error('[initDatabase] Ошибка при проверке колонок users:', e);
 		}
 
 		try {
@@ -343,6 +374,11 @@ export async function initDatabase(isTelegram: boolean = false) {
 					WHERE referral_code IS NULL;
 				END $$;
 			`);
+
+			await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS ystu_id INTEGER UNIQUE`);
+			await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS ystu_data JSONB`);
+			await pool.query(`CREATE INDEX IF NOT EXISTS idx_users_ystu_id ON users(ystu_id)`);
+
 			console.log('Миграция основной БД выполнена');
 		} catch (error) {
 			console.log('Миграция основной БД пропущена:', error);

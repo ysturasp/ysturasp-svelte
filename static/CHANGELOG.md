@@ -1,3 +1,4 @@
+- remove duplicate Footer component from statistics page (ysturasp, 2026-01-04) [3 files changed, 2 insertions(+), 2 deletions(-)]
 - enhance ratings functionality by add course and minimum grades filters, update api to support new parameters, and improve ui for filter selection (ysturasp, 2026-01-04) [7 files changed, 128 insertions(+), 17 deletions(-)]
 - add referral history and leaderboard retrieval in referral statistics API, update profile and statistics sections to display referral data, and remove unused ReferralModal component (ysturasp, 2026-01-04) [11 files changed, 388 insertions(+), 205 deletions(-)]
 - refactor referral handling in createReferralByCode and add updateReferredBonus function for managing referral bonuses (ysturasp, 2026-01-04) [4 files changed, 103 insertions(+), 19 deletions(-)]

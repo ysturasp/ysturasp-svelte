@@ -344,3 +344,50 @@ export async function getDisciplines(institute: InstituteId): Promise<string[]> 
 
 	return result.rows.map((row) => row.subject).filter(Boolean);
 }
+
+export async function getGroupStats(
+	institute: InstituteId,
+	groupName: string
+): Promise<{ average: number; count: number; stddev: number }> {
+	const pool = getPool();
+	if (!pool) {
+		throw new Error('База данных не доступна');
+	}
+
+	const tableName = getGradesTableName(institute);
+
+	const tableExists = await pool.query(
+		`
+		SELECT EXISTS (
+			SELECT FROM information_schema.tables 
+			WHERE table_schema = 'public' 
+			AND table_name = $1
+		)
+	`,
+		[tableName]
+	);
+
+	if (!tableExists.rows[0]?.exists) {
+		return { average: 0, count: 0, stddev: 0 };
+	}
+
+	const result = await pool.query(
+		`
+		SELECT 
+			AVG(grade_numeric) as average,
+			COUNT(*) as count,
+			STDDEV(grade_numeric) as stddev
+		FROM "${tableName}"
+		WHERE group_name = $1
+		AND grade_numeric IS NOT NULL
+	`,
+		[groupName]
+	);
+
+	const row = result.rows[0];
+	return {
+		average: parseFloat(row.average || '0') || 0,
+		count: parseInt(row.count || '0', 10),
+		stddev: parseFloat(row.stddev || '0') || 0
+	};
+}

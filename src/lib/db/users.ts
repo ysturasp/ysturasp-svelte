@@ -474,3 +474,57 @@ export async function getOrCreateUser(
 
 	return await createUser(params, isTelegram);
 }
+
+export async function linkYstuAccount(
+	userId: string,
+	ystuId: number,
+	ystuData: any,
+	isTelegram: boolean = false
+): Promise<void> {
+	const pool = getPool(isTelegram);
+	if (!pool) throw new Error('База данных недоступна');
+
+	try {
+		await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS ystu_id INTEGER UNIQUE`);
+		await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS ystu_data JSONB`);
+		await pool.query(
+			`ALTER TABLE users ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT NOW()`
+		);
+		await pool.query(
+			`ALTER TABLE users ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT NOW()`
+		);
+		await pool.query(`CREATE INDEX IF NOT EXISTS idx_users_ystu_id ON users(ystu_id)`);
+	} catch (e: any) {
+		console.error('[Migration Error]: Failed robust migration in linkYstuAccount:', e);
+		if (e.message?.includes('type "jsonb" does not exist')) {
+			try {
+				await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS ystu_data TEXT`);
+			} catch (e2) {
+				console.error('[Migration Error]: Fallback migration also failed:', e2);
+			}
+		}
+	}
+
+	try {
+		await pool.query(
+			'UPDATE users SET ystu_id = $1, ystu_data = $2, updated_at = NOW() WHERE id = $3',
+			[ystuId, typeof ystuData === 'object' ? JSON.stringify(ystuData) : ystuData, userId]
+		);
+	} catch (error: any) {
+		console.error('[Database Error in linkYstuAccount]:', error);
+		throw new Error(`Ошибка сохранения данных ЯГТУ: ${error.message}`);
+	}
+}
+
+export async function unlinkYstuAccount(
+	userId: string,
+	isTelegram: boolean = false
+): Promise<void> {
+	const pool = getPool(isTelegram);
+	if (!pool) throw new Error('База данных недоступна');
+
+	await pool.query(
+		'UPDATE users SET ystu_id = NULL, ystu_data = NULL, updated_at = NOW() WHERE id = $1',
+		[userId]
+	);
+}
