@@ -1,3 +1,4 @@
+- add rating word logic and improve layout in RecentlyViewedSection component (ysturasp, 2026-01-05) [3 files changed, 27 insertions(+), 6 deletions(-)]
 - update referral code retrieval in API to include tg user id and adjust referral link generation in profile section (ysturasp, 2026-01-05) [5 files changed, 139 insertions(+), 25 deletions(-)]
 - integrate YSTU personal account, including database schema updates for user data, and enhance authentication state management with user details (ysturasp, 2026-01-05) [23 files changed, 1611 insertions(+), 66 deletions(-)]
 - remove duplicate Footer component from statistics page (ysturasp, 2026-01-04) [3 files changed, 2 insertions(+), 2 deletions(-)]

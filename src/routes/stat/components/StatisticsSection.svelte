@@ -592,7 +592,74 @@
 		</div>
 	</div>
 
-	{#if statistics}
+	{#if isFetchingStatistics && !statistics}
+		<div class="result mt-4 animate-pulse" bind:this={statisticsSection}>
+			<div class="flex flex-col gap-2 text-slate-200">
+				<div class="flex flex-col md:flex-row md:items-baseline md:justify-between">
+					<div class="space-y-2">
+						<div class="h-8 w-64 rounded-lg bg-slate-700/60"></div>
+					</div>
+					<div class="mt-6 flex items-baseline gap-8">
+						{#each Array(3).fill(0) as _}
+							<div class="space-y-2">
+								<div class="h-3 w-16 rounded bg-slate-700/60"></div>
+								<div class="h-8 w-20 rounded bg-slate-600/70"></div>
+							</div>
+						{/each}
+					</div>
+				</div>
+
+				<div class="flex flex-col">
+					<div class="mb-1 flex items-end justify-between text-xs">
+						<span class="h-3 w-36 rounded bg-slate-700/60"></span>
+					</div>
+
+					<div
+						class="flex h-10 w-full overflow-hidden rounded-lg bg-slate-800/50 ring-1 ring-white/10"
+					>
+						<div class="h-full flex-1 bg-slate-700/60"></div>
+						<div class="h-full flex-1 bg-slate-700/50"></div>
+						<div class="h-full flex-1 bg-slate-700/40"></div>
+						<div class="h-full flex-1 bg-slate-700/30"></div>
+					</div>
+
+					<div
+						class="mt-2 grid grid-cols-2 gap-3 text-xs font-medium text-slate-400 md:flex md:flex-wrap md:gap-x-6 md:gap-y-2"
+					>
+						{#each Array(4).fill(0) as _}
+							<span class="flex items-center gap-1.5">
+								<div class="h-2 w-2 rounded-full bg-slate-600"></div>
+								<div class="h-3 w-24 rounded bg-slate-700/60"></div>
+							</span>
+						{/each}
+					</div>
+				</div>
+
+				<div class="rounded-2xl bg-slate-800/60 p-4 ring-1 ring-white/5">
+					<div class="h-64 rounded-xl bg-slate-700/40"></div>
+				</div>
+
+				<div class="grid grid-cols-1 gap-4 md:grid-cols-3 md:gap-8">
+					{#each Array(3).fill(0) as _}
+						<div class="flex flex-col gap-3 rounded-xl bg-slate-800/40 p-4">
+							<div class="h-4 w-40 rounded bg-slate-700/60"></div>
+							<div class="flex flex-col gap-2">
+								{#each Array(3).fill(0) as _}
+									<div class="flex items-baseline justify-between text-sm">
+										<span class="h-3 w-28 rounded bg-slate-700/50"></span>
+										<div class="flex items-baseline gap-3">
+											<span class="h-3 w-10 rounded bg-slate-700/50"></span>
+											<span class="h-4 w-10 rounded bg-slate-600/60"></span>
+										</div>
+									</div>
+								{/each}
+							</div>
+						</div>
+					{/each}
+				</div>
+			</div>
+		</div>
+	{:else if statistics}
 		<div class="result mt-4" bind:this={statisticsSection}>
 			<div class="flex flex-col gap-2 text-slate-200">
 				<div class="flex flex-col md:flex-row md:items-baseline md:justify-between">
