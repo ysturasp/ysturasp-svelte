@@ -180,17 +180,56 @@ export async function getReferralHistory(
 	const pool = getPool(isTelegram);
 	if (!pool) return [];
 
-	const result = await pool.query(
-		`SELECT u.email, r.created_at 
-		 FROM referrals r
-		 JOIN users u ON r.referred_id = u.id
-		 WHERE r.referrer_id = $1
-		 ORDER BY r.created_at DESC
-		 LIMIT 50`,
-		[userId]
-	);
+	if (isTelegram) {
+		const columnCheck = await pool.query(`
+			SELECT column_name 
+			FROM information_schema.columns 
+			WHERE table_name='users' 
+			AND column_name IN ('username', 'firstName', 'chatId')
+		`);
+		const existingColumns = new Set(columnCheck.rows.map((r: any) => r.column_name));
 
-	return result.rows;
+		const coalesceFields: string[] = [];
+		if (existingColumns.has('username')) {
+			coalesceFields.push('u.username');
+		}
+		if (existingColumns.has('firstName')) {
+			coalesceFields.push('u."firstName"');
+		}
+		if (existingColumns.has('chatId')) {
+			coalesceFields.push('u."chatId"');
+		}
+		coalesceFields.push("'Пользователь'");
+
+		const coalesceExpr =
+			coalesceFields.length > 0 ? `COALESCE(${coalesceFields.join(', ')})` : "'Пользователь'";
+
+		const result = await pool.query(
+			`SELECT 
+				${coalesceExpr} as email,
+				r.created_at 
+			 FROM referrals r
+			 JOIN users u ON r.referred_id = u.id
+			 WHERE r.referrer_id = $1
+			 ORDER BY r.created_at DESC
+			 LIMIT 50`,
+			[userId]
+		);
+
+		return result.rows;
+	} else {
+		const result = await pool.query(
+			`SELECT u.email, r.created_at 
+			 FROM referrals r
+			 JOIN users u ON r.referred_id = u.id
+			 WHERE r.referrer_id = $1
+			 ORDER BY r.created_at DESC
+			 LIMIT 50`,
+			[userId]
+		);
+
+		return result.rows;
+	}
 }
 
 export async function getTopReferrers(
@@ -199,18 +238,64 @@ export async function getTopReferrers(
 	const pool = getPool(isTelegram);
 	if (!pool) return [];
 
-	const result = await pool.query(
-		`SELECT u.email, COUNT(r.id) as referral_count
-		 FROM referrals r
-		 JOIN users u ON r.referrer_id = u.id
-		 WHERE u.email IS NOT NULL
-		 GROUP BY u.id, u.email
-		 ORDER BY referral_count DESC
-		 LIMIT 10`
-	);
+	if (isTelegram) {
+		const columnCheck = await pool.query(`
+			SELECT column_name 
+			FROM information_schema.columns 
+			WHERE table_name='users' 
+			AND column_name IN ('username', 'firstName', 'chatId')
+		`);
+		const existingColumns = new Set(columnCheck.rows.map((r: any) => r.column_name));
 
-	return result.rows.map((row) => ({
-		email: row.email,
-		referral_count: parseInt(row.referral_count, 10)
-	}));
+		const coalesceFields: string[] = [];
+		const groupByFields: string[] = ['u.id'];
+
+		if (existingColumns.has('username')) {
+			coalesceFields.push('u.username');
+			groupByFields.push('u.username');
+		}
+		if (existingColumns.has('firstName')) {
+			coalesceFields.push('u."firstName"');
+			groupByFields.push('u."firstName"');
+		}
+		if (existingColumns.has('chatId')) {
+			coalesceFields.push('u."chatId"');
+			groupByFields.push('u."chatId"');
+		}
+		coalesceFields.push("'Пользователь'");
+
+		const coalesceExpr =
+			coalesceFields.length > 0 ? `COALESCE(${coalesceFields.join(', ')})` : "'Пользователь'";
+
+		const result = await pool.query(
+			`SELECT 
+				${coalesceExpr} as email,
+				COUNT(r.id) as referral_count
+			 FROM referrals r
+			 JOIN users u ON r.referrer_id = u.id
+			 GROUP BY ${groupByFields.join(', ')}
+			 ORDER BY referral_count DESC
+			 LIMIT 10`
+		);
+
+		return result.rows.map((row) => ({
+			email: row.email,
+			referral_count: parseInt(row.referral_count, 10)
+		}));
+	} else {
+		const result = await pool.query(
+			`SELECT u.email, COUNT(r.id) as referral_count
+			 FROM referrals r
+			 JOIN users u ON r.referrer_id = u.id
+			 WHERE u.email IS NOT NULL
+			 GROUP BY u.id, u.email
+			 ORDER BY referral_count DESC
+			 LIMIT 10`
+		);
+
+		return result.rows.map((row) => ({
+			email: row.email,
+			referral_count: parseInt(row.referral_count, 10)
+		}));
+	}
 }

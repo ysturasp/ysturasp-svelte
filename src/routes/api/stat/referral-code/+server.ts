@@ -10,7 +10,30 @@ export const GET: RequestHandler = async (event) => {
 	}
 
 	const { user, isTelegram } = sessionContext;
+
+	if (isTelegram) {
+		const { getPool } = await import('$lib/db/database');
+		const pool = getPool(true);
+		if (pool) {
+			const result = await pool.query('SELECT "chatId" FROM users WHERE id = $1', [user.id]);
+			const chatId = result.rows[0]?.chatId;
+			if (chatId) {
+				return json({
+					referralCode: chatId,
+					userId: user.id
+				});
+			}
+		}
+		return json({
+			referralCode: user.id,
+			userId: user.id
+		});
+	}
+
 	const referralCode = await ensureReferralCode(user.id, isTelegram);
 
-	return json({ referralCode });
+	return json({
+		referralCode,
+		userId: user.id
+	});
 };

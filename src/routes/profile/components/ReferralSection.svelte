@@ -18,7 +18,11 @@
 				const response = await fetch('/api/stat/referral-code');
 				if (response.ok) {
 					const data = await response.json();
-					referralLink = `${window.location.origin}/stat?ref=${data.referralCode}`;
+					if ($auth.isTelegram) {
+						referralLink = `https://t.me/ysturasp_bot?start=${data.referralCode}`;
+					} else {
+						referralLink = `${window.location.origin}/stat?ref=${data.referralCode}`;
+					}
 				}
 			}
 		} catch (error) {
