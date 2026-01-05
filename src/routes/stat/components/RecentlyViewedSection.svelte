@@ -36,6 +36,25 @@
 		dispatch('viewAgain', { subject: item.discipline, institute: item.institute });
 	}
 
+	function getRatingWord(count: number): string {
+		const lastDigit = count % 10;
+		const lastTwoDigits = count % 100;
+
+		if (lastTwoDigits >= 11 && lastTwoDigits <= 19) {
+			return 'оценок';
+		}
+
+		if (lastDigit === 1) {
+			return 'оценка';
+		}
+
+		if (lastDigit >= 2 && lastDigit <= 4) {
+			return 'оценки';
+		}
+
+		return 'оценок';
+	}
+
 	onMount(loadRecentlyViewed);
 
 	recentlyViewedStore.subscribe((value) => {
@@ -55,7 +74,7 @@
 			<div class="flex gap-3">
 				{#each recentlyViewed as item}
 					<button
-						class="group flex min-w-[200px] flex-col gap-2 rounded-xl bg-slate-700/40 p-4 text-left transition-all hover:bg-slate-700/60 hover:shadow-lg"
+						class="group flex w-64 flex-col gap-2 rounded-xl bg-slate-700/40 p-4 text-left transition-all hover:bg-slate-700/60 hover:shadow-lg"
 						aria-label="Открыть статистику предмета {item.discipline}"
 						on:click={() => handleViewAgain(item)}
 						on:keydown={(e) => {
@@ -66,7 +85,7 @@
 					>
 						<div class="flex items-start justify-between gap-2">
 							<h3
-								class="truncate text-sm font-semibold text-white transition-colors group-hover:text-blue-400"
+								class="line-clamp-2 text-sm font-semibold break-words text-white transition-colors group-hover:text-blue-400"
 							>
 								{item.discipline}
 							</h3>
@@ -87,9 +106,8 @@
 						<p class="line-clamp-1 text-xs text-slate-400">
 							{getInstituteName(item.institute)}
 						</p>
-						<div class="flex items-center gap-3 pt-1">
+						<div class="flex items-center gap-1 pt-1">
 							<div class="flex items-center gap-1.5">
-								<span class="text-xs text-slate-500">Средний балл</span>
 								<span
 									class="font-mono text-sm font-bold {item.stats.average >= 4
 										? 'text-emerald-400'
@@ -100,8 +118,9 @@
 								>
 							</div>
 							<span class="text-slate-600">•</span>
-							<span class="font-mono text-xs text-slate-500"
-								>{item.stats.totalCount} оценок</span
+							<span class="font-mono text-xs whitespace-nowrap text-slate-500"
+								>{item.stats.totalCount}
+								{getRatingWord(item.stats.totalCount)}</span
 							>
 						</div>
 					</button>
