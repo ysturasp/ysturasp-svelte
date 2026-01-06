@@ -1,0 +1,39 @@
+services:
+    app:
+        build:
+            context: .
+            args:
+                - VITE_NOTIFICATIONS_API_URL=${VITE_NOTIFICATIONS_API_URL}
+        ports:
+            - '5174:5173'
+        environment:
+            - PRIVATE_KEY=${PRIVATE_KEY}
+            - GROQ_API_KEY=${GROQ_API_KEY}
+            - DATABASE_URL=${DATABASE_URL}
+            - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+            - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+            - YOOKASSA_SHOP_ID=${YOOKASSA_SHOP_ID}
+            - YOOKASSA_SECRET_KEY=${YOOKASSA_SECRET_KEY}
+            - SESSION_SECRET=${SESSION_SECRET}
+            - ONLINE_SECRET=${ONLINE_SECRET:-}
+            - BOT_DATABASE=${BOT_DATABASE}
+            - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+            - REDIS_HOST=${REDIS_HOST}
+            - REDIS_PORT=${REDIS_PORT}
+            - REDIS_PASSWORD=${REDIS_PASSWORD}
+        restart: unless-stopped
+        networks:
+            - ysturasp-db
+            - proxy
+        labels:
+            - 'traefik.enable=true'
+            - 'traefik.http.routers.ysturasp-backup.rule=PathPrefix(`/`)'
+            - 'traefik.http.routers.ysturasp-backup.entrypoints=web'
+            - 'traefik.http.routers.ysturasp-backup.priority=1'
+            - 'traefik.http.services.ysturasp-backup.loadbalancer.server.port=5173'
+
+networks:
+    ysturasp-db:
+        external: true
+    proxy:
+        external: true

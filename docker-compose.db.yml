@@ -1,0 +1,23 @@
+services:
+    db:
+        image: postgres:15
+        container_name: ysturasp-db
+        ports:
+            - '127.0.0.1:5432:5432'
+        environment:
+            - POSTGRES_USER=${POSTGRES_USER}
+            - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+            - POSTGRES_DB=${POSTGRES_DB}
+        volumes:
+            - db_data:/var/lib/postgresql/data
+        restart: unless-stopped
+        networks:
+            - ysturasp-db
+
+volumes:
+    db_data:
+
+networks:
+    ysturasp-db:
+        name: ysturasp-db
+        driver: bridge
