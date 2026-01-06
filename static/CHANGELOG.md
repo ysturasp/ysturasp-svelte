@@ -1,3 +1,4 @@
+- refactor layout and styling in profile and me pages, add reverce buttons for between profiles (ysturasp, 2026-01-06) [4 files changed, 117 insertions(+), 87 deletions(-)]
 - update authentication flow to redirect users based on current path and enhance user experience with new login prompts in profile section (ysturasp, 2026-01-06) [4 files changed, 79 insertions(+), 4 deletions(-)]
 - add goal tracking for subject statistics view in StatisticsSection component (ysturasp, 2026-01-05) [3 files changed, 8 insertions(+)]
 - add skeleton loading and remove LoadingOverlay for statistics page (ysturasp, 2026-01-05) [4 files changed, 70 insertions(+), 8 deletions(-)]

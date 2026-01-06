@@ -71,21 +71,46 @@ export function getFilesWord(count: number): string {
 }
 
 export function parseChangelogLine(line: string): ChangelogItem | null {
-	const match = line.match(
-		/^- (.*?) \((.*?), (.*?)\)(?: \[(\d+) files? changed, (\d+) insertions?\(\+\), (\d+) deletions?\(\-\)\])?$/
+	if (!line.startsWith('- ')) return null;
+
+	let content = line.slice(2).trim();
+
+	let filesChanged: number | undefined;
+	let insertions: number | undefined;
+	let deletions: number | undefined;
+
+	const statsMatch = content.match(
+		/\[(\d+) files? changed, (\d+) insertions?\(\+\), (\d+) deletions?\(\-\)\]\s*$/
 	);
 
-	if (!match) return null;
+	if (statsMatch) {
+		filesChanged = parseInt(statsMatch[1]);
+		insertions = parseInt(statsMatch[2]);
+		deletions = parseInt(statsMatch[3]);
+		content = content.slice(0, content.lastIndexOf('[')).trim();
+	}
 
-	const [, description, author, date, filesChanged, insertions, deletions] = match;
+	const lastOpenParen = content.lastIndexOf('(');
+	const lastCloseParen = content.lastIndexOf(')');
+
+	if (lastOpenParen === -1 || lastCloseParen === -1 || lastCloseParen < lastOpenParen) {
+		return null;
+	}
+
+	const meta = content.slice(lastOpenParen + 1, lastCloseParen);
+	const description = content.slice(0, lastOpenParen).trim();
+
+	const [authorRaw, dateRaw] = meta.split(',').map((s) => s.trim());
+
+	if (!authorRaw || !dateRaw) return null;
 
 	return {
 		description,
-		author,
-		date,
-		filesChanged: filesChanged ? parseInt(filesChanged) : undefined,
-		insertions: insertions ? parseInt(insertions) : undefined,
-		deletions: deletions ? parseInt(deletions) : undefined,
+		author: authorRaw,
+		date: dateRaw,
+		filesChanged,
+		insertions,
+		deletions,
 		emoji: getEmojiForChange(description)
 	};
 }
