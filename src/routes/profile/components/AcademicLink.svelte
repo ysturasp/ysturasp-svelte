@@ -47,43 +47,30 @@
 	}
 </script>
 
-<div class="rounded-2xl border border-slate-700/50 bg-slate-800/50 p-6">
-	<div class="mb-6 flex items-center justify-between">
-		<div class="flex items-center gap-3">
-			<div
-				class="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500/10 text-blue-400"
-			>
-				<svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M12 14l9-5-9-5-9 5 9 5z"
-					/>
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"
-					/>
-				</svg>
-			</div>
-			<div>
-				<h3 class="text-lg leading-tight font-bold text-white">Личный кабинет ЯГТУ</h3>
-				<p class="mt-1 text-xs text-slate-400">
-					Привяжите аккаунт для доступа к своим оценкам
-				</p>
-			</div>
+<div class="rounded-2xl border border-slate-700/50 bg-slate-800/50 p-4">
+	<div class="mb-6 flex items-center gap-3">
+		<div
+			class="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500/10 text-blue-400"
+		>
+			<svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+				<path
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					stroke-width="2"
+					d="M12 14l9-5-9-5-9 5 9 5z"
+				/>
+				<path
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					stroke-width="2"
+					d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"
+				/>
+			</svg>
 		</div>
-
-		{#if $auth.academicUser}
-			<button
-				on:click={handleUnlink}
-				class="text-xs font-semibold tracking-wider text-rose-400 uppercase transition-colors hover:text-rose-300"
-			>
-				Отвязать
-			</button>
-		{/if}
+		<div>
+			<h3 class="text-lg leading-tight font-bold text-white">Личный кабинет ЯГТУ</h3>
+			<p class="mt-1 text-xs text-slate-400">Привяжите аккаунт для доступа к своим оценкам</p>
+		</div>
 	</div>
 
 	{#if $auth.academicUser}
@@ -102,20 +89,36 @@
 				</div>
 			</div>
 		</div>
-		<a
-			href="/me"
-			class="mt-4 flex items-center justify-center gap-2 rounded-xl border border-blue-500/20 bg-blue-500/10 px-4 py-2.5 text-xs font-bold text-blue-400 transition-all hover:bg-blue-500/20"
-		>
-			Перейти в личный кабинет
-			<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-				<path
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					stroke-width="2"
-					d="M14 5l7 7m0 0l-7 7m7-7H3"
-				/>
-			</svg>
-		</a>
+		<div class="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+			<a
+				href="/me"
+				class="flex flex-1 items-center justify-center gap-2 rounded-xl border border-blue-500/20 bg-blue-500/10 px-4 py-2.5 text-xs font-bold text-blue-400 transition-all hover:bg-blue-500/20"
+			>
+				Перейти в кабинет студента
+				<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M14 5l7 7m0 0l-7 7m7-7H3"
+					/>
+				</svg>
+			</a>
+			<button
+				on:click={handleUnlink}
+				class="flex flex-1 items-center justify-center gap-2 rounded-xl border border-rose-500/30 bg-rose-500/5 px-4 py-2.5 text-[11px] font-bold text-rose-300 transition-all hover:bg-rose-500/15"
+			>
+				<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M6 18L18 6M6 6l12 12"
+					/>
+				</svg>
+				Отвязать кабинет
+			</button>
+		</div>
 	{:else if !showLoginForm}
 		<button
 			on:click={() => (showLoginForm = true)}

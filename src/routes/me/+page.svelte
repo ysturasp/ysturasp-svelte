@@ -106,8 +106,8 @@
 
 	<main class="container mx-auto px-4 md:px-0">
 		{#if !isAuthChecked || (!!student && !hasRequiredData)}
-			<div class="mx-auto mt-12 flex max-w-6xl animate-pulse flex-col gap-8 md:mt-16">
-				<div class="flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
+			<div class="mx-auto mt-12 flex max-w-6xl animate-pulse flex-col gap-6 md:mt-16">
+				<div class="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
 					<div class="flex items-center gap-6">
 						<div
 							class="h-24 w-24 rounded-2xl border border-white/5 bg-slate-800/50 md:h-32 md:w-32"
@@ -117,15 +117,18 @@
 							<div class="h-10 w-48 rounded-lg bg-slate-800/50 md:h-14"></div>
 						</div>
 					</div>
-					<div class="flex items-baseline gap-10">
-						<div class="flex flex-col gap-2">
-							<div class="h-3 w-12 rounded bg-slate-800/50"></div>
-							<div class="h-12 w-24 rounded-lg bg-slate-800/50 md:h-16"></div>
+					<div class="flex flex-col items-stretch gap-4 md:items-end">
+						<div class="flex items-baseline gap-10">
+							<div class="flex flex-col gap-2">
+								<div class="h-3 w-12 rounded bg-slate-800/50"></div>
+								<div class="h-12 w-24 rounded-lg bg-slate-800/50 md:h-16"></div>
+							</div>
+							<div class="flex flex-col gap-2">
+								<div class="h-3 w-12 rounded bg-slate-800/50"></div>
+								<div class="h-12 w-24 rounded-lg bg-slate-800/50 md:h-16"></div>
+							</div>
 						</div>
-						<div class="flex flex-col gap-2">
-							<div class="h-3 w-12 rounded bg-slate-800/50"></div>
-							<div class="h-12 w-24 rounded-lg bg-slate-800/50 md:h-16"></div>
-						</div>
+						<div class="mt-3 h-10 w-48 rounded-xl bg-slate-800/50 md:w-56"></div>
 					</div>
 				</div>
 
@@ -310,10 +313,10 @@
 		{:else}
 			<div
 				in:fade={{ duration: 250 }}
-				class="mx-auto mt-12 flex max-w-6xl flex-col gap-8 md:mt-16"
+				class="mx-auto mt-12 flex max-w-6xl flex-col gap-6 md:mt-16"
 			>
-				<div class="flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
-					<div class="flex items-center gap-6">
+				<div class="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+					<div class="flex flex-1 items-center gap-6">
 						<div class="relative flex-shrink-0">
 							<img
 								src={student.photoUrl}
@@ -347,34 +350,56 @@
 						</div>
 					</div>
 
-					<div class="flex items-baseline gap-10">
-						<div>
-							<div
-								class="mb-1 text-[10px] font-bold tracking-wider text-slate-500 uppercase"
-							>
-								Ср. балл
+					<div class="flex flex-col items-stretch gap-4 md:items-end">
+						<div class="flex items-baseline gap-10">
+							<div>
+								<div
+									class="mb-1 text-[10px] font-bold tracking-wider text-slate-500 uppercase"
+								>
+									Ср. балл
+								</div>
+								<div
+									class="text-5xl font-bold md:text-7xl {myStats &&
+									myStats.average >= 4
+										? 'text-emerald-400'
+										: 'text-rose-400'} leading-none tracking-tighter"
+								>
+									{myStats ? myStats.average.toFixed(2) : '—'}
+								</div>
 							</div>
-							<div
-								class="text-5xl font-bold md:text-7xl {myStats &&
-								myStats.average >= 4
-									? 'text-emerald-400'
-									: 'text-rose-400'} leading-none tracking-tighter"
-							>
-								{myStats ? myStats.average.toFixed(2) : '—'}
+							<div>
+								<div
+									class="mb-1 text-[10px] font-bold tracking-wider text-slate-500 uppercase"
+								>
+									Всего
+								</div>
+								<div
+									class="text-5xl leading-none font-bold tracking-tighter text-white md:text-7xl"
+								>
+									{myStats ? myStats.total : '—'}
+								</div>
 							</div>
 						</div>
-						<div>
-							<div
-								class="mb-1 text-[10px] font-bold tracking-wider text-slate-500 uppercase"
+
+						<a
+							href="/profile"
+							class="mt-2 flex items-center justify-center gap-2 rounded-xl border border-blue-500/20 bg-blue-500/10 px-4 py-2.5 text-xs font-bold text-blue-400 transition-all hover:bg-blue-500/20"
+						>
+							Перейти в профиль ysturasp
+							<svg
+								class="h-4 w-4"
+								fill="none"
+								stroke="currentColor"
+								viewBox="0 0 24 24"
 							>
-								Всего
-							</div>
-							<div
-								class="text-5xl leading-none font-bold tracking-tighter text-white md:text-7xl"
-							>
-								{myStats ? myStats.total : '—'}
-							</div>
-						</div>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M14 5l7 7m0 0l-7 7m7-7H3"
+								/>
+							</svg>
+						</a>
 					</div>
 				</div>
 
