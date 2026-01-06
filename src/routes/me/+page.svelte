@@ -6,10 +6,11 @@
 	import Footer from '$lib/components/layout/Footer.svelte';
 	import PageLayout from '$lib/components/layout/PageLayout.svelte';
 	import MyGrades from '../profile/components/MyGrades.svelte';
+	import AuthButton from '../format/components/AuthButton.svelte';
+	import AcademicLink from '../profile/components/AcademicLink.svelte';
 	import NavigationLinks from '$lib/components/ui/NavigationLinks.svelte';
-	import { reachGoal } from '$lib/utils/metrika';
 	import { fade } from 'svelte/transition';
-	import { FACULTY_NAME_MAP, EDUCATION_FORMS } from '$lib/constants/ystu';
+	import { EDUCATION_FORMS } from '$lib/constants/ystu';
 
 	let groupStats: { average: number; count: number; institute?: string } | null = null;
 	let myStats: { average: number; total: number; counts: any } | null = null;
@@ -18,7 +19,7 @@
 		await auth.checkAuth();
 		await auth.checkAcademic();
 
-		if (!$auth.loading && !$auth.authenticated) {
+		if (!$auth.loading && !$auth.authenticated && $auth.isTelegram) {
 			goto('/format');
 		}
 	});
@@ -55,6 +56,8 @@
 			: null;
 	$: hasRequiredData = !!student && !!myStats && (!student.groupName || !!groupStats);
 	$: isAuthChecked = !$auth.loading && !$auth.academicLoading;
+	$: isLoggedIn = $auth.authenticated;
+	$: isTelegramUser = $auth.isTelegram;
 </script>
 
 <svelte:head>
@@ -155,6 +158,76 @@
 					<MyGrades on:averageUpdate={handleStatsUpdate} />
 				</div>
 			{/if}
+		{:else if !isLoggedIn && !isTelegramUser}
+			<div
+				in:fade
+				class="mx-auto mt-20 max-w-2xl rounded-3xl border border-white/5 bg-slate-900/60 p-10 text-center shadow-2xl backdrop-blur-xl"
+			>
+				<div
+					class="mx-auto mb-8 flex h-20 w-20 items-center justify-center rounded-2xl border border-blue-500/20 bg-blue-600/10"
+				>
+					<svg
+						class="h-10 w-10 text-blue-500"
+						viewBox="0 0 24 24"
+						fill="none"
+						stroke="currentColor"
+						stroke-width="2"
+					>
+						<path d="M12 11V7a4 4 0 0 1 8 0v4h3v10H1V11h3V7a4 4 0 0 1 8 0v4" />
+					</svg>
+				</div>
+
+				<h1 class="mb-6 text-3xl font-black tracking-tight text-white uppercase">
+					Личный кабинет ЯГТУ
+				</h1>
+
+				<div class="mx-auto mb-8 max-w-sm space-y-6 text-left">
+					<div class="flex items-start gap-4">
+						<div
+							class="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full border border-white/5 bg-slate-800 text-[10px] font-black text-slate-400"
+						>
+							1
+						</div>
+						<p class="text-sm leading-snug text-slate-300">
+							Сначала нужно <b>войти через Google</b>, чтобы мы могли сохранить ваши
+							данные и показывать оценки.
+						</p>
+					</div>
+					<div class="flex items-start gap-4">
+						<div
+							class="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full border border-white/5 bg-slate-800 text-[10px] font-black text-slate-400"
+						>
+							2
+						</div>
+						<p class="text-sm leading-snug text-slate-300">
+							После входа вы сможете <b>привязать личный кабинет ЯГТУ</b>, введя логин
+							и пароль от ЛК.
+						</p>
+					</div>
+				</div>
+
+				<div class="flex justify-center">
+					<AuthButton />
+				</div>
+			</div>
+		{:else if isLoggedIn && !student}
+			<div
+				in:fade
+				class="mx-auto mt-20 max-w-2xl rounded-3xl border border-white/5 bg-slate-900/60 p-10 text-center shadow-2xl backdrop-blur-xl"
+			>
+				<h1 class="mb-4 text-3xl font-black tracking-tight text-white uppercase">
+					Привязка кабинета ЯГТУ
+				</h1>
+
+				<p class="mx-auto mb-8 max-w-md text-sm leading-snug text-slate-300">
+					Вы вошли через Google. Теперь привяжите ваш
+					<b>личный кабинет ЯГТУ</b>, чтобы показывать оценки, средний балл и статистику.
+				</p>
+
+				<div class="text-left">
+					<AcademicLink />
+				</div>
+			</div>
 		{:else if !student}
 			<div
 				in:fade

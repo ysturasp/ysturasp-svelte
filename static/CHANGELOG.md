@@ -1,3 +1,4 @@
+- add goal tracking for subject statistics view in StatisticsSection component (ysturasp, 2026-01-05) [3 files changed, 8 insertions(+)]
 - add skeleton loading and remove LoadingOverlay for statistics page (ysturasp, 2026-01-05) [4 files changed, 70 insertions(+), 8 deletions(-)]
 - add rating word logic and improve layout in RecentlyViewedSection component (ysturasp, 2026-01-05) [3 files changed, 27 insertions(+), 6 deletions(-)]
 - update referral code retrieval in API to include tg user id and adjust referral link generation in profile section (ysturasp, 2026-01-05) [5 files changed, 139 insertions(+), 25 deletions(-)]
