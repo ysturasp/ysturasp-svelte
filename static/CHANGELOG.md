@@ -1,3 +1,4 @@
+- realize fault tolerance architecture with db + traefik + main+ backup in different stacks (ysturasp, 2026-01-07) [6 files changed, 132 insertions(+)]
 - add changelog files to .prettierignore (ysturasp, 2026-01-06) [3 files changed, 7 insertions(+), 1 deletion(-)]
 - refactor changelog parsing logic to improve handling of metadata (ysturasp, 2026-01-06) [3 files changed, 36 insertions(+), 9 deletions(-)]
 - refactor layout and styling in profile and me pages, add reverce buttons for between profiles (ysturasp, 2026-01-06) [4 files changed, 117 insertions(+), 87 deletions(-)]
