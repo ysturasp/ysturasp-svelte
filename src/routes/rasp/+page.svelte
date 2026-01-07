@@ -47,10 +47,10 @@
 	import { page } from '$app/state';
 	import { fade } from 'svelte/transition';
 	import { quintOut } from 'svelte/easing';
+	import { tick } from 'svelte';
 	import ScheduleSwitcher from '$lib/components/schedule/ScheduleSwitcher.svelte';
 	import type { Settings } from '$lib/stores/settings';
 	import { settings } from '$lib/stores/settings';
-	import { reachGoal } from '$lib/utils/metrika';
 	import WorkloadStatistics from './components/WorkloadStatistics.svelte';
 
 	const isMobile = writable(false);
@@ -305,6 +305,9 @@
 			localStorage.setItem('lastWeek', selectedWeek);
 
 			updateURL();
+
+			await tick();
+			await new Promise((resolve) => setTimeout(resolve, 100));
 		} catch (error) {
 			console.error('Error loading schedule:', error);
 			notifications.add('Ошибка при загрузке расписания', 'error');

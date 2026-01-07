@@ -1,6 +1,7 @@
 import { json } from '@sveltejs/kit';
 import * as XLSX from 'xlsx';
 import type { RequestEvent } from '@sveltejs/kit';
+import { getRedisClient } from '$lib/config/redis';
 
 interface TimeSlot {
 	start: string;
@@ -778,7 +779,27 @@ async function parseSchedule(fileId: string) {
 export async function GET({ params }: RequestEvent) {
 	try {
 		const fileId = params.id as string;
+		const cacheKey = `schedule:yspu:${fileId}`;
+		const redis = getRedisClient();
+		const CACHE_TTL = 3600;
+
+		try {
+			const cached = await redis.get(cacheKey);
+			if (cached) {
+				return json(JSON.parse(cached));
+			}
+		} catch (redisError) {
+			console.error('Redis error (reading cache):', redisError);
+		}
+
 		const schedule = await parseSchedule(fileId);
+
+		try {
+			await redis.setex(cacheKey, CACHE_TTL, JSON.stringify(schedule));
+		} catch (redisError) {
+			console.error('Redis error (writing cache):', redisError);
+		}
+
 		return json(schedule);
 	} catch (error) {
 		console.error('Ошибка при обработке запроса:', error);

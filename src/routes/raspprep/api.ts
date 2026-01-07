@@ -9,7 +9,7 @@ import {
 	cleanupCorruptedData
 } from '$lib/utils/offline-storage';
 
-const API_URL = 'https://api-ochre-eta-11.vercel.app/s/schedule/v1/schedule';
+const API_URL = '/api/schedule';
 
 async function getFromServiceWorkerCache(url: string): Promise<any | null> {
 	if (!browser || !('caches' in window)) {
@@ -76,7 +76,7 @@ export async function getTeachers(): Promise<Teacher[]> {
 	const cached = getCachedTeachersData<{ items: Teacher[] }>();
 
 	try {
-		const response = await fetch(`${API_URL}/actual_teachers`);
+		const response = await fetch(`${API_URL}/teachers`);
 		if (!response.ok) {
 			throw new Error(`HTTP error! status: ${response.status}`);
 		}
@@ -93,13 +93,13 @@ export async function getTeachers(): Promise<Teacher[]> {
 			return cached.items;
 		}
 
-		const swCached = await getFromServiceWorkerCache(`${API_URL}/actual_teachers`);
+		const swCached = await getFromServiceWorkerCache(`${API_URL}/teachers`);
 		if (swCached?.items) {
 			console.log('Using service worker cached teachers data');
 			return swCached.items;
 		}
 
-		const swFetchCached = await getFromServiceWorkerViaFetch(`${API_URL}/actual_teachers`);
+		const swFetchCached = await getFromServiceWorkerViaFetch(`${API_URL}/teachers`);
 		if (swFetchCached?.items) {
 			console.log('Using service worker fetch cached teachers data');
 			return swFetchCached.items;

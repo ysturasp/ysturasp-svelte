@@ -31,10 +31,10 @@
 	import { settings } from '$lib/stores/settings';
 	import GithubApiSection from '$lib/components/sections/GithubApiSection.svelte';
 	import type { Settings } from '$lib/stores/settings';
-	import { reachGoal } from '$lib/utils/metrika';
 	import { writable } from 'svelte/store';
 	import { fade } from 'svelte/transition';
 	import { quintOut } from 'svelte/easing';
+	import { tick } from 'svelte';
 
 	let currentSettings: Settings;
 	settings.subscribe((value) => {
@@ -166,6 +166,9 @@
 			localStorage.setItem('lastWeek', selectedWeek.toString());
 
 			updateURL();
+
+			await tick();
+			await new Promise((resolve) => setTimeout(resolve, 100));
 		} catch (error) {
 			if (error instanceof Response && error.status === 429) {
 				notifications.add('Превышено количество запросов. Попробуйте позже.', 'error');

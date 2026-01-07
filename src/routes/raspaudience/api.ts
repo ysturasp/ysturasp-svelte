@@ -9,7 +9,7 @@ import {
 	cleanupCorruptedData
 } from '$lib/utils/offline-storage';
 
-const API_URL = 'https://api-ochre-eta-11.vercel.app/s/schedule/v1/schedule';
+const API_URL = '/api/schedule';
 
 async function getFromServiceWorkerCache(url: string): Promise<any | null> {
 	if (!browser || !('caches' in window)) {
@@ -76,7 +76,7 @@ export async function getAudiences(): Promise<Audience[]> {
 	const cached = getCachedAudiencesData<{ items: Audience[] }>();
 
 	try {
-		const response = await fetch(`${API_URL}/actual_audiences`);
+		const response = await fetch(`${API_URL}/audiences`);
 		if (!response.ok) {
 			throw new Error(`HTTP error! status: ${response.status}`);
 		}
@@ -93,13 +93,13 @@ export async function getAudiences(): Promise<Audience[]> {
 			return cached.items;
 		}
 
-		const swCached = await getFromServiceWorkerCache(`${API_URL}/actual_audiences`);
+		const swCached = await getFromServiceWorkerCache(`${API_URL}/audiences`);
 		if (swCached?.items) {
 			console.log('Using service worker cached audiences data');
 			return swCached.items;
 		}
 
-		const swFetchCached = await getFromServiceWorkerViaFetch(`${API_URL}/actual_audiences`);
+		const swFetchCached = await getFromServiceWorkerViaFetch(`${API_URL}/audiences`);
 		if (swFetchCached?.items) {
 			console.log('Using service worker fetch cached audiences data');
 			return swFetchCached.items;

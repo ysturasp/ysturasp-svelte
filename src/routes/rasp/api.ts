@@ -10,7 +10,7 @@ import {
 import { isOnline } from '$lib/stores/offline';
 import { browser } from '$app/environment';
 
-const API_BASE = 'https://api-ochre-eta-11.vercel.app/s/schedule/v1/schedule';
+const API_BASE = '/api/schedule';
 
 async function getFromServiceWorkerCache(url: string): Promise<any | null> {
 	if (!browser || !('caches' in window)) {
@@ -71,7 +71,7 @@ export async function getInstitutes(): Promise<Institute[]> {
 	const cached = getCachedInstitutesData<{ items: Institute[] }>();
 
 	try {
-		const response = await fetch(`${API_BASE}/actual_groups`);
+		const response = await fetch(`${API_BASE}/institutes`);
 		if (!response.ok) {
 			throw new Error(`HTTP error! status: ${response.status}`);
 		}
@@ -88,13 +88,13 @@ export async function getInstitutes(): Promise<Institute[]> {
 			return cached.items;
 		}
 
-		const swCached = await getFromServiceWorkerCache(`${API_BASE}/actual_groups`);
+		const swCached = await getFromServiceWorkerCache(`${API_BASE}/institutes`);
 		if (swCached?.items) {
 			console.log('Using service worker cached institutes data');
 			return swCached.items;
 		}
 
-		const swFetchCached = await getFromServiceWorkerViaFetch(`${API_BASE}/actual_groups`);
+		const swFetchCached = await getFromServiceWorkerViaFetch(`${API_BASE}/institutes`);
 		if (swFetchCached?.items) {
 			console.log('Using service worker fetch cached institutes data');
 			return swFetchCached.items;
