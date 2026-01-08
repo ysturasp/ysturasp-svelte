@@ -1,3 +1,4 @@
+- implement caching for schedule data using Redis in GET request handler and update API endpoints for institutes, audiences and teachers (ysturasp, 2026-01-07) [15 files changed, 359 insertions(+), 15 deletions(-)]
 - add external volume configuration for database in docker-compose file (ysturasp, 2026-01-07) [3 files changed, 4 insertions(+)]
 - update Traefik configuration to use environment variables for port settings in docker-compose file (ysturasp, 2026-01-07) [3 files changed, 7 insertions(+), 5 deletions(-)]
 - realize fault tolerance architecture with db + traefik + main+ backup in different stacks (ysturasp, 2026-01-07) [6 files changed, 132 insertions(+)]

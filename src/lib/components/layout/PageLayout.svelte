@@ -4,7 +4,7 @@
 	import '$lib/styles/global.css';
 	import '$lib/styles/fonts.css';
 	import { haptic } from '$lib/actions/haptic';
-	import { init } from '@tma.js/sdk-svelte';
+	import { init, swipeBehavior } from '@tma.js/sdk-svelte';
 	import { checkIsTelegramMiniApp } from '$lib/utils/telegram';
 
 	let isLowercase = false;
@@ -15,6 +15,8 @@
 		if (isTelegram) {
 			try {
 				init();
+				swipeBehavior.mount();
+				swipeBehavior.disableVertical();
 			} catch (error) {
 				console.warn('Not in Telegram Mini App:', error);
 			}
@@ -34,6 +36,13 @@
 			if (typeof document !== 'undefined') {
 				document.body.classList.remove('lowercase');
 				document.body.classList.remove('modern-fonts');
+			}
+			if (isTelegram) {
+				try {
+					swipeBehavior.unmount();
+				} catch (error) {
+					console.warn('Error unmounting swipeBehavior:', error);
+				}
 			}
 		};
 	});
