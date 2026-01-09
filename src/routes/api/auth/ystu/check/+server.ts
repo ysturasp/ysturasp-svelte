@@ -1,13 +1,9 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from '@sveltejs/kit';
 import * as ystu from '$lib/api/ystu';
-import {
-	getAcademicTokens,
-	setAcademicCookies,
-	clearAcademicCookies
-} from '$lib/server/academicSession';
 import { getSessionContext } from '$lib/server/sessionContext';
 import { getRealIp } from '$lib/server/ip';
+import { clearYstuSessionForUser, getValidYstuAccessTokenForUser } from '$lib/server/ystuSession';
 
 export const GET: RequestHandler = async ({ cookies, request, getClientAddress }) => {
 	const ipAddress = getRealIp(request, getClientAddress);
@@ -17,23 +13,14 @@ export const GET: RequestHandler = async ({ cookies, request, getClientAddress }
 		return json({ authenticated: false, error: 'Unauthorized' }, { status: 401 });
 	}
 
-	const { accessToken, refreshToken } = getAcademicTokens(cookies);
-
-	if (!accessToken && !refreshToken) {
-		return json({ authenticated: false });
-	}
-
 	try {
-		let currentAccessToken = accessToken;
-
-		if (!currentAccessToken && refreshToken) {
-			const newTokens = await ystu.refresh(refreshToken);
-			setAcademicCookies(cookies, newTokens);
-			currentAccessToken = newTokens.access_token;
-		}
+		const currentAccessToken = await getValidYstuAccessTokenForUser(
+			context.user.id,
+			context.isTelegram
+		);
 
 		if (!currentAccessToken) {
-			throw new Error('No access token');
+			return json({ authenticated: false });
 		}
 
 		const userInfo = await ystu.check(currentAccessToken);
@@ -43,7 +30,7 @@ export const GET: RequestHandler = async ({ cookies, request, getClientAddress }
 		});
 	} catch (error: any) {
 		console.error('[YSTU Check Error]:', error);
-		clearAcademicCookies(cookies);
+		await clearYstuSessionForUser(context.user.id, context.isTelegram);
 		return json({ authenticated: false, error: 'Session expired' });
 	}
 };

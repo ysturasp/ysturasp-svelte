@@ -1,10 +1,10 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from '@sveltejs/kit';
 import * as ystu from '$lib/api/ystu';
-import { setAcademicCookies } from '$lib/server/academicSession';
 import { getSessionContext } from '$lib/server/sessionContext';
 import { getRealIp } from '$lib/server/ip';
 import { linkYstuAccount } from '$lib/db/users';
+import { storeInitialYstuTokensForUser } from '$lib/server/ystuSession';
 
 export const POST: RequestHandler = async ({ request, cookies, getClientAddress }) => {
 	const { username, password } = await request.json();
@@ -32,7 +32,7 @@ export const POST: RequestHandler = async ({ request, cookies, getClientAddress 
 			context.isTelegram
 		);
 
-		setAcademicCookies(cookies, tokens);
+		await storeInitialYstuTokensForUser(context.user.id, context.isTelegram, tokens);
 
 		return json({
 			success: true,

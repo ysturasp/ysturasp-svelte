@@ -1,30 +1,26 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from '@sveltejs/kit';
 import * as ystu from '$lib/api/ystu';
-import {
-	getAcademicTokens,
-	setAcademicCookies,
-	clearAcademicCookies
-} from '$lib/server/academicSession';
+import { getSessionContext } from '$lib/server/sessionContext';
+import { getRealIp } from '$lib/server/ip';
+import { clearYstuSessionForUser, getValidYstuAccessTokenForUser } from '$lib/server/ystuSession';
 
-export const GET: RequestHandler = async ({ cookies }) => {
-	const { accessToken, refreshToken } = getAcademicTokens(cookies);
+export const GET: RequestHandler = async ({ cookies, getClientAddress, request }) => {
+	const ipAddress = getRealIp(request, getClientAddress);
+	const context = await getSessionContext(cookies, { touch: false, ipAddress });
 
-	if (!accessToken && !refreshToken) {
+	if (!context) {
 		return json({ error: 'Необходимо авторизоваться в системе ЯГТУ' }, { status: 401 });
 	}
 
 	try {
-		let currentAccessToken = accessToken;
-
-		if (!currentAccessToken && refreshToken) {
-			const newTokens = await ystu.refresh(refreshToken);
-			setAcademicCookies(cookies, newTokens);
-			currentAccessToken = newTokens.access_token;
-		}
+		const currentAccessToken = await getValidYstuAccessTokenForUser(
+			context.user.id,
+			context.isTelegram
+		);
 
 		if (!currentAccessToken) {
-			throw new Error('No access token');
+			return json({ error: 'Необходимо авторизоваться в системе ЯГТУ' }, { status: 401 });
 		}
 
 		const marks = await ystu.getMarks(currentAccessToken);
@@ -32,7 +28,7 @@ export const GET: RequestHandler = async ({ cookies }) => {
 	} catch (error: any) {
 		console.error('[YSTU Marks Error]:', error);
 		if (error.message.includes('недействительна') || error.message.includes('expired')) {
-			clearAcademicCookies(cookies);
+			await clearYstuSessionForUser(context.user.id, context.isTelegram);
 		}
 		return json({ error: error.message || 'Ошибка при получении оценок' }, { status: 500 });
 	}

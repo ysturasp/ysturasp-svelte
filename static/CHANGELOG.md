@@ -1,3 +1,4 @@
+- refactor layout and styling in me page, updating classes and svg for improved design and user experience (ysturasp, 2026-01-09) [3 files changed, 24 insertions(+), 21 deletions(-)]
 - enhance telegram mini app integration by adding swipe behavior management in PageLayout component (ysturasp, 2026-01-08) [3 files changed, 12 insertions(+), 1 deletion(-)]
 - implement caching for schedule data using Redis in GET request handler and update API endpoints for institutes, audiences and teachers (ysturasp, 2026-01-07) [15 files changed, 359 insertions(+), 15 deletions(-)]
 - add external volume configuration for database in docker-compose file (ysturasp, 2026-01-07) [3 files changed, 4 insertions(+)]
