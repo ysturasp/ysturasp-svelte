@@ -1,3 +1,4 @@
+- update .env.example (ysturasp, 2026-01-09) [3 files changed, 7 insertions(+), 1 deletion(-)]
 - add YSTU_TOKENS_SECRET environment variable to Docker configuration in main and backup compose files (ysturasp, 2026-01-09) [5 files changed, 8 insertions(+), 1 deletion(-)]
 - update legal documents with enhance privacy policy with details on external service data handling (ysturasp, 2026-01-09) [6 files changed, 68 insertions(+), 4 deletions(-)]
 - refactor authentication handling by removing academic session management and integrating YSTU session management (ysturasp, 2026-01-09) [10 files changed, 272 insertions(+), 98 deletions(-)]
