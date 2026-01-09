@@ -1,3 +1,4 @@
+- update legal documents with enhance privacy policy with details on external service data handling (ysturasp, 2026-01-09) [6 files changed, 68 insertions(+), 4 deletions(-)]
 - refactor authentication handling by removing academic session management and integrating YSTU session management (ysturasp, 2026-01-09) [10 files changed, 272 insertions(+), 98 deletions(-)]
 - refactor layout and styling in me page, updating classes and svg for improved design and user experience (ysturasp, 2026-01-09) [3 files changed, 24 insertions(+), 21 deletions(-)]
 - enhance telegram mini app integration by adding swipe behavior management in PageLayout component (ysturasp, 2026-01-08) [3 files changed, 12 insertions(+), 1 deletion(-)]

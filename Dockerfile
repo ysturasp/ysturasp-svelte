@@ -40,6 +40,8 @@ ARG REDIS_HOST
 ARG REDIS_PORT
 ARG REDIS_PASSWORD
 ARG ONLINE_SECRET
+ARG YSTU_TOKENS_SECRET
+
 WORKDIR /app
 
 ENV NODE_ENV=production \
@@ -57,7 +59,8 @@ ENV NODE_ENV=production \
     REDIS_HOST=${REDIS_HOST:-} \
     REDIS_PORT=${REDIS_PORT:-} \
     REDIS_PASSWORD=${REDIS_PASSWORD:-} \
-    ONLINE_SECRET=${ONLINE_SECRET:-}
+    ONLINE_SECRET=${ONLINE_SECRET:-} \
+    YSTU_TOKENS_SECRET=${YSTU_TOKENS_SECRET:-}
     
 COPY --chown=nonroot:nonroot --from=prod-deps /app/node_modules ./node_modules
 COPY --chown=nonroot:nonroot --from=build /app/build ./build
