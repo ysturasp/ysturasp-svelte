@@ -1,3 +1,4 @@
+- refactor authentication handling by removing academic session management and integrating YSTU session management (ysturasp, 2026-01-09) [10 files changed, 272 insertions(+), 98 deletions(-)]
 - refactor layout and styling in me page, updating classes and svg for improved design and user experience (ysturasp, 2026-01-09) [3 files changed, 24 insertions(+), 21 deletions(-)]
 - enhance telegram mini app integration by adding swipe behavior management in PageLayout component (ysturasp, 2026-01-08) [3 files changed, 12 insertions(+), 1 deletion(-)]
 - implement caching for schedule data using Redis in GET request handler and update API endpoints for institutes, audiences and teachers (ysturasp, 2026-01-07) [15 files changed, 359 insertions(+), 15 deletions(-)]
