@@ -45,8 +45,10 @@ export const POST: RequestHandler = async ({ request, cookies, getClientAddress 
 
 	try {
 		body = await request.json();
-	} catch {
-		return buildErrorResponse('Некорректное тело запроса', 'InvalidRequest');
+	} catch (error) {
+		console.error('Ошибка парсинга тела запроса:', error);
+		const errorMessage = error instanceof Error ? error.message : 'Неизвестная ошибка';
+		return buildErrorResponse(`Некорректное тело запроса: ${errorMessage}`, 'InvalidRequest');
 	}
 
 	const base64 = body?.file;

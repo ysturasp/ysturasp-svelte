@@ -1,3 +1,4 @@
+- update padding on mobile in footer on pages with schedule switcher (ysturasp, 2026-01-09) [9 files changed, 9 insertions(+), 7 deletions(-)]
 - add new environment variables for private key, Redis configuration, and online secret in .env.example (ysturasp, 2026-01-09) [3 files changed, 7 insertions(+), 1 deletion(-)]
 - update .env.example (ysturasp, 2026-01-09) [3 files changed, 7 insertions(+), 1 deletion(-)]
 - add YSTU_TOKENS_SECRET environment variable to Docker configuration in main and backup compose files (ysturasp, 2026-01-09) [5 files changed, 8 insertions(+), 1 deletion(-)]
