@@ -560,7 +560,7 @@
 		{/if}
 	</main>
 
-	<Footer class_name="pb-28 md:pb-18" />
+	<Footer />
 </PageLayout>
 
 <style>

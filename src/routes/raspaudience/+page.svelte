@@ -526,7 +526,7 @@
 		{/if}
 	</main>
 
-	<Footer class_name="pb-28 md:pb-18" />
+	<Footer class_name="pb-38 md:pb-18" />
 	<NotificationsContainer hasScheduleSwitcher={true} />
 </PageLayout>
 
