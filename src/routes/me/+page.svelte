@@ -162,21 +162,28 @@
 				</div>
 			{/if}
 		{:else if !isLoggedIn && !isTelegramUser}
-			<div
-				in:fade
-				class="mx-auto mt-20 max-w-2xl rounded-3xl border border-white/5 bg-slate-900/60 p-10 text-center shadow-2xl backdrop-blur-xl"
-			>
+			<div in:fade class="mx-auto mt-20 max-w-2xl p-4 text-center">
 				<div
-					class="mx-auto mb-8 flex h-20 w-20 items-center justify-center rounded-2xl border border-blue-500/20 bg-blue-600/10"
+					class="mx-auto mb-8 flex h-20 w-20 items-center justify-center rounded-3xl border border-blue-500/20 bg-blue-600/10"
 				>
 					<svg
-						class="h-10 w-10 text-blue-500"
-						viewBox="0 0 24 24"
+						xmlns="http://www.w3.org/2000/svg"
+						viewBox="0 0 95 95"
+						class="h-14 w-14"
 						fill="none"
-						stroke="currentColor"
-						stroke-width="2"
 					>
-						<path d="M12 11V7a4 4 0 0 1 8 0v4h3v10H1V11h3V7a4 4 0 0 1 8 0v4" />
+						<path
+							fill-rule="evenodd"
+							clip-rule="evenodd"
+							d="M94.9997 73.8889C91.5433 86.0563 80.3544 95 67.0805 95H36.9443V73.8889H94.9997Z"
+							fill="#F07C00"
+						/>
+						<path
+							fill-rule="evenodd"
+							clip-rule="evenodd"
+							d="M0 65.9721C0 58.9596 2.45605 52.5178 6.59731 47.5C2.44174 42.4778 0 36.0537 0 29.0278C0 12.9989 12.9989 0 29.0277 0H94.9998V21.1112H29.0277C24.6562 21.1112 21.1111 24.6562 21.1111 29.0278C21.1111 33.3993 24.6562 36.9444 29.0277 36.9444H94.9998V58.0555H29.0277C24.6562 58.0555 21.1111 61.6005 21.1111 65.9721V94.9998H0V65.9721Z"
+							fill="#004589"
+						/>
 					</svg>
 				</div>
 
@@ -193,7 +200,7 @@
 						</div>
 						<p class="text-sm leading-snug text-slate-300">
 							Сначала нужно <b>войти через Google</b>, чтобы мы могли сохранить ваши
-							данные и показывать оценки.
+							данные и показывать оценки
 						</p>
 					</div>
 					<div class="flex items-start gap-4">
@@ -214,17 +221,14 @@
 				</div>
 			</div>
 		{:else if isLoggedIn && !student}
-			<div
-				in:fade
-				class="mx-auto mt-20 max-w-2xl rounded-3xl border border-white/5 bg-slate-900/60 p-10 text-center shadow-2xl backdrop-blur-xl"
-			>
+			<div in:fade class="mx-auto mt-20 max-w-2xl p-4 text-center">
 				<h1 class="mb-4 text-3xl font-black tracking-tight text-white uppercase">
 					Привязка кабинета ЯГТУ
 				</h1>
 
 				<p class="mx-auto mb-8 max-w-md text-sm leading-snug text-slate-300">
-					Вы вошли через Google. Теперь привяжите ваш
-					<b>личный кабинет ЯГТУ</b>, чтобы показывать оценки, средний балл и статистику.
+					Вы авторизованы - теперь привяжите
+					<b>личный кабинет ЯГТУ</b>, чтобы смотреть оценки, средний балл и статистику.
 				</p>
 
 				<div class="text-left">
@@ -232,10 +236,7 @@
 				</div>
 			</div>
 		{:else if !student}
-			<div
-				in:fade
-				class="mx-auto mt-20 max-w-2xl rounded-3xl border border-white/5 bg-slate-900/60 p-10 text-center shadow-2xl backdrop-blur-xl"
-			>
+			<div in:fade class="mx-auto mt-20 max-w-2xl p-4 text-center">
 				<div
 					class="mx-auto mb-8 flex h-20 w-20 items-center justify-center rounded-2xl border border-blue-500/20 bg-blue-600/10"
 				>
