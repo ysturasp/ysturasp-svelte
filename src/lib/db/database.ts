@@ -109,8 +109,62 @@ export async function initDatabase(isTelegram: boolean = false) {
 				return;
 			}
 
-			await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS ystu_id INTEGER UNIQUE`);
-			await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS ystu_data JSONB`);
+			const ystuIdColumnCheck = await pool.query(`
+				SELECT EXISTS (
+					SELECT 1 FROM information_schema.columns 
+					WHERE table_name = 'users' AND column_name = 'ystu_id'
+				)
+			`);
+
+			if (!ystuIdColumnCheck.rows[0]?.exists) {
+				await pool.query(`ALTER TABLE users ADD COLUMN ystu_id INTEGER UNIQUE`);
+			} else {
+				const uniqueCheck = await pool.query(`
+					SELECT EXISTS (
+						SELECT 1 FROM pg_constraint 
+						WHERE conrelid = 'users'::regclass 
+						AND conname LIKE '%ystu_id%'
+						AND contype = 'u'
+					)
+				`);
+				if (!uniqueCheck.rows[0]?.exists) {
+					try {
+						await pool.query(
+							`ALTER TABLE users ADD CONSTRAINT users_ystu_id_unique UNIQUE (ystu_id)`
+						);
+					} catch (constraintError: any) {
+						if (
+							!constraintError.message?.includes('duplicate') &&
+							!constraintError.message?.includes('violates')
+						) {
+							console.error(
+								'[initDatabase Telegram] Ошибка при добавлении UNIQUE constraint:',
+								constraintError
+							);
+						}
+					}
+				}
+			}
+
+			const ystuDataColumnCheck = await pool.query(`
+				SELECT EXISTS (
+					SELECT 1 FROM information_schema.columns 
+					WHERE table_name = 'users' AND column_name = 'ystu_data'
+				)
+			`);
+
+			if (!ystuDataColumnCheck.rows[0]?.exists) {
+				try {
+					await pool.query(`ALTER TABLE users ADD COLUMN ystu_data JSONB`);
+				} catch (e: any) {
+					if (e.message?.includes('type "jsonb" does not exist')) {
+						await pool.query(`ALTER TABLE users ADD COLUMN ystu_data TEXT`);
+					} else {
+						throw e;
+					}
+				}
+			}
+
 			await pool.query(`CREATE INDEX IF NOT EXISTS idx_users_ystu_id ON users(ystu_id)`);
 
 			console.log('Миграция ystu_id выполнена в БД бота');
@@ -303,9 +357,63 @@ export async function initDatabase(isTelegram: boolean = false) {
 				CREATE INDEX IF NOT EXISTS idx_promo_code_uses_user_id ON promo_code_uses(user_id);
 				CREATE INDEX IF NOT EXISTS idx_promo_code_uses_promo_code_id ON promo_code_uses(promo_code_id);
 			`);
+			const ystuIdColumnCheckBot = await pool.query(`
+				SELECT EXISTS (
+					SELECT 1 FROM information_schema.columns 
+					WHERE table_name = 'users' AND column_name = 'ystu_id'
+				)
+			`);
+
+			if (!ystuIdColumnCheckBot.rows[0]?.exists) {
+				await pool.query(`ALTER TABLE users ADD COLUMN ystu_id INTEGER UNIQUE`);
+			} else {
+				const uniqueCheckBot = await pool.query(`
+					SELECT EXISTS (
+						SELECT 1 FROM pg_constraint 
+						WHERE conrelid = 'users'::regclass 
+						AND conname LIKE '%ystu_id%'
+						AND contype = 'u'
+					)
+				`);
+				if (!uniqueCheckBot.rows[0]?.exists) {
+					try {
+						await pool.query(
+							`ALTER TABLE users ADD CONSTRAINT users_ystu_id_unique UNIQUE (ystu_id)`
+						);
+					} catch (constraintError: any) {
+						if (
+							!constraintError.message?.includes('duplicate') &&
+							!constraintError.message?.includes('violates')
+						) {
+							console.error(
+								'[initDatabase Bot] Ошибка при добавлении UNIQUE constraint:',
+								constraintError
+							);
+						}
+					}
+				}
+			}
+
+			const ystuDataColumnCheckBot = await pool.query(`
+				SELECT EXISTS (
+					SELECT 1 FROM information_schema.columns 
+					WHERE table_name = 'users' AND column_name = 'ystu_data'
+				)
+			`);
+
+			if (!ystuDataColumnCheckBot.rows[0]?.exists) {
+				try {
+					await pool.query(`ALTER TABLE users ADD COLUMN ystu_data JSONB`);
+				} catch (e: any) {
+					if (e.message?.includes('type "jsonb" does not exist')) {
+						await pool.query(`ALTER TABLE users ADD COLUMN ystu_data TEXT`);
+					} else {
+						throw e;
+					}
+				}
+			}
+
 			await pool.query(`
-				ALTER TABLE users ADD COLUMN IF NOT EXISTS ystu_id INTEGER UNIQUE;
-				ALTER TABLE users ADD COLUMN IF NOT EXISTS ystu_data JSONB;
 				ALTER TABLE users ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT NOW();
 				ALTER TABLE users ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT NOW();
 			`);
@@ -344,12 +452,67 @@ export async function initDatabase(isTelegram: boolean = false) {
 		}
 
 		try {
+			const ystuIdColumnCheck = await pool.query(`
+				SELECT EXISTS (
+					SELECT 1 FROM information_schema.columns 
+					WHERE table_name = 'users' AND column_name = 'ystu_id'
+				)
+			`);
+
+			if (!ystuIdColumnCheck.rows[0]?.exists) {
+				await pool.query(`ALTER TABLE users ADD COLUMN ystu_id INTEGER UNIQUE`);
+			} else {
+				const uniqueCheck = await pool.query(`
+					SELECT EXISTS (
+						SELECT 1 FROM pg_constraint 
+						WHERE conrelid = 'users'::regclass 
+						AND conname LIKE '%ystu_id%'
+						AND contype = 'u'
+					)
+				`);
+				if (!uniqueCheck.rows[0]?.exists) {
+					try {
+						await pool.query(
+							`ALTER TABLE users ADD CONSTRAINT users_ystu_id_unique UNIQUE (ystu_id)`
+						);
+					} catch (constraintError: any) {
+						if (
+							!constraintError.message?.includes('duplicate') &&
+							!constraintError.message?.includes('violates')
+						) {
+							console.error(
+								'[initDatabase] Ошибка при добавлении UNIQUE constraint:',
+								constraintError
+							);
+						}
+					}
+				}
+			}
+
+			const ystuDataColumnCheck = await pool.query(`
+				SELECT EXISTS (
+					SELECT 1 FROM information_schema.columns 
+					WHERE table_name = 'users' AND column_name = 'ystu_data'
+				)
+			`);
+
+			if (!ystuDataColumnCheck.rows[0]?.exists) {
+				try {
+					await pool.query(`ALTER TABLE users ADD COLUMN ystu_data JSONB`);
+				} catch (e: any) {
+					if (e.message?.includes('type "jsonb" does not exist')) {
+						await pool.query(`ALTER TABLE users ADD COLUMN ystu_data TEXT`);
+					} else {
+						throw e;
+					}
+				}
+			}
+
 			await pool.query(`
-				ALTER TABLE users ADD COLUMN IF NOT EXISTS ystu_id INTEGER UNIQUE;
-				ALTER TABLE users ADD COLUMN IF NOT EXISTS ystu_data JSONB;
 				ALTER TABLE users ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT NOW();
 				ALTER TABLE users ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT NOW();
 			`);
+
 			const cols = await pool.query(
 				"SELECT column_name FROM information_schema.columns WHERE table_name = 'users'"
 			);
@@ -375,8 +538,62 @@ export async function initDatabase(isTelegram: boolean = false) {
 				END $$;
 			`);
 
-			await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS ystu_id INTEGER UNIQUE`);
-			await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS ystu_data JSONB`);
+			const ystuIdColumnCheckMain = await pool.query(`
+				SELECT EXISTS (
+					SELECT 1 FROM information_schema.columns 
+					WHERE table_name = 'users' AND column_name = 'ystu_id'
+				)
+			`);
+
+			if (!ystuIdColumnCheckMain.rows[0]?.exists) {
+				await pool.query(`ALTER TABLE users ADD COLUMN ystu_id INTEGER UNIQUE`);
+			} else {
+				const uniqueCheckMain = await pool.query(`
+					SELECT EXISTS (
+						SELECT 1 FROM pg_constraint 
+						WHERE conrelid = 'users'::regclass 
+						AND conname LIKE '%ystu_id%'
+						AND contype = 'u'
+					)
+				`);
+				if (!uniqueCheckMain.rows[0]?.exists) {
+					try {
+						await pool.query(
+							`ALTER TABLE users ADD CONSTRAINT users_ystu_id_unique UNIQUE (ystu_id)`
+						);
+					} catch (constraintError: any) {
+						if (
+							!constraintError.message?.includes('duplicate') &&
+							!constraintError.message?.includes('violates')
+						) {
+							console.error(
+								'[initDatabase Main] Ошибка при добавлении UNIQUE constraint:',
+								constraintError
+							);
+						}
+					}
+				}
+			}
+
+			const ystuDataColumnCheckMain = await pool.query(`
+				SELECT EXISTS (
+					SELECT 1 FROM information_schema.columns 
+					WHERE table_name = 'users' AND column_name = 'ystu_data'
+				)
+			`);
+
+			if (!ystuDataColumnCheckMain.rows[0]?.exists) {
+				try {
+					await pool.query(`ALTER TABLE users ADD COLUMN ystu_data JSONB`);
+				} catch (e: any) {
+					if (e.message?.includes('type "jsonb" does not exist')) {
+						await pool.query(`ALTER TABLE users ADD COLUMN ystu_data TEXT`);
+					} else {
+						throw e;
+					}
+				}
+			}
+
 			await pool.query(`CREATE INDEX IF NOT EXISTS idx_users_ystu_id ON users(ystu_id)`);
 
 			console.log('Миграция основной БД выполнена');

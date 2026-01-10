@@ -485,8 +485,62 @@ export async function linkYstuAccount(
 	if (!pool) throw new Error('База данных недоступна');
 
 	try {
-		await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS ystu_id INTEGER UNIQUE`);
-		await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS ystu_data JSONB`);
+		const ystuIdColumnCheck = await pool.query(`
+			SELECT EXISTS (
+				SELECT 1 FROM information_schema.columns 
+				WHERE table_name = 'users' AND column_name = 'ystu_id'
+			)
+		`);
+
+		if (!ystuIdColumnCheck.rows[0]?.exists) {
+			await pool.query(`ALTER TABLE users ADD COLUMN ystu_id INTEGER UNIQUE`);
+		} else {
+			const uniqueCheck = await pool.query(`
+				SELECT EXISTS (
+					SELECT 1 FROM pg_constraint 
+					WHERE conrelid = 'users'::regclass 
+					AND conname LIKE '%ystu_id%'
+					AND contype = 'u'
+				)
+			`);
+			if (!uniqueCheck.rows[0]?.exists) {
+				try {
+					await pool.query(
+						`ALTER TABLE users ADD CONSTRAINT users_ystu_id_unique UNIQUE (ystu_id)`
+					);
+				} catch (constraintError: any) {
+					if (
+						!constraintError.message?.includes('duplicate') &&
+						!constraintError.message?.includes('violates')
+					) {
+						console.error(
+							'[Migration Error]: Failed to add UNIQUE constraint:',
+							constraintError
+						);
+					}
+				}
+			}
+		}
+
+		const ystuDataColumnCheck = await pool.query(`
+			SELECT EXISTS (
+				SELECT 1 FROM information_schema.columns 
+				WHERE table_name = 'users' AND column_name = 'ystu_data'
+			)
+		`);
+
+		if (!ystuDataColumnCheck.rows[0]?.exists) {
+			try {
+				await pool.query(`ALTER TABLE users ADD COLUMN ystu_data JSONB`);
+			} catch (e: any) {
+				if (e.message?.includes('type "jsonb" does not exist')) {
+					await pool.query(`ALTER TABLE users ADD COLUMN ystu_data TEXT`);
+				} else {
+					throw e;
+				}
+			}
+		}
+
 		await pool.query(
 			`ALTER TABLE users ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT NOW()`
 		);

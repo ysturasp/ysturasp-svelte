@@ -1,3 +1,4 @@
+- implement caching for disciplines and subject statistics using redis, adding new utility functions for cache key generation (ysturasp, 2026-01-10) [5 files changed, 66 insertions(+)]
 - unify and normalize redis keys for app and telegram bot to prevent duplicates (ysturasp, 2026-01-10) [12 files changed, 59 insertions(+), 16 deletions(-)]
 - refactor write access handling in layout component to support Telegram mini app detection and adjust app initialization logic accordingly (ysturasp, 2026-01-10) [3 files changed, 8 insertions(+), 3 deletions(-)]
 - implement write access permission handling in layout component, integrating WriteAccessGate and refactoring app initialization logic (ysturasp, 2026-01-10) [5 files changed, 570 insertions(+), 40 deletions(-)]
