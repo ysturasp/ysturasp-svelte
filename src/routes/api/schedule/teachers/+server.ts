@@ -1,12 +1,13 @@
 import { json } from '@sveltejs/kit';
 import { getRedisClient } from '$lib/config/redis';
+import { getTeachersListKey } from '$lib/utils/redis-keys';
 
 const API_BASE = 'https://gg-api.ystuty.ru/s/schedule/v1/schedule';
 const CACHE_TTL = 3600;
 
 export async function GET() {
 	try {
-		const cacheKey = 'schedule:teachers';
+		const cacheKey = getTeachersListKey();
 		const redis = getRedisClient();
 
 		try {

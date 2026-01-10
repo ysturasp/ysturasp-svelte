@@ -160,10 +160,12 @@ export async function logout(accessToken: string): Promise<{ logout: number }> {
 	return response.json();
 }
 
+import { getActualGroupsKey } from '$lib/utils/redis-keys';
+
 export async function getActualGroups(): Promise<{
 	items: Array<{ name: string; groups: string[] }>;
 }> {
-	const cacheKey = 'ystu:actual_groups';
+	const cacheKey = getActualGroupsKey();
 	try {
 		const { getRedisClient } = await import('$lib/config/redis');
 		const redis = getRedisClient();

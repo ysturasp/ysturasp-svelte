@@ -2,6 +2,7 @@ import { json } from '@sveltejs/kit';
 import * as XLSX from 'xlsx';
 import type { RequestEvent } from '@sveltejs/kit';
 import { getRedisClient } from '$lib/config/redis';
+import { getYspuScheduleKey } from '$lib/utils/redis-keys';
 
 interface TimeSlot {
 	start: string;
@@ -779,7 +780,7 @@ async function parseSchedule(fileId: string) {
 export async function GET({ params }: RequestEvent) {
 	try {
 		const fileId = params.id as string;
-		const cacheKey = `schedule:yspu:${fileId}`;
+		const cacheKey = getYspuScheduleKey(fileId);
 		const redis = getRedisClient();
 		const CACHE_TTL = 3600;
 

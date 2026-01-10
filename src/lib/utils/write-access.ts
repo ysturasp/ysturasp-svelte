@@ -3,9 +3,6 @@ import { checkIsTelegramMiniApp } from './telegram';
 
 export type WriteAccessStatus = 'allowed' | 'denied' | 'blocked' | 'error' | 'not_telegram';
 
-/**
- * Ожидает загрузки Telegram WebApp API (быстрое ожидание)
- */
 function waitForTelegramWebApp(maxWait = 500): Promise<any> {
 	return new Promise((resolve) => {
 		if (!browser) {
@@ -35,11 +32,6 @@ function waitForTelegramWebApp(maxWait = 500): Promise<any> {
 	});
 }
 
-/**
- * Проверяет и запрашивает доступ на отправку сообщений от бота пользователю
- * Должен вызываться после инициализации Telegram SDK
- * @returns Статус доступа: 'allowed' - разрешено, 'denied' - отказано, 'blocked' - бот заблокирован, 'error' - ошибка, 'not_telegram' - не Telegram
- */
 export async function requestWriteAccessPermission(): Promise<WriteAccessStatus> {
 	if (!browser) {
 		return 'not_telegram';

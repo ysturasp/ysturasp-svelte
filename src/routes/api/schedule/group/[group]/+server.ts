@@ -1,6 +1,7 @@
 import { json } from '@sveltejs/kit';
 import type { RequestEvent } from '@sveltejs/kit';
 import { getRedisClient } from '$lib/config/redis';
+import { getGroupScheduleKey } from '$lib/utils/redis-keys';
 
 const API_BASE = 'https://gg-api.ystuty.ru/s/schedule/v1/schedule';
 const CACHE_TTL = 3600;
@@ -12,7 +13,7 @@ export async function GET({ params }: RequestEvent) {
 			return json({ error: 'Group parameter is required' }, { status: 400 });
 		}
 
-		const cacheKey = `schedule:group:${group}`;
+		const cacheKey = getGroupScheduleKey(group);
 		const redis = getRedisClient();
 
 		try {
