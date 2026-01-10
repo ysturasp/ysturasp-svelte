@@ -1,3 +1,4 @@
+- implement write access permission handling in layout component, integrating WriteAccessGate and refactoring app initialization logic (ysturasp, 2026-01-10) [5 files changed, 570 insertions(+), 40 deletions(-)]
 - add BODY_SIZE_LIMIT environment variable to Docker configuration and improve error handling in API request parsing (ysturasp, 2026-01-10) [6 files changed, 9 insertions(+), 2 deletions(-)]
 - update padding on mobile in footer on pages with schedule switcher (ysturasp, 2026-01-09) [9 files changed, 9 insertions(+), 7 deletions(-)]
 - add new environment variables for private key, Redis configuration, and online secret in .env.example (ysturasp, 2026-01-09) [3 files changed, 7 insertions(+), 1 deletion(-)]

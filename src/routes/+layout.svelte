@@ -30,9 +30,12 @@
 	let showServiceStatusModal = $state(false);
 	let downServices = $state<UptimeRobotMonitor[]>([]);
 	let totalDown = $state(0);
-	let writeAccessStatus = $state<WriteAccessStatus | null>(null);
-	let isCheckingWriteAccess = $state(true);
-	let appReady = $state(false);
+	const isTelegramInitially = browser ? checkIsTelegramMiniApp() : false;
+	let writeAccessStatus = $state<WriteAccessStatus | null>(
+		isTelegramInitially ? null : 'not_telegram'
+	);
+	let isCheckingWriteAccess = $state(isTelegramInitially);
+	let appReady = $state(!isTelegramInitially);
 	let cleanupOffline: (() => void) | undefined;
 
 	function updateBack(currentPath: string) {
