@@ -21,6 +21,8 @@
 	import { page } from '$app/stores';
 	import { auth } from '$lib/stores/auth';
 	import { checkIsTelegramMiniApp } from '$lib/utils/telegram';
+	import { requestWriteAccessPermission, type WriteAccessStatus } from '$lib/utils/write-access';
+	import WriteAccessGate from '$lib/components/modals/WriteAccessGate.svelte';
 
 	let { children } = $props();
 
@@ -28,6 +30,10 @@
 	let showServiceStatusModal = $state(false);
 	let downServices = $state<UptimeRobotMonitor[]>([]);
 	let totalDown = $state(0);
+	let writeAccessStatus = $state<WriteAccessStatus | null>(null);
+	let isCheckingWriteAccess = $state(true);
+	let appReady = $state(false);
+	let cleanupOffline: (() => void) | undefined;
 
 	function updateBack(currentPath: string) {
 		try {
@@ -55,27 +61,8 @@
 		}
 	}
 
-	onMount(() => {
-		if (browser) {
-			const hash = window.location.hash;
-			const migrationMatch = hash.match(/#migration=(.+)/);
-			if (migrationMatch) {
-				decodeMigrationData(migrationMatch[1]).then((decodedData) => {
-					if (decodedData) {
-						restoreUserData(decodedData);
-						localStorage.setItem('migration_completed', 'true');
-						const newUrl = window.location.pathname + window.location.search;
-						window.history.replaceState(null, '', newUrl);
-						setTimeout(() => {
-							window.location.reload();
-						}, 100);
-						return;
-					}
-				});
-			}
-		}
-
-		let cleanupOffline: (() => void) | undefined;
+	function initializeApp() {
+		if (!browser) return;
 
 		offlineStore.init().then((cleanup) => {
 			cleanupOffline = cleanup;
@@ -159,34 +146,117 @@
 				}
 			})();
 		}
+	}
+
+	onMount(() => {
+		(async () => {
+			if (browser) {
+				const isTelegramCheck = checkIsTelegramMiniApp();
+				if (isTelegramCheck) {
+					try {
+						isCheckingWriteAccess = true;
+
+						try {
+							init();
+						} catch (initError) {
+							console.warn('Ошибка при инициализации Telegram SDK:', initError);
+						}
+
+						const accessStatus = await requestWriteAccessPermission();
+						writeAccessStatus = accessStatus;
+
+						if (accessStatus !== 'allowed' && accessStatus !== 'not_telegram') {
+							isCheckingWriteAccess = false;
+							appReady = false;
+						} else {
+							isCheckingWriteAccess = false;
+							appReady = true;
+							initializeAppAfterAccessCheck();
+						}
+					} catch (error) {
+						console.error('Ошибка при проверке доступа на отправку сообщений:', error);
+						writeAccessStatus = 'error';
+						isCheckingWriteAccess = false;
+						appReady = false;
+					}
+				} else {
+					isCheckingWriteAccess = false;
+					appReady = true;
+					initializeAppAfterAccessCheck();
+				}
+			} else {
+				isCheckingWriteAccess = false;
+				appReady = true;
+				initializeAppAfterAccessCheck();
+			}
+		})();
+
+		const handleWriteAccessAllowed = () => {
+			if (!appReady && writeAccessStatus === 'allowed') {
+				isCheckingWriteAccess = false;
+				appReady = true;
+				initializeAppAfterAccessCheck();
+			}
+		};
+
+		if (browser) {
+			window.addEventListener('writeAccessAllowed', handleWriteAccessAllowed);
+		}
 
 		return () => {
-			if (isTelegram) {
-				try {
-					backButton.unmount();
-					backButton.offClick(handleBack);
-				} catch {}
+			if (browser) {
+				window.removeEventListener('writeAccessAllowed', handleWriteAccessAllowed);
 			}
 			cleanupOffline?.();
 		};
 	});
+
+	function initializeAppAfterAccessCheck() {
+		if (!browser) return;
+
+		const hash = window.location.hash;
+		const migrationMatch = hash.match(/#migration=(.+)/);
+		if (migrationMatch) {
+			decodeMigrationData(migrationMatch[1]).then((decodedData) => {
+				if (decodedData) {
+					restoreUserData(decodedData);
+					localStorage.setItem('migration_completed', 'true');
+					const newUrl = window.location.pathname + window.location.search;
+					window.history.replaceState(null, '', newUrl);
+					setTimeout(() => {
+						window.location.reload();
+					}, 100);
+					return;
+				}
+			});
+		}
+
+		initializeApp();
+	}
 
 	afterNavigate(() => {
 		updateBack(window.location.pathname);
 	});
 </script>
 
-<Preloader />
-<Snow />
-<YandexMetrica id={97705826} />
-<OfflineModal isOpen={$showOfflineModal} />
-<ServiceStatusModal
-	isOpen={showServiceStatusModal}
-	{downServices}
-	onClose={() => {
-		showServiceStatusModal = false;
-	}}
-/>
-<DomainMigrationModal />
-<NewYearPromoBanner />
-{@render children()}
+{#if (!appReady || isCheckingWriteAccess) && writeAccessStatus !== 'not_telegram'}
+	<WriteAccessGate
+		status={writeAccessStatus || 'denied'}
+		bind:isChecking={isCheckingWriteAccess}
+	/>
+{:else if appReady}
+	<Preloader />
+	<Snow />
+	<YandexMetrica id={97705826} />
+	<OfflineModal isOpen={$showOfflineModal} />
+	<ServiceStatusModal
+		isOpen={showServiceStatusModal}
+		{downServices}
+		onClose={() => {
+			showServiceStatusModal = false;
+		}}
+	/>
+	<DomainMigrationModal />
+	<NewYearPromoBanner />
+	{@render children()}
+{/if}
