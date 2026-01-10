@@ -1,3 +1,4 @@
+- unify and normalize redis keys for app and telegram bot to prevent duplicates (ysturasp, 2026-01-10) [12 files changed, 59 insertions(+), 16 deletions(-)]
 - refactor write access handling in layout component to support Telegram mini app detection and adjust app initialization logic accordingly (ysturasp, 2026-01-10) [3 files changed, 8 insertions(+), 3 deletions(-)]
 - implement write access permission handling in layout component, integrating WriteAccessGate and refactoring app initialization logic (ysturasp, 2026-01-10) [5 files changed, 570 insertions(+), 40 deletions(-)]
 - add BODY_SIZE_LIMIT environment variable to Docker configuration and improve error handling in API request parsing (ysturasp, 2026-01-10) [6 files changed, 9 insertions(+), 2 deletions(-)]

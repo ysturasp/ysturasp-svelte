@@ -38,3 +38,11 @@ export function getAudiencesListKey(): string {
 export function getYspuScheduleKey(fileId: string): string {
 	return `schedule:yspu:${fileId.trim()}`;
 }
+
+export function getStatisticsDisciplinesKey(institute: string): string {
+	return `statistics:disciplines:${institute}`;
+}
+
+export function getStatisticsSubjectKey(institute: string, discipline: string): string {
+	return `statistics:subject:${institute}:${encodeURIComponent(discipline)}`;
+}
