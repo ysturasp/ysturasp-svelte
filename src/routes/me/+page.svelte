@@ -32,8 +32,15 @@
 
 	$: student = $auth.academicUser;
 	$: details = $auth.academicDetailedUser;
+	$: studentPhotoUrl = student?.photoUrl || $auth.user?.picture || '';
 
-	$: if (student?.groupName && myStats && myStats.total > 0) {
+	$: if (
+		student?.groupName &&
+		myStats &&
+		myStats.total > 0 &&
+		details?.course &&
+		details.course > 1
+	) {
 		fetchGroupStats(student.groupName, myStats.average);
 	}
 
@@ -65,7 +72,8 @@
 		groupStats && myStats && myStats.average > 0
 			? (myStats.average - groupStats.average).toFixed(2)
 			: null;
-	$: hasRequiredData = !!student && !!myStats && (!student.groupName || !!groupStats);
+	$: hasRequiredData =
+		!!student && !!myStats && (!student.groupName || !!groupStats || details?.course === 1);
 	$: isAuthChecked = !$auth.loading && !$auth.academicLoading;
 	$: isLoggedIn = $auth.authenticated;
 	$: isTelegramUser = $auth.isTelegram;
@@ -331,7 +339,7 @@
 					<div class="flex flex-1 items-center gap-6">
 						<div class="relative flex-shrink-0">
 							<img
-								src={student.photoUrl}
+								src={studentPhotoUrl}
 								alt="Student"
 								class="h-24 w-24 rounded-2xl border border-slate-700 object-cover shadow-2xl md:h-32 md:w-32"
 							/>
@@ -381,44 +389,37 @@
 							</div>
 							<div>
 								<div
-									class="mb-1 text-[10px] font-bold tracking-wider text-slate-500 uppercase"
+									class="mb-1 flex items-baseline gap-1.5 text-[10px] font-bold tracking-wider text-slate-500 uppercase"
 								>
-									Всего
+									<span>Всего</span>
+									{#if myStats && (myStats.grades > 0 || myStats.credits > 0)}
+										<span
+											class="text-[9px] font-normal tracking-normal text-slate-600 normal-case"
+										>
+											({#if myStats.grades > 0}
+												{myStats.grades}
+												{pluralize(myStats.grades, [
+													'оценка',
+													'оценки',
+													'оценок'
+												])}
+											{/if}{#if myStats.grades > 0 && myStats.credits > 0},
+											{/if}{#if myStats.credits > 0}
+												{myStats.credits}
+												{pluralize(myStats.credits, [
+													'зачет',
+													'зачета',
+													'зачетов'
+												])}
+											{/if})
+										</span>
+									{/if}
 								</div>
 								<div
 									class="text-5xl leading-none font-bold tracking-tighter text-white md:text-7xl"
 								>
 									{myStats ? myStats.total : '—'}
 								</div>
-								{#if myStats && (myStats.grades > 0 || myStats.credits > 0)}
-									<div
-										class="mt-1 flex items-center gap-1.5 text-[9px] font-medium text-slate-500"
-									>
-										{#if myStats.grades > 0}
-											<span
-												>{myStats.grades}
-												{pluralize(myStats.grades, [
-													'оценка',
-													'оценки',
-													'оценок'
-												])}</span
-											>
-										{/if}
-										{#if myStats.grades > 0 && myStats.credits > 0}
-											<span class="text-slate-600">·</span>
-										{/if}
-										{#if myStats.credits > 0}
-											<span class="text-[8px] text-slate-600"
-												>{myStats.credits}
-												{pluralize(myStats.credits, [
-													'зачет',
-													'зачета',
-													'зачетов'
-												])}</span
-											>
-										{/if}
-									</div>
-								{/if}
 							</div>
 						</div>
 
@@ -497,7 +498,18 @@
 							>
 								<div class="flex flex-col"></div>
 
-								{#if groupStats}
+								{#if details?.course === 1}
+									<div class="flex flex-col items-start gap-1.5 sm:items-end">
+										<div
+											class="text-[10px] font-bold tracking-widest text-slate-500 uppercase"
+										>
+											Рейтинг в группе
+										</div>
+										<div class="text-sm font-medium text-slate-400">
+											Недостаточно данных
+										</div>
+									</div>
+								{:else if groupStats}
 									<div class="flex flex-col items-start gap-1.5 sm:items-end">
 										<div
 											class="flex w-full items-center justify-between gap-4 sm:w-auto"

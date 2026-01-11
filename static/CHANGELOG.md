@@ -1,3 +1,4 @@
+- enhance stats structure to include grades and credits, and update grades component to calculate valid marks and credits accurately (ysturasp, 2026-01-11) [4 files changed, 51 insertions(+), 2 deletions(-)]
 - refactor database schema to use camelCase for createdAt and updatedAt fields in users table (ysturasp, 2026-01-11) [4 files changed, 20 insertions(+), 18 deletions(-)]
 - refactor database initialization to check for existing columns and constraints before adding ystu_id and ystu_data in users table (ysturasp, 2026-01-10) [4 files changed, 283 insertions(+), 10 deletions(-)]
 - implement caching for disciplines and subject statistics using redis, adding new utility functions for cache key generation (ysturasp, 2026-01-10) [5 files changed, 66 insertions(+)]
