@@ -83,9 +83,16 @@
 				: '0.00';
 	}
 
+	$: validMarks = marks.filter((m) => m.mark > 0);
+	$: credits = marks.filter(
+		(m) => m.mark === 0 && m.markName?.toLowerCase().includes('зачет')
+	).length;
+
 	$: dispatch('averageUpdate', {
 		average: parseFloat(averageMark),
-		total: marks.length,
+		total: validMarks.length,
+		credits: credits,
+		grades: validMarks.length,
 		counts
 	});
 

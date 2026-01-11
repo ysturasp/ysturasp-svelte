@@ -13,7 +13,13 @@
 	import { EDUCATION_FORMS } from '$lib/constants/ystu';
 
 	let groupStats: { average: number; count: number; institute?: string } | null = null;
-	let myStats: { average: number; total: number; counts: any } | null = null;
+	let myStats: {
+		average: number;
+		total: number;
+		credits: number;
+		grades: number;
+		counts: any;
+	} | null = null;
 
 	onMount(async () => {
 		await auth.checkAuth();
@@ -48,6 +54,11 @@
 
 	function handleStatsUpdate(event: any) {
 		myStats = event.detail;
+	}
+
+	function pluralize(count: number, forms: [string, string, string]): string {
+		const cases = [2, 0, 1, 1, 1, 2];
+		return forms[count % 100 > 4 && count % 100 < 20 ? 2 : cases[Math.min(count % 10, 5)]];
 	}
 
 	$: diff =
@@ -379,6 +390,35 @@
 								>
 									{myStats ? myStats.total : '—'}
 								</div>
+								{#if myStats && (myStats.grades > 0 || myStats.credits > 0)}
+									<div
+										class="mt-1 flex items-center gap-1.5 text-[9px] font-medium text-slate-500"
+									>
+										{#if myStats.grades > 0}
+											<span
+												>{myStats.grades}
+												{pluralize(myStats.grades, [
+													'оценка',
+													'оценки',
+													'оценок'
+												])}</span
+											>
+										{/if}
+										{#if myStats.grades > 0 && myStats.credits > 0}
+											<span class="text-slate-600">·</span>
+										{/if}
+										{#if myStats.credits > 0}
+											<span class="text-[8px] text-slate-600"
+												>{myStats.credits}
+												{pluralize(myStats.credits, [
+													'зачет',
+													'зачета',
+													'зачетов'
+												])}</span
+											>
+										{/if}
+									</div>
+								{/if}
 							</div>
 						</div>
 

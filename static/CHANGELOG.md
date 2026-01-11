@@ -1,3 +1,4 @@
+- refactor database schema to use camelCase for createdAt and updatedAt fields in users table (ysturasp, 2026-01-11) [4 files changed, 20 insertions(+), 18 deletions(-)]
 - refactor database initialization to check for existing columns and constraints before adding ystu_id and ystu_data in users table (ysturasp, 2026-01-10) [4 files changed, 283 insertions(+), 10 deletions(-)]
 - implement caching for disciplines and subject statistics using redis, adding new utility functions for cache key generation (ysturasp, 2026-01-10) [5 files changed, 66 insertions(+)]
 - unify and normalize redis keys for app and telegram bot to prevent duplicates (ysturasp, 2026-01-10) [12 files changed, 59 insertions(+), 16 deletions(-)]
