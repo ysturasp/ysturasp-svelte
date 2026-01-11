@@ -9,8 +9,8 @@ export interface User {
 	name: string | null;
 	picture: string | null;
 	referral_code: string | null;
-	created_at: Date;
-	updated_at: Date;
+	createdAt: Date;
+	updatedAt: Date;
 	chatId?: string | null;
 	username?: string | null;
 	firstName?: string | null;
@@ -82,7 +82,7 @@ export async function createUser(
 					SELECT column_name 
 					FROM information_schema.columns 
 					WHERE table_name='users' 
-					AND column_name IN ('email', 'name', 'picture', 'username', 'firstName', 'lastName', 'updated_at')
+					AND column_name IN ('email', 'name', 'picture', 'username', 'firstName', 'lastName', 'updatedAt')
 				`);
 				const existingColumns = new Set(columnCheck.rows.map((r: any) => r.column_name));
 
@@ -141,8 +141,8 @@ export async function createUser(
 				}
 
 				if (updateFields.length > 0) {
-					if (existingColumns.has('updated_at')) {
-						updateFields.push('updated_at = NOW()');
+					if (existingColumns.has('updatedAt')) {
+						updateFields.push('"updatedAt" = NOW()');
 					}
 					updateParams.push(existing.id);
 					await pool.query(
@@ -452,14 +452,14 @@ export async function getOrCreateUser(
 				const columnCheck = await pool.query(`
 					SELECT EXISTS (
 						SELECT 1 FROM information_schema.columns 
-						WHERE table_name='users' AND column_name='updated_at'
+						WHERE table_name='users' AND column_name='updatedAt'
 					)
 				`);
 				if (columnCheck.rows[0]?.exists) {
-					updateFields.push('updated_at = NOW()');
+					updateFields.push('"updatedAt" = NOW()');
 				}
 			} else {
-				updateFields.push('updated_at = NOW()');
+				updateFields.push('"updatedAt" = NOW()');
 			}
 			updateParams.push(existing.id);
 			await pool.query(
@@ -542,10 +542,10 @@ export async function linkYstuAccount(
 		}
 
 		await pool.query(
-			`ALTER TABLE users ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT NOW()`
+			`ALTER TABLE users ADD COLUMN IF NOT EXISTS "createdAt" TIMESTAMP DEFAULT NOW()`
 		);
 		await pool.query(
-			`ALTER TABLE users ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT NOW()`
+			`ALTER TABLE users ADD COLUMN IF NOT EXISTS "updatedAt" TIMESTAMP DEFAULT NOW()`
 		);
 		await pool.query(`CREATE INDEX IF NOT EXISTS idx_users_ystu_id ON users(ystu_id)`);
 	} catch (e: any) {
@@ -561,7 +561,7 @@ export async function linkYstuAccount(
 
 	try {
 		await pool.query(
-			'UPDATE users SET ystu_id = $1, ystu_data = $2, updated_at = NOW() WHERE id = $3',
+			'UPDATE users SET ystu_id = $1, ystu_data = $2, "updatedAt" = NOW() WHERE id = $3',
 			[ystuId, typeof ystuData === 'object' ? JSON.stringify(ystuData) : ystuData, userId]
 		);
 	} catch (error: any) {
@@ -578,7 +578,7 @@ export async function unlinkYstuAccount(
 	if (!pool) throw new Error('База данных недоступна');
 
 	await pool.query(
-		'UPDATE users SET ystu_id = NULL, ystu_data = NULL, updated_at = NOW() WHERE id = $1',
+		'UPDATE users SET ystu_id = NULL, ystu_data = NULL, "updatedAt" = NOW() WHERE id = $1',
 		[userId]
 	);
 }

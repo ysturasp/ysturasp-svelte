@@ -414,8 +414,8 @@ export async function initDatabase(isTelegram: boolean = false) {
 			}
 
 			await pool.query(`
-				ALTER TABLE users ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT NOW();
-				ALTER TABLE users ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT NOW();
+				ALTER TABLE users ADD COLUMN IF NOT EXISTS "createdAt" TIMESTAMP DEFAULT NOW();
+				ALTER TABLE users ADD COLUMN IF NOT EXISTS "updatedAt" TIMESTAMP DEFAULT NOW();
 			`);
 			console.log('Поля для YSTU и таймстампы проверены/созданы в БД бота');
 			console.log('Инициализация БД бота завершена успешно');
@@ -442,8 +442,8 @@ export async function initDatabase(isTelegram: boolean = false) {
 					referral_code TEXT UNIQUE,
 					ystu_id INTEGER UNIQUE,
 					ystu_data JSONB,
-					created_at TIMESTAMP DEFAULT NOW(),
-					updated_at TIMESTAMP DEFAULT NOW()
+					"createdAt" TIMESTAMP DEFAULT NOW(),
+					"updatedAt" TIMESTAMP DEFAULT NOW()
 				)
 			`);
 			console.log('Таблица users создана в основной БД');
@@ -509,8 +509,8 @@ export async function initDatabase(isTelegram: boolean = false) {
 			}
 
 			await pool.query(`
-				ALTER TABLE users ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT NOW();
-				ALTER TABLE users ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT NOW();
+				ALTER TABLE users ADD COLUMN IF NOT EXISTS "createdAt" TIMESTAMP DEFAULT NOW();
+				ALTER TABLE users ADD COLUMN IF NOT EXISTS "updatedAt" TIMESTAMP DEFAULT NOW();
 			`);
 
 			const cols = await pool.query(
