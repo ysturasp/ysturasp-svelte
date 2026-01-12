@@ -363,7 +363,7 @@
 								class="text-3xl leading-[0.9] font-bold tracking-tight text-white uppercase md:text-5xl"
 							>
 								{student.lastName}<br />
-								<span class="text-blue-500"
+								<span class="text-2xl text-blue-500 md:text-4xl"
 									>{student.firstName} {student.patronymic}</span
 								>
 							</h1>
