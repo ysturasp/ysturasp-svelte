@@ -5,6 +5,7 @@ export const GET: RequestHandler = ({ url }) => {
 
 	const content = `User-agent: *
 Host: ${url.host}
+Disallow: /promo2026
 Sitemap: ${origin}/sitemap.xml
 Clean-param: week&semester /rasp
 Clean-param: week&semester /raspprep

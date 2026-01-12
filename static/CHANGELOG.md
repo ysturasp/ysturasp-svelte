@@ -1,3 +1,4 @@
+- update post-New Year promotion end date to January 25 and adjust discount percentage to 70% (ysturasp, 2026-01-12) [3 files changed, 4 insertions(+), 2 deletions(-)]
 - update student details handling and improve group stats fetching logic in profile page (ysturasp, 2026-01-11) [3 files changed, 48 insertions(+), 34 deletions(-)]
 - enhance stats structure to include grades and credits, and update grades component to calculate valid marks and credits accurately (ysturasp, 2026-01-11) [4 files changed, 51 insertions(+), 2 deletions(-)]
 - refactor database schema to use camelCase for createdAt and updatedAt fields in users table (ysturasp, 2026-01-11) [4 files changed, 20 insertions(+), 18 deletions(-)]
