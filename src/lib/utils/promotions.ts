@@ -15,7 +15,7 @@ export function getCurrentPromotion(): Promotion | null {
 	const preNewYearEnd = new Date(currentYear, 11, 31, 23, 59, 59);
 
 	const postNewYearStart = new Date(currentYear, 0, 1);
-	const postNewYearEnd = new Date(currentYear, 0, 15, 23, 59, 59);
+	const postNewYearEnd = new Date(currentYear, 0, 25, 23, 59, 59);
 
 	if (now >= preNewYearStart && now <= preNewYearEnd) {
 		return {
@@ -31,7 +31,7 @@ export function getCurrentPromotion(): Promotion | null {
 	if (now >= postNewYearStart && now <= postNewYearEnd) {
 		return {
 			isActive: true,
-			discountPercent: 75,
+			discountPercent: 70,
 			name: 'Новогодняя акция',
 			description: 'Скидка на всё!',
 			startDate: postNewYearStart,

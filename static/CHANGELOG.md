@@ -1,3 +1,4 @@
+- update student details handling and improve group stats fetching logic in profile page (ysturasp, 2026-01-11) [3 files changed, 48 insertions(+), 34 deletions(-)]
 - enhance stats structure to include grades and credits, and update grades component to calculate valid marks and credits accurately (ysturasp, 2026-01-11) [4 files changed, 51 insertions(+), 2 deletions(-)]
 - refactor database schema to use camelCase for createdAt and updatedAt fields in users table (ysturasp, 2026-01-11) [4 files changed, 20 insertions(+), 18 deletions(-)]
 - refactor database initialization to check for existing columns and constraints before adding ystu_id and ystu_data in users table (ysturasp, 2026-01-10) [4 files changed, 283 insertions(+), 10 deletions(-)]
