@@ -1,3 +1,4 @@
+- fix text size for name and patronymic in /me page (ysturasp, 2026-01-12) [3 files changed, 3 insertions(+), 1 deletion(-)]
 - add rules for new year promoactions and procodes (ysturasp, 2026-01-12) [4 files changed, 393 insertions(+)]
 - update post-New Year promotion end date to January 25 and adjust discount percentage to 70% (ysturasp, 2026-01-12) [3 files changed, 4 insertions(+), 2 deletions(-)]
 - update student details handling and improve group stats fetching logic in profile page (ysturasp, 2026-01-11) [3 files changed, 48 insertions(+), 34 deletions(-)]
