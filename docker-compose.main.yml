@@ -5,7 +5,7 @@ services:
             args:
                 - VITE_NOTIFICATIONS_API_URL=${VITE_NOTIFICATIONS_API_URL}
         ports:
-            - 'localhost:5173:5173'
+            - '127.0.0.1:5173:5173'
         environment:
             - PRIVATE_KEY=${PRIVATE_KEY}
             - GROQ_API_KEY=${GROQ_API_KEY}
