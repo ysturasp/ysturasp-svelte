@@ -1,3 +1,4 @@
+- update docker-compose.traefik.yml to bind service ports to 127.0.0.1 for enhanced security (ysturasp, 2026-01-13) [3 files changed, 5 insertions(+), 3 deletions(-)]
 - fix docker-compose files to bind ports to 127.0.0.1 (ysturasp, 2026-01-13) [4 files changed, 4 insertions(+), 2 deletions(-)]
 - update docker-compose files to bind ports to localhost for improved security (ysturasp, 2026-01-13) [4 files changed, 4 insertions(+), 2 deletions(-)]
 - fix text size for name and patronymic in /me page (ysturasp, 2026-01-12) [3 files changed, 3 insertions(+), 1 deletion(-)]

@@ -3,6 +3,7 @@
 	import { auth } from '$lib/stores/auth';
 	import { slide, fade } from 'svelte/transition';
 	import CustomSelect from '$lib/components/ui/CustomSelect.svelte';
+	import Checkbox from '$lib/components/ui/Checkbox.svelte';
 
 	const dispatch = createEventDispatcher();
 
@@ -23,6 +24,7 @@
 	let isLoading = true;
 	let error: string | null = null;
 	let selectedSemester: number | 'all' = 'all';
+	let onlyDiplom = false;
 	let averageMark = '0.00';
 
 	async function fetchMarks() {
@@ -53,8 +55,9 @@
 		}
 	});
 
-	$: filteredMarks =
-		selectedSemester === 'all' ? marks : marks.filter((m) => m.semester === selectedSemester);
+	$: filteredMarks = marks
+		.filter((m) => (selectedSemester === 'all' ? true : m.semester === selectedSemester))
+		.filter((m) => (onlyDiplom ? m.inDiplom === 1 : true));
 
 	$: semesters = [...new Set(marks.map((m) => m.semester))].sort((a, b) => b - a);
 
@@ -120,13 +123,18 @@
 		</div>
 
 		{#if marks.length > 0}
-			<div class="flex items-center gap-3">
+			<div class="flex flex-row items-center gap-3">
 				<CustomSelect
 					items={selectItems}
 					selectedId={selectedSemester}
 					on:select={handleSemesterSelect}
 					width="180px"
 					searchable={false}
+				/>
+				<Checkbox
+					bind:checked={onlyDiplom}
+					label="Только в диплом"
+					labelClass="text-slate-400 text-[11px] font-bold tracking-wider uppercase"
 				/>
 			</div>
 		{/if}
@@ -163,7 +171,7 @@
 					transition:slide={{ duration: 150 }}
 				>
 					<div class="min-w-0 flex-1">
-						<div class="mb-0.5 flex items-center gap-2">
+						<div class="mb-0.5 flex flex-wrap items-center gap-2">
 							<span
 								class="text-[9px] font-black tracking-tighter text-slate-600 uppercase"
 							>
@@ -172,6 +180,15 @@
 							<span class="text-[9px] font-bold text-slate-500 uppercase">
 								{mark.controlTypeName}
 							</span>
+							{#if mark.inDiplom === 1}
+								<span
+									class="inline-flex items-center gap-1 text-[9px] font-semibold tracking-wider text-amber-300/70 uppercase"
+									title="Эта оценка учитывается в приложении к диплому"
+								>
+									<span class="h-1.5 w-1.5 rounded-full bg-amber-400/70"></span>
+									в дипломе
+								</span>
+							{/if}
 						</div>
 						<h4
 							class="truncate text-xs font-bold tracking-tight text-slate-300 uppercase transition-colors group-hover:text-white"
@@ -180,18 +197,21 @@
 						</h4>
 					</div>
 					<div class="pl-4 text-right">
-						<div
-							class="text-sm font-black {getMarkColor(
-								mark.mark,
-								mark.markName
-							)} uppercase"
-						>
-							{mark.markName || (mark.mark > 0 ? mark.mark : '—')}
-						</div>
-						<div
-							class="mt-0.5 text-[9px] font-bold tracking-tighter text-slate-600 uppercase"
-						>
-							{mark.years}
+						<div class="flex flex-col items-end gap-0.5">
+							<div
+								class="text-sm font-black {getMarkColor(
+									mark.mark,
+									mark.markName
+								)} uppercase"
+							>
+								{mark.markName || (mark.mark > 0 ? mark.mark : '—')}
+							</div>
+
+							<div
+								class="text-[9px] font-bold tracking-tighter text-slate-600 uppercase"
+							>
+								{mark.years}
+							</div>
 						</div>
 					</div>
 				</div>
