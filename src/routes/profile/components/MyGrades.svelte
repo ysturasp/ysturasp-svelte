@@ -26,8 +26,10 @@
 	let selectedSemester: number | 'all' = 'all';
 	let onlyDiplom = false;
 	let averageMark = '0.00';
+	let hasTriedFetch = false;
 
 	async function fetchMarks() {
+		if (hasTriedFetch && !error) return;
 		isLoading = true;
 		error = null;
 		try {
@@ -38,6 +40,7 @@
 					if (a.course !== b.course) return b.course - a.course;
 					return b.semester - a.semester;
 				});
+				hasTriedFetch = true;
 			} else {
 				const data = await response.json();
 				error = data.error || 'Ошибка загрузки оценок';
@@ -54,6 +57,10 @@
 			fetchMarks();
 		}
 	});
+
+	$: if ($auth.academicUser && !hasTriedFetch && !isLoading) {
+		fetchMarks();
+	}
 
 	$: filteredMarks = marks
 		.filter((m) => (selectedSemester === 'all' ? true : m.semester === selectedSemester))

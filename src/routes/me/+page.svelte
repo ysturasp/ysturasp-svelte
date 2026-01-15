@@ -72,8 +72,7 @@
 		groupStats && myStats && myStats.average > 0
 			? (myStats.average - groupStats.average).toFixed(2)
 			: null;
-	$: hasRequiredData =
-		!!student && !!myStats && (!student.groupName || !!groupStats || details?.course === 1);
+	$: hasRequiredData = !!student;
 	$: isAuthChecked = !$auth.loading && !$auth.academicLoading;
 	$: isLoggedIn = $auth.authenticated;
 	$: isTelegramUser = $auth.isTelegram;
