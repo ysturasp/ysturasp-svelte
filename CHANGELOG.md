@@ -1,3 +1,4 @@
+- add OAuth support by including client id, client secret and redirect uri in api integration (ysturasp, 2026-01-15) [9 files changed, 381 insertions(+), 14 deletions(-)]
 - add checkbox filter for diploma marks in my grades component and improve marks display layout (ysturasp, 2026-01-14) [3 files changed, 38 insertions(+), 16 deletions(-)]
 - update docker-compose.traefik.yml to bind service ports to 127.0.0.1 for enhanced security (ysturasp, 2026-01-13) [3 files changed, 5 insertions(+), 3 deletions(-)]
 - fix docker-compose files to bind ports to 127.0.0.1 (ysturasp, 2026-01-13) [4 files changed, 4 insertions(+), 2 deletions(-)]

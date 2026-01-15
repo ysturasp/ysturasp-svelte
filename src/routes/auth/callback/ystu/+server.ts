@@ -11,7 +11,6 @@ import { storeInitialYstuTokensForUser } from '$lib/server/ystuSession';
 
 export const GET: RequestHandler = async ({ cookies, url }) => {
 	const code = url.searchParams.get('code');
-	const state = url.searchParams.get('state');
 	const sign = url.searchParams.get('sign');
 	const sign_keys = url.searchParams.get('sign_keys');
 
@@ -19,20 +18,17 @@ export const GET: RequestHandler = async ({ cookies, url }) => {
 		return new Response('Отсутствует параметр code', { status: 400 });
 	}
 
-	const savedState = cookies.get('ystu_oauth_state');
-	if (!savedState || savedState !== state) {
-		return new Response('Неверный state параметр', { status: 400 });
+	if (!sign || !sign_keys) {
+		return new Response('Отсутствует подпись запроса', { status: 400 });
 	}
 
-	if (sign && sign_keys) {
-		const queryData: Record<string, string> = {};
-		url.searchParams.forEach((value, key) => {
-			queryData[key] = value;
-		});
+	const queryData: Record<string, string> = {};
+	url.searchParams.forEach((value, key) => {
+		queryData[key] = value;
+	});
 
-		if (!verifyRequestSignature({ ...queryData, sign, sign_keys })) {
-			return new Response('Неверная подпись запроса', { status: 400 });
-		}
+	if (!verifyRequestSignature({ ...queryData, sign, sign_keys })) {
+		return new Response('Неверная подпись запроса', { status: 400 });
 	}
 
 	const userId = cookies.get('ystu_oauth_user_id');
@@ -63,6 +59,10 @@ export const GET: RequestHandler = async ({ cookies, url }) => {
 
 		throw redirect(302, '/profile?ystu_linked=true');
 	} catch (error: any) {
+		if (error && typeof error === 'object' && 'status' in error && 'location' in error) {
+			throw error;
+		}
+
 		console.error('[YSTU OAuth Callback Error]:', error);
 
 		cookies.delete('ystu_oauth_state', { path: '/' });
