@@ -69,8 +69,26 @@ export interface YSTUDetailedUserInfo {
 	sourceFinancingStr: string;
 }
 
+import { env } from '$env/dynamic/private';
+
 const OAUTH_BASE = 'https://oauth.ystuty.ru';
 const API_BASE = 'https://gg-api.ystuty.ru/s';
+
+function getClientId(): string {
+	const clientId = env.YSTU_OAUTH_CLIENT_ID;
+	if (!clientId) {
+		throw new Error('YSTU_OAUTH_CLIENT_ID не задан');
+	}
+	return clientId;
+}
+
+function getClientSecret(): string {
+	const clientSecret = env.YSTU_OAUTH_CLIENT_SECRET;
+	if (!clientSecret) {
+		throw new Error('YSTU_OAUTH_CLIENT_SECRET не задан');
+	}
+	return clientSecret;
+}
 
 export async function login(
 	username: string,
@@ -100,14 +118,25 @@ export async function login(
 	return response.json();
 }
 
-export async function refresh(refreshToken: string, clientId = 'x-id'): Promise<YSTUTokens> {
+export async function refresh(refreshToken: string): Promise<YSTUTokens> {
+	const clientId = getClientId();
+	const clientSecret = getClientSecret();
+
 	const url = new URL('/access_token', OAUTH_BASE);
-	url.searchParams.set('client_id', clientId);
-	url.searchParams.set('grant_type', 'refresh_token');
-	url.searchParams.set('refresh_token', refreshToken);
+
+	const body = new URLSearchParams({
+		client_id: clientId,
+		client_secret: clientSecret,
+		grant_type: 'refresh_token',
+		refresh_token: refreshToken
+	});
 
 	const response = await fetch(url.toString(), {
-		method: 'POST'
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/x-www-form-urlencoded'
+		},
+		body
 	});
 
 	if (!response.ok) {

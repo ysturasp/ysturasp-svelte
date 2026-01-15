@@ -1,3 +1,4 @@
+- add checkbox filter for diploma marks in my grades component and improve marks display layout (ysturasp, 2026-01-14) [3 files changed, 38 insertions(+), 16 deletions(-)]
 - update docker-compose.traefik.yml to bind service ports to 127.0.0.1 for enhanced security (ysturasp, 2026-01-13) [3 files changed, 5 insertions(+), 3 deletions(-)]
 - fix docker-compose files to bind ports to 127.0.0.1 (ysturasp, 2026-01-13) [4 files changed, 4 insertions(+), 2 deletions(-)]
 - update docker-compose files to bind ports to localhost for improved security (ysturasp, 2026-01-13) [4 files changed, 4 insertions(+), 2 deletions(-)]

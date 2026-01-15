@@ -2,11 +2,24 @@
 	import { auth } from '$lib/stores/auth';
 	import { notifications } from '$lib/stores/notifications';
 	import { slide } from 'svelte/transition';
+	import { onMount } from 'svelte';
 
 	let username = '';
 	let password = '';
 	let isLinking = false;
 	let showLoginForm = false;
+
+	onMount(() => {
+		const urlParams = new URLSearchParams(window.location.search);
+		if (urlParams.get('ystu_linked') === 'true') {
+			auth.checkAcademic();
+			notifications.add('Аккаунт ЯГТУ успешно привязан', 'success');
+			urlParams.delete('ystu_linked');
+			const newUrl =
+				window.location.pathname + (urlParams.toString() ? '?' + urlParams.toString() : '');
+			window.history.replaceState({}, '', newUrl);
+		}
+	});
 
 	async function handleLink() {
 		if (!username || !password) {
@@ -35,6 +48,16 @@
 		} catch (error) {
 			notifications.add('Сетевая ошибка', 'error');
 		} finally {
+			isLinking = false;
+		}
+	}
+
+	async function handleOAuthLink() {
+		isLinking = true;
+		try {
+			window.location.href = '/api/auth/ystu/authorize';
+		} catch (error) {
+			notifications.add('Сетевая ошибка', 'error');
 			isLinking = false;
 		}
 	}
@@ -120,12 +143,26 @@
 			</button>
 		</div>
 	{:else if !showLoginForm}
-		<button
-			on:click={() => (showLoginForm = true)}
-			class="w-full rounded-xl bg-blue-600 px-4 py-3 text-sm font-bold text-white shadow-lg shadow-blue-500/20 transition-all hover:bg-blue-500 active:scale-[0.98]"
-		>
-			Привязать аккаунт
-		</button>
+		<div class="flex flex-col gap-3">
+			<button
+				on:click={() => (showLoginForm = true)}
+				class="w-full rounded-xl bg-blue-600 px-4 py-3 text-sm font-bold text-white shadow-lg shadow-blue-500/20 transition-all hover:bg-blue-500 active:scale-[0.98]"
+			>
+				Войти через логин и пароль
+			</button>
+			<div class="relative flex items-center gap-3">
+				<div class="flex-1 border-t border-slate-700"></div>
+				<span class="text-xs text-slate-500">или</span>
+				<div class="flex-1 border-t border-slate-700"></div>
+			</div>
+			<button
+				on:click={handleOAuthLink}
+				disabled={isLinking}
+				class="w-full rounded-xl border border-blue-500/30 bg-blue-500/10 px-4 py-3 text-sm font-bold text-blue-400 transition-all hover:bg-blue-500/20 active:scale-[0.98] disabled:opacity-50"
+			>
+				{isLinking ? 'Перенаправление...' : 'Войти через OAuth'}
+			</button>
+		</div>
 	{:else}
 		<div class="space-y-4" transition:slide>
 			<div class="space-y-1.5">
@@ -138,7 +175,7 @@
 					id="ystu-login"
 					type="text"
 					bind:value={username}
-					placeholder="ivanov.ii.22"
+					placeholder="ivanovii.22"
 					class="w-full rounded-xl border border-slate-700 bg-slate-900 px-4 py-2.5 text-sm text-white transition-all placeholder:text-slate-600 focus:ring-2 focus:ring-blue-500/50 focus:outline-none"
 				/>
 			</div>
@@ -173,7 +210,7 @@
 				</button>
 			</div>
 			<p class="text-center text-[10px] font-medium text-slate-500">
-				Мы не храним ваш пароль. Токены сохраняются только в вашем браузере.
+				Мы не храним ваш пароль. Токены сохраняются только на сервере.
 			</p>
 		</div>
 	{/if}

@@ -22,6 +22,9 @@ services:
             - REDIS_PORT=${REDIS_PORT}
             - REDIS_PASSWORD=${REDIS_PASSWORD}
             - YSTU_TOKENS_SECRET=${YSTU_TOKENS_SECRET}
+            - YSTU_OAUTH_CLIENT_ID=${YSTU_OAUTH_CLIENT_ID}
+            - YSTU_OAUTH_CLIENT_SECRET=${YSTU_OAUTH_CLIENT_SECRET}
+            - YSTU_OAUTH_REDIRECT_URI=${YSTU_OAUTH_REDIRECT_URI}
             - BODY_SIZE_LIMIT=${BODY_SIZE_LIMIT:-50M}
         restart: unless-stopped
         networks:
