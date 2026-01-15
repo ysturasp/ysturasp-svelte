@@ -39,6 +39,17 @@ export const GET: RequestHandler = async ({ cookies, request, url, getClientAddr
 		maxAge: 600
 	});
 
+	const returnPath = url.searchParams.get('return');
+	if (returnPath && (returnPath === '/me' || returnPath === '/profile')) {
+		cookies.set('ystu_oauth_return', returnPath, {
+			path: '/',
+			httpOnly: true,
+			secure: process.env.NODE_ENV === 'production',
+			sameSite: 'lax',
+			maxAge: 600
+		});
+	}
+
 	const authUrl = getOAuthAuthorizeUrl(state);
 	throw redirect(302, authUrl);
 };

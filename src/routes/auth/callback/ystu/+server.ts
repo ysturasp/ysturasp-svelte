@@ -34,6 +34,7 @@ export const GET: RequestHandler = async ({ cookies, url }) => {
 	const userId = cookies.get('ystu_oauth_user_id');
 	const isTelegramStr = cookies.get('ystu_oauth_is_telegram');
 	const isTelegram = isTelegramStr === 'true';
+	const returnUrlCookie = cookies.get('ystu_oauth_return');
 
 	if (!userId) {
 		return new Response('Сессия истекла. Пожалуйста, попробуйте снова.', { status: 400 });
@@ -56,8 +57,17 @@ export const GET: RequestHandler = async ({ cookies, url }) => {
 		cookies.delete('ystu_oauth_state', { path: '/' });
 		cookies.delete('ystu_oauth_user_id', { path: '/' });
 		cookies.delete('ystu_oauth_is_telegram', { path: '/' });
+		cookies.delete('ystu_oauth_return', { path: '/' });
 
-		throw redirect(302, '/profile?ystu_linked=true');
+		const targetPath =
+			returnUrlCookie && (returnUrlCookie === '/me' || returnUrlCookie === '/profile')
+				? returnUrlCookie
+				: '/me';
+
+		const separator = targetPath.includes('?') ? '&' : '?';
+		const redirectUrl = `${targetPath}${separator}ystu_linked=true`;
+
+		throw redirect(302, redirectUrl);
 	} catch (error: any) {
 		if (error && typeof error === 'object' && 'status' in error && 'location' in error) {
 			throw error;

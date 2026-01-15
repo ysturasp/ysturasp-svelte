@@ -55,7 +55,11 @@
 	async function handleOAuthLink() {
 		isLinking = true;
 		try {
-			window.location.href = '/api/auth/ystu/authorize';
+			const currentPath = window.location.pathname;
+			const returnPath =
+				currentPath === '/me' || currentPath === '/profile' ? currentPath : '/me';
+			const url = `/api/auth/ystu/authorize?return=${encodeURIComponent(returnPath)}`;
+			window.location.href = url;
 		} catch (error) {
 			notifications.add('Сетевая ошибка', 'error');
 			isLinking = false;
