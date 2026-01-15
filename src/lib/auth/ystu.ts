@@ -59,6 +59,7 @@ export function getOAuthAuthorizeUrl(state: string): string {
 		client_id: getClientId(),
 		response_type: 'code',
 		redirect_uri: getRedirectUri(),
+		scope: 'general:user:personal,general:mark:personal',
 		state
 	});
 

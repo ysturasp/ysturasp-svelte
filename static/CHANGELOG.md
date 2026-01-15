@@ -1,3 +1,4 @@
+- add debuging for detail user info request (ysturasp, 2026-01-15) [5 files changed, 45 insertions(+), 7 deletions(-)]
 - refactor data loading logic in mygrades and me components (ysturasp, 2026-01-15) [4 files changed, 10 insertions(+), 2 deletions(-)]
 - implement return path handling in ystu oauth flow to redirect users to their original destination after authentication (ysturasp, 2026-01-15) [6 files changed, 41 insertions(+), 16 deletions(-)]
 - refactor ystu OAuth callback to remove unused state parameter and streamline request validation (ysturasp, 2026-01-15) [3 files changed, 14 insertions(+), 12 deletions(-)]
