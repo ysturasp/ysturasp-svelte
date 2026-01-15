@@ -24,6 +24,14 @@ export async function getValidYstuAccessTokenForUser(
 	const skewMs = 30 * 1000;
 
 	if (record.accessExpiresAt.getTime() - skewMs > now.getTime()) {
+		console.log('[getValidYstuAccessTokenForUser] Using cached token:', {
+			tokenLength: record.accessToken?.length,
+			tokenPreview: record.accessToken
+				? `${record.accessToken.substring(0, 20)}...${record.accessToken.substring(record.accessToken.length - 10)}`
+				: 'null',
+			expiresAt: record.accessExpiresAt,
+			now: now
+		});
 		return record.accessToken;
 	}
 

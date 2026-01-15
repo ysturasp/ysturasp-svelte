@@ -222,15 +222,33 @@ export async function getActualGroups(): Promise<{
 }
 
 export async function getDetailedUserInfo(accessToken: string): Promise<YSTUDetailedUserInfo> {
-	const response = await fetch(`${API_BASE}/general/v1/user/my`, {
-		headers: {
-			Authorization: `Bearer ${accessToken}`,
-			Accept: '*/*'
-		}
-	});
+	if (!accessToken || typeof accessToken !== 'string') {
+		throw new Error('Неверный формат токена доступа');
+	}
+
+	const url = `${API_BASE}/general/v1/user/my`;
+	const headers = {
+		Authorization: `Bearer ${accessToken.trim()}`,
+		Accept: '*/*'
+	};
+
+	const response = await fetch(url, { headers });
 
 	if (!response.ok) {
-		throw new Error('Ошибка при получении данных пользователя ЯГТУ');
+		const errorText = await response.text().catch(() => 'Не удалось прочитать ответ');
+		const errorMessage = `Ошибка при получении данных пользователя ЯГТУ: ${response.status} ${response.statusText}. Ответ: ${errorText.substring(0, 200)}`;
+		console.error('[getDetailedUserInfo]', {
+			url,
+			status: response.status,
+			statusText: response.statusText,
+			headers: Object.fromEntries(response.headers.entries()),
+			requestHeaders: headers,
+			tokenPreview: accessToken
+				? `${accessToken.substring(0, 20)}...${accessToken.substring(accessToken.length - 10)}`
+				: 'null',
+			errorText: errorText.substring(0, 500)
+		});
+		throw new Error(errorMessage);
 	}
 
 	return response.json();
