@@ -3,11 +3,13 @@
 	import { notifications } from '$lib/stores/notifications';
 	import { slide } from 'svelte/transition';
 	import { onMount } from 'svelte';
+	import ConfirmDialog from '$lib/components/modals/ConfirmDialog.svelte';
 
 	let username = '';
 	let password = '';
 	let isLinking = false;
 	let showLoginForm = false;
+	let showUnlinkDialog = false;
 
 	onMount(() => {
 		const urlParams = new URLSearchParams(window.location.search);
@@ -66,9 +68,12 @@
 		}
 	}
 
-	async function handleUnlink() {
-		if (!confirm('Вы уверены, что хотите отвязать аккаунт ЯГТУ?')) return;
+	function handleUnlink() {
+		showUnlinkDialog = true;
+	}
 
+	async function confirmUnlink() {
+		showUnlinkDialog = false;
 		await auth.logoutAcademic();
 		notifications.add('Аккаунт ЯГТУ отвязан', 'info');
 	}
@@ -219,3 +224,13 @@
 		</div>
 	{/if}
 </div>
+
+<ConfirmDialog
+	isOpen={showUnlinkDialog}
+	title="Отвязывание аккаунта"
+	message="Вы уверены, что хотите отвязать аккаунт ЯГТУ?"
+	confirmText="Отвязать"
+	cancelText="Отмена"
+	on:confirm={confirmUnlink}
+	on:close={() => (showUnlinkDialog = false)}
+/>
