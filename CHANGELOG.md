@@ -1,3 +1,4 @@
+- add confirmation dialog for unlinking academic account in academic link component (ysturasp, 2026-01-16) [4 files changed, 259 insertions(+), 2 deletions(-)]
 - add scope parameter for oauth authorization in ystu.ts (ysturasp, 2026-01-15) [3 files changed, 3 insertions(+)]
 - add debuging for detail user info request (ysturasp, 2026-01-15) [5 files changed, 45 insertions(+), 7 deletions(-)]
 - refactor data loading logic in mygrades and me components (ysturasp, 2026-01-15) [4 files changed, 10 insertions(+), 2 deletions(-)]

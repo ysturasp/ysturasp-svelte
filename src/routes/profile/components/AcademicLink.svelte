@@ -164,13 +164,23 @@
 				<span class="text-xs text-slate-500">или</span>
 				<div class="flex-1 border-t border-slate-700"></div>
 			</div>
-			<button
-				on:click={handleOAuthLink}
-				disabled={isLinking}
-				class="w-full rounded-xl border border-blue-500/30 bg-blue-500/10 px-4 py-3 text-sm font-bold text-blue-400 transition-all hover:bg-blue-500/20 active:scale-[0.98] disabled:opacity-50"
-			>
-				{isLinking ? 'Перенаправление...' : 'Войти через OAuth'}
-			</button>
+			<div class="group relative w-full">
+				<button
+					on:click={handleOAuthLink}
+					disabled
+					class="w-full rounded-xl border border-blue-500/30 bg-blue-500/10 px-4 py-3 text-sm font-bold text-blue-400 transition-all hover:bg-blue-500/20 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+				>
+					{isLinking ? 'Перенаправление...' : 'Войти через OAuth'}
+				</button>
+				<div
+					class="pointer-events-none absolute bottom-full left-1/2 mb-2 -translate-x-1/2 rounded-lg border border-slate-700/50 bg-slate-800 px-3 py-1.5 text-xs font-medium whitespace-nowrap text-slate-300 opacity-0 shadow-lg transition-opacity group-hover:opacity-100"
+				>
+					Временно вход через YSTU ID OAuth недоступен
+					<div
+						class="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-slate-800"
+					></div>
+				</div>
+			</div>
 		</div>
 	{:else}
 		<div class="space-y-4" transition:slide>
