@@ -1,3 +1,4 @@
+- refactor academic link component to remove login form and streamline OAuth linking process (ysturasp, 2026-01-18) [3 files changed, 8 insertions(+), 111 deletions(-)]
 - add grade notification settings in user profile (ysturasp, 2026-01-18) [5 files changed, 182 insertions(+), 3 deletions(-)]
 - disable button during oauth linking process in academic link component (ysturasp, 2026-01-17) [3 files changed, 19 insertions(+), 7 deletions(-)]
 - add confirmation dialog for unlinking academic account in academic link component (ysturasp, 2026-01-16) [4 files changed, 259 insertions(+), 2 deletions(-)]

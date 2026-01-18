@@ -43,16 +43,6 @@ export const GET: RequestHandler = async ({ cookies, url }) => {
 	try {
 		const tokens = await exchangeCodeForTokens(code);
 
-		console.log('[OAuth Callback] Tokens received:', {
-			accessTokenLength: tokens.access_token?.length,
-			refreshTokenLength: tokens.refresh_token?.length,
-			expiresIn: tokens.expires_in,
-			tokenType: tokens.token_type,
-			accessTokenPreview: tokens.access_token
-				? `${tokens.access_token.substring(0, 20)}...${tokens.access_token.substring(tokens.access_token.length - 10)}`
-				: 'null'
-		});
-
 		const userInfo = await getUserInfo(tokens.access_token);
 
 		await linkYstuAccount(
