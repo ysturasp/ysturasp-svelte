@@ -1,9 +1,11 @@
 <script lang="ts">
 	import { onMount, createEventDispatcher } from 'svelte';
+	import { browser } from '$app/environment';
 	import { auth } from '$lib/stores/auth';
 	import { slide, fade } from 'svelte/transition';
 	import CustomSelect from '$lib/components/ui/CustomSelect.svelte';
 	import Checkbox from '$lib/components/ui/Checkbox.svelte';
+	import { checkIsTelegramMiniApp } from '$lib/utils/telegram';
 
 	const dispatch = createEventDispatcher();
 
@@ -29,6 +31,7 @@
 	let hasTriedFetch = false;
 	let gradeNotificationsEnabled = false;
 	let isTogglingNotifications = false;
+	let isTelegram = false;
 
 	async function fetchMarks() {
 		if (hasTriedFetch && !error) return;
@@ -55,9 +58,14 @@
 	}
 
 	onMount(() => {
+		if (browser) {
+			isTelegram = checkIsTelegramMiniApp();
+		}
 		if ($auth.academicUser) {
 			fetchMarks();
-			fetchNotificationSetting();
+			if (isTelegram) {
+				fetchNotificationSetting();
+			}
 		}
 	});
 
@@ -187,7 +195,7 @@
 		{/if}
 	</div>
 
-	{#if marks.length > 0}
+	{#if marks.length > 0 && isTelegram}
 		<div
 			class="flex items-center gap-3 rounded-xl border border-slate-700/50 bg-slate-800/50 p-3"
 		>

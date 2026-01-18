@@ -11,6 +11,13 @@ export const POST: RequestHandler = async ({ request, cookies, getClientAddress 
 		return json({ error: 'Необходимо авторизоваться' }, { status: 401 });
 	}
 
+	if (!context.isTelegram) {
+		return json(
+			{ error: 'Уведомления доступны только в Telegram мини-приложении' },
+			{ status: 403 }
+		);
+	}
+
 	try {
 		const { enabled } = await request.json();
 
@@ -33,6 +40,13 @@ export const GET: RequestHandler = async ({ cookies, getClientAddress, request }
 
 	if (!context) {
 		return json({ error: 'Необходимо авторизоваться' }, { status: 401 });
+	}
+
+	if (!context.isTelegram) {
+		return json(
+			{ error: 'Уведомления доступны только в Telegram мини-приложении' },
+			{ status: 403 }
+		);
 	}
 
 	try {
