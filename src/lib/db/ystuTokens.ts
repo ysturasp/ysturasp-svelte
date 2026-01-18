@@ -65,11 +65,26 @@ async function ensureTable(isTelegram: boolean): Promise<void> {
 			access_token_enc TEXT NOT NULL,
 			refresh_token_enc TEXT,
 			access_expires_at TIMESTAMPTZ NOT NULL,
+			grade_notifications_enabled BOOLEAN NOT NULL DEFAULT TRUE,
 			created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 			updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 			PRIMARY KEY (user_id, is_telegram)
 		)
 	`);
+
+	const columnCheck = await pool.query(`
+		SELECT EXISTS (
+			SELECT 1 FROM information_schema.columns 
+			WHERE table_name = 'ystu_tokens' AND column_name = 'grade_notifications_enabled'
+		)
+	`);
+
+	if (!columnCheck.rows[0]?.exists) {
+		await pool.query(`
+			ALTER TABLE ystu_tokens 
+			ADD COLUMN grade_notifications_enabled BOOLEAN NOT NULL DEFAULT TRUE
+		`);
+	}
 }
 
 export async function saveYstuTokens(
@@ -92,8 +107,8 @@ export async function saveYstuTokens(
 
 	await pool.query(
 		`
-		INSERT INTO ystu_tokens (user_id, is_telegram, access_token_enc, refresh_token_enc, access_expires_at)
-		VALUES ($1, $2, $3, $4, $5)
+		INSERT INTO ystu_tokens (user_id, is_telegram, access_token_enc, refresh_token_enc, access_expires_at, grade_notifications_enabled)
+		VALUES ($1, $2, $3, $4, $5, TRUE)
 		ON CONFLICT (user_id, is_telegram) DO UPDATE
 		SET access_token_enc = EXCLUDED.access_token_enc,
 			refresh_token_enc = EXCLUDED.refresh_token_enc,
@@ -164,4 +179,63 @@ export async function clearYstuTokensForUser(userId: string, isTelegram: boolean
 		`,
 		[userId, isTelegram]
 	);
+}
+
+export async function setGradeNotificationsEnabled(
+	userId: string,
+	enabled: boolean,
+	isTelegram: boolean = false
+): Promise<void> {
+	const pool = getPool(isTelegram);
+	if (!pool) throw new Error('База данных недоступна');
+
+	await ensureTable(isTelegram);
+
+	try {
+		const result = await pool.query(
+			`
+			UPDATE ystu_tokens 
+			SET grade_notifications_enabled = $1, updated_at = NOW()
+			WHERE user_id = $2 AND is_telegram = $3
+			`,
+			[enabled, userId, isTelegram]
+		);
+
+		if (result.rowCount === 0) {
+			throw new Error('Токены YSTU не найдены для данного пользователя');
+		}
+	} catch (error: any) {
+		console.error('[Database Error in setGradeNotificationsEnabled]:', error);
+		throw new Error(`Ошибка сохранения настройки уведомлений: ${error.message}`);
+	}
+}
+
+export async function getGradeNotificationsEnabled(
+	userId: string,
+	isTelegram: boolean = false
+): Promise<boolean> {
+	const pool = getPool(isTelegram);
+	if (!pool) throw new Error('База данных недоступна');
+
+	await ensureTable(isTelegram);
+
+	try {
+		const result = await pool.query(
+			`
+			SELECT grade_notifications_enabled 
+			FROM ystu_tokens 
+			WHERE user_id = $1 AND is_telegram = $2
+			`,
+			[userId, isTelegram]
+		);
+
+		if (result.rows.length === 0) {
+			return false;
+		}
+
+		return result.rows[0]?.grade_notifications_enabled ?? true;
+	} catch (error: any) {
+		console.error('[Database Error in getGradeNotificationsEnabled]:', error);
+		return false;
+	}
 }

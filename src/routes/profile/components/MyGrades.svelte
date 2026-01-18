@@ -27,6 +27,8 @@
 	let onlyDiplom = false;
 	let averageMark = '0.00';
 	let hasTriedFetch = false;
+	let gradeNotificationsEnabled = false;
+	let isTogglingNotifications = false;
 
 	async function fetchMarks() {
 		if (hasTriedFetch && !error) return;
@@ -55,8 +57,46 @@
 	onMount(() => {
 		if ($auth.academicUser) {
 			fetchMarks();
+			fetchNotificationSetting();
 		}
 	});
+
+	async function fetchNotificationSetting() {
+		try {
+			const response = await fetch('/api/auth/ystu/grade-notifications');
+			if (response.ok) {
+				const data = await response.json();
+				gradeNotificationsEnabled = data.enabled || false;
+			}
+		} catch (e) {
+			console.error('Ошибка загрузки настройки уведомлений:', e);
+		}
+	}
+
+	async function toggleNotifications() {
+		if (isTogglingNotifications) return;
+		isTogglingNotifications = true;
+
+		try {
+			const newValue = !gradeNotificationsEnabled;
+			const response = await fetch('/api/auth/ystu/grade-notifications', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ enabled: newValue })
+			});
+
+			if (response.ok) {
+				gradeNotificationsEnabled = newValue;
+			} else {
+				const data = await response.json();
+				console.error('Ошибка изменения настройки:', data.error);
+			}
+		} catch (e) {
+			console.error('Ошибка при переключении уведомлений:', e);
+		} finally {
+			isTogglingNotifications = false;
+		}
+	}
 
 	$: if ($auth.academicUser && !hasTriedFetch && !isLoading) {
 		fetchMarks();
@@ -130,7 +170,7 @@
 		</div>
 
 		{#if marks.length > 0}
-			<div class="flex flex-row items-center gap-3">
+			<div class="flex flex-row flex-wrap items-center gap-3">
 				<CustomSelect
 					items={selectItems}
 					selectedId={selectedSemester}
@@ -146,6 +186,24 @@
 			</div>
 		{/if}
 	</div>
+
+	{#if marks.length > 0}
+		<div
+			class="flex items-center gap-3 rounded-xl border border-slate-700/50 bg-slate-800/50 p-3"
+		>
+			<Checkbox
+				checked={gradeNotificationsEnabled}
+				on:change={toggleNotifications}
+				disabled={isTogglingNotifications}
+				label="Уведомления об оценках"
+				labelClass="text-slate-300 text-[11px] font-bold tracking-wider uppercase"
+			/>
+			<p class="text-[10px] text-slate-500">
+				Получать уведомления в Telegram при появлении новых или изменении существующих
+				оценок
+			</p>
+		</div>
+	{/if}
 
 	{#if isLoading}
 		<div class="grid grid-cols-1 gap-3 md:grid-cols-2" transition:fade>
