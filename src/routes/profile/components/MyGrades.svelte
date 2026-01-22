@@ -196,9 +196,7 @@
 	</div>
 
 	{#if marks.length > 0 && isTelegram}
-		<div
-			class="flex items-center gap-3 rounded-xl border border-slate-700/50 bg-slate-800/50 p-3"
-		>
+		<div class="flex flex-col gap-1 rounded-xl border border-slate-700/50 bg-slate-800/50 p-3">
 			<Checkbox
 				checked={gradeNotificationsEnabled}
 				on:change={toggleNotifications}
