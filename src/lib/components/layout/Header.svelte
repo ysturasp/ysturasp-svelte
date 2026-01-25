@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import Garland from '$lib/components/Garland.svelte';
+	import { isWinterSeason } from '$lib/utils/winter-season';
 	let isMobileMenuOpen = false;
 	let isClosing = false;
 	let mobileMenu: HTMLElement;
@@ -140,7 +141,9 @@
 			</a>
 			<slot name="personal-account-ystu" />
 		</div>
-		<Garland />
+		{#if isWinterSeason()}
+			<Garland />
+		{/if}
 	</div>
 
 	<slot name="online-counter-mobile" />

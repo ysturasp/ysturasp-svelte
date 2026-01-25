@@ -3,6 +3,7 @@
 	import Preloader from '$lib/components/Preloader.svelte';
 	import Snow from '$lib/components/Snow.svelte';
 	import YandexMetrica from '$lib/components/common/YandexMetrica.svelte';
+	import { isWinterSeason } from '$lib/utils/winter-season';
 	import OfflineModal from '$lib/components/offline/OfflineModal.svelte';
 	import ServiceStatusModal from '$lib/components/notifications/ServiceStatusModal.svelte';
 	import DomainMigrationModal from '$lib/components/modals/DomainMigrationModal.svelte';
@@ -249,7 +250,9 @@
 	/>
 {:else if appReady}
 	<Preloader />
-	<Snow />
+	{#if isWinterSeason()}
+		<Snow />
+	{/if}
 	<YandexMetrica id={97705826} />
 	<OfflineModal isOpen={$showOfflineModal} />
 	<ServiceStatusModal
