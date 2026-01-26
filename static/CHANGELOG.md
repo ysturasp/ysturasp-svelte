@@ -1,3 +1,4 @@
+- implement seasonal display of garland and snow components based on winter season check (ysturasp, 2026-01-25) [5 files changed, 25 insertions(+), 2 deletions(-)]
 - update MyGrades component layout for improved styling of grade notifications section (ysturasp, 2026-01-22) [3 files changed, 3 insertions(+), 3 deletions(-)]
 - add telegram mini-app restriction for grade notifications in api and profile component (ysturasp, 2026-01-19) [4 files changed, 26 insertions(+), 2 deletions(-)]
 - remove debug logging for access token and oauth callback in ystu session management (ysturasp, 2026-01-18) [4 files changed, 2 insertions(+), 18 deletions(-)]

@@ -14,7 +14,7 @@ policy: https://github.com/ysturasp/ysturasp-svelte/blob/main/SECURITY.md
 acknowledgments: https://github.com/ysturasp/ysturasp-svelte/blob/main/SECURITY.md#hall-of-fame
 
 preferred-languages: ru, en
-expires: 2026-01-01T12:00:00Z`;
+expires: 2027-01-01T12:00:00Z`;
 
 	return new Response(content, {
 		headers: {
