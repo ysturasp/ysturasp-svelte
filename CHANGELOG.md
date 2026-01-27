@@ -1,3 +1,4 @@
+- add new full server endpoints for yspu teachers and integrate with redis caching (ysturasp, 2026-01-27) [6 files changed, 300 insertions(+), 6 deletions(-)]
 - smalling size for image (ysturasp, 2026-01-27) [3 files changed, 2 insertions(+)]
 - update expiration date in security.txt and related server files to 2027-01-01 (ysturasp, 2026-01-26) [4 files changed, 4 insertions(+), 2 deletions(-)]
 - implement seasonal display of garland and snow components based on winter season check (ysturasp, 2026-01-25) [5 files changed, 25 insertions(+), 2 deletions(-)]

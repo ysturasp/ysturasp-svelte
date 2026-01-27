@@ -5,14 +5,13 @@ export interface Audience {
 	number: string;
 }
 
-const API_URL =
-	'https://script.google.com/macros/s/AKfycbxQmhIknsAvgkpP5nQOc8CWgH3KoiP_iWKumPKiitIdNatDmSHUce9erYIYU6hOVLA_/exec';
+const API_URL = '/api/yspu';
 
 export async function getAudiences(): Promise<Audience[]> {
 	try {
-		const response = await fetch(`${API_URL}?action=auditories`);
+		const response = await fetch(`${API_URL}/audiences`);
 		const data = await response.json();
-		return data;
+		return data.items || [];
 	} catch (error) {
 		console.error('Error fetching audiences:', error);
 		throw error;
@@ -21,9 +20,7 @@ export async function getAudiences(): Promise<Audience[]> {
 
 export async function getSchedule(audience: string): Promise<AudienceScheduleData> {
 	try {
-		const response = await fetch(
-			`${API_URL}?action=auditory&id=${encodeURIComponent(audience)}`
-		);
+		const response = await fetch(`${API_URL}/audience/${encodeURIComponent(audience)}`);
 		const data = await response.json();
 		return data;
 	} catch (error) {
