@@ -458,7 +458,7 @@ async function parseSchedule(fileId: string) {
 			throw new Error('Лист "Table 1" не найден');
 		}
 
-		const rawData = XLSX.utils.sheet_to_json(worksheet, { defval: null }) as any[];
+		const rawData = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: null }) as any[][];
 		const merges = (worksheet['!merges'] || []) as Array<{
 			s: { r: number; c: number };
 			e: { r: number; c: number };
@@ -487,18 +487,37 @@ async function parseSchedule(fileId: string) {
 			items: []
 		};
 
+		let groupHeaderRowIndex = 3;
+		let firstGroupColIndex = 2;
+		const groupPattern = /(\d+)\s*\((\d+)\s*курс/;
+
+		for (let i = 0; i < Math.min(10, rawData.length); i++) {
+			const row = rawData[i];
+			if (!Array.isArray(row)) continue;
+
+			const colIndex = row.findIndex(
+				(cell) => typeof cell === 'string' && groupPattern.test(cell)
+			);
+
+			if (colIndex !== -1) {
+				groupHeaderRowIndex = i;
+				firstGroupColIndex = colIndex;
+				break;
+			}
+		}
+
 		const groups: Record<CourseKey, any> = {
-			first: rawData[3]['__EMPTY_1'],
-			second: rawData[3]['__EMPTY_2'],
-			third: rawData[3]['__EMPTY_3'],
-			fourth: rawData[3]['__EMPTY_4']
+			first: rawData[groupHeaderRowIndex][firstGroupColIndex],
+			second: rawData[groupHeaderRowIndex][firstGroupColIndex + 1],
+			third: rawData[groupHeaderRowIndex][firstGroupColIndex + 2],
+			fourth: rawData[groupHeaderRowIndex][firstGroupColIndex + 3]
 		};
 
 		const directionHeaders: Record<CourseKey, string> = {
-			first: rawData[2]['__EMPTY_1'] || '',
-			second: rawData[2]['__EMPTY_2'] || '',
-			third: rawData[2]['__EMPTY_3'] || '',
-			fourth: rawData[2]['__EMPTY_4'] || ''
+			first: rawData[groupHeaderRowIndex - 1]?.[firstGroupColIndex] || '',
+			second: rawData[groupHeaderRowIndex - 1]?.[firstGroupColIndex + 1] || '',
+			third: rawData[groupHeaderRowIndex - 1]?.[firstGroupColIndex + 2] || '',
+			fourth: rawData[groupHeaderRowIndex - 1]?.[firstGroupColIndex + 3] || ''
 		};
 
 		const courseInfo: Partial<
@@ -559,20 +578,31 @@ async function parseSchedule(fileId: string) {
 		};
 
 		const courseColumns: Record<CourseKey, number> = {
-			first: 2,
-			second: 3,
-			third: 4,
-			fourth: 5
+			first: firstGroupColIndex,
+			second: firstGroupColIndex + 1,
+			third: firstGroupColIndex + 2,
+			fourth: firstGroupColIndex + 3
 		};
 
 		const dayNames = ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота'];
 
-		for (let i = 4; i < rawData.length; i++) {
-			const row: any = rawData[i];
-			const dayName: string | null =
-				row[
-					'Министерство просвещения Российской Федерации \nФедеральное государственное бюджетное учреждение высшего образования\n«Ярославский государственный педагогический университет им. К.Д. Ушинского»\n'
-				];
+		const dayColIndex = Math.max(0, firstGroupColIndex - 2);
+		const timeColIndex = Math.max(0, firstGroupColIndex - 1);
+
+		for (let i = groupHeaderRowIndex + 1; i < rawData.length; i++) {
+			const row: any[] = rawData[i];
+			if (!row) continue;
+
+			let dayName: string | null = row[dayColIndex];
+			if (typeof dayName === 'string') dayName = dayName.trim();
+
+			if ((!dayName || !dayNames.includes(dayName)) && dayColIndex > 0) {
+				const altDay = row[0];
+				if (typeof altDay === 'string' && dayNames.includes(altDay.trim())) {
+					dayName = altDay.trim();
+				}
+			}
+
 			const excelRowIdx = i + 1;
 
 			if (typeof dayName === 'string' && dayNames.includes(dayName)) {
@@ -658,13 +688,13 @@ async function parseSchedule(fileId: string) {
 				};
 			}
 
-			if (currentDay && row['__EMPTY']) {
-				const time: string = row['__EMPTY'];
+			if (currentDay) {
+				const time: string = row[timeColIndex];
 				const subjects: Record<CourseKey, any> = {
-					first: row['__EMPTY_1'],
-					second: row['__EMPTY_2'],
-					third: row['__EMPTY_3'],
-					fourth: row['__EMPTY_4']
+					first: row[courseColumns.first],
+					second: row[courseColumns.second],
+					third: row[courseColumns.third],
+					fourth: row[courseColumns.fourth]
 				};
 
 				Object.entries(subjects).forEach(([courseKey, subject]) => {

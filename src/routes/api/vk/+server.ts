@@ -51,23 +51,35 @@ function getSemesterInfo(timestamp: number): SemesterInfo {
 }
 
 async function getFolderContents(folderId: string): Promise<FileInfo[]> {
-	try {
-		const embedded = await fetch(`${API_URL}/embeddedfolderview?id=${folderId}#list`, {
-			headers: {
-				'User-Agent':
-					'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko)'
+	const filesMap = new Map<string, string>();
+
+	const addFiles = (files: FileInfo[]) => {
+		files.forEach((f) => {
+			if (f.id && f.id.length > 5 && f.name) {
+				filesMap.set(f.name, f.id);
 			}
 		});
-		if (embedded.ok) {
-			const embeddedHtml = await embedded.text();
-			const files: FileInfo[] = [];
-			const reEmbedded =
-				/href=\"https:\/\/drive\.google\.com\/uc\?id=([A-Za-z0-9_-]+)&export=download\"[^>]*>([^<]+\.xlsx)/g;
-			let m1;
-			while ((m1 = reEmbedded.exec(embeddedHtml)) !== null) {
-				files.push({ id: m1[1], name: m1[2].replace(/\.xlsx$/, '') });
+	};
+
+	try {
+		try {
+			const embedded = await fetch(`${API_URL}/embeddedfolderview?id=${folderId}#list`, {
+				headers: {
+					'User-Agent':
+						'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko)'
+				}
+			});
+			if (embedded.ok) {
+				const embeddedHtml = await embedded.text();
+				const reEmbedded =
+					/href=\"https:\/\/drive\.google\.com\/uc\?id=([A-Za-z0-9_-]{10,})&export=download\"[^>]*>([^<]+\.xlsx)/g;
+				let m1;
+				while ((m1 = reEmbedded.exec(embeddedHtml)) !== null) {
+					addFiles([{ id: m1[1], name: m1[2].replace(/\.xlsx$/, '') }]);
+				}
 			}
-			if (files.length > 0) return files;
+		} catch (e) {
+			console.error(`Ошибка embedded view для ${folderId}:`, e);
 		}
 
 		const response = await fetch(`${API_URL}/drive/folders/${folderId}`, {
@@ -76,30 +88,36 @@ async function getFolderContents(folderId: string): Promise<FileInfo[]> {
 					'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko)'
 			}
 		});
-		if (!response.ok) {
+
+		if (response.ok) {
+			const html = await response.text();
+
+			const reTooltip = /data-id=\"([^\"]+)\"[^>]*data-tooltip=\"([^\"]+?)\.xlsx/g;
+			let m4;
+			while ((m4 = reTooltip.exec(html)) !== null) {
+				addFiles([{ id: m4[1], name: m4[2] }]);
+			}
+
+			const reGeneral = /data-id=\"([^\"]+)\"[^>]*aria-label=\"([^\"]+?\.xlsx)\"/g;
+			let m2;
+			while ((m2 = reGeneral.exec(html)) !== null) {
+				addFiles([{ id: m2[1], name: m2[2].replace(/\.xlsx$/, '') }]);
+			}
+
+			const reLegacy = /data-id=\"([^\"]+)\"[\s\S]*?>\s*([^<]+)\.xlsx/gi;
+			let m3;
+			while ((m3 = reLegacy.exec(html)) !== null) {
+				addFiles([{ id: m3[1], name: m3[2] }]);
+			}
+		} else {
 			console.error(
 				`Ошибка загрузки папки ${folderId}:`,
 				response.status,
 				response.statusText
 			);
-			return [];
 		}
-		const html = await response.text();
 
-		const files: FileInfo[] = [];
-		const reGeneral = /data-id=\"([^\"]+)\"[^>]*aria-label=\"([^\"]+?\.xlsx)\"/g;
-		let m2;
-		while ((m2 = reGeneral.exec(html)) !== null) {
-			files.push({ id: m2[1], name: m2[2].replace(/\.xlsx$/, '') });
-		}
-		if (files.length > 0) return files;
-
-		const reLegacy = /data-id=\"([^\"]+)\"[\s\S]*?>\s*([^<]+)\.xlsx/gi;
-		let m3;
-		while ((m3 = reLegacy.exec(html)) !== null) {
-			files.push({ id: m3[1], name: m3[2] });
-		}
-		return files;
+		return Array.from(filesMap.entries()).map(([name, id]) => ({ id, name }));
 	} catch (error) {
 		console.error(`Ошибка при получении содержимого папки ${folderId}:`, error);
 		return [];
@@ -212,27 +230,45 @@ async function getCoursesFromFile(fileId: string): Promise<Record<string, Course
 			return {};
 		}
 
-		const rawData = XLSX.utils.sheet_to_json(worksheet, { defval: null }) as Record<
-			string,
-			any
-		>[];
+		const rawData = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: null }) as any[][];
 		if (!rawData[2] || !rawData[3]) {
 			console.error(`Некорректная структура файла ${fileId}`);
 			return {};
 		}
 
+		let groupHeaderRowIndex = 3;
+		let firstGroupColIndex = 2;
+		const groupPattern = /(\d+)\s*\((\d+)\s*курс/;
+
+		if (rawData.length > 0) {
+			for (let i = 0; i < Math.min(10, rawData.length); i++) {
+				const row = rawData[i];
+				if (!Array.isArray(row)) continue;
+
+				const colIndex = row.findIndex(
+					(cell) => typeof cell === 'string' && groupPattern.test(cell)
+				);
+
+				if (colIndex !== -1) {
+					groupHeaderRowIndex = i;
+					firstGroupColIndex = colIndex;
+					break;
+				}
+			}
+		}
+
 		const groups = {
-			first: rawData[3]['__EMPTY_1'],
-			second: rawData[3]['__EMPTY_2'],
-			third: rawData[3]['__EMPTY_3'],
-			fourth: rawData[3]['__EMPTY_4']
+			first: rawData[groupHeaderRowIndex]?.[firstGroupColIndex],
+			second: rawData[groupHeaderRowIndex]?.[firstGroupColIndex + 1],
+			third: rawData[groupHeaderRowIndex]?.[firstGroupColIndex + 2],
+			fourth: rawData[groupHeaderRowIndex]?.[firstGroupColIndex + 3]
 		};
 
 		const directionHeaders = {
-			first: rawData[2]['__EMPTY_1'] || '',
-			second: rawData[2]['__EMPTY_2'] || '',
-			third: rawData[2]['__EMPTY_3'] || '',
-			fourth: rawData[2]['__EMPTY_4'] || ''
+			first: rawData[groupHeaderRowIndex - 1]?.[firstGroupColIndex] || '',
+			second: rawData[groupHeaderRowIndex - 1]?.[firstGroupColIndex + 1] || '',
+			third: rawData[groupHeaderRowIndex - 1]?.[firstGroupColIndex + 2] || '',
+			fourth: rawData[groupHeaderRowIndex - 1]?.[firstGroupColIndex + 3] || ''
 		};
 
 		const courses: Record<string, CourseInfo> = {};
