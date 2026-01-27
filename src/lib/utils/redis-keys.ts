@@ -39,6 +39,14 @@ export function getYspuScheduleKey(fileId: string): string {
 	return `schedule:yspu:${fileId.trim()}`;
 }
 
+export function getYspuTeachersListKey(folderId: string): string {
+	return `schedule:yspu:${folderId.trim()}:teachers`;
+}
+
+export function getYspuTeacherScheduleKey(folderId: string, teacherId: string): string {
+	return `schedule:yspu:${folderId.trim()}:teacher:${teacherId.trim()}`;
+}
+
 export function getStatisticsDisciplinesKey(institute: string): string {
 	return `statistics:disciplines:${institute}`;
 }

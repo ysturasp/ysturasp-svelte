@@ -1,7 +1,6 @@
 import type { TeacherScheduleData } from './types';
 
-const API_URL =
-	'https://script.google.com/macros/s/AKfycbxQmhIknsAvgkpP5nQOc8CWgH3KoiP_iWKumPKiitIdNatDmSHUce9erYIYU6hOVLA_/exec';
+const API_URL = '/api/yspu';
 
 export interface Teacher {
 	id: string;
@@ -10,9 +9,9 @@ export interface Teacher {
 
 export async function getTeachers(): Promise<Teacher[]> {
 	try {
-		const response = await fetch(`${API_URL}?action=teachers`);
+		const response = await fetch(`${API_URL}/teachers`);
 		const data = await response.json();
-		return data;
+		return data.items || [];
 	} catch (error) {
 		console.error('Error fetching teachers:', error);
 		throw error;
@@ -21,9 +20,9 @@ export async function getTeachers(): Promise<Teacher[]> {
 
 export async function getTeacherSchedule(teacherId: string): Promise<TeacherScheduleData> {
 	try {
-		const response = await fetch(`${API_URL}?action=teacher&id=${teacherId}`);
+		const response = await fetch(`${API_URL}/teacher/${encodeURIComponent(teacherId)}`);
 		const data = await response.json();
-		return data;
+		return data as TeacherScheduleData;
 	} catch (error) {
 		console.error('Error fetching teacher schedule:', error);
 		throw error;
