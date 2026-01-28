@@ -1,3 +1,4 @@
+- refactor folder content retrieval and schedule parsing to improve data extraction logic and enhance error handling (ysturasp, 2026-01-28) [4 files changed, 136 insertions(+), 68 deletions(-)]
 - add new full server endpoints for yspu audience and integrate with redis keys caching (ysturasp, 2026-01-27) [6 files changed, 291 insertions(+), 7 deletions(-)]
 - add new full server endpoints for yspu teachers and integrate with redis caching (ysturasp, 2026-01-27) [6 files changed, 300 insertions(+), 6 deletions(-)]
 - smalling size for image (ysturasp, 2026-01-27) [3 files changed, 2 insertions(+)]

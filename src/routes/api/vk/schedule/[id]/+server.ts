@@ -241,11 +241,26 @@ function parseSubject(
 		}
 	}
 
-	const subjectsSplit = subjectStr.split(/\n\s*\n/).filter(Boolean);
+	const subjectsSplit = subjectStr.split(/(?:\n\s*\n|;(?!\s*\)))/).filter(Boolean);
 	if (subjectsSplit.length > 1) {
+		const firstPart = subjectsSplit[0].trim();
+		const firstPartParts = firstPart.split(',').map((p) => p.trim());
+		const baseSubjectName = firstPartParts[0].trim();
+
 		return subjectsSplit
-			.map((s) => {
-				const parsed = parseSubject(s, defaultTime);
+			.map((s, index) => {
+				let partToparse = s.trim();
+
+				if (index > 0) {
+					const startsWithType = /^(лек\.|лекц|практ\.|практик|лаб\.|семин)/i.test(
+						partToparse
+					);
+					if (startsWithType) {
+						partToparse = `${baseSubjectName}, ${partToparse}`;
+					}
+				}
+
+				const parsed = parseSubject(partToparse, defaultTime);
 				if (parsed && !Array.isArray(parsed)) {
 					parsed.isPartOfComposite = true;
 				}
@@ -374,7 +389,7 @@ function parseSubject(
 	}
 
 	const startDateMatch = subjectStr.match(/с\s*(\d{2}\.\d{2}\.\d{4})/);
-	const endDateMatch = subjectStr.match(/(?:по|до)\s*(\д{2}\.\д{2}\.\д{4})/);
+	const endDateMatch = subjectStr.match(/(?:по|до)\s*(\d{2}\.\d{2}\.\d{4})/);
 	const startDate = startDateMatch ? startDateMatch[1] : null;
 	const endDate = endDateMatch ? endDateMatch[1] : null;
 
@@ -553,7 +568,7 @@ async function parseSchedule(fileId: string) {
 
 				if (!startDate && groupNumber && groupNumber.match(/^9[34]/)) {
 					const headerDateMatch =
-						directionHeaders[course].match(/с\s*(\d{2}\.\d{2}\.\д{4})/);
+						directionHeaders[course].match(/с\s*(\d{2}\.\d{2}\.\d{4})/);
 					if (headerDateMatch) {
 						startDate = headerDateMatch[1];
 					}
@@ -592,6 +607,21 @@ async function parseSchedule(fileId: string) {
 		for (let i = groupHeaderRowIndex + 1; i < rawData.length; i++) {
 			const row: any[] = rawData[i];
 			if (!row) continue;
+
+			const isFooterRow = row.some((cell: any) => {
+				if (typeof cell !== 'string') return false;
+				const trimmed = cell.trim();
+				return (
+					trimmed.startsWith('Декан') ||
+					trimmed.startsWith('Зав. кафедрой') ||
+					trimmed.startsWith('Начальник') ||
+					trimmed.startsWith('Директор') ||
+					trimmed.includes('_______')
+				);
+			});
+			if (isFooterRow) {
+				break;
+			}
 
 			let dayName: string | null = row[dayColIndex];
 			if (typeof dayName === 'string') dayName = dayName.trim();
@@ -707,16 +737,26 @@ async function parseSchedule(fileId: string) {
 					}
 
 					if (actualSubject) {
-						const last =
-							currentDaySchedule[course][currentDaySchedule[course].length - 1];
+						const trimmedSubject = actualSubject.trim();
+						const isFooterText =
+							trimmedSubject.startsWith('Декан') ||
+							trimmedSubject.startsWith('Зав. кафедрой') ||
+							trimmedSubject.startsWith('Начальник') ||
+							trimmedSubject.startsWith('Директор') ||
+							trimmedSubject.includes('_______');
 
-						if (last && last.subject === actualSubject) {
-							last.time += ', ' + (time || '');
-						} else {
-							currentDaySchedule[course].push({
-								time: time || '',
-								subject: actualSubject
-							});
+						if (!isFooterText) {
+							const last =
+								currentDaySchedule[course][currentDaySchedule[course].length - 1];
+
+							if (last && last.subject === actualSubject) {
+								last.time += ', ' + (time || '');
+							} else {
+								currentDaySchedule[course].push({
+									time: time || '',
+									subject: actualSubject
+								});
+							}
 						}
 					} else if (
 						currentDaySchedule[course].length > 0 &&
