@@ -502,6 +502,13 @@ async function parseSchedule(fileId: string) {
 			items: []
 		};
 
+		const groupSchedules: Record<CourseKey, any[]> = {
+			first: [],
+			second: [],
+			third: [],
+			fourth: []
+		};
+
 		let groupHeaderRowIndex = 3;
 		let firstGroupColIndex = 2;
 		const groupPattern = /(\d+)\s*\((\d+)\s*курс/;
@@ -604,6 +611,8 @@ async function parseSchedule(fileId: string) {
 		const dayColIndex = Math.max(0, firstGroupColIndex - 2);
 		const timeColIndex = Math.max(0, firstGroupColIndex - 1);
 
+		let currentDayStartRow = groupHeaderRowIndex + 1;
+
 		for (let i = groupHeaderRowIndex + 1; i < rawData.length; i++) {
 			const row: any[] = rawData[i];
 			if (!row) continue;
@@ -633,13 +642,11 @@ async function parseSchedule(fileId: string) {
 				}
 			}
 
-			const excelRowIdx = i + 1;
-
 			if (typeof dayName === 'string' && dayNames.includes(dayName)) {
 				if (currentDay) {
 					Object.entries(currentDaySchedule).forEach(([courseKey, lessons]) => {
 						const course = courseKey as CourseKey;
-						if (lessons.length > 0 && courseInfo[course]) {
+						if (lessons.length > 0) {
 							const processedLessons: any[] = [];
 
 							lessons.forEach((lesson) => {
@@ -685,31 +692,19 @@ async function parseSchedule(fileId: string) {
 								return a.number - b.number;
 							});
 
-							schedule.items.push({
-								number:
-									course === 'first'
-										? 1
-										: course === 'second'
-											? 2
-											: course === 'third'
-												? 3
-												: 4,
-								courseInfo: courseInfo[course],
-								days: [
-									{
-										info: {
-											type: dayNames.indexOf(currentDay as string),
-											weekNumber: 1,
-											date: new Date().toISOString()
-										},
-										lessons: processedLessons
-									}
-								]
+							groupSchedules[course].push({
+								info: {
+									type: dayNames.indexOf(currentDay as string),
+									weekNumber: 1,
+									date: new Date().toISOString()
+								},
+								lessons: processedLessons
 							});
 						}
 					});
 				}
 				currentDay = dayName;
+				currentDayStartRow = i;
 				currentDaySchedule = {
 					first: [],
 					second: [],
@@ -732,8 +727,24 @@ async function parseSchedule(fileId: string) {
 					const col = courseColumns[course];
 					let actualSubject: string | null = subject as string | null;
 
-					if (!actualSubject && isCellMerged(excelRowIdx, col)) {
-						actualSubject = getMergedCellValue(excelRowIdx, col);
+					if (!actualSubject && isCellMerged(i, col)) {
+						let shouldUseMergedValue = false;
+						for (const merge of merges) {
+							if (
+								i >= merge.s.r &&
+								i <= merge.e.r &&
+								col >= merge.s.c &&
+								col <= merge.e.c
+							) {
+								if (merge.s.r >= currentDayStartRow) {
+									shouldUseMergedValue = true;
+								}
+								break;
+							}
+						}
+						if (shouldUseMergedValue) {
+							actualSubject = getMergedCellValue(i, col);
+						}
 					}
 
 					if (actualSubject) {
@@ -758,12 +769,26 @@ async function parseSchedule(fileId: string) {
 								});
 							}
 						}
-					} else if (
-						currentDaySchedule[course].length > 0 &&
-						isCellMerged(excelRowIdx, col)
-					) {
-						currentDaySchedule[course][currentDaySchedule[course].length - 1].time +=
-							', ' + (time || '');
+					} else if (currentDaySchedule[course].length > 0 && isCellMerged(i, col)) {
+						let shouldAddTime = false;
+						for (const merge of merges) {
+							if (
+								i >= merge.s.r &&
+								i <= merge.e.r &&
+								col >= merge.s.c &&
+								col <= merge.e.c
+							) {
+								if (merge.s.r >= currentDayStartRow) {
+									shouldAddTime = true;
+								}
+								break;
+							}
+						}
+						if (shouldAddTime) {
+							currentDaySchedule[course][
+								currentDaySchedule[course].length - 1
+							].time += ', ' + (time || '');
+						}
 					}
 				});
 			}
@@ -772,7 +797,7 @@ async function parseSchedule(fileId: string) {
 		if (currentDay) {
 			Object.entries(currentDaySchedule).forEach(([courseKey, lessons]) => {
 				const course = courseKey as CourseKey;
-				if (lessons.length > 0 && courseInfo[course]) {
+				if (lessons.length > 0) {
 					const processedLessons: any[] = [];
 
 					lessons.forEach((lesson) => {
@@ -812,30 +837,35 @@ async function parseSchedule(fileId: string) {
 						return a.number - b.number;
 					});
 
-					schedule.items.push({
-						number:
-							course === 'first'
-								? 1
-								: course === 'second'
-									? 2
-									: course === 'third'
-										? 3
-										: 4,
-						courseInfo: courseInfo[course],
-						days: [
-							{
-								info: {
-									type: dayNames.indexOf(currentDay as string),
-									weekNumber: 1,
-									date: new Date().toISOString()
-								},
-								lessons: processedLessons
-							}
-						]
+					groupSchedules[course].push({
+						info: {
+							type: dayNames.indexOf(currentDay as string),
+							weekNumber: 1,
+							date: new Date().toISOString()
+						},
+						lessons: processedLessons
 					});
 				}
 			});
 		}
+
+		Object.entries(groupSchedules).forEach(([courseKey, days]) => {
+			const course = courseKey as CourseKey;
+			if (days.length > 0 && courseInfo[course]) {
+				schedule.items.push({
+					number:
+						course === 'first'
+							? 1
+							: course === 'second'
+								? 2
+								: course === 'third'
+									? 3
+									: 4,
+					courseInfo: courseInfo[course],
+					days: days
+				});
+			}
+		});
 
 		return schedule;
 	} catch (error) {
