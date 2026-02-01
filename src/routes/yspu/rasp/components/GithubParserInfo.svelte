@@ -34,7 +34,7 @@
 					Вот исходный код
 					<a
 						class="mx-1 font-bold text-white transition-colors hover:text-blue-400"
-						href="https://github.com/ysturasp/parser-schedule-yspu">парсера</a
+						href="https://github.com/ysturasp/ysturasp-svelte/tree/main/src/routes/api/yspu">парсера</a
 					>
 					для получения расписания факультета
 				</span>
