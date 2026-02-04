@@ -5,6 +5,8 @@ import { addPaidFormats } from '$lib/db/limits';
 import { cancelPaymentCheck } from '$lib/payment/payment-scheduler';
 import { getUserById } from '$lib/db/users';
 import ipaddr from 'ipaddr.js';
+import { getPool } from '$lib/db/database';
+import { trackEvent } from '$lib/server/analytics';
 
 const ALLOWED_YOOKASSA_IPS = [
 	'185.71.76.0/27',
@@ -92,6 +94,21 @@ export const POST: RequestHandler = async ({ request }) => {
 			if (status === 'succeeded' && payment.status !== 'succeeded') {
 				if (updatedPayment && updatedPayment.status === 'succeeded') {
 					await addPaidFormats(payment.user_id, payment.formats_count, isTelegram);
+
+					trackEvent(
+						{
+							userId: payment.user_id,
+							eventType: 'payment:completed',
+							payload: {
+								paymentId,
+								amount: payment.amount,
+								formatsCount: payment.formats_count,
+								paymentType: 'yookassa'
+							},
+							source: isTelegram ? 'mini-app' : 'web'
+						},
+						isTelegram
+					).catch((err) => console.warn('[Analytics] Track failed:', err));
 				}
 			}
 		}

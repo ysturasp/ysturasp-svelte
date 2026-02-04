@@ -2,11 +2,13 @@ import { json } from '@sveltejs/kit';
 import type { RequestEvent } from '@sveltejs/kit';
 import { getRedisClient } from '$lib/config/redis';
 import { getTeacherScheduleKey } from '$lib/utils/redis-keys';
+import { trackEventAuto } from '$lib/server/analyticsContext';
 
 const API_BASE = 'https://gg-api.ystuty.ru/s/schedule/v1/schedule';
 const CACHE_TTL = 3600;
 
-export async function GET({ params }: RequestEvent) {
+export async function GET(event: RequestEvent) {
+	const { params, locals } = event;
 	try {
 		const teacherId = params.teacherId as string;
 		if (!teacherId) {
@@ -19,6 +21,13 @@ export async function GET({ params }: RequestEvent) {
 		try {
 			const cached = await redis.get(cacheKey);
 			if (cached) {
+				if (locals.user?.id) {
+					trackEventAuto(event, locals.user.id, 'schedule:view', {
+						teacherId,
+						type: 'teacher',
+						cached: true
+					}).catch((err) => console.warn('[Analytics] Track failed:', err));
+				}
 				return json(JSON.parse(cached));
 			}
 		} catch (redisError) {
@@ -42,6 +51,14 @@ export async function GET({ params }: RequestEvent) {
 			await redis.setex(cacheKey, CACHE_TTL, JSON.stringify(data));
 		} catch (redisError) {
 			console.error('Redis error (writing cache):', redisError);
+		}
+
+		if (locals.user?.id) {
+			trackEventAuto(event, locals.user.id, 'schedule:view', {
+				teacherId,
+				type: 'teacher',
+				cached: false
+			}).catch((err) => console.warn('[Analytics] Track failed:', err));
 		}
 
 		return json(data);

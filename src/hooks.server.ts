@@ -5,6 +5,7 @@ import * as Sentry from '@sentry/sveltekit';
 import { initDatabase } from '$lib/db/database';
 import { isbot } from 'isbot';
 import { startPaymentChecker } from '$lib/payment/payment-scheduler';
+import { getSessionContext } from '$lib/server/sessionContext';
 
 const KNOWN_ROUTE_PREFIXES = [
 	'/api',
@@ -366,11 +367,27 @@ dbInitPromise = (async () => {
 	}
 })();
 
+const sessionHandle: Handle = async ({ event, resolve }) => {
+	try {
+		const context = await getSessionContext(event.cookies);
+		if (context) {
+			event.locals.user = context.user;
+			event.locals.session = context.session;
+			event.locals.isTelegram = context.isTelegram;
+		}
+	} catch (error) {
+		console.error('[sessionHandle] Ошибка получения сессии:', error);
+	}
+
+	return resolve(event);
+};
+
 // If you have custom handlers, make sure to place them after `sentryHandle()` in the `sequence` function.
 export const handle = sequence(
 	suppressBotErrorsHandle,
 	sentryHandle(),
 	initDbHandle,
+	sessionHandle,
 	skipMonocraftHandle
 );
 

@@ -7,6 +7,7 @@ import { getRealIp } from '$lib/server/ip';
 import { schedulePaymentCheck } from '$lib/payment/payment-scheduler';
 import { dev } from '$app/environment';
 import { getPriceWithPromotion } from '$lib/utils/promotions';
+import { trackEventAuto } from '$lib/server/analyticsContext';
 
 const FORMATS_COUNT = 10;
 
@@ -25,7 +26,8 @@ function calculatePrice(count: number): number {
 	return finalPrice;
 }
 
-export const POST: RequestHandler = async ({ request, cookies, url, getClientAddress }) => {
+export const POST: RequestHandler = async (event) => {
+	const { request, cookies, url, getClientAddress } = event;
 	const ipAddress = getRealIp(request, getClientAddress);
 	const context = await getSessionContext(cookies, { ipAddress });
 	if (!context) {
@@ -97,6 +99,13 @@ export const POST: RequestHandler = async ({ request, cookies, url, getClientAdd
 		if (payment.status === 'pending') {
 			schedulePaymentCheck(payment.id);
 		}
+
+		trackEventAuto(event, user.id, 'payment:initiated', {
+			paymentId: payment.id,
+			amount,
+			formatsCount: count,
+			paymentType: 'yookassa'
+		}).catch((err) => console.warn('[Analytics] Track failed:', err));
 
 		return json({
 			paymentId: payment.id,

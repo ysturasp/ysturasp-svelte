@@ -4,10 +4,12 @@ import { getSubjectStats } from '$lib/db/statGrades';
 import type { InstituteId } from '../../../stat/types';
 import { getRedisClient } from '$lib/config/redis';
 import { getStatisticsSubjectKey } from '$lib/utils/redis-keys';
+import { trackEventAuto } from '$lib/server/analyticsContext';
 
 const CACHE_TTL = 1296000;
 
-export const GET: RequestHandler = async ({ url }) => {
+export const GET: RequestHandler = async (event) => {
+	const { url, locals } = event;
 	const institute = url.searchParams.get('institute') as InstituteId | null;
 	const discipline = url.searchParams.get('discipline');
 
@@ -39,6 +41,14 @@ export const GET: RequestHandler = async ({ url }) => {
 			} catch (e) {
 				console.error('Ошибка при сохранении в Redis:', e);
 			}
+		}
+
+		if (locals.user?.id) {
+			trackEventAuto(event, locals.user.id, 'stat:view', {
+				institute,
+				discipline,
+				type: 'subject'
+			}).catch((err) => console.warn('[Analytics] Track failed:', err));
 		}
 
 		return json(stats);

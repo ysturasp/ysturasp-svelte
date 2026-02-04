@@ -2,8 +2,10 @@ import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { getSessionContext } from '$lib/server/sessionContext';
 import { getPromoCodeByCode, applyPromoCode } from '$lib/db/promo-codes';
+import { trackEventAuto } from '$lib/server/analyticsContext';
 
-export const POST: RequestHandler = async ({ cookies, request }) => {
+export const POST: RequestHandler = async (event) => {
+	const { cookies, request } = event;
 	const context = await getSessionContext(cookies);
 	if (!context) {
 		return json({ error: 'Не авторизован' }, { status: 401 });
@@ -29,6 +31,11 @@ export const POST: RequestHandler = async ({ cookies, request }) => {
 				{ status: 400 }
 			);
 		}
+
+		trackEventAuto(event, context.user.id, 'promo:apply', {
+			code: code.trim(),
+			formatsAdded: result.formatsAdded
+		}).catch((err) => console.warn('[Analytics] Track failed:', err));
 
 		return json({
 			success: true,

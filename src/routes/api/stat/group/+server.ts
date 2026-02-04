@@ -3,8 +3,10 @@ import { getGroupStats } from '$lib/db/statGrades';
 import { getActualGroups } from '$lib/api/ystu';
 import { FACULTY_NAME_MAP } from '$lib/constants/ystu';
 import type { InstituteId } from '../../../stat/types';
+import { trackEventAuto } from '$lib/server/analyticsContext';
 
-export const GET: RequestHandler = async ({ url }) => {
+export const GET: RequestHandler = async (event) => {
+	const { url, locals } = event;
 	let institute = url.searchParams.get('institute') as InstituteId | null;
 	const group = url.searchParams.get('group');
 
@@ -52,6 +54,14 @@ export const GET: RequestHandler = async ({ url }) => {
 				(0.3193815 + t * (-0.3565638 + t * (1.781478 + t * (-1.821256 + t * 1.330274))));
 			percentile = z > 0 ? 1 - p : p;
 			percentile = Math.round(percentile * 100);
+		}
+
+		if (locals.user?.id) {
+			trackEventAuto(event, locals.user.id, 'stat:view', {
+				group,
+				institute,
+				type: 'group'
+			}).catch((err) => console.warn('[Analytics] Track failed:', err));
 		}
 
 		return json({ ...data, institute, percentile });

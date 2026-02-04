@@ -8,9 +8,19 @@ declare global {
 		interface Locals {
 			user?: {
 				id: string;
-				email: string;
-				name?: string;
+				email: string | null;
+				name?: string | null;
+				google_id?: string | null;
+				telegram_id?: string | null;
+				picture?: string | null;
 			};
+			session?: {
+				id: string;
+				user_id: string;
+				expires_at: Date;
+				revoked_at?: Date | null;
+			};
+			isTelegram?: boolean;
 		}
 	}
 }

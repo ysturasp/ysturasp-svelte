@@ -298,6 +298,18 @@ export async function initDatabase(isTelegram: boolean = false) {
 			console.log('Таблица referrals создана/проверена в БД бота');
 
 			await pool.query(`
+				CREATE TABLE IF NOT EXISTS webapp_events (
+					id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+					user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+					event_type VARCHAR(128) NOT NULL,
+					payload JSONB,
+					source VARCHAR(32) DEFAULT 'mini-app',
+					created_at TIMESTAMP DEFAULT NOW()
+				)
+			`);
+			console.log('Таблица webapp_events создана/проверена в БД бота');
+
+			await pool.query(`
 				CREATE TABLE IF NOT EXISTS promo_codes (
 					id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 					code TEXT NOT NULL UNIQUE,
@@ -356,6 +368,9 @@ export async function initDatabase(isTelegram: boolean = false) {
 				CREATE INDEX IF NOT EXISTS idx_promo_codes_code ON promo_codes(code);
 				CREATE INDEX IF NOT EXISTS idx_promo_code_uses_user_id ON promo_code_uses(user_id);
 				CREATE INDEX IF NOT EXISTS idx_promo_code_uses_promo_code_id ON promo_code_uses(promo_code_id);
+				CREATE INDEX IF NOT EXISTS idx_webapp_events_user_id ON webapp_events(user_id);
+				CREATE INDEX IF NOT EXISTS idx_webapp_events_event_type ON webapp_events(event_type);
+				CREATE INDEX IF NOT EXISTS idx_webapp_events_created_at ON webapp_events(created_at);
 			`);
 			const ystuIdColumnCheckBot = await pool.query(`
 				SELECT EXISTS (
@@ -742,6 +757,18 @@ export async function initDatabase(isTelegram: boolean = false) {
 		`);
 		console.log('Таблица stat_limits создана/проверена');
 
+		await pool.query(`
+			CREATE TABLE IF NOT EXISTS web_events (
+				id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+				user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+				event_type VARCHAR(128) NOT NULL,
+				payload JSONB,
+				source VARCHAR(32) DEFAULT 'web',
+				created_at TIMESTAMP DEFAULT NOW()
+			)
+		`);
+		console.log('Таблица web_events создана/проверена');
+
 		try {
 			await pool.query(`
 				DO $$
@@ -832,6 +859,9 @@ export async function initDatabase(isTelegram: boolean = false) {
 			CREATE INDEX IF NOT EXISTS idx_promo_codes_code ON promo_codes(code);
 			CREATE INDEX IF NOT EXISTS idx_promo_code_uses_user_id ON promo_code_uses(user_id);
 			CREATE INDEX IF NOT EXISTS idx_promo_code_uses_promo_code_id ON promo_code_uses(promo_code_id);
+			CREATE INDEX IF NOT EXISTS idx_web_events_user_id ON web_events(user_id);
+			CREATE INDEX IF NOT EXISTS idx_web_events_event_type ON web_events(event_type);
+			CREATE INDEX IF NOT EXISTS idx_web_events_created_at ON web_events(created_at);
 		`);
 		console.log('Индексы созданы/проверены');
 		console.log('Инициализация БД завершена успешно');

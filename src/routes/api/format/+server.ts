@@ -6,6 +6,7 @@ import { getPublicFormatHistory, savePublicFormatRecord } from '$lib/db/publicFo
 import { getSessionContext } from '$lib/server/sessionContext';
 import { useFormat, canFormat } from '$lib/db/limits';
 import { getRealIp } from '$lib/server/ip';
+import { trackEventAuto } from '$lib/server/analyticsContext';
 
 type FormatRequestBody = {
 	file?: string;
@@ -38,7 +39,8 @@ export const GET: RequestHandler = async ({ url }) => {
 	}
 };
 
-export const POST: RequestHandler = async ({ request, cookies, getClientAddress }) => {
+export const POST: RequestHandler = async (event) => {
+	const { request, cookies, getClientAddress } = event;
 	const ipAddress = getRealIp(request, getClientAddress);
 	const context = await getSessionContext(cookies, { ipAddress });
 	let body: FormatRequestBody;
@@ -113,6 +115,15 @@ export const POST: RequestHandler = async ({ request, cookies, getClientAddress 
 				formattedSize: formattedBuffer.length,
 				formattedBase64
 			});
+		}
+
+		if (context?.user?.id) {
+			trackEventAuto(event, context.user.id, 'format:download', {
+				fileName,
+				originalSize: decodedBuffer.length,
+				formattedSize: formattedBuffer.length,
+				sizeChange: calculateSizeChange(decodedBuffer.length, formattedBuffer.length)
+			}).catch((err) => console.warn('[Analytics] Track failed:', err));
 		}
 
 		return new Response(formattedBase64, {
