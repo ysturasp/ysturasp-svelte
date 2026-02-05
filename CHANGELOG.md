@@ -1,3 +1,4 @@
+- implement analytics tracking system with event logging and user interaction tracking (ysturasp, 2026-02-04) [21 files changed, 757 insertions(+), 10 deletions(-)]
 - refactor schedule parsing to group lessons by course and improve handling of merged cells (ysturasp, 2026-02-02) [4 files changed, 86 insertions(+), 74 deletions(-)]
 - update github link in GithubParserInfo.svelte to new repository path (ysturasp, 2026-02-01) [3 files changed, 3 insertions(+), 1 deletion(-)]
 - add oauth configuration variables to .env.example for ystu integration lk (ysturasp, 2026-01-29) [3 files changed, 5 insertions(+)]

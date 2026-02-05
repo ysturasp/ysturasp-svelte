@@ -47,27 +47,27 @@
 				targets: '.preloader-cat',
 				scale: [0.5, 1],
 				opacity: [0, 1],
-				duration: 1000
+				duration: 600
 			})
 			.add(
 				{
 					targets: '.preloader-text',
 					opacity: [0, 1],
 					translateY: [20, 0],
-					duration: 800
+					duration: 400
 				},
-				'-=400'
+				'-=200'
 			)
 			.add(
 				{
 					targets: '.preloader-bar',
 					width: '100%',
-					duration: 1500,
+					duration: 800,
 					complete: () => {
-						setTimeout(hidePreloader, 500);
+						setTimeout(hidePreloader, 200);
 					}
 				},
-				'-=800'
+				'-=400'
 			);
 
 		anime({
