@@ -7,19 +7,21 @@ export const POST: RequestHandler = async (event) => {
 	const { request, cookies } = event;
 	const context = await getSessionContext(cookies);
 
-	if (!context) {
-		return json({ error: 'Не авторизован' }, { status: 401 });
-	}
-
 	try {
 		const body = await request.json();
-		const { eventType, payload } = body;
+		const { eventType, payload, anonymousId } = body;
 
 		if (!eventType || typeof eventType !== 'string') {
 			return json({ error: 'eventType обязателен' }, { status: 400 });
 		}
 
-		await trackEventAuto(event, context.user.id, eventType, payload || null);
+		await trackEventAuto(
+			event,
+			context?.user?.id || null,
+			anonymousId || null,
+			eventType,
+			payload || null
+		);
 
 		return json({ success: true });
 	} catch (error) {

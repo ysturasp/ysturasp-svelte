@@ -43,13 +43,11 @@ export const GET: RequestHandler = async (event) => {
 			}
 		}
 
-		if (locals.user?.id) {
-			trackEventAuto(event, locals.user.id, 'stat:view', {
-				institute,
-				discipline,
-				type: 'subject'
-			}).catch((err) => console.warn('[Analytics] Track failed:', err));
-		}
+		trackEventAuto(event, locals.user?.id, null, 'stat:view', {
+			institute,
+			discipline,
+			type: 'subject'
+		}).catch((err) => console.warn('[Analytics] Track failed:', err));
 
 		return json(stats);
 	} catch (error) {

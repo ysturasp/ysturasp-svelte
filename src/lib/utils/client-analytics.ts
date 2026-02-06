@@ -1,8 +1,28 @@
+import { browser } from '$app/environment';
+
+function getAnonymousId(): string | null {
+	if (!browser) return null;
+
+	const cookieMatch = document.cookie.match(/analytics_anonymous_id=([^;]+)/);
+	if (cookieMatch) return cookieMatch[1];
+
+	let id = localStorage.getItem('analytics_anonymous_id');
+	if (!id) {
+		id = crypto.randomUUID();
+		localStorage.setItem('analytics_anonymous_id', id);
+	}
+
+	document.cookie = `analytics_anonymous_id=${id}; path=/; max-age=${60 * 60 * 24 * 365}; SameSite=Lax; Secure`;
+
+	return id;
+}
+
 export async function trackClientEvent(
 	eventType: string,
 	payload?: Record<string, unknown>
 ): Promise<void> {
 	try {
+		const anonymousId = getAnonymousId();
 		const response = await fetch('/api/analytics/track', {
 			method: 'POST',
 			headers: {
@@ -10,7 +30,8 @@ export async function trackClientEvent(
 			},
 			body: JSON.stringify({
 				eventType,
-				payload
+				payload,
+				anonymousId
 			})
 		});
 

@@ -300,7 +300,8 @@ export async function initDatabase(isTelegram: boolean = false) {
 			await pool.query(`
 				CREATE TABLE IF NOT EXISTS webapp_events (
 					id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-					user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+					user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+					anonymous_id UUID,
 					event_type VARCHAR(128) NOT NULL,
 					payload JSONB,
 					source VARCHAR(32) DEFAULT 'mini-app',
@@ -308,6 +309,22 @@ export async function initDatabase(isTelegram: boolean = false) {
 				)
 			`);
 			console.log('Таблица webapp_events создана/проверена в БД бота');
+
+			await pool.query(`
+				DO $$
+				BEGIN
+					IF EXISTS (SELECT 1 FROM information_schema.columns 
+						WHERE table_name='webapp_events' AND column_name='user_id' AND is_nullable='NO') THEN
+						ALTER TABLE webapp_events ALTER COLUMN user_id DROP NOT NULL;
+					END IF;
+					IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+						WHERE table_name='webapp_events' AND column_name='anonymous_id') THEN
+						ALTER TABLE webapp_events ADD COLUMN anonymous_id UUID;
+						CREATE INDEX idx_webapp_events_anonymous_id ON webapp_events(anonymous_id);
+					END IF;
+				END $$;
+			`);
+			console.log('Миграция webapp_events выполнена в БД бота');
 
 			await pool.query(`
 				CREATE TABLE IF NOT EXISTS promo_codes (
@@ -371,6 +388,7 @@ export async function initDatabase(isTelegram: boolean = false) {
 				CREATE INDEX IF NOT EXISTS idx_webapp_events_user_id ON webapp_events(user_id);
 				CREATE INDEX IF NOT EXISTS idx_webapp_events_event_type ON webapp_events(event_type);
 				CREATE INDEX IF NOT EXISTS idx_webapp_events_created_at ON webapp_events(created_at);
+				CREATE INDEX IF NOT EXISTS idx_webapp_events_anonymous_id ON webapp_events(anonymous_id);
 			`);
 			const ystuIdColumnCheckBot = await pool.query(`
 				SELECT EXISTS (
@@ -760,7 +778,8 @@ export async function initDatabase(isTelegram: boolean = false) {
 		await pool.query(`
 			CREATE TABLE IF NOT EXISTS web_events (
 				id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-				user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+				user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+				anonymous_id UUID,
 				event_type VARCHAR(128) NOT NULL,
 				payload JSONB,
 				source VARCHAR(32) DEFAULT 'web',
@@ -768,6 +787,23 @@ export async function initDatabase(isTelegram: boolean = false) {
 			)
 		`);
 		console.log('Таблица web_events создана/проверена');
+
+		await pool.query(`
+			DO $$
+			BEGIN
+				-- web_events migrations
+				IF EXISTS (SELECT 1 FROM information_schema.columns 
+					WHERE table_name='web_events' AND column_name='user_id' AND is_nullable='NO') THEN
+					ALTER TABLE web_events ALTER COLUMN user_id DROP NOT NULL;
+				END IF;
+				IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+					WHERE table_name='web_events' AND column_name='anonymous_id') THEN
+					ALTER TABLE web_events ADD COLUMN anonymous_id UUID;
+					CREATE INDEX idx_web_events_anonymous_id ON web_events(anonymous_id);
+				END IF;
+			END $$;
+		`);
+		console.log('Миграция таблицы web_events выполнена');
 
 		try {
 			await pool.query(`
@@ -862,6 +898,7 @@ export async function initDatabase(isTelegram: boolean = false) {
 			CREATE INDEX IF NOT EXISTS idx_web_events_user_id ON web_events(user_id);
 			CREATE INDEX IF NOT EXISTS idx_web_events_event_type ON web_events(event_type);
 			CREATE INDEX IF NOT EXISTS idx_web_events_created_at ON web_events(created_at);
+			CREATE INDEX IF NOT EXISTS idx_web_events_anonymous_id ON web_events(anonymous_id);
 		`);
 		console.log('Индексы созданы/проверены');
 		console.log('Инициализация БД завершена успешно');

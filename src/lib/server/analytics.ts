@@ -4,7 +4,8 @@ import type { Pool } from 'pg';
 export type WebEventSource = 'web' | 'mini-app';
 
 export interface TrackEventParams {
-	userId: string;
+	userId?: string | null;
+	anonymousId?: string | null;
 	eventType: string;
 	payload?: Record<string, unknown> | null;
 	source: WebEventSource;
@@ -38,7 +39,7 @@ export async function trackEvent(
 	params: TrackEventParams,
 	isMiniApp: boolean = false
 ): Promise<void> {
-	const { userId, eventType, payload = null, source } = params;
+	const { userId = null, anonymousId = null, eventType, payload = null, source } = params;
 
 	try {
 		const pool = getPool(isMiniApp);
@@ -53,12 +54,13 @@ export async function trackEvent(
 		const tableName = isMiniApp ? 'webapp_events' : 'web_events';
 
 		const query = `
-			INSERT INTO ${tableName} (user_id, event_type, payload, source, created_at)
-			VALUES ($1, $2, $3, $4, NOW())
+			INSERT INTO ${tableName} (user_id, anonymous_id, event_type, payload, source, created_at)
+			VALUES ($1, $2, $3, $4, $5, NOW())
 		`;
 
 		await pool.query(query, [
 			userId,
+			anonymousId,
 			eventType,
 			payload ? JSON.stringify(payload) : null,
 			source
@@ -82,15 +84,21 @@ export function getTrackEventSQL(
 	sql: string;
 	values: any[];
 } {
-	const { userId, eventType, payload = null, source } = params;
+	const { userId = null, anonymousId = null, eventType, payload = null, source } = params;
 	const tableName = isMiniApp ? 'webapp_events' : 'web_events';
 
 	const sql = `
-		INSERT INTO ${tableName} (user_id, event_type, payload, source, created_at)
-		VALUES ($1, $2, $3, $4, NOW())
+		INSERT INTO ${tableName} (user_id, anonymous_id, event_type, payload, source, created_at)
+		VALUES ($1, $2, $3, $4, $5, NOW())
 	`;
 
-	const values = [userId, eventType, payload ? JSON.stringify(payload) : null, source];
+	const values = [
+		userId,
+		anonymousId,
+		eventType,
+		payload ? JSON.stringify(payload) : null,
+		source
+	];
 
 	console.log('[getTrackEventSQL] SQL подготовлен', {
 		tableName,
@@ -119,7 +127,7 @@ export async function getDAU(
 		`
 		SELECT 
 			DATE(created_at AT TIME ZONE 'UTC') as date,
-			COUNT(DISTINCT user_id) as unique_users,
+			COUNT(DISTINCT COALESCE(user_id::text, anonymous_id::text)) as unique_users,
 			COUNT(*) as total_events
 		FROM ${tableName}
 		WHERE created_at >= $1 AND created_at <= $2
@@ -145,7 +153,7 @@ export async function getMAU(month: Date, isMiniApp: boolean = false): Promise<n
 
 	const result = await pool.query<{ count: string }>(
 		`
-		SELECT COUNT(DISTINCT user_id) as count
+		SELECT COUNT(DISTINCT COALESCE(user_id::text, anonymous_id::text)) as count
 		FROM ${tableName}
 		WHERE created_at >= $1 AND created_at <= $2
 		`,
@@ -201,7 +209,7 @@ export async function getSummary(
 			[startDate, endDate]
 		),
 		pool.query<{ count: string }>(
-			`SELECT COUNT(DISTINCT user_id) as count FROM ${tableName} WHERE created_at >= $1 AND created_at <= $2`,
+			`SELECT COUNT(DISTINCT COALESCE(user_id::text, anonymous_id::text)) as count FROM ${tableName} WHERE created_at >= $1 AND created_at <= $2`,
 			[startDate, endDate]
 		),
 		getEventsByType(startDate, endDate, isMiniApp),

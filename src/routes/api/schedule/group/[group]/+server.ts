@@ -21,13 +21,12 @@ export async function GET(event: RequestEvent) {
 		try {
 			const cached = await redis.get(cacheKey);
 			if (cached) {
-				if (locals.user?.id) {
-					trackEventAuto(event, locals.user.id, 'schedule:view', {
-						group,
-						type: 'group',
-						cached: true
-					}).catch((err) => console.warn('[Analytics] Track failed:', err));
-				}
+				trackEventAuto(event, locals.user?.id, null, 'schedule:view', {
+					group,
+					type: 'group',
+					cached: true
+				}).catch((err) => console.warn('[Analytics] Track failed:', err));
+
 				return json(JSON.parse(cached));
 			}
 		} catch (redisError) {
@@ -50,13 +49,11 @@ export async function GET(event: RequestEvent) {
 			console.error('Redis error (writing cache):', redisError);
 		}
 
-		if (locals.user?.id) {
-			trackEventAuto(event, locals.user.id, 'schedule:view', {
-				group,
-				type: 'group',
-				cached: false
-			}).catch((err) => console.warn('[Analytics] Track failed:', err));
-		}
+		trackEventAuto(event, locals.user?.id, null, 'schedule:view', {
+			group,
+			type: 'group',
+			cached: false
+		}).catch((err) => console.warn('[Analytics] Track failed:', err));
 
 		return json(data);
 	} catch (error) {

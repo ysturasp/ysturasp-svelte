@@ -367,7 +367,25 @@ dbInitPromise = (async () => {
 	}
 })();
 
-const sessionHandle: Handle = async ({ event, resolve }) => {
+const anonymousIdHandle: Handle = async ({ event, resolve }) => {
+	let anonymousId = event.cookies.get('analytics_anonymous_id');
+
+	if (!anonymousId) {
+		anonymousId = crypto.randomUUID();
+		event.cookies.set('analytics_anonymous_id', anonymousId, {
+			path: '/',
+			httpOnly: false,
+			secure: true,
+			sameSite: 'lax',
+			maxAge: 60 * 60 * 24 * 365
+		});
+	}
+
+	event.locals.anonymousId = anonymousId;
+	return resolve(event);
+};
+
+export async function sessionHandle({ event, resolve }: { event: any; resolve: any }) {
 	try {
 		const context = await getSessionContext(event.cookies);
 		if (context) {
@@ -380,13 +398,14 @@ const sessionHandle: Handle = async ({ event, resolve }) => {
 	}
 
 	return resolve(event);
-};
+}
 
 // If you have custom handlers, make sure to place them after `sentryHandle()` in the `sequence` function.
 export const handle = sequence(
 	suppressBotErrorsHandle,
 	sentryHandle(),
 	initDbHandle,
+	anonymousIdHandle,
 	sessionHandle,
 	skipMonocraftHandle
 );

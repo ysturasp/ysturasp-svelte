@@ -56,13 +56,11 @@ export const GET: RequestHandler = async (event) => {
 			percentile = Math.round(percentile * 100);
 		}
 
-		if (locals.user?.id) {
-			trackEventAuto(event, locals.user.id, 'stat:view', {
-				group,
-				institute,
-				type: 'group'
-			}).catch((err) => console.warn('[Analytics] Track failed:', err));
-		}
+		trackEventAuto(event, locals.user?.id, null, 'stat:view', {
+			group,
+			institute,
+			type: 'group'
+		}).catch((err) => console.warn('[Analytics] Track failed:', err));
 
 		return json({ ...data, institute, percentile });
 	} catch (error: any) {

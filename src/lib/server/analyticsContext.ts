@@ -35,16 +35,19 @@ export function isMiniApp(event: RequestEvent): boolean {
 
 export async function trackEventAuto(
 	event: RequestEvent,
-	userId: string,
+	userId: string | null | undefined,
+	anonymousId: string | null | undefined,
 	eventType: string,
 	payload?: Record<string, unknown> | null
 ): Promise<void> {
 	const source = getEventSource(event);
 	const miniApp = source === 'mini-app';
+	const finalAnonymousId = anonymousId || event.locals.anonymousId;
 
 	await trackEvent(
 		{
 			userId,
+			anonymousId: finalAnonymousId,
 			eventType,
 			payload,
 			source
@@ -55,16 +58,19 @@ export async function trackEventAuto(
 
 export function getTrackEventSQLAuto(
 	event: RequestEvent,
-	userId: string,
+	userId: string | null | undefined,
+	anonymousId: string | null | undefined,
 	eventType: string,
 	payload?: Record<string, unknown> | null
 ): { sql: string; values: any[] } {
 	const source = getEventSource(event);
 	const miniApp = source === 'mini-app';
+	const finalAnonymousId = anonymousId || event.locals.anonymousId;
 
 	return getTrackEventSQL(
 		{
 			userId,
+			anonymousId: finalAnonymousId,
 			eventType,
 			payload,
 			source
@@ -77,11 +83,12 @@ export async function executeWithTracking<T>(
 	pool: any,
 	mainQuery: { sql: string; values: any[] },
 	event: RequestEvent,
-	userId: string,
+	userId: string | null | undefined,
+	anonymousId: string | null | undefined,
 	eventType: string,
 	payload?: Record<string, unknown> | null
 ): Promise<T> {
-	const trackingQuery = getTrackEventSQLAuto(event, userId, eventType, payload);
+	const trackingQuery = getTrackEventSQLAuto(event, userId, anonymousId, eventType, payload);
 
 	const client = await pool.connect();
 	try {

@@ -21,6 +21,7 @@ declare global {
 				revoked_at?: Date | null;
 			};
 			isTelegram?: boolean;
+			anonymousId?: string;
 		}
 	}
 }
