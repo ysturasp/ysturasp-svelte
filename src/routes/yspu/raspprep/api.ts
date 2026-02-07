@@ -1,4 +1,4 @@
-import type { TeacherScheduleData } from './types';
+import type { YspuScheduleResponse } from '../rasp/api';
 
 const API_URL = '/api/yspu';
 
@@ -18,13 +18,13 @@ export async function getTeachers(): Promise<Teacher[]> {
 	}
 }
 
-export async function getTeacherSchedule(teacherId: string): Promise<TeacherScheduleData> {
-	try {
-		const response = await fetch(`${API_URL}/teacher/${encodeURIComponent(teacherId)}`);
-		const data = await response.json();
-		return data as TeacherScheduleData;
-	} catch (error) {
-		console.error('Error fetching teacher schedule:', error);
-		throw error;
-	}
+export async function getTeacherSchedule(
+	teacherName: string,
+	folderId: string,
+	semesterName?: string
+): Promise<YspuScheduleResponse> {
+	const params = new URLSearchParams({ semester: folderId });
+	if (semesterName) params.append('semesterName', semesterName);
+	const response = await fetch(`/api/yspu/teacher/${encodeURIComponent(teacherName)}?${params}`);
+	return (await response.json()) as YspuScheduleResponse;
 }

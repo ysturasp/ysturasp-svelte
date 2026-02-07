@@ -10,6 +10,9 @@ import {
 import { browser } from '$app/environment';
 
 const API_URL = '/api/vk';
+export type YspuScheduleResponse = {
+	items: Array<any>;
+};
 
 async function getFromServiceWorkerCache(url: string): Promise<any | null> {
 	if (!browser || !('caches' in window)) {
@@ -113,7 +116,12 @@ export async function getDirections(): Promise<DirectionsResponse> {
 	}
 }
 
-export async function getSchedule(directionId: string, semesterId?: string): Promise<ScheduleData> {
+export async function getSchedule(
+	directionId: string,
+	semesterId?: string,
+	group?: string,
+	directionName?: string
+): Promise<ScheduleData> {
 	cleanupCorruptedData();
 	const cacheKey = semesterId ? `${directionId}_${semesterId}` : directionId;
 	const cached = getCachedScheduleData<ScheduleData>(cacheKey);
@@ -122,6 +130,12 @@ export async function getSchedule(directionId: string, semesterId?: string): Pro
 		const params = new URLSearchParams();
 		if (semesterId) {
 			params.append('semester', semesterId);
+		}
+		if (group) {
+			params.append('group', group);
+		}
+		if (directionName) {
+			params.append('directionName', directionName);
 		}
 		const url = `${API_URL}/schedule/${directionId}${params.toString() ? `?${params}` : ''}`;
 		const response = await fetch(url);

@@ -2,6 +2,7 @@ import { json } from '@sveltejs/kit';
 import type { RequestEvent } from '@sveltejs/kit';
 import { getRedisClient } from '$lib/config/redis';
 import { getYspuTeachersListKey } from '$lib/utils/redis-keys';
+import { trackEventAuto } from '$lib/server/analyticsContext';
 
 type VkDirectionsResponse = {
 	schedules: Array<{
@@ -31,7 +32,8 @@ function splitTeachers(teacherName: string): string[] {
 		.filter(Boolean);
 }
 
-export async function GET({ url, fetch }: RequestEvent) {
+export async function GET(event: RequestEvent) {
+	const { url, fetch, locals } = event;
 	const semesterFolderId = url.searchParams.get('semester');
 
 	try {
@@ -57,7 +59,9 @@ export async function GET({ url, fetch }: RequestEvent) {
 
 		try {
 			const cached = await redis.get(cacheKey);
-			if (cached) return json(JSON.parse(cached));
+			if (cached) {
+				return json(JSON.parse(cached));
+			}
 		} catch (e) {
 			console.error('Redis error (reading cache):', e);
 		}
@@ -66,7 +70,7 @@ export async function GET({ url, fetch }: RequestEvent) {
 
 		const schedules = await Promise.allSettled(
 			targetSchedule.directions.map(async (direction) => {
-				const r = await fetch(`/api/vk/schedule/${direction.id}`);
+				const r = await fetch(`/api/vk/schedule/${direction.id}?noAnalytics=1`);
 				if (!r.ok) throw new Error(`Schedule HTTP ${r.status} for ${direction.id}`);
 				return (await r.json()) as YspuScheduleResponse;
 			})

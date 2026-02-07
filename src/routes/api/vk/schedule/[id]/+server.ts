@@ -3,6 +3,7 @@ import * as XLSX from 'xlsx';
 import type { RequestEvent } from '@sveltejs/kit';
 import { getRedisClient } from '$lib/config/redis';
 import { getYspuScheduleKey } from '$lib/utils/redis-keys';
+import { trackEventAuto } from '$lib/server/analyticsContext';
 
 interface TimeSlot {
 	start: string;
@@ -877,31 +878,72 @@ async function parseSchedule(fileId: string) {
 	}
 }
 
-export async function GET({ params }: RequestEvent) {
+export async function GET(event: RequestEvent) {
 	try {
-		const fileId = params.id as string;
-		const cacheKey = getYspuScheduleKey(fileId);
+		const { params, locals, url } = event;
+		const directionId = params.id as string;
+		const groupParam = url.searchParams.get('group');
+		const directionName = url.searchParams.get('directionName');
+		const noAnalytics = url.searchParams.get('noAnalytics') === '1';
+		const cacheKey = getYspuScheduleKey(directionId);
 		const redis = getRedisClient();
 		const CACHE_TTL = 3600;
 
 		try {
 			const cached = await redis.get(cacheKey);
 			if (cached) {
-				return json(JSON.parse(cached));
+				const data = JSON.parse(cached);
+				const groups = data.items?.map((item: any) => ({
+					number: item.courseInfo?.number,
+					course: item.courseInfo?.course
+				}));
+				const currentGroupInfo = groups?.find((g: any) => g.number === groupParam);
+
+				if (!noAnalytics) {
+					trackEventAuto(event, locals?.user?.id, null, 'yspu:schedule:view', {
+						directionId,
+						directionName,
+						group: groupParam,
+						course: currentGroupInfo?.course,
+						groups,
+						type: 'group',
+						cached: true
+					}).catch((err) => console.warn('[Analytics] Track failed:', err));
+				}
+
+				return json(data);
 			}
 		} catch (redisError) {
 			console.error('Redis error (reading cache):', redisError);
 		}
 
-		const schedule = await parseSchedule(fileId);
+		const data = await parseSchedule(directionId);
 
 		try {
-			await redis.setex(cacheKey, CACHE_TTL, JSON.stringify(schedule));
+			await redis.setex(cacheKey, CACHE_TTL, JSON.stringify(data));
 		} catch (redisError) {
 			console.error('Redis error (writing cache):', redisError);
 		}
 
-		return json(schedule);
+		const groups = data.items?.map((item: any) => ({
+			number: item.courseInfo?.number,
+			course: item.courseInfo?.course
+		}));
+		const currentGroupInfo = groups?.find((g: any) => g.number === groupParam);
+
+		if (!noAnalytics) {
+			trackEventAuto(event, locals?.user?.id, null, 'yspu:schedule:view', {
+				directionId,
+				directionName,
+				group: groupParam,
+				course: currentGroupInfo?.course,
+				groups,
+				type: 'group',
+				cached: false
+			}).catch((err) => console.warn('[Analytics] Track failed:', err));
+		}
+
+		return json(data);
 	} catch (error) {
 		console.error('Ошибка при обработке запроса:', error);
 		return json(

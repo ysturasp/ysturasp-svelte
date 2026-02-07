@@ -202,7 +202,12 @@
 			}
 
 			directions = (targetSchedule.directions as Direction[]) || [];
-			scheduleData = await getSchedule(selectedDirection);
+			scheduleData = await getSchedule(
+				selectedDirection,
+				selectedSemester.folderId,
+				selectedGroup,
+				directions.find((d) => d.id === selectedDirection)?.name
+			);
 
 			const courses = Object.entries(
 				directions.find((d) => d.id === selectedDirection)?.courses || {}

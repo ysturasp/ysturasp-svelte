@@ -1,4 +1,4 @@
-import type { AudienceScheduleData } from '$lib/types/schedule';
+import type { YspuScheduleResponse } from '../rasp/api';
 
 export interface Audience {
 	id: string;
@@ -18,13 +18,13 @@ export async function getAudiences(): Promise<Audience[]> {
 	}
 }
 
-export async function getSchedule(audience: string): Promise<AudienceScheduleData> {
-	try {
-		const response = await fetch(`${API_URL}/audience/${encodeURIComponent(audience)}`);
-		const data = await response.json();
-		return data;
-	} catch (error) {
-		console.error('Error fetching audience schedule:', error);
-		throw error;
-	}
+export async function getAudienceSchedule(
+	audienceId: string,
+	folderId: string,
+	semesterName?: string
+): Promise<YspuScheduleResponse> {
+	const params = new URLSearchParams({ semester: folderId });
+	if (semesterName) params.append('semesterName', semesterName);
+	const response = await fetch(`/api/yspu/audience/${encodeURIComponent(audienceId)}?${params}`);
+	return (await response.json()) as YspuScheduleResponse;
 }

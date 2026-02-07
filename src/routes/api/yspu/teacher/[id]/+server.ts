@@ -2,6 +2,7 @@ import { json } from '@sveltejs/kit';
 import type { RequestEvent } from '@sveltejs/kit';
 import { getRedisClient } from '$lib/config/redis';
 import { getYspuTeacherScheduleKey } from '$lib/utils/redis-keys';
+import { trackEventAuto } from '$lib/server/analyticsContext';
 
 type VkDirectionsResponse = {
 	schedules: Array<{
@@ -27,9 +28,11 @@ function splitTeachers(teacherName: string): string[] {
 		.filter(Boolean);
 }
 
-export async function GET({ params, url, fetch }: RequestEvent) {
+export async function GET(event: RequestEvent) {
+	const { params, url, fetch, locals } = event;
 	const rawTeacherId = params.id as string;
 	const semesterFolderId = url.searchParams.get('semester');
+	const semesterName = url.searchParams.get('semesterName');
 
 	const teacherName = decodeURIComponent(rawTeacherId || '').trim();
 	if (!teacherName) {
@@ -59,7 +62,16 @@ export async function GET({ params, url, fetch }: RequestEvent) {
 
 		try {
 			const cached = await redis.get(cacheKey);
-			if (cached) return json(JSON.parse(cached));
+			if (cached) {
+				trackEventAuto(event, locals?.user?.id, null, 'yspu:teacher:view', {
+					teacherName: rawTeacherId,
+					folderId,
+					semesterName,
+					cached: true
+				}).catch((err) => console.warn('[Analytics] Track failed:', err));
+
+				return json(JSON.parse(cached));
+			}
 		} catch (e) {
 			console.error('Redis error (reading cache):', e);
 		}
@@ -86,7 +98,7 @@ export async function GET({ params, url, fetch }: RequestEvent) {
 
 		const schedules = await Promise.allSettled(
 			targetSchedule.directions.map(async (direction) => {
-				const r = await fetch(`/api/vk/schedule/${direction.id}`);
+				const r = await fetch(`/api/vk/schedule/${direction.id}?noAnalytics=1`);
 				if (!r.ok) throw new Error(`Schedule HTTP ${r.status} for ${direction.id}`);
 				const data = (await r.json()) as YspuScheduleResponse;
 				return { directionName: direction.name, data };
@@ -156,6 +168,13 @@ export async function GET({ params, url, fetch }: RequestEvent) {
 		} catch (e) {
 			console.error('Redis error (writing cache):', e);
 		}
+
+		trackEventAuto(event, locals?.user?.id, null, 'yspu:teacher:view', {
+			teacherName: rawTeacherId,
+			folderId,
+			semesterName,
+			cached: false
+		}).catch((err) => console.warn('[Analytics] Track failed:', err));
 
 		return json(response);
 	} catch (error) {

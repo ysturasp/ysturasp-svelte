@@ -1,3 +1,4 @@
+- implement anonymous user tracking across analytics services, updating tracking functions, api handlers, and unique user metrics to include anonymous ids (ysturasp, 2026-02-06) [14 files changed, 166 insertions(+), 82 deletions(-)]
 - reduce preloader animation durations and delays for faster display (ysturasp, 2026-02-05) [3 files changed, 8 insertions(+), 6 deletions(-)]
 - implement analytics tracking system with event logging and user interaction tracking (ysturasp, 2026-02-04) [21 files changed, 757 insertions(+), 10 deletions(-)]
 - refactor schedule parsing to group lessons by course and improve handling of merged cells (ysturasp, 2026-02-02) [4 files changed, 86 insertions(+), 74 deletions(-)]

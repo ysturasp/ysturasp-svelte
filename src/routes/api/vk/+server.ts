@@ -1,5 +1,7 @@
 import { json } from '@sveltejs/kit';
 import * as XLSX from 'xlsx';
+import { trackEventAuto } from '$lib/server/analyticsContext';
+import type { RequestEvent } from '@sveltejs/kit';
 
 interface FileInfo {
 	id: string;
@@ -297,7 +299,8 @@ async function getCoursesFromFile(fileId: string): Promise<Record<string, Course
 	}
 }
 
-export async function GET() {
+export async function GET(event: RequestEvent) {
+	const { locals } = event;
 	try {
 		if (cache && Date.now() - cache.timestamp < CACHE_TTL) {
 			return json(cache.data);
