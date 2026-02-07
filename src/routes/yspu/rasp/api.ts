@@ -9,7 +9,7 @@ import {
 } from '$lib/utils/offline-storage';
 import { browser } from '$app/environment';
 
-const API_URL = '/api/vk';
+const API_URL = '/api/yspu';
 export type YspuScheduleResponse = {
 	items: Array<any>;
 };
@@ -85,7 +85,7 @@ export async function getDirections(): Promise<DirectionsResponse> {
 	const cached = getCachedInstitutesData<DirectionsResponse>();
 
 	try {
-		const response = await fetch(API_URL);
+		const response = await fetch(`${API_URL}/groups`);
 		const data = await response.json();
 
 		storeInstitutesData(data);
@@ -137,7 +137,7 @@ export async function getSchedule(
 		if (directionName) {
 			params.append('directionName', directionName);
 		}
-		const url = `${API_URL}/schedule/${directionId}${params.toString() ? `?${params}` : ''}`;
+		const url = `${API_URL}/group/${directionId}${params.toString() ? `?${params}` : ''}`;
 		const response = await fetch(url);
 		const data = await response.json();
 
@@ -156,7 +156,7 @@ export async function getSchedule(
 		if (semesterId) {
 			params.append('semester', semesterId);
 		}
-		const url = `${API_URL}/schedule/${directionId}${params.toString() ? `?${params}` : ''}`;
+		const url = `${API_URL}/group/${directionId}${params.toString() ? `?${params}` : ''}`;
 
 		const swCached = await getFromServiceWorkerCache(url);
 		if (swCached) {

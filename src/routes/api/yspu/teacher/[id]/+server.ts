@@ -40,7 +40,7 @@ export async function GET(event: RequestEvent) {
 	}
 
 	try {
-		const vkRes = await fetch('/api/vk');
+		const vkRes = await fetch('/api/yspu/groups');
 		if (!vkRes.ok) {
 			return json({ error: 'Failed to load YSPU semesters' }, { status: vkRes.status });
 		}
@@ -98,7 +98,7 @@ export async function GET(event: RequestEvent) {
 
 		const schedules = await Promise.allSettled(
 			targetSchedule.directions.map(async (direction) => {
-				const r = await fetch(`/api/vk/schedule/${direction.id}?noAnalytics=1`);
+				const r = await fetch(`/api/yspu/group/${direction.id}?noAnalytics=1`);
 				if (!r.ok) throw new Error(`Schedule HTTP ${r.status} for ${direction.id}`);
 				const data = (await r.json()) as YspuScheduleResponse;
 				return { directionName: direction.name, data };

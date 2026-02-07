@@ -22,7 +22,7 @@ const CACHE_PAGES = [
 	'/support'
 ];
 
-const INTERNAL_API_PREFIXES = ['/api/vk'];
+const INTERNAL_API_PREFIXES = ['/api/yspu'];
 
 const EXTERNAL_API_HOSTS = ['api-ochre-eta-11.vercel.app'];
 
