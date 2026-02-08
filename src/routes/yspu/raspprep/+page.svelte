@@ -148,7 +148,7 @@
 			}
 			replaceState(`${window.location.pathname}?${params}`, {});
 
-			scheduleData = await getTeacherSchedule(teacher.id);
+			scheduleData = await getTeacherSchedule(teacher.name, '');
 			localStorage.setItem('lastYspuTeacher', selectedTeacher);
 		} catch (error) {
 			if (error instanceof Response && error.status === 429) {
