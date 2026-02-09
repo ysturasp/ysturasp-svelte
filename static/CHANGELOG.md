@@ -1,3 +1,4 @@
+- refactor redis client configuration to use dynamic environment variables and update teacher schedule retrieval to use teacher name (ysturasp, 2026-02-08) [4 files changed, 7 insertions(+), 4 deletions(-)]
 - replace routes for yspu endpoints for get groups schedule from vk and google drive sheets (ysturasp, 2026-02-07) [10 files changed, 17 insertions(+), 15 deletions(-)]
 - implement analytics tracking for yspu schedule views and add `semesterName` parameter to API calls (ysturasp, 2026-02-07) [12 files changed, 154 insertions(+), 42 deletions(-)]
 - implement anonymous user tracking across analytics services, updating tracking functions, api handlers, and unique user metrics to include anonymous ids (ysturasp, 2026-02-06) [14 files changed, 166 insertions(+), 82 deletions(-)]

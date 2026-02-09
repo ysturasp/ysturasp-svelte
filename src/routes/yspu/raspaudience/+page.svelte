@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { getAudiences, getSchedule } from './api';
+	import { getAudiences, getAudienceSchedule } from './api';
 	import { replaceState } from '$app/navigation';
 	import type { AudienceScheduleData } from '$lib/types/schedule';
 	import type { Audience } from './api';
@@ -112,7 +112,7 @@
 			}
 			replaceState(`${window.location.pathname}?${params}`, {});
 
-			scheduleData = await getSchedule(selectedAudience);
+			scheduleData = await getAudienceSchedule(selectedAudience, '');
 			localStorage.setItem('lastYspuAudience', selectedAudience);
 		} catch (error) {
 			if (error instanceof Response && error.status === 429) {
