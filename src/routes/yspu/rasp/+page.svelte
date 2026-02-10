@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { replaceState } from '$app/navigation';
 	import { getDirections, getSchedule } from './api';
 	import type {
 		Direction,
@@ -192,7 +193,7 @@
 			if (selectedDirection) params.set('direction', selectedDirection);
 			if (selectedGroup) params.set('group', selectedGroup);
 			if (selectedSemester) params.set('semester', selectedSemester.folderId);
-			window.history.replaceState({}, '', `${window.location.pathname}?${params}`);
+			replaceState(`${window.location.pathname}?${params}`, { noscroll: true });
 
 			const targetSchedule = schedules.find((s) => s.folderId === selectedSemester?.folderId);
 			if (!targetSchedule) {
@@ -248,7 +249,7 @@
 			params.delete('direction');
 			params.delete('group');
 		}
-		window.history.replaceState({}, '', `${window.location.pathname}?${params}`);
+		replaceState(`${window.location.pathname}?${params}`, { noscroll: true });
 	}
 
 	function toggleViewMode(mode: 'all' | 'actual') {
@@ -406,7 +407,7 @@
 
 			const params = new URLSearchParams(window.location.search);
 			params.set('semester', semester.folderId);
-			window.history.replaceState({}, '', `${window.location.pathname}?${params}`);
+			replaceState(`${window.location.pathname}?${params}`, { noscroll: true });
 
 			const targetSchedule = schedules.find((s) => s.folderId === semester.folderId);
 			if (!targetSchedule) {

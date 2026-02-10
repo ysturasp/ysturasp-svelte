@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { replaceState } from '$app/navigation';
 	import type { Direction, Course } from '$lib/types/schedule';
 	import CopyLinkButton from '$lib/components/ui/CopyLinkButton.svelte';
 	import CustomSelect from '$lib/components/ui/CustomSelect.svelte';
@@ -61,7 +62,7 @@
 		} else {
 			params.delete('group');
 		}
-		window.history.replaceState({}, '', `${window.location.pathname}?${params}`);
+		replaceState(`${window.location.pathname}?${params}`, { noscroll: true });
 
 		if (
 			autoLoadOnSelect &&
