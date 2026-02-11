@@ -20,7 +20,14 @@ export async function getUserLimits(
 	let result = await pool.query('SELECT * FROM user_limits WHERE user_id = $1', [userId]);
 
 	if (result.rows.length === 0) {
-		await pool.query('INSERT INTO user_limits (user_id) VALUES ($1)', [userId]);
+		await pool.query(
+			`
+			INSERT INTO user_limits (user_id)
+			VALUES ($1)
+			ON CONFLICT (user_id) DO NOTHING
+			`,
+			[userId]
+		);
 		result = await pool.query('SELECT * FROM user_limits WHERE user_id = $1', [userId]);
 	}
 

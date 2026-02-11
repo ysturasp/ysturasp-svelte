@@ -118,7 +118,7 @@ export const POST: RequestHandler = async (event) => {
 		}
 
 		if (context?.user?.id) {
-			trackEventAuto(event, context.user.id, 'format:download', {
+			trackEventAuto(event, context.user.id, null, 'format:download', {
 				fileName,
 				originalSize: decodedBuffer.length,
 				formattedSize: formattedBuffer.length,
