@@ -789,6 +789,35 @@ export async function initDatabase(isTelegram: boolean = false) {
 		console.log('Таблица web_events создана/проверена');
 
 		await pool.query(`
+			CREATE TABLE IF NOT EXISTS security_events (
+				id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+				ip_address TEXT,
+				user_agent TEXT,
+				method TEXT,
+				path TEXT NOT NULL,
+				status INTEGER,
+				reason TEXT,
+				referer TEXT,
+				is_bot BOOLEAN DEFAULT false,
+				is_api_testing_tool BOOLEAN DEFAULT false,
+				created_at TIMESTAMP DEFAULT NOW()
+			)
+		`);
+		console.log('Таблица security_events создана/проверена');
+
+		await pool.query(`
+			CREATE TABLE IF NOT EXISTS blocked_ips (
+				ip_address TEXT PRIMARY KEY,
+				blocked_until TIMESTAMP NOT NULL,
+				reason TEXT,
+				events_count INTEGER DEFAULT 0,
+				created_at TIMESTAMP DEFAULT NOW(),
+				last_event_at TIMESTAMP DEFAULT NOW()
+			)
+		`);
+		console.log('Таблица blocked_ips создана/проверена');
+
+		await pool.query(`
 			DO $$
 			BEGIN
 				-- web_events migrations
@@ -799,7 +828,7 @@ export async function initDatabase(isTelegram: boolean = false) {
 				IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
 					WHERE table_name='web_events' AND column_name='anonymous_id') THEN
 					ALTER TABLE web_events ADD COLUMN anonymous_id UUID;
-					CREATE INDEX idx_web_events_anonymous_id ON web_events(anonymous_id);
+					CREATE INDEX IF NOT EXISTS idx_web_events_anonymous_id ON web_events(anonymous_id);
 				END IF;
 			END $$;
 		`);
@@ -899,6 +928,9 @@ export async function initDatabase(isTelegram: boolean = false) {
 			CREATE INDEX IF NOT EXISTS idx_web_events_event_type ON web_events(event_type);
 			CREATE INDEX IF NOT EXISTS idx_web_events_created_at ON web_events(created_at);
 			CREATE INDEX IF NOT EXISTS idx_web_events_anonymous_id ON web_events(anonymous_id);
+			CREATE INDEX IF NOT EXISTS idx_security_events_ip ON security_events(ip_address);
+			CREATE INDEX IF NOT EXISTS idx_security_events_created_at ON security_events(created_at);
+			CREATE INDEX IF NOT EXISTS idx_blocked_ips_blocked_until ON blocked_ips(blocked_until);
 		`);
 		console.log('Индексы созданы/проверены');
 		console.log('Инициализация БД завершена успешно');

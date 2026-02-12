@@ -3,6 +3,7 @@ import { sequence } from '@sveltejs/kit/hooks';
 import { handleErrorWithSentry, sentryHandle } from '@sentry/sveltekit';
 import * as Sentry from '@sentry/sveltekit';
 import { initDatabase } from '$lib/db/database';
+import { isIpBlocked, logSecurityEventAndMaybeBlock } from '$lib/db/security';
 import { isbot } from 'isbot';
 import { startPaymentChecker } from '$lib/payment/payment-scheduler';
 import { getSessionContext } from '$lib/server/sessionContext';
@@ -66,6 +67,18 @@ function isKnownRoute(pathname: string): boolean {
 
 function hasSuspiciousSigns(pathname: string): boolean {
 	const normalizedPath = pathname.toLowerCase();
+
+	if (normalizedPath === '/env' || normalizedPath === '/.env') {
+		return true;
+	}
+
+	if (/^\/[^/]+\.js$/i.test(pathname)) {
+		return true;
+	}
+
+	if (pathname.startsWith('/@vite/')) {
+		return true;
+	}
 
 	if (SUSPICIOUS_EXTENSIONS.some((ext) => normalizedPath.endsWith(ext))) {
 		return true;
@@ -216,6 +229,10 @@ const initDbHandle: Handle = async ({ event, resolve }) => {
 const skipMonocraftHandle: Handle = async ({ event, resolve }) => {
 	const pathname = decodeURIComponent(event.url.pathname);
 
+	if (pathname === '/favicon.ico') {
+		return new Response(null, { status: 204 });
+	}
+
 	if (pathname.startsWith('/url(') && pathname.includes('Monocraft')) {
 		return new Response(null, { status: 204 });
 	}
@@ -226,80 +243,84 @@ const skipMonocraftHandle: Handle = async ({ event, resolve }) => {
 const suppressBotErrorsHandle: Handle = async ({ event, resolve }) => {
 	const pathname = event.url.pathname;
 	const userAgent = event.request.headers.get('user-agent');
+	const referer = event.request.headers.get('referer');
+
+	const clientAddressHeader = event.request.headers.get('x-forwarded-for');
+	const forwardedIp = clientAddressHeader?.split(',')[0]?.trim() || null;
+	const clientAddress =
+		typeof event.getClientAddress === 'function' ? event.getClientAddress() : null;
+	const ipAddress = forwardedIp || clientAddress;
 
 	const isDevelopment = process.env.NODE_ENV === 'development' || import.meta.env?.DEV;
+	if (await isIpBlocked(ipAddress)) {
+		return new Response('Forbidden', { status: 403 });
+	}
+
 	if (isApiTestingTool(userAgent) && !isDevelopment) {
 		const isStaticPath = STATIC_PATHS.some((path) => pathname.startsWith(path));
 
 		if (!isStaticPath) {
+			await logSecurityEventAndMaybeBlock({
+				ipAddress,
+				userAgent,
+				method: event.request.method,
+				path: pathname,
+				status: 403,
+				reason: 'API_TESTING_TOOL_FORBIDDEN',
+				referer,
+				isBot: false,
+				isApiTestingTool: true
+			});
 			return new Response('Forbidden', { status: 403 });
 		}
 	}
 
-	if (isBotRequest(pathname, userAgent)) {
-		const originalConsoleError = console.error;
-		const originalConsoleWarn = console.warn;
-		const originalConsoleLog = console.log;
+	const botLike = isBotRequest(pathname, userAgent);
 
-		const suppressLogging = (...args: unknown[]) => {
-			const firstArg = args[0];
-			if (firstArg instanceof Error) {
-				if (firstArg.message.includes('Not found:')) {
-					const pathMatch = firstArg.message.match(/Not found: (.+)/);
-					if (pathMatch && isBotRequest(pathMatch[1], userAgent)) {
-						return;
-					}
-				}
-			} else if (typeof firstArg === 'string') {
-				if (firstArg.includes('Not found:') && firstArg.includes(pathname)) {
-					return;
-				}
-			}
-			originalConsoleError.apply(console, args);
-		};
+	try {
+		const response = await resolve(event);
 
-		console.error = suppressLogging;
-		console.warn = suppressLogging;
-
-		const originalStderrWrite = process.stderr.write.bind(process.stderr);
-		process.stderr.write = (chunk: any, ...args: any[]) => {
-			const str = chunk?.toString() || '';
-			if (str.includes('Not found:') && str.includes(pathname)) {
-				return true;
-			}
-			return originalStderrWrite(chunk, ...args);
-		};
-
-		const wrappedResolve = async (event: Parameters<typeof resolve>[0]) => {
-			try {
-				return await resolve(event);
-			} catch (error) {
-				if (error instanceof Error && error.message.includes('Not found:')) {
-					const notFoundError = error as Error & { status?: number };
-					notFoundError.status = 404;
-					throw notFoundError;
-				}
-				throw error;
-			}
-		};
-
-		try {
-			const result = await wrappedResolve(event);
-			console.error = originalConsoleError;
-			console.warn = originalConsoleWarn;
-			console.log = originalConsoleLog;
-			process.stderr.write = originalStderrWrite;
-			return result;
-		} catch (error) {
-			console.error = originalConsoleError;
-			console.warn = originalConsoleWarn;
-			console.log = originalConsoleLog;
-			process.stderr.write = originalStderrWrite;
-			throw error;
+		if (response.status === 404) {
+			await logSecurityEventAndMaybeBlock({
+				ipAddress,
+				userAgent,
+				method: event.request.method,
+				path: pathname,
+				status: 404,
+				reason: botLike ? 'BOT_404' : 'NOT_FOUND',
+				referer,
+				isBot: botLike,
+				isApiTestingTool: isApiTestingTool(userAgent)
+			});
 		}
-	}
 
-	return resolve(event);
+		return response;
+	} catch (error) {
+		if (error instanceof Error && error.message.includes('Not found:')) {
+			const pathMatch = error.message.match(/Not found: (.+)/);
+			const notFoundPath = pathMatch ? pathMatch[1] : pathname;
+
+			const { blocked } = await logSecurityEventAndMaybeBlock({
+				ipAddress,
+				userAgent,
+				method: event.request.method,
+				path: notFoundPath,
+				status: 404,
+				reason: botLike ? 'BOT_404_ERROR' : 'NOT_FOUND_ERROR',
+				referer,
+				isBot: botLike,
+				isApiTestingTool: isApiTestingTool(userAgent)
+			});
+
+			if (blocked) {
+				return new Response('Forbidden', { status: 403 });
+			}
+
+			return new Response('Not found', { status: 404 });
+		}
+
+		throw error;
+	}
 };
 
 const originalConsoleError = console.error;
@@ -308,21 +329,7 @@ const originalStderrWrite = process.stderr.write.bind(process.stderr);
 console.error = (...args: unknown[]) => {
 	const firstArg = args[0];
 	if (firstArg instanceof Error && firstArg.message.includes('Not found:')) {
-		const pathMatch = firstArg.message.match(/Not found: (.+)/);
-		if (pathMatch) {
-			const path = pathMatch[1];
-			if (
-				path.startsWith('/.well-known/appspecific/') ||
-				path.startsWith('/.well-known/security.txt') ||
-				path.startsWith('/.well-known/assetlinks.json') ||
-				path.startsWith('/.well-known/apple-app-site-association')
-			) {
-				return;
-			}
-			if (hasSuspiciousSigns(path)) {
-				return;
-			}
-		}
+		return;
 	}
 	originalConsoleError.apply(console, args);
 };
@@ -330,21 +337,7 @@ console.error = (...args: unknown[]) => {
 process.stderr.write = (chunk: any, ...args: any[]) => {
 	const str = chunk?.toString() || '';
 	if (str.includes('Not found:')) {
-		const pathMatch = str.match(/Not found: (.+)/);
-		if (pathMatch) {
-			const path = pathMatch[1];
-			if (
-				path.startsWith('/.well-known/appspecific/') ||
-				path.startsWith('/.well-known/security.txt') ||
-				path.startsWith('/.well-known/assetlinks.json') ||
-				path.startsWith('/.well-known/apple-app-site-association')
-			) {
-				return true;
-			}
-			if (hasSuspiciousSigns(path)) {
-				return true;
-			}
-		}
+		return true;
 	}
 	return originalStderrWrite(chunk, ...args);
 };

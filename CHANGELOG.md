@@ -1,3 +1,4 @@
+- update icon references throughout the application to use cat image (ysturasp, 2026-02-12) [8 files changed, 8 insertions(+), 6 deletions(-)]
 - update user limits insertion logic to handle conflicts and improve database query efficiency (ysturasp, 2026-02-11) [4 files changed, 11 insertions(+), 2 deletions(-)]
 - refactor navigation state management to use replaceState for url updates in yspu schedule components (ysturasp, 2026-02-10) [5 files changed, 17 insertions(+), 4 deletions(-)]
 - update audience schedule retrieval to use getAudienceSchedule function (ysturasp, 2026-02-09) [3 files changed, 4 insertions(+), 2 deletions(-)]
