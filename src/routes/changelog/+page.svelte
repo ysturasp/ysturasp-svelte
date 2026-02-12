@@ -81,7 +81,7 @@
 		name="description"
 		content="История изменений ysturasp - отслеживайте все обновления и улучшения нашего сервиса"
 	/>
-	<link rel="icon" href="/images/cat_new_year.png" type="image/png" />
+	<link rel="icon" href="/images/cat.png" type="image/png" />
 </svelte:head>
 
 <PageLayout>

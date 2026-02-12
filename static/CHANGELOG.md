@@ -1,3 +1,4 @@
+- update user limits insertion logic to handle conflicts and improve database query efficiency (ysturasp, 2026-02-11) [4 files changed, 11 insertions(+), 2 deletions(-)]
 - refactor navigation state management to use replaceState for url updates in yspu schedule components (ysturasp, 2026-02-10) [5 files changed, 17 insertions(+), 4 deletions(-)]
 - update audience schedule retrieval to use getAudienceSchedule function (ysturasp, 2026-02-09) [3 files changed, 4 insertions(+), 2 deletions(-)]
 - refactor redis client configuration to use dynamic environment variables and update teacher schedule retrieval to use teacher name (ysturasp, 2026-02-08) [4 files changed, 7 insertions(+), 4 deletions(-)]

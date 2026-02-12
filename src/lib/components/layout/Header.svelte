@@ -78,7 +78,7 @@
 				href="/"
 				class="flex items-center text-sm font-semibold text-blue-500 transition-all hover:text-blue-400 md:text-base"
 			>
-				<img src="/images/cat_new_year.png" alt="Logo" class="mr-2 h-10 w-10" />
+				<img src="/images/cat.png" alt="Logo" class="mr-2 h-10 w-10" />
 				<span class="text-sm md:text-base">ysturasp</span>
 			</a>
 			<a
