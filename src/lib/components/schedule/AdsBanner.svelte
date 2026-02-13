@@ -7,15 +7,22 @@
 	export let handleNavClick: () => void;
 
 	type BannerType = 'aeza' | 'toilets' | 'apps';
-	let activeBanner: BannerType = 'aeza';
 	let bannerInterval: ReturnType<typeof setInterval> | null = null;
-	const bannerOrder: BannerType[] = ['aeza', 'toilets', 'apps'];
 	let bannerIndex = 0;
+
+	$: bannerOrder = (
+		university === 'ystu' ? ['aeza', 'toilets', 'apps'] : ['aeza', 'apps']
+	) as BannerType[];
+
+	$: activeBanner = bannerOrder[bannerIndex] || bannerOrder[0];
+
+	$: if (university) {
+		bannerIndex = 0;
+	}
 
 	onMount(() => {
 		bannerInterval = setInterval(() => {
 			bannerIndex = (bannerIndex + 1) % bannerOrder.length;
-			activeBanner = bannerOrder[bannerIndex];
 		}, 5000);
 	});
 
