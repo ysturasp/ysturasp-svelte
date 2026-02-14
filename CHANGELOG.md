@@ -1,3 +1,4 @@
+- dynamically adjust ad banner order and active banner selection based on university prop (ysturasp, 2026-02-13) [3 files changed, 12 insertions(+), 3 deletions(-)]
 - improve security event logging and ip blocking mechanisms in server hooks, enhance database schema with security_events and blocked_ips tables (ysturasp, 2026-02-12) [5 files changed, 240 insertions(+), 89 deletions(-)]
 - update icon references throughout the application to use cat image (ysturasp, 2026-02-12) [8 files changed, 8 insertions(+), 6 deletions(-)]
 - update user limits insertion logic to handle conflicts and improve database query efficiency (ysturasp, 2026-02-11) [4 files changed, 11 insertions(+), 2 deletions(-)]

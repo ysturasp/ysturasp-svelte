@@ -15,6 +15,7 @@ export interface TeacherSubgroupData {
 	teacher: string;
 	isDivision: boolean;
 	displayName: string;
+	isFallback?: boolean;
 }
 
 export interface SubgroupSettings {
@@ -212,7 +213,10 @@ export function generateSubgroupDistribution(scheduleData: any, semester: Semest
 		weekItem.days.forEach((day: any) => {
 			if (!isDateInCurrentSemester(day.info.date, semester)) return;
 			day.lessons?.forEach((lesson: any) => {
-				if (!isSubgroupType(lesson.type)) return;
+				const isLab = isSubgroupType(lesson.type);
+				const isDivision = lesson.isDivision;
+				if (!isLab && !isDivision) return;
+
 				const teacherName = lesson.teacherName || lesson.additionalTeacherName;
 				if (!teacherName) return;
 				const originalName = lesson.lessonName || 'null';
@@ -269,6 +273,7 @@ export function generateSubgroupDistribution(scheduleData: any, semester: Semest
 		isVUC: boolean;
 		originalName: string;
 		type: number;
+		isFallback: boolean;
 	};
 	const groups = new Map<
 		string,
@@ -280,7 +285,10 @@ export function generateSubgroupDistribution(scheduleData: any, semester: Semest
 			if (!isDateInCurrentSemester(day.info.date, semester)) return;
 
 			day.lessons?.forEach((lesson: any) => {
-				if (!isSubgroupType(lesson.type)) return;
+				const isLab = isSubgroupType(lesson.type);
+				const isDivision = lesson.isDivision;
+				if (!isLab && !isDivision) return;
+
 				const teacherName = lesson.teacherName || lesson.additionalTeacherName;
 				if (!teacherName) return;
 
@@ -310,7 +318,8 @@ export function generateSubgroupDistribution(scheduleData: any, semester: Semest
 					timeRange: lesson.timeRange || `${lesson.startAt}-${lesson.endAt}`,
 					isVUC: vucDays.has(day.info.date),
 					originalName,
-					type: lesson.type
+					type: lesson.type,
+					isFallback: !isDivision || lesson.type !== 8
 				});
 			});
 		});
@@ -507,11 +516,14 @@ export function generateSubgroupDistribution(scheduleData: any, semester: Semest
 				}
 			}
 
+			const isFallback = items.length > 0 ? items[0].isFallback : false;
+
 			teacherSubgroups[key] = {
 				dates,
 				teacher,
 				isDivision,
-				displayName: subjectName
+				displayName: subjectName,
+				isFallback
 			};
 		});
 	});

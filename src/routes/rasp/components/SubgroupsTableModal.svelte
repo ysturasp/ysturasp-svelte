@@ -11,9 +11,10 @@
 	export let show = false;
 
 	let subjects = new Set<string>();
+	let sortedSubjects: string[] = [];
 	let dates = new Set<string>();
 	let dateToWeek = new Map<string, number>();
-	let subjectStats: Record<string, { group1: number; group2: number }> = {};
+	let subjectStats: Record<string, { group1: number; group2: number; isFallback: boolean }> = {};
 	let scrollY: number;
 	let overlay: HTMLElement;
 	let modalContent: HTMLElement;
@@ -78,7 +79,13 @@
 			subjects.add(displaySubject);
 
 			if (!subjectStats[displaySubject]) {
-				subjectStats[displaySubject] = { group1: 0, group2: 0 };
+				subjectStats[displaySubject] = {
+					group1: 0,
+					group2: 0,
+					isFallback: !!data.isFallback
+				};
+			} else if (data.isFallback) {
+				subjectStats[displaySubject].isFallback = true;
 			}
 
 			Object.entries(data.dates || {}).forEach(([dateTime, info]) => {
@@ -97,6 +104,14 @@
 				}
 			});
 		});
+
+		sortedSubjects = Array.from(subjects).sort((a, b) => {
+			const aFallback = subjectStats[a].isFallback;
+			const bFallback = subjectStats[b].isFallback;
+			if (aFallback && !bFallback) return 1;
+			if (!aFallback && bFallback) return -1;
+			return a.localeCompare(b);
+		});
 	}
 
 	function downloadExcel() {
@@ -105,8 +120,11 @@
 
 		const subjectsHeader = ['ysturasp', ''];
 		const statsHeader = ['', ''];
-		Array.from(subjects).forEach((subject) => {
-			subjectsHeader.push(subject, '');
+		sortedSubjects.forEach((subject) => {
+			subjectsHeader.push(
+				subject + (subjectStats[subject].isFallback ? ' (не по подгруппам)' : ''),
+				''
+			);
 			statsHeader.push(
 				`1-я: ${subjectStats[subject].group1} зан.`,
 				`2-я: ${subjectStats[subject].group2} зан.`
@@ -116,7 +134,7 @@
 		data.push(statsHeader);
 
 		const headers = ['Неделя', 'Дата'];
-		Array.from(subjects).forEach(() => {
+		sortedSubjects.forEach(() => {
 			headers.push('Время', 'Подгруппа');
 		});
 		data.push(headers);
@@ -140,7 +158,7 @@
 			weekGroup.dates.sort().forEach((date, dateIdx) => {
 				const row = [dateIdx === 0 ? `${weekGroup.week}-я` : '', date];
 
-				Array.from(subjects).forEach((subject) => {
+				sortedSubjects.forEach((subject) => {
 					const items: { time: string; subgroup: string }[] = [];
 					Object.entries(teacherSubgroups).forEach(([key, data]) => {
 						const [subjectName, teacher] = key.split('_');
@@ -173,7 +191,7 @@
 		const merges: { s: { r: number; c: number }; e: { r: number; c: number } }[] = [];
 
 		let colIndex = 0;
-		Array.from(subjects).forEach(() => {
+		sortedSubjects.forEach(() => {
 			merges.push({
 				s: { r: 0, c: colIndex + 2 },
 				e: { r: 0, c: colIndex + 3 }
@@ -238,12 +256,19 @@
 						<thead>
 							<tr class="bg-slate-700">
 								<th colspan="2" class="px-2 py-1.5 text-center">ysturasp</th>
-								{#each Array.from(subjects) as subject}
+								{#each sortedSubjects as subject}
 									<th
 										colspan="2"
 										class="border-l border-slate-600 px-2 py-1.5 text-center"
 									>
-										<div class="font-medium">{subject}</div>
+										<div class="font-medium">
+											{subject}
+											{#if subjectStats[subject].isFallback}
+												<div class="text-[10px] text-orange-400">
+													Всей группой (распределено на всякий случай)
+												</div>
+											{/if}
+										</div>
 										<div class="mt-0.5 text-[10px] text-yellow-400">
 											1-я: {subjectStats[subject].group1} зан. | 2-я: {subjectStats[
 												subject
@@ -255,7 +280,7 @@
 							<tr class="bg-slate-700">
 								<th class="px-2 py-1.5 text-center">Неделя</th>
 								<th class="px-2 py-1.5 text-center">Дата</th>
-								{#each Array.from(subjects) as _}
+								{#each sortedSubjects as _}
 									<th class="border-l border-slate-600 px-2 py-1.5 text-center"
 										>Время</th
 									>
@@ -286,7 +311,7 @@
 											</td>
 										{/if}
 										<td class="px-2 py-1.5">{date}</td>
-										{#each Array.from(subjects) as subject}
+										{#each sortedSubjects as subject}
 											{@const entries = (() => {
 												const items: {
 													time: string;

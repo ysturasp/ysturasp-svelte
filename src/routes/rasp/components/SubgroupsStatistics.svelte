@@ -36,6 +36,7 @@
 			teacher: string;
 		}[];
 		typePriority: number;
+		isFallback?: boolean;
 	}
 
 	$: stats = calculateStats(teacherSubgroups, scheduleData, selectedSemester);
@@ -224,7 +225,8 @@
 					subgroup2Count: 0,
 					vucCount: 0,
 					isDivision: teacherData.isDivision,
-					displayName: teacherData.displayName
+					displayName: teacherData.displayName,
+					isFallback: teacherData.isFallback
 				});
 			}
 
@@ -297,6 +299,7 @@
 				totalLessons,
 				distributedLessons,
 				isDivision: subjectData.isDivision,
+				isFallback: subjectData.isFallback,
 				dates: allDates,
 				typePriority
 			});
@@ -551,6 +554,11 @@
 														? 'По подгруппам'
 														: 'Всей группой'}
 												</span>
+												{#if stat.isFallback}
+													<div class="mt-1 text-xs text-orange-400">
+														⚠️ Предмет не по подгруппам
+													</div>
+												{/if}
 												{#if !stat.isDivision}
 													<div class="mt-1 text-xs text-yellow-400/70">
 														но.. мы всё равно рассчитываем, мало ли
