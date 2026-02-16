@@ -767,6 +767,7 @@
 					{scheduleData}
 					{selectedSemester}
 					institute={selectedInstitute}
+					hiddenSubjects={hiddenSubjectsForGroup}
 				/>
 			</section>
 		{:else if isScheduleLoading && selectedGroup && currentSettings.showWorkload}

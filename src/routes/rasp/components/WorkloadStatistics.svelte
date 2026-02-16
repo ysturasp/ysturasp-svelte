@@ -6,9 +6,16 @@
 	import type { InstituteId, Stats } from '../../stat/types';
 	import { goto } from '$app/navigation';
 
+	interface HiddenSubject {
+		lessonName: string;
+		type: number;
+		teacher: string;
+	}
+
 	export let scheduleData: ScheduleData | null = null;
 	export let selectedSemester: SemesterInfo | null = null;
 	export let institute: string = '';
+	export let hiddenSubjects: HiddenSubject[] = [];
 
 	const INSTITUTE_NAME_TO_ID: Record<string, InstituteId> = {
 		'Институт цифровых систем': 'btn-digital-systems',
@@ -30,10 +37,13 @@
 		subject: string;
 		teachers: string[];
 		totalLessons: number;
+		totalLessonsVisible: number;
 		typeStats: {
 			[key: number]: {
 				count: number;
 				total: number;
+				countVisible: number;
+				totalVisible: number;
 				label: string;
 				color: string;
 			};
@@ -273,6 +283,16 @@
 		return false;
 	}
 
+	function isLessonHidden(lesson: YSTULesson): boolean {
+		if (!hiddenSubjects || !hiddenSubjects.length) return false;
+		return hiddenSubjects.some(
+			(s) =>
+				s.lessonName === lesson.lessonName &&
+				s.type === lesson.type &&
+				s.teacher === lesson.teacherName
+		);
+	}
+
 	function calculateWorkloadStats(): WorkloadStats[] {
 		if (!scheduleData || !selectedSemester) return [];
 
@@ -295,12 +315,14 @@
 
 					const cleanName = cleanSubjectName(lesson.lessonName);
 					const key = cleanName || `null_${lesson.teacherName}`;
+					const hidden = isLessonHidden(lesson);
 
 					if (!stats.has(key)) {
 						stats.set(key, {
 							subject: cleanName || 'Без названия',
 							teachers: [],
 							totalLessons: 0,
+							totalLessonsVisible: 0,
 							typeStats: {},
 							exams: []
 						});
@@ -308,6 +330,7 @@
 
 					const subjectStats = stats.get(key)!;
 					subjectStats.totalLessons++;
+					if (!hidden) subjectStats.totalLessonsVisible++;
 
 					if (lesson.teacherName && !subjectStats.teachers.includes(lesson.teacherName)) {
 						subjectStats.teachers.push(lesson.teacherName);
@@ -326,6 +349,8 @@
 						subjectStats.typeStats[lesson.type] = {
 							count: 0,
 							total: 0,
+							countVisible: 0,
+							totalVisible: 0,
 							label:
 								lesson.type === 256
 									? 'Экзамен'
@@ -334,9 +359,12 @@
 						};
 					}
 
-					subjectStats.typeStats[lesson.type].total++;
+					const ts = subjectStats.typeStats[lesson.type];
+					ts.total++;
+					if (!hidden) ts.totalVisible++;
 					if (lessonDate < currentDate) {
-						subjectStats.typeStats[lesson.type].count++;
+						ts.count++;
+						if (!hidden) ts.countVisible++;
 					}
 				});
 			});
@@ -354,7 +382,7 @@
 	$: workloadStats = calculateWorkloadStats();
 	$: totalStats = calculateTotalCompletedLessons();
 	$: {
-		if (selectedSemester || scheduleData) {
+		if (selectedSemester || scheduleData || hiddenSubjects) {
 			workloadStats = calculateWorkloadStats();
 			totalStats = calculateTotalCompletedLessons();
 		}
@@ -370,18 +398,27 @@
 		return many;
 	}
 
-	function calculateTotalCompletedLessons(): { completed: number; total: number } {
+	function calculateTotalCompletedLessons(): {
+		completed: number;
+		total: number;
+		completedVisible: number;
+		totalVisible: number;
+	} {
 		let completed = 0;
 		let total = 0;
+		let completedVisible = 0;
+		let totalVisible = 0;
 
 		workloadStats.forEach((stat) => {
 			Object.values(stat.typeStats).forEach((typeStat) => {
 				completed += typeStat.count;
 				total += typeStat.total;
+				completedVisible += typeStat.countVisible;
+				totalVisible += typeStat.totalVisible;
 			});
 		});
 
-		return { completed, total };
+		return { completed, total, completedVisible, totalVisible };
 	}
 
 	function getGradient(mouseX: number, mouseY: number): string {
@@ -406,10 +443,18 @@
 		void _tick;
 		const withAvg: { s: WorkloadStats; avg: number }[] = [];
 		const withoutAvg: WorkloadStats[] = [];
+		const allHidden: WorkloadStats[] = [];
 
 		const instituteId = getInstituteId();
 
 		for (const s of items) {
+			const hasVisibleLessons = s.totalLessonsVisible > 0;
+
+			if (!hasVisibleLessons) {
+				allHidden.push(s);
+				continue;
+			}
+
 			const key = cleanSubjectName(s.subject);
 			const cacheKey = instituteId ? `${instituteId}_${key}` : key;
 			const stats = statsCache.get(cacheKey);
@@ -422,7 +467,7 @@
 		}
 
 		withAvg.sort((a, b) => b.avg - a.avg);
-		return [...withAvg.map((x) => x.s), ...withoutAvg];
+		return [...withAvg.map((x) => x.s), ...withoutAvg, ...allHidden];
 	}
 
 	let hoveredCard: HTMLElement | null = null;
@@ -457,12 +502,28 @@
 {#if workloadStats.length > 0}
 	<section>
 		<h3 class="text-2xl font-semibold text-white">📚 Учебная нагрузка</h3>
-		<h3 class="mt-2 text-xl font-medium text-white">
-			Количество завершенных занятий ко всем: {totalStats.completed} из {totalStats.total} ({(
-				(totalStats.completed / totalStats.total) *
-				100
-			).toFixed(2)}%)
-		</h3>
+		<div class="mt-2 space-y-1">
+			<p class="text-xl font-medium text-white">
+				Количество завершенных занятий ко всем:
+				{#if totalStats.totalVisible < totalStats.total && totalStats.totalVisible > 0}
+					<span class="text-white">{totalStats.completedVisible} из </span>
+					<span class="inline-flex items-baseline gap-1.5">
+						<span class="text-slate-400 line-through decoration-slate-500"
+							>{totalStats.total}</span
+						>
+						<span
+							class="rounded bg-slate-700/60 px-1.5 py-0.5 text-sm font-medium text-slate-300"
+							title="С учётом скрытых предметов">{totalStats.totalVisible}</span
+						>
+					</span>
+				{:else}
+					{totalStats.completed} из {totalStats.total} ({(
+						(totalStats.completed / totalStats.total) *
+						100
+					).toFixed(2)}%)
+				{/if}
+			</p>
+		</div>
 
 		<div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
 			{#each sortedWorkloadStats as stat (stat.subject + '|' + stat.teachers.join(','))}
@@ -545,24 +606,60 @@
 					<div class="mt-2">
 						{#each Object.entries(stat.typeStats) as [type, info]}
 							{#if info.total > 0 && type !== '256'}
-								<div class="mb-1 flex items-center justify-between text-slate-300">
-									<span>{info.label}: {info.count} из {info.total}</span>
-									<div class="ml-2 flex items-center">
-										<div
-											class="relative mr-2 h-2 w-24 rounded-full bg-gray-300"
-										>
+								{@const hasHiddenForType = info.totalVisible !== info.total}
+								{@const pct = hasHiddenForType
+									? info.totalVisible > 0
+										? (info.countVisible / info.totalVisible) * 100
+										: 0
+									: (info.count / info.total) * 100}
+								{@const displayPct =
+									hasHiddenForType && info.totalVisible > 0
+										? Math.round((info.countVisible / info.totalVisible) * 100)
+										: Math.round((info.count / info.total) * 100)}
+								<div class="mb-1 flex flex-col gap-0.5 text-slate-300">
+									<div class="flex items-center justify-between">
+										<span class="min-w-0 flex-1">
+											{info.label}:
+											{#if hasHiddenForType}
+												<span class="text-white"
+													>{info.countVisible} из
+												</span>
+												<span class="inline-flex items-baseline gap-1.5">
+													<span
+														class="text-slate-500 line-through decoration-slate-500"
+														>{info.total}</span
+													>
+													<span
+														class="rounded bg-slate-700/60 px-1.5 py-0.5 text-sm font-medium text-slate-200"
+														title="С учётом скрытых занятий"
+														>{info.totalVisible}</span
+													>
+												</span>
+											{:else}
+												<span class="text-white"
+													>{info.count} из {info.total}</span
+												>
+											{/if}
+										</span>
+										<div class="ml-2 flex flex-shrink-0 items-center">
 											<div
-												class="absolute top-0 left-0 h-full rounded-full"
-												style="width: {(info.count / info.total) *
-													100}%; background-color: {info.count ===
-												info.total
-													? '#00ff00b5'
-													: '#0000ffb5'};"
-											></div>
+												class="relative mr-2 h-2 w-24 rounded-full bg-gray-300"
+											>
+												<div
+													class="absolute top-0 left-0 h-full rounded-full"
+													style="width: {pct}%; background-color: {(
+														hasHiddenForType
+															? info.countVisible ===
+																info.totalVisible
+															: info.count === info.total
+													)
+														? '#00ff00b5'
+														: '#0000ffb5'};"
+												></div>
+											</div>
+											<span class="text-sm text-slate-400">{displayPct}%</span
+											>
 										</div>
-										<span class="text-sm text-slate-400"
-											>{Math.round((info.count / info.total) * 100)}%</span
-										>
 									</div>
 								</div>
 							{/if}
