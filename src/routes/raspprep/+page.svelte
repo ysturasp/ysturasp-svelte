@@ -445,6 +445,10 @@
 											style="grid-template-columns: repeat({daysWithLessons.length}, 1fr)"
 										>
 											{#each daysWithLessons as dayIndex}
+												{@const dayData = dayLessons[dayIndex]}
+												{@const dayNumber = dayData?.date
+													? new Date(dayData.date).getDate()
+													: dayIndex + 1}
 												<button
 													class="day-button flex flex-col items-center rounded-lg p-2 transition-all {dayIndex ===
 													selectedDay
@@ -464,7 +468,7 @@
 														>{getDayName(dayIndex)}</span
 													>
 													<span class="text-lg font-bold"
-														>{dayIndex + 1}</span
+														>{dayNumber}</span
 													>
 												</button>
 											{/each}
