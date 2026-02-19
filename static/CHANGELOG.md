@@ -1,3 +1,4 @@
+- add hidden subjects functionality to workload statistics allowing for visibility control and updated calculations in ui (ysturasp, 2026-02-16) [4 files changed, 128 insertions(+), 28 deletions(-)]
 - include non-subgroup lessons in statistics with an `isFallback` flag and display their status in ui (ysturasp, 2026-02-14) [5 files changed, 63 insertions(+), 16 deletions(-)]
 - dynamically adjust ad banner order and active banner selection based on university prop (ysturasp, 2026-02-13) [3 files changed, 12 insertions(+), 3 deletions(-)]
 - improve security event logging and ip blocking mechanisms in server hooks, enhance database schema with security_events and blocked_ips tables (ysturasp, 2026-02-12) [5 files changed, 240 insertions(+), 89 deletions(-)]
