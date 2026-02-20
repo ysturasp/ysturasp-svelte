@@ -109,6 +109,17 @@
 			(ctx as any).roundRect(screenPos.x, screenPos.y, screenWidth, screenHeight, radius);
 			ctx.fill();
 			ctx.stroke();
+		}
+	}
+
+	function drawStairsBlocksText() {
+		if (!ctx || !buildingMap.stairsBlocks) return;
+		const t = getTransform();
+
+		for (const block of buildingMap.stairsBlocks) {
+			const screenPos = worldToScreen(block.x, block.y);
+			const screenWidth = block.width * t.scale;
+			const screenHeight = block.height * t.scale;
 
 			const fontSize = 11 * t.scale;
 			ctx.font = `600 ${fontSize}px 'Unbounded', 'Exo 2', 'Inter', sans-serif`;
@@ -551,6 +562,8 @@
 		if (currentRoute || (lastRoute && isRouteDisappearing)) {
 			drawRoute(currentRoute || lastRoute!);
 		}
+
+		drawStairsBlocksText();
 	}
 
 	function getCanvasCoords(clientX: number, clientY: number): { x: number; y: number } {
