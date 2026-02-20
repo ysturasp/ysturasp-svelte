@@ -31,7 +31,19 @@
 	let routeAnimStartMs = 0;
 	let routeAnimProgress = 1;
 	let routeAnimRaf: number | null = null;
+	let isRouteDisappearing = false;
 	const ROUTE_ANIM_MS = 650;
+	const ROUTE_DISAPPEAR_MS = 400;
+
+	let isAnimatingView = false;
+	let viewAnimRaf: number | null = null;
+	let targetOffsetX = 0;
+	let targetOffsetY = 0;
+	let targetScale = 1;
+	let startOffsetX = 0;
+	let startOffsetY = 0;
+	let startScale = 1;
+	const VIEW_ANIM_MS = 500;
 
 	const MIN_SCALE = 0.2;
 	const MAX_SCALE = 4;
@@ -200,7 +212,8 @@
 		if (!ctx) return;
 
 		const t = getTransform();
-		ctx.strokeStyle = '#3b82f6';
+		const opacity = isRouteDisappearing ? 1 - routeAnimProgress : 1;
+		ctx.strokeStyle = `rgba(59, 130, 246, ${opacity})`;
 		ctx.lineWidth = 5 * t.scale;
 		ctx.lineCap = 'round';
 		ctx.lineJoin = 'round';
@@ -268,7 +281,7 @@
 
 		ctx.stroke();
 
-		if (lastDrawn && lastDir && (lastDir.x !== 0 || lastDir.y !== 0)) {
+		if (lastDrawn && lastDir && (lastDir.x !== 0 || lastDir.y !== 0) && !isRouteDisappearing) {
 			const angle = Math.atan2(lastDir.y, lastDir.x);
 			const arrowLength = 12 * t.scale;
 			const arrowWidth = 8 * t.scale;
@@ -281,7 +294,7 @@
 			ctx.lineTo(-arrowLength, -arrowWidth / 2);
 			ctx.lineTo(-arrowLength, arrowWidth / 2);
 			ctx.closePath();
-			ctx.fillStyle = '#3b82f6';
+			ctx.fillStyle = `rgba(59, 130, 246, ${opacity})`;
 			ctx.fill();
 			ctx.restore();
 		}
@@ -347,8 +360,8 @@
 			drawAuditorium(auditorium, isSelected, isHovered);
 		}
 
-		if (currentRoute) {
-			drawRoute(currentRoute);
+		if (currentRoute || (lastRoute && isRouteDisappearing)) {
+			drawRoute(currentRoute || lastRoute!);
 		}
 	}
 
@@ -545,6 +558,139 @@
 		draw();
 	}
 
+	function centerOnFirstFloor() {
+		if (!canvas || !container) return;
+
+		const firstFloorSections = buildingMap.sections.filter((s) => s.floor === 1);
+		if (firstFloorSections.length === 0) {
+			centerOnBuilding();
+			return;
+		}
+
+		const firstSection = firstFloorSections.find((s) => s.id === 1) || firstFloorSections[0];
+
+		const centerX = firstSection.position.x + firstSection.width / 2;
+		const centerY = firstSection.position.y + firstSection.height / 2;
+		const width = firstSection.width;
+		const height = firstSection.height;
+
+		const rect = container.getBoundingClientRect();
+		const scaleX = rect.width / (width + 100);
+		const scaleY = rect.height / (height + 100);
+		scale = Math.min(scaleX, scaleY, 1.2);
+
+		offsetX = rect.width / 2 - centerX * scale;
+		offsetY = rect.height * 0.7 - centerY * scale;
+		draw();
+	}
+
+	function centerOnRoute(route: Route, animate = true) {
+		if (!canvas || !container || !route) return;
+
+		let minX = Infinity;
+		let minY = Infinity;
+		let maxX = -Infinity;
+		let maxY = -Infinity;
+
+		let polyline: Point[] = [];
+		if (route.polyline && route.polyline.length >= 2) {
+			polyline = route.polyline;
+		} else if (route.path && route.path.length >= 2) {
+			for (const aud of route.path) {
+				const section = buildingMap.sections.find(
+					(s) => s.id === aud.section && s.floor === aud.floor
+				);
+				if (!section) continue;
+				polyline.push({
+					x: section.position.x + aud.position.x + aud.width / 2,
+					y: section.position.y + aud.position.y + aud.height / 2
+				});
+			}
+		}
+
+		if (polyline.length >= 2) {
+			for (const point of polyline) {
+				minX = Math.min(minX, point.x);
+				minY = Math.min(minY, point.y);
+				maxX = Math.max(maxX, point.x);
+				maxY = Math.max(maxY, point.y);
+			}
+		}
+
+		if (route.path && route.path.length > 0) {
+			for (const aud of route.path) {
+				const section = buildingMap.sections.find(
+					(s) => s.id === aud.section && s.floor === aud.floor
+				);
+				if (!section) continue;
+				const left = section.position.x + aud.position.x;
+				const top = section.position.y + aud.position.y;
+				const right = left + aud.width;
+				const bottom = top + aud.height;
+
+				minX = Math.min(minX, left);
+				minY = Math.min(minY, top);
+				maxX = Math.max(maxX, right);
+				maxY = Math.max(maxY, bottom);
+			}
+		}
+
+		if (minX === Infinity) return;
+
+		const padding = 80;
+		minX -= padding;
+		minY -= padding;
+		maxX += padding;
+		maxY += padding;
+
+		const centerX = (minX + maxX) / 2;
+		const centerY = (minY + maxY) / 2;
+		const width = maxX - minX;
+		const height = maxY - minY;
+
+		const rect = container.getBoundingClientRect();
+		const scaleX = rect.width / width;
+		const scaleY = rect.height / height;
+		targetScale = Math.min(scaleX, scaleY, MAX_SCALE);
+
+		targetOffsetX = rect.width / 2 - centerX * targetScale;
+		targetOffsetY = rect.height / 2 - centerY * targetScale;
+
+		if (
+			animate &&
+			typeof window !== 'undefined' &&
+			typeof requestAnimationFrame !== 'undefined'
+		) {
+			startOffsetX = offsetX;
+			startOffsetY = offsetY;
+			startScale = scale;
+			isAnimatingView = true;
+
+			if (viewAnimRaf !== null) cancelAnimationFrame(viewAnimRaf);
+			const viewAnimStartMs = performance.now();
+			const tick = (now: number) => {
+				const p = Math.min(1, (now - viewAnimStartMs) / VIEW_ANIM_MS);
+				const ease = 1 - Math.pow(1 - p, 3);
+				offsetX = startOffsetX + (targetOffsetX - startOffsetX) * ease;
+				offsetY = startOffsetY + (targetOffsetY - startOffsetY) * ease;
+				scale = startScale + (targetScale - startScale) * ease;
+				draw();
+				if (p < 1) {
+					viewAnimRaf = requestAnimationFrame(tick);
+				} else {
+					viewAnimRaf = null;
+					isAnimatingView = false;
+				}
+			};
+			viewAnimRaf = requestAnimationFrame(tick);
+		} else {
+			offsetX = targetOffsetX;
+			offsetY = targetOffsetY;
+			scale = targetScale;
+			draw();
+		}
+	}
+
 	onMount(() => {
 		if (!container || !canvas) return;
 		ctx = canvas.getContext('2d');
@@ -620,7 +766,7 @@
 		canvas.addEventListener('touchend', handleTouchEnd, { passive: true });
 		canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
 
-		setTimeout(centerOnBuilding, 100);
+		setTimeout(centerOnFirstFloor, 100);
 
 		return () => {
 			window.removeEventListener('resize', resizeCanvas);
@@ -631,6 +777,14 @@
 			canvas.removeEventListener('touchstart', handleTouchStart);
 			canvas.removeEventListener('touchend', handleTouchEnd);
 			canvas.removeEventListener('touchmove', handleTouchMove);
+			if (routeAnimRaf !== null) {
+				cancelAnimationFrame(routeAnimRaf);
+				routeAnimRaf = null;
+			}
+			if (viewAnimRaf !== null) {
+				cancelAnimationFrame(viewAnimRaf);
+				viewAnimRaf = null;
+			}
 		};
 	});
 
@@ -639,10 +793,19 @@
 	}
 
 	let prevRouteId: string | null = null;
+	let lastRoute: Route | null = null;
 	$: if (currentRoute) {
 		const routeId = `${currentRoute.path[0]?.id || ''}-${currentRoute.path[currentRoute.path.length - 1]?.id || ''}`;
 		if (routeId !== prevRouteId) {
 			prevRouteId = routeId;
+			isRouteDisappearing = false;
+			lastRoute = currentRoute;
+
+			setTimeout(() => {
+				if (currentRoute) {
+					centerOnRoute(currentRoute, true);
+				}
+			}, 100);
 
 			if (typeof window === 'undefined' || typeof requestAnimationFrame === 'undefined') {
 				routeAnimProgress = 1;
@@ -666,13 +829,40 @@
 			}
 		}
 	} else {
-		prevRouteId = null;
-		if (routeAnimRaf !== null) {
-			cancelAnimationFrame(routeAnimRaf);
-			routeAnimRaf = null;
+		if (lastRoute && prevRouteId !== null) {
+			isRouteDisappearing = true;
+			routeAnimStartMs = performance.now();
+			const startProgress = routeAnimProgress;
+
+			if (routeAnimRaf !== null) cancelAnimationFrame(routeAnimRaf);
+			const tick = (now: number) => {
+				const elapsed = now - routeAnimStartMs;
+				const p = Math.max(0, 1 - elapsed / ROUTE_DISAPPEAR_MS);
+				routeAnimProgress = startProgress * p;
+				draw();
+				if (p > 0) {
+					routeAnimRaf = requestAnimationFrame(tick);
+				} else {
+					routeAnimRaf = null;
+					routeAnimProgress = 0;
+					lastRoute = null;
+					prevRouteId = null;
+					isRouteDisappearing = false;
+					draw();
+				}
+			};
+			routeAnimRaf = requestAnimationFrame(tick);
+		} else {
+			prevRouteId = null;
+			lastRoute = null;
+			isRouteDisappearing = false;
+			if (routeAnimRaf !== null) {
+				cancelAnimationFrame(routeAnimRaf);
+				routeAnimRaf = null;
+			}
+			routeAnimProgress = 0;
+			draw();
 		}
-		routeAnimProgress = 0;
-		draw();
 	}
 </script>
 
