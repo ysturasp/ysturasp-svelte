@@ -47,7 +47,7 @@
 
 	const MIN_SCALE = 0.2;
 	const MAX_SCALE = 4;
-	const SCALE_STEP = 0.15;
+	const SCALE_STEP = 0.08;
 
 	function getTransform() {
 		return { x: offsetX, y: offsetY, scale };
@@ -109,6 +109,40 @@
 			(ctx as any).roundRect(screenPos.x, screenPos.y, screenWidth, screenHeight, radius);
 			ctx.fill();
 			ctx.stroke();
+
+			const fontSize = 11 * t.scale;
+			ctx.font = `600 ${fontSize}px 'Unbounded', 'Exo 2', 'Inter', sans-serif`;
+			ctx.textAlign = 'center';
+			ctx.textBaseline = 'middle';
+			ctx.fillStyle = 'rgba(226, 232, 240, 0.9)';
+
+			const centerX = screenPos.x + screenWidth / 2;
+			const centerY = screenPos.y + screenHeight / 2;
+			const floorLabel = `${block.floor}`;
+			const textLabel = 'этаж';
+			const fullLabel = floorLabel + textLabel;
+
+			const textMetrics = ctx.measureText('0');
+			const charHeight =
+				textMetrics.actualBoundingBoxAscent + textMetrics.actualBoundingBoxDescent;
+			const spacing = charHeight * 0.2;
+			const gapBetweenParts = charHeight * 0.5;
+
+			const totalHeight = (charHeight + spacing) * (fullLabel.length - 1) + gapBetweenParts;
+			const startY = centerY - totalHeight / 2;
+
+			for (let i = 0; i < floorLabel.length; i++) {
+				const char = floorLabel[i];
+				const y = startY + i * (charHeight + spacing) + charHeight / 2;
+				ctx.fillText(char, centerX, y);
+			}
+
+			const floorEndY = startY + floorLabel.length * (charHeight + spacing);
+			for (let i = 0; i < textLabel.length; i++) {
+				const char = textLabel[i];
+				const y = floorEndY + gapBetweenParts + i * (charHeight + spacing) + charHeight / 2;
+				ctx.fillText(char, centerX, y);
+			}
 		}
 	}
 
@@ -130,21 +164,9 @@
 		ctx.fill();
 		ctx.stroke();
 
-		const fontSize = 10 * t.scale;
-		ctx.font = `600 ${fontSize}px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial`;
-		ctx.textAlign = 'left';
-		ctx.textBaseline = 'top';
-		const label = `${section.floor} этаж`;
-		const textMetrics = ctx.measureText(label);
-		const textWidth = textMetrics.width;
-		const labelX = screenPos.x - textWidth - 8 * t.scale;
-		const labelY = screenPos.y + 6 * t.scale;
-		ctx.fillStyle = 'rgba(226, 232, 240, 0.85)';
-		ctx.fillText(label, labelX, labelY);
-
 		if (section.floor === 6 && section.id === 2) {
 			const secretSize = 14 * t.scale;
-			ctx.font = `700 ${secretSize}px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial`;
+			ctx.font = `700 ${secretSize}px 'Unbounded', 'Exo 2', 'Inter', sans-serif`;
 			ctx.textAlign = 'center';
 			ctx.textBaseline = 'middle';
 			ctx.fillStyle = 'rgba(226, 232, 240, 0.55)';
@@ -199,13 +221,53 @@
 		ctx.stroke();
 
 		const fontSize = 9 * t.scale;
-		ctx.font = `600 ${fontSize}px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial`;
+		ctx.font = `600 ${fontSize}px 'Exo 2', 'Inter', sans-serif`;
 		ctx.textAlign = 'center';
 		ctx.textBaseline = 'middle';
 		const centerX = screenPos.x + screenWidth / 2;
 		const centerY = screenPos.y + screenHeight / 2;
 		ctx.fillStyle = 'rgba(226, 232, 240, 0.9)';
 		ctx.fillText(auditorium.name, centerX, centerY);
+	}
+
+	function getClosestEdgePoint(
+		left: number,
+		top: number,
+		right: number,
+		bottom: number,
+		targetX: number,
+		targetY: number
+	): Point {
+		const centerX = (left + right) / 2;
+		const centerY = (top + bottom) / 2;
+
+		const dx = targetX - centerX;
+		const dy = targetY - centerY;
+
+		if (Math.abs(dx) < 0.001 && Math.abs(dy) < 0.001) {
+			return { x: centerX, y: centerY };
+		}
+
+		const width = right - left;
+		const height = bottom - top;
+
+		const ratioX = Math.abs(dx / (width / 2));
+		const ratioY = Math.abs(dy / (height / 2));
+
+		let edgeX: number, edgeY: number;
+
+		if (ratioX > ratioY) {
+			edgeX = dx > 0 ? right : left;
+			edgeY = centerY + dy / ratioX;
+		} else {
+			edgeY = dy > 0 ? bottom : top;
+			edgeX = centerX + dx / ratioY;
+		}
+
+		edgeX = Math.max(left, Math.min(right, edgeX));
+		edgeY = Math.max(top, Math.min(bottom, edgeY));
+
+		return { x: edgeX, y: edgeY };
 	}
 
 	function drawRoute(route: Route) {
@@ -220,17 +282,118 @@
 
 		let polyline: Point[] = [];
 		if (route.polyline && route.polyline.length >= 2) {
-			polyline = route.polyline;
+			polyline = [...route.polyline];
+
+			if (route.path && route.path.length >= 2) {
+				const firstAud = route.path[0];
+				const lastAud = route.path[route.path.length - 1];
+
+				if (polyline.length >= 2) {
+					const nextPoint = polyline[1];
+					const firstSection = buildingMap.sections.find(
+						(s) => s.id === firstAud.section && s.floor === firstAud.floor
+					);
+					if (firstSection) {
+						const audLeft = firstSection.position.x + firstAud.position.x;
+						const audTop = firstSection.position.y + firstAud.position.y;
+						const audRight = audLeft + firstAud.width;
+						const audBottom = audTop + firstAud.height;
+
+						const edgePoint = getClosestEdgePoint(
+							audLeft,
+							audTop,
+							audRight,
+							audBottom,
+							nextPoint.x,
+							nextPoint.y
+						);
+						polyline[0] = edgePoint;
+					}
+				}
+
+				if (polyline.length >= 2) {
+					const prevPoint = polyline[polyline.length - 2];
+					const lastSection = buildingMap.sections.find(
+						(s) => s.id === lastAud.section && s.floor === lastAud.floor
+					);
+					if (lastSection) {
+						const audLeft = lastSection.position.x + lastAud.position.x;
+						const audTop = lastSection.position.y + lastAud.position.y;
+						const audRight = audLeft + lastAud.width;
+						const audBottom = audTop + lastAud.height;
+
+						const edgePoint = getClosestEdgePoint(
+							audLeft,
+							audTop,
+							audRight,
+							audBottom,
+							prevPoint.x,
+							prevPoint.y
+						);
+						polyline[polyline.length - 1] = edgePoint;
+					}
+				}
+			}
 		} else if (route.path && route.path.length >= 2) {
-			for (const aud of route.path) {
+			for (let i = 0; i < route.path.length; i++) {
+				const aud = route.path[i];
 				const section = buildingMap.sections.find(
 					(s) => s.id === aud.section && s.floor === aud.floor
 				);
 				if (!section) continue;
-				polyline.push({
-					x: section.position.x + aud.position.x + aud.width / 2,
-					y: section.position.y + aud.position.y + aud.height / 2
-				});
+
+				const audLeft = section.position.x + aud.position.x;
+				const audTop = section.position.y + aud.position.y;
+				const audRight = audLeft + aud.width;
+				const audBottom = audTop + aud.height;
+
+				let point: Point;
+				if (i === 0 && route.path.length > 1) {
+					const nextAud = route.path[i + 1];
+					const nextSection = buildingMap.sections.find(
+						(s) => s.id === nextAud.section && s.floor === nextAud.floor
+					);
+					if (nextSection) {
+						const nextCenterX =
+							nextSection.position.x + nextAud.position.x + nextAud.width / 2;
+						const nextCenterY =
+							nextSection.position.y + nextAud.position.y + nextAud.height / 2;
+						point = getClosestEdgePoint(
+							audLeft,
+							audTop,
+							audRight,
+							audBottom,
+							nextCenterX,
+							nextCenterY
+						);
+					} else {
+						point = { x: audLeft + aud.width / 2, y: audTop + aud.height / 2 };
+					}
+				} else if (i === route.path.length - 1 && route.path.length > 1) {
+					const prevAud = route.path[i - 1];
+					const prevSection = buildingMap.sections.find(
+						(s) => s.id === prevAud.section && s.floor === prevAud.floor
+					);
+					if (prevSection) {
+						const prevCenterX =
+							prevSection.position.x + prevAud.position.x + prevAud.width / 2;
+						const prevCenterY =
+							prevSection.position.y + prevAud.position.y + prevAud.height / 2;
+						point = getClosestEdgePoint(
+							audLeft,
+							audTop,
+							audRight,
+							audBottom,
+							prevCenterX,
+							prevCenterY
+						);
+					} else {
+						point = { x: audLeft + aud.width / 2, y: audTop + aud.height / 2 };
+					}
+				} else {
+					point = { x: audLeft + aud.width / 2, y: audTop + aud.height / 2 };
+				}
+				polyline.push(point);
 			}
 		}
 
@@ -281,22 +444,47 @@
 
 		ctx.stroke();
 
-		if (lastDrawn && lastDir && (lastDir.x !== 0 || lastDir.y !== 0) && !isRouteDisappearing) {
-			const angle = Math.atan2(lastDir.y, lastDir.x);
-			const arrowLength = 12 * t.scale;
-			const arrowWidth = 8 * t.scale;
+		if (screenPts.length >= 2 && !isRouteDisappearing) {
+			const endPoint = screenPts[screenPts.length - 1];
+			const prevPoint = screenPts[screenPts.length - 2];
 
-			ctx.save();
-			ctx.translate(lastDrawn.x, lastDrawn.y);
-			ctx.rotate(angle);
-			ctx.beginPath();
-			ctx.moveTo(0, 0);
-			ctx.lineTo(-arrowLength, -arrowWidth / 2);
-			ctx.lineTo(-arrowLength, arrowWidth / 2);
-			ctx.closePath();
-			ctx.fillStyle = `rgba(59, 130, 246, ${opacity})`;
-			ctx.fill();
-			ctx.restore();
+			const dirX = endPoint.x - prevPoint.x;
+			const dirY = endPoint.y - prevPoint.y;
+			const dirLen = Math.sqrt(dirX * dirX + dirY * dirY);
+
+			if (dirLen > 0.1) {
+				const normX = dirX / dirLen;
+				const normY = dirY / dirLen;
+
+				const angle = Math.atan2(dirY, dirX);
+
+				const arrowLength = 8 * t.scale;
+				const arrowWidth = 10 * t.scale;
+
+				const offset = 2 * t.scale;
+
+				const shiftedX = endPoint.x + normX * offset;
+				const shiftedY = endPoint.y + normY * offset;
+
+				ctx.save();
+				ctx.translate(shiftedX, shiftedY);
+				ctx.rotate(angle);
+
+				ctx.strokeStyle = `rgba(59, 130, 246, ${opacity})`;
+				ctx.lineWidth = 3 * t.scale;
+				ctx.lineCap = 'round';
+				ctx.lineJoin = 'round';
+
+				ctx.beginPath();
+
+				ctx.moveTo(0, 0);
+				ctx.lineTo(-arrowLength, -arrowWidth / 2);
+				ctx.moveTo(0, 0);
+				ctx.lineTo(-arrowLength, arrowWidth / 2);
+
+				ctx.stroke();
+				ctx.restore();
+			}
 		}
 	}
 
@@ -379,11 +567,11 @@
 		const { x: mouseX, y: mouseY } = getCanvasCoords(e.clientX, e.clientY);
 		const worldBefore = screenToWorld(mouseX, mouseY);
 
-		if (e.deltaY < 0) {
-			scale = Math.min(MAX_SCALE, scale + SCALE_STEP);
-		} else {
-			scale = Math.max(MIN_SCALE, scale - SCALE_STEP);
-		}
+		const zoomSpeed = 0.005;
+		const zoomFactor = 1 - e.deltaY * zoomSpeed;
+		const newScale = scale * zoomFactor;
+
+		scale = Math.max(MIN_SCALE, Math.min(MAX_SCALE, newScale));
 
 		const worldAfter = screenToWorld(mouseX, mouseY);
 		offsetX += (worldAfter.x - worldBefore.x) * scale;
