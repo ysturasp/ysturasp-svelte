@@ -1,3 +1,4 @@
+- refactor day number display in schedule components to use date from dayLessons, ensuring accurate representation in raspaudience and raspprep pages (ysturasp, 2026-02-19) [4 files changed, 12 insertions(+), 2 deletions(-)]
 - add map page (ysturasp, 2026-02-19) [11 files changed, 1756 insertions(+)]
 - add hidden subjects functionality to workload statistics allowing for visibility control and updated calculations in ui (ysturasp, 2026-02-16) [4 files changed, 128 insertions(+), 28 deletions(-)]
 - include non-subgroup lessons in statistics with an `isFallback` flag and display their status in ui (ysturasp, 2026-02-14) [5 files changed, 63 insertions(+), 16 deletions(-)]
