@@ -167,7 +167,7 @@
 		const screenHeight = section.height * t.scale;
 
 		ctx.strokeStyle = 'rgba(248, 250, 252, 0.9)';
-		ctx.lineWidth = 2.25 * t.scale;
+		ctx.lineWidth = 1.25 * t.scale;
 		ctx.fillStyle = 'rgba(15, 23, 42, 0.18)';
 
 		const radius = 10 * t.scale;

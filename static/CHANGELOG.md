@@ -1,3 +1,4 @@
+- implement auditorium status loading and rendering in map components, enhancing visual feedback for auditorium availability (ysturasp, 2026-02-23) [5 files changed, 193 insertions(+), 1 deletion(-)]
 - add stairs blocks text rendering to BuildingMapCanvas (ysturasp, 2026-02-21) [3 files changed, 15 insertions(+)]
 - refactor BuildingMapCanvas to improve text rendering and zoom functionality, adjusting scale step and font settings for better visual clarity (ysturasp, 2026-02-21) [3 files changed, 231 insertions(+), 41 deletions(-)]
 - implement route animation and view centering features in BuildingMapCanvas, enhancing user experience with smooth transitions and improved route visibility (ysturasp, 2026-02-20) [3 files changed, 204 insertions(+), 12 deletions(-)]
