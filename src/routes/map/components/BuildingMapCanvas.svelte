@@ -8,6 +8,7 @@
 	export let routeStart: Auditorium | null = null;
 	export let routeEnd: Auditorium | null = null;
 	export let currentRoute: Route | null = null;
+	export let auditoriumStatuses: Record<string, boolean> = {};
 	export let onAuditoriumClick: (auditorium: Auditorium) => void = () => {};
 	export let onAuditoriumHover: (auditorium: Auditorium | null) => void = () => {};
 
@@ -220,6 +221,23 @@
 		} else if (auditorium === routeEnd) {
 			fillColor = 'rgba(245, 158, 11, 0.16)';
 			strokeColor = 'rgba(251, 191, 36, 0.95)';
+		} else {
+			const baseName = auditorium.name;
+			const gName = `Г-${baseName}`;
+			const withoutPrefix = baseName.replace(/^Г-/, '');
+
+			const actualStatus =
+				auditoriumStatuses[baseName] ??
+				auditoriumStatuses[gName] ??
+				auditoriumStatuses[withoutPrefix];
+
+			if (actualStatus === true) {
+				fillColor = 'rgba(16, 185, 129, 0.08)';
+				strokeColor = 'rgba(52, 211, 153, 0.4)';
+			} else if (actualStatus === false) {
+				fillColor = 'rgba(239, 68, 68, 0.25)';
+				strokeColor = 'rgba(239, 68, 68, 0.9)';
+			}
 		}
 
 		ctx.fillStyle = fillColor;
@@ -990,6 +1008,10 @@
 	});
 
 	$: if (selectedAuditorium !== null || routeStart !== null || routeEnd !== null) {
+		draw();
+	}
+
+	$: if (auditoriumStatuses) {
 		draw();
 	}
 

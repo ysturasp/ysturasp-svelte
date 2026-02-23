@@ -1,3 +1,4 @@
+- add stairs blocks text rendering to BuildingMapCanvas (ysturasp, 2026-02-21) [3 files changed, 15 insertions(+)]
 - refactor BuildingMapCanvas to improve text rendering and zoom functionality, adjusting scale step and font settings for better visual clarity (ysturasp, 2026-02-21) [3 files changed, 231 insertions(+), 41 deletions(-)]
 - implement route animation and view centering features in BuildingMapCanvas, enhancing user experience with smooth transitions and improved route visibility (ysturasp, 2026-02-20) [3 files changed, 204 insertions(+), 12 deletions(-)]
 - enhance redis client error handling with connection error logging and retry mechanisms (ysturasp, 2026-02-20) [3 files changed, 54 insertions(+), 2 deletions(-)]

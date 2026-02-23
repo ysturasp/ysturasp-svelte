@@ -16,6 +16,7 @@
 	let routeEnd: Auditorium | null = null;
 	let currentRoute: Route | null = null;
 	let hoveredAuditorium: Auditorium | null = null;
+	let auditoriumStatuses: Record<string, boolean> = {};
 
 	function handleAuditoriumClick(auditorium: Auditorium) {
 		selectedAuditorium = auditorium;
@@ -84,7 +85,24 @@
 		selectedAuditorium = null;
 	}
 
-	onMount(() => {});
+	async function loadAuditoriumStatuses() {
+		try {
+			const response = await fetch('/api/map/auditoriums-status');
+			if (response.ok) {
+				const data = await response.json();
+				console.log('Loaded auditorium statuses:', data);
+				auditoriumStatuses = data;
+			}
+		} catch (error) {
+			console.error('Error loading auditorium statuses:', error);
+		}
+	}
+
+	onMount(() => {
+		loadAuditoriumStatuses();
+		const interval = setInterval(loadAuditoriumStatuses, 60000);
+		return () => clearInterval(interval);
+	});
 </script>
 
 <svelte:head>
@@ -104,6 +122,7 @@
 				{routeStart}
 				{routeEnd}
 				{currentRoute}
+				{auditoriumStatuses}
 				onAuditoriumClick={handleAuditoriumClick}
 				onAuditoriumHover={handleAuditoriumHover}
 			/>
