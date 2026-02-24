@@ -15,16 +15,22 @@ function normalizeAuditoriumName(name: string): string {
 
 function isAuditoriumOccupiedNow(lessons: AudienceLesson[]): boolean {
 	const now = new Date();
-	const currentTime = now.getHours() * 60 + now.getMinutes();
-	const currentDay = now.getDay();
-
-	if (currentDay === 0 || currentDay === 6) {
-		return false;
-	}
+	const nowTs = now.getTime();
 
 	for (const lesson of lessons) {
-		if (!lesson.timeRange) continue;
+		const anyLesson = lesson as any;
+		if (anyLesson.startAt && anyLesson.endAt) {
+			const start = new Date(anyLesson.startAt);
+			const end = new Date(anyLesson.endAt);
+			const startTs = start.getTime();
+			const endTs = end.getTime();
+			if (!Number.isNaN(startTs) && !Number.isNaN(endTs) && nowTs >= startTs && nowTs <= endTs) {
+				return true;
+			}
+			continue;
+		}
 
+		if (!lesson.timeRange) continue;
 		const [startStr, endStr] = lesson.timeRange.split('-').map((s) => s.trim());
 		if (!startStr || !endStr) continue;
 
@@ -39,10 +45,11 @@ function isAuditoriumOccupiedNow(lessons: AudienceLesson[]): boolean {
 			continue;
 		}
 
+		const currentMinutes = now.getHours() * 60 + now.getMinutes();
 		const lessonStart = startHour * 60 + startMin;
 		const lessonEnd = endHour * 60 + endMin;
 
-		if (currentTime >= lessonStart && currentTime <= lessonEnd) {
+		if (currentMinutes >= lessonStart && currentMinutes <= lessonEnd) {
 			return true;
 		}
 	}
@@ -91,13 +98,6 @@ export async function GET(_event: RequestEvent) {
 			return json(statuses);
 		}
 
-		const now = new Date();
-		const todayISO = now.toISOString().split('T')[0];
-		const day = String(now.getDate()).padStart(2, '0');
-		const month = String(now.getMonth() + 1).padStart(2, '0');
-		const year = now.getFullYear();
-		const todayDot = `${day}.${month}.${year}`;
-
 		for (const aud of audiences) {
 			const originalName = aud.name;
 			const normalizedName = normalizeAuditoriumName(originalName);
@@ -112,22 +112,17 @@ export async function GET(_event: RequestEvent) {
 				}
 
 				const schedule: AudienceScheduleData = JSON.parse(cachedSchedule);
-				const todaysLessons: AudienceLesson[] = [];
+				const allLessons: AudienceLesson[] = [];
 
 				for (const week of schedule.items ?? []) {
 					for (const dayInfo of week.days ?? []) {
-						const date = dayInfo.info?.date;
-						if (!date) continue;
-
-						if (date === todayISO || date === todayDot) {
-							for (const lesson of dayInfo.lessons ?? []) {
-								todaysLessons.push(lesson);
-							}
+						for (const lesson of dayInfo.lessons ?? []) {
+							allLessons.push(lesson);
 						}
 					}
 				}
 
-				const occupied = isAuditoriumOccupiedNow(todaysLessons);
+				const occupied = isAuditoriumOccupiedNow(allLessons);
 				statuses[originalName] = !occupied;
 			} catch (err) {
 				console.error(`Error processing audience ${aud.id} (${aud.name}):`, err);

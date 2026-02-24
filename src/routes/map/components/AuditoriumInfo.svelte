@@ -20,7 +20,8 @@
 
 	function getScheduleLink(auditorium: Auditorium | null): string {
 		if (!auditorium) return '/raspaudience';
-		return `/raspaudience?audience=${auditorium.name}`;
+		const name = auditorium.name.startsWith('Г-') ? auditorium.name : `Г-${auditorium.name}`;
+		return `/raspaudience?audience=${encodeURIComponent(name)}`;
 	}
 
 	function closePanel() {
