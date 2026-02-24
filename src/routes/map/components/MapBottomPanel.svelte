@@ -74,12 +74,8 @@
 		onSwap();
 	}
 
-	$: if (routeStart) {
-		startSearch = routeStart.name;
-	}
-	$: if (routeEnd) {
-		endSearch = routeEnd.name;
-	}
+	$: startSearch = routeStart ? routeStart.name : '';
+	$: endSearch = routeEnd ? routeEnd.name : '';
 </script>
 
 <div class="fixed bottom-4 left-1/2 z-50 w-full max-w-4xl -translate-x-1/2 px-4">

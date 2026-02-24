@@ -20,28 +20,16 @@
 
 	function handleAuditoriumClick(auditorium: Auditorium) {
 		selectedAuditorium = auditorium;
-
-		if (!routeStart) {
-			routeStart = auditorium;
-		} else if (!routeEnd && routeStart.id !== auditorium.id) {
-			routeEnd = auditorium;
-			calculateRoute();
-		} else if (routeStart.id === auditorium.id) {
-			routeStart = null;
-			routeEnd = null;
-			currentRoute = null;
-		} else if (routeEnd?.id === auditorium.id) {
-			routeEnd = null;
-			currentRoute = null;
-		} else {
-			routeStart = auditorium;
-			routeEnd = null;
-			currentRoute = null;
+		if (auditorium === routeStart) {
+			handleStartChange(null);
+		} else if (auditorium === routeEnd) {
+			handleEndChange(null);
 		}
 	}
 
 	function handleStartChange(aud: Auditorium | null) {
 		routeStart = aud;
+		if (aud && routeEnd && aud.id === routeEnd.id) routeEnd = null;
 		if (routeStart && routeEnd) {
 			calculateRoute();
 		} else {
@@ -51,6 +39,7 @@
 
 	function handleEndChange(aud: Auditorium | null) {
 		routeEnd = aud;
+		if (aud && routeStart && aud.id === routeStart.id) routeStart = null;
 		if (routeStart && routeEnd) {
 			calculateRoute();
 		} else {
@@ -65,6 +54,18 @@
 		if (routeStart && routeEnd) {
 			calculateRoute();
 		}
+	}
+
+	function getAuditoriumStatus(aud: Auditorium | null): boolean | null {
+		if (!aud) return null;
+		const baseName = aud.name;
+		const gName = `Г-${baseName}`;
+		const withoutPrefix = baseName.replace(/^Г-/, '');
+		const actualStatus =
+			auditoriumStatuses[baseName] ??
+			auditoriumStatuses[gName] ??
+			auditoriumStatuses[withoutPrefix];
+		return actualStatus ?? null;
 	}
 
 	function calculateRoute() {
@@ -101,7 +102,44 @@
 	onMount(() => {
 		loadAuditoriumStatuses();
 		const interval = setInterval(loadAuditoriumStatuses, 60000);
-		return () => clearInterval(interval);
+		const scrollY = typeof window !== 'undefined' ? window.scrollY : 0;
+		const body = typeof document !== 'undefined' ? document.body : null;
+		const html = typeof document !== 'undefined' ? document.documentElement : null;
+		const prev = body
+			? {
+					position: body.style.position,
+					top: body.style.top,
+					left: body.style.left,
+					right: body.style.right,
+					width: body.style.width,
+					overflow: body.style.overflow
+				}
+			: null;
+		const prevHtmlOverflow = html ? html.style.overflow : null;
+
+		if (body && html) {
+			html.style.overflow = 'hidden';
+			body.style.overflow = 'hidden';
+			body.style.position = 'fixed';
+			body.style.top = `-${scrollY}px`;
+			body.style.left = '0';
+			body.style.right = '0';
+			body.style.width = '100%';
+		}
+
+		return () => {
+			clearInterval(interval);
+			if (body && html && prev) {
+				body.style.position = prev.position;
+				body.style.top = prev.top;
+				body.style.left = prev.left;
+				body.style.right = prev.right;
+				body.style.width = prev.width;
+				body.style.overflow = prev.overflow;
+				html.style.overflow = prevHtmlOverflow ?? '';
+				window.scrollTo(0, scrollY);
+			}
+		};
 	});
 </script>
 
@@ -114,7 +152,9 @@
 </svelte:head>
 
 <PageLayout>
-	<div class="relative h-[100svh] w-screen overflow-hidden bg-slate-900">
+	<div
+		class="relative h-[100svh] w-screen overflow-hidden bg-slate-900 supports-[height:100dvh]:h-[100dvh]"
+	>
 		<div class="absolute inset-0">
 			<BuildingMapCanvas
 				{buildingMap}
@@ -140,6 +180,18 @@
 			onSwap={handleSwap}
 		/>
 
-		<AuditoriumInfo auditorium={selectedAuditorium} onClose={closeAuditoriumInfo} />
+		<AuditoriumInfo
+			auditorium={selectedAuditorium}
+			onClose={closeAuditoriumInfo}
+			status={getAuditoriumStatus(selectedAuditorium)}
+			onSelectAsStart={handleStartChange}
+			onSelectAsEnd={handleEndChange}
+			isStartSelected={Boolean(
+				selectedAuditorium && routeStart && selectedAuditorium.id === routeStart.id
+			)}
+			isEndSelected={Boolean(
+				selectedAuditorium && routeEnd && selectedAuditorium.id === routeEnd.id
+			)}
+		/>
 	</div>
 </PageLayout>

@@ -1,3 +1,4 @@
+- adjust line width in BuildingMapCanvas for improved visual consistency, changing from 2.25 to 1.25 times scale (ysturasp, 2026-02-23) [3 files changed, 3 insertions(+), 1 deletion(-)]
 - implement auditorium status loading and rendering in map components, enhancing visual feedback for auditorium availability (ysturasp, 2026-02-23) [5 files changed, 193 insertions(+), 1 deletion(-)]
 - add stairs blocks text rendering to BuildingMapCanvas (ysturasp, 2026-02-21) [3 files changed, 15 insertions(+)]
 - refactor BuildingMapCanvas to improve text rendering and zoom functionality, adjusting scale step and font settings for better visual clarity (ysturasp, 2026-02-21) [3 files changed, 231 insertions(+), 41 deletions(-)]
