@@ -346,7 +346,6 @@ async function seedFirstFloor(pool: any, sectionDbId: string) {
 
 	const firstFloorCustom = [
 		{ type: 'text', text: 'гардероб', x: 165, y: 17, fontSize: 8 },
-		{ type: 'text', text: 'вход', x: 180, y: 100, fontSize: 10 },
 		{ type: 'text', text: 'банкоматы', x: 106, y: 113, fontSize: 8 }
 	];
 

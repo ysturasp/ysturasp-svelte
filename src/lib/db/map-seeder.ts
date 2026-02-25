@@ -111,7 +111,6 @@ export async function checkAndSeedMap(pool: Pool) {
 					);
 				}
 
-				// Аудитории
 				for (let i = 0; i < ROOMS_PER_ROW; i++) {
 					const x = i * roomWidth;
 					const topRoomNum = floor * 100 + sectionOffset + (i + 1);
@@ -335,7 +334,6 @@ async function seedFirstFloor(pool: Pool, sectionDbId: string) {
 
 	const firstFloorCustom = [
 		{ type: 'text', text: 'гардероб', x: 165, y: 17, fontSize: 8 },
-		{ type: 'text', text: 'вход', x: 180, y: 100, fontSize: 10 },
 		{ type: 'text', text: 'банкоматы', x: 106, y: 113, fontSize: 8 }
 	];
 

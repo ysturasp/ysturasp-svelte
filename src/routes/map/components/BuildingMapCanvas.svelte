@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { tweened } from 'svelte/motion';
+	import { cubicOut } from 'svelte/easing';
 	import type { BuildingMap, Auditorium, Point, Route, AuditoriumStatus } from '../types';
 	import { getAllAuditoriums } from '../data';
 
@@ -49,6 +51,18 @@
 	const MIN_SCALE = 0.2;
 	const MAX_SCALE = 4;
 
+	const focusDimFactor = tweened(0, {
+		duration: 450,
+		easing: cubicOut
+	});
+
+	$: {
+		const isFocusActive = routeStart !== null && routeEnd !== null;
+		focusDimFactor.set(isFocusActive ? 1 : 0);
+	}
+
+	$: ($focusDimFactor, draw());
+
 	function getTransform() {
 		return { x: offsetX, y: offsetY, scale };
 	}
@@ -96,6 +110,10 @@
 		if (!ctx || !buildingMap.stairsBlocks) return;
 		const t = getTransform();
 
+		const dimAlpha = 1 - $focusDimFactor * 0.65;
+		ctx.save();
+		ctx.globalAlpha = dimAlpha;
+
 		for (const block of buildingMap.stairsBlocks) {
 			const screenPos = worldToScreen(block.x, block.y);
 			const screenWidth = block.width * t.scale;
@@ -110,11 +128,17 @@
 			ctx.fill();
 			ctx.stroke();
 		}
+
+		ctx.restore();
 	}
 
 	function drawStairsBlocksText() {
 		if (!ctx || !buildingMap.stairsBlocks) return;
 		const t = getTransform();
+
+		const dimAlpha = 1 - $focusDimFactor * 0.65;
+		ctx.save();
+		ctx.globalAlpha = dimAlpha;
 
 		for (const block of buildingMap.stairsBlocks) {
 			const screenPos = worldToScreen(block.x, block.y);
@@ -155,12 +179,25 @@
 				ctx.fillText(char, centerX, y);
 			}
 		}
+
+		ctx.restore();
 	}
 
 	function drawSection(section: any) {
 		if (!ctx) return;
 
 		const t = getTransform();
+
+		const isRouteStartSection =
+			routeStart && section.id === routeStart.section && section.floor === routeStart.floor;
+		const isRouteEndSection =
+			routeEnd && section.id === routeEnd.section && section.floor === routeEnd.floor;
+		const isFocused = isRouteStartSection || isRouteEndSection;
+
+		const dimAlpha = isFocused ? 1 : 1 - $focusDimFactor * 0.65;
+		ctx.save();
+		ctx.globalAlpha = dimAlpha;
+
 		const screenPos = worldToScreen(section.position.x, section.position.y);
 		const screenWidth = section.width * t.scale;
 		const screenHeight = section.height * t.scale;
@@ -189,6 +226,8 @@
 				screenPos.y + screenHeight / 2
 			);
 		}
+
+		ctx.restore();
 	}
 
 	function drawCustomElements(section: any) {
@@ -262,6 +301,16 @@
 			(s) => s.id === auditorium.section && s.floor === auditorium.floor
 		);
 		if (!section) return;
+
+		const isRouteStartSection =
+			routeStart && section.id === routeStart.section && section.floor === routeStart.floor;
+		const isRouteEndSection =
+			routeEnd && section.id === routeEnd.section && section.floor === routeEnd.floor;
+		const isFocused = isRouteStartSection || isRouteEndSection;
+
+		const dimAlpha = isFocused ? 1 : 1 - $focusDimFactor * 0.65;
+		ctx.save();
+		ctx.globalAlpha = dimAlpha;
 
 		const absX = section.position.x + auditorium.position.x;
 		const absY = section.position.y + auditorium.position.y;
@@ -364,6 +413,8 @@
 		const centerY = screenPos.y + screenHeight / 2;
 		ctx.fillStyle = 'rgba(226, 232, 240, 0.9)';
 		ctx.fillText(auditorium.name, centerX, centerY);
+
+		ctx.restore();
 	}
 
 	function getClosestEdgePoint(
@@ -875,12 +926,17 @@
 		const height = maxY - minY;
 
 		const rect = container.getBoundingClientRect();
-		const scaleX = rect.width / (width + 100);
-		const scaleY = rect.height / (height + 100);
+		const headerHeight = 70;
+		const bottomHeight = 130;
+		const safeHeight = Math.max(200, rect.height - headerHeight - bottomHeight);
+
+		const scaleX = rect.width / (width + 60);
+		const scaleY = safeHeight / (height + 60);
 		scale = Math.min(scaleX, scaleY, 1);
 
 		offsetX = rect.width / 2 - centerX * scale;
-		offsetY = rect.height / 2 - centerY * scale;
+		const safeCenterY = headerHeight + safeHeight / 2;
+		offsetY = safeCenterY - centerY * scale;
 		draw();
 	}
 
@@ -901,12 +957,17 @@
 		const height = firstSection.height;
 
 		const rect = container.getBoundingClientRect();
-		const scaleX = rect.width / (width + 100);
-		const scaleY = rect.height / (height + 100);
+		const headerHeight = 70;
+		const bottomHeight = 130;
+		const safeHeight = Math.max(200, rect.height - headerHeight - bottomHeight);
+
+		const scaleX = rect.width / (width + 60);
+		const scaleY = safeHeight / (height + 60);
 		scale = Math.min(scaleX, scaleY, 1.2);
 
 		offsetX = rect.width / 2 - centerX * scale;
-		offsetY = rect.height * 0.7 - centerY * scale;
+		const safeCenterY = headerHeight + safeHeight / 2;
+		offsetY = safeCenterY - centerY * scale;
 		draw();
 	}
 
@@ -963,7 +1024,7 @@
 
 		if (minX === Infinity) return;
 
-		const padding = 80;
+		const padding = 40;
 		minX -= padding;
 		minY -= padding;
 		maxX += padding;
@@ -975,12 +1036,17 @@
 		const height = maxY - minY;
 
 		const rect = container.getBoundingClientRect();
-		const scaleX = rect.width / width;
-		const scaleY = rect.height / height;
+		const headerHeight = 70;
+		const bottomHeight = 130;
+		const safeHeight = Math.max(200, rect.height - headerHeight - bottomHeight);
+
+		const scaleX = (rect.width - 40) / width;
+		const scaleY = safeHeight / height;
 		targetScale = Math.min(scaleX, scaleY, MAX_SCALE);
 
 		targetOffsetX = rect.width / 2 - centerX * targetScale;
-		targetOffsetY = rect.height / 2 - centerY * targetScale;
+		const safeCenterY = headerHeight + safeHeight / 2;
+		targetOffsetY = safeCenterY - centerY * targetScale;
 
 		if (
 			animate &&
