@@ -24,137 +24,132 @@ export async function checkAndSeedMap(pool: Pool) {
 		}
 
 		console.log('[Auto-Migration] Map data is missing. Seeding building map...');
-
-		const TOTAL_FLOORS = 9;
-		for (let floor = 1; floor <= TOTAL_FLOORS; floor++) {
-			for (let sectionId = 1; sectionId <= 3; sectionId++) {
-				const sectionDbId = `section-${sectionId}-${floor}`;
-				const sectionX = (sectionId - 1) * (SECTION_WIDTH + SECTION_SPACING);
-				const sectionY =
-					(TOTAL_FLOORS - floor) * (SECTION_HEIGHT + FLOOR_SPACING) +
-					(sectionId - 1) * SECTION_STEP;
-
-				await pool.query(
-					`INSERT INTO map_sections (id, floor, section_id, x, y, width, height) 
-                     VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-					[
-						sectionDbId,
-						floor,
-						sectionId,
-						sectionX,
-						sectionY,
-						SECTION_WIDTH,
-						SECTION_HEIGHT
-					]
-				);
-
-				if (floor === 1 && sectionId === 1) {
-					await seedFirstFloor(pool, sectionDbId);
-					continue;
-				}
-
-				if (floor === 6 && sectionId === 2) continue;
-
-				const sectionOffset = (sectionId - 1) * 14;
-
-				const horizontalLines = [
-					{ x1: 0, y1: corridorTopY, x2: SECTION_WIDTH, y2: corridorTopY },
-					{ x1: 0, y1: corridorBottomY, x2: SECTION_WIDTH, y2: corridorBottomY }
-				];
-
-				for (const line of horizontalLines) {
-					await pool.query(
-						`INSERT INTO map_custom_elements (section_db_id, type, payload) VALUES ($1, $2, $3)`,
-						[
-							sectionDbId,
-							'line',
-							JSON.stringify({
-								type: 'line',
-								points: [
-									{ x: line.x1, y: line.y1 },
-									{ x: line.x2, y: line.y2 }
-								]
-							})
-						]
-					);
-				}
-
-				for (let i = 1; i < ROOMS_PER_ROW; i++) {
-					const x = i * roomWidth;
-					await pool.query(
-						`INSERT INTO map_custom_elements (section_db_id, type, payload) VALUES ($1, $2, $3)`,
-						[
-							sectionDbId,
-							'line',
-							JSON.stringify({
-								type: 'line',
-								points: [
-									{ x, y: topRowY },
-									{ x, y: corridorTopY }
-								]
-							})
-						]
-					);
-					await pool.query(
-						`INSERT INTO map_custom_elements (section_db_id, type, payload) VALUES ($1, $2, $3)`,
-						[
-							sectionDbId,
-							'line',
-							JSON.stringify({
-								type: 'line',
-								points: [
-									{ x, y: corridorBottomY },
-									{ x, y: corridorBottomY + roomHeight }
-								]
-							})
-						]
-					);
-				}
-
-				for (let i = 0; i < ROOMS_PER_ROW; i++) {
-					const x = i * roomWidth;
-					const topRoomNum = floor * 100 + sectionOffset + (i + 1);
-					await pool.query(
-						`INSERT INTO map_auditoriums (id, section_db_id, name, x, y, width, height, floor, section_id) 
-                         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
-						[
-							`${topRoomNum}`,
-							sectionDbId,
-							`${topRoomNum}`,
-							x,
-							topRowY,
-							roomWidth,
-							roomHeight,
-							floor,
-							sectionId
-						]
-					);
-
-					const bottomRoomNum = floor * 100 + sectionOffset + (ROOMS_PER_ROW + i + 1);
-					await pool.query(
-						`INSERT INTO map_auditoriums (id, section_db_id, name, x, y, width, height, floor, section_id) 
-                         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
-						[
-							`${bottomRoomNum}`,
-							sectionDbId,
-							`${bottomRoomNum}`,
-							x,
-							bottomRowY,
-							roomWidth,
-							roomHeight,
-							floor,
-							sectionId
-						]
-					);
-				}
-			}
-		}
-
-		await seedInfrastructure(pool, TOTAL_FLOORS);
+		await seedMap(pool);
 		console.log('[Auto-Migration] Map data seeded successfully.');
 	} catch (error) {
 		console.error('[Auto-Migration] Failed to seed map data:', error);
 	}
+}
+
+export async function seedMap(pool: Pool) {
+	const TOTAL_FLOORS = 9;
+	for (let floor = 1; floor <= TOTAL_FLOORS; floor++) {
+		for (let sectionId = 1; sectionId <= 3; sectionId++) {
+			const sectionDbId = `section-${sectionId}-${floor}`;
+			const sectionX = (sectionId - 1) * (SECTION_WIDTH + SECTION_SPACING);
+			const sectionY =
+				(TOTAL_FLOORS - floor) * (SECTION_HEIGHT + FLOOR_SPACING) +
+				(sectionId - 1) * SECTION_STEP;
+
+			await pool.query(
+				`INSERT INTO map_sections (id, floor, section_id, x, y, width, height) 
+                 VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+				[sectionDbId, floor, sectionId, sectionX, sectionY, SECTION_WIDTH, SECTION_HEIGHT]
+			);
+
+			if (floor === 1 && sectionId === 1) {
+				await seedFirstFloor(pool, sectionDbId);
+				continue;
+			}
+
+			if (floor === 6 && sectionId === 2) continue;
+
+			const sectionOffset = (sectionId - 1) * 14;
+
+			const horizontalLines = [
+				{ x1: 0, y1: corridorTopY, x2: SECTION_WIDTH, y2: corridorTopY },
+				{ x1: 0, y1: corridorBottomY, x2: SECTION_WIDTH, y2: corridorBottomY }
+			];
+
+			for (const line of horizontalLines) {
+				await pool.query(
+					`INSERT INTO map_custom_elements (section_db_id, type, payload) VALUES ($1, $2, $3)`,
+					[
+						sectionDbId,
+						'line',
+						JSON.stringify({
+							type: 'line',
+							points: [
+								{ x: line.x1, y: line.y1 },
+								{ x: line.x2, y: line.y2 }
+							]
+						})
+					]
+				);
+			}
+
+			for (let i = 1; i < ROOMS_PER_ROW; i++) {
+				const x = i * roomWidth;
+				await pool.query(
+					`INSERT INTO map_custom_elements (section_db_id, type, payload) VALUES ($1, $2, $3)`,
+					[
+						sectionDbId,
+						'line',
+						JSON.stringify({
+							type: 'line',
+							points: [
+								{ x: x, y: topRowY },
+								{ x: x, y: corridorTopY }
+							]
+						})
+					]
+				);
+				await pool.query(
+					`INSERT INTO map_custom_elements (section_db_id, type, payload) VALUES ($1, $2, $3)`,
+					[
+						sectionDbId,
+						'line',
+						JSON.stringify({
+							type: 'line',
+							points: [
+								{ x: x, y: corridorBottomY },
+								{ x: x, y: corridorBottomY + roomHeight }
+							]
+						})
+					]
+				);
+			}
+
+			for (let i = 0; i < ROOMS_PER_ROW; i++) {
+				const x = i * roomWidth;
+				const topRoomNum = floor * 100 + sectionOffset + (i + 1);
+				await pool.query(
+					`INSERT INTO map_auditoriums (id, section_db_id, name, x, y, width, height, floor, section_id) 
+                     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+					[
+						`${topRoomNum}`,
+						sectionDbId,
+						`${topRoomNum}`,
+						x,
+						topRowY,
+						roomWidth,
+						roomHeight,
+						floor,
+						sectionId
+					]
+				);
+
+				const bottomRoomNum = floor * 100 + sectionOffset + (ROOMS_PER_ROW + i + 1);
+				await pool.query(
+					`INSERT INTO map_auditoriums (id, section_db_id, name, x, y, width, height, floor, section_id) 
+                     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+					[
+						`${bottomRoomNum}`,
+						sectionDbId,
+						`${bottomRoomNum}`,
+						x,
+						bottomRowY,
+						roomWidth,
+						roomHeight,
+						floor,
+						sectionId
+					]
+				);
+			}
+		}
+	}
+
+	await seedInfrastructure(pool, TOTAL_FLOORS);
 }
 
 async function seedFirstFloor(pool: Pool, sectionDbId: string) {
@@ -194,9 +189,9 @@ async function seedFirstFloor(pool: Pool, sectionDbId: string) {
 		{
 			id: 'вход',
 			name: 'вход',
-			position: { x: 150, y: 108 },
+			position: { x: 150, y: 107 },
 			width: 60,
-			height: 12,
+			height: 13,
 			description: 'Главный вход в корпус Г.'
 		}
 	];
@@ -283,20 +278,20 @@ async function seedFirstFloor(pool: Pool, sectionDbId: string) {
 		},
 		{
 			points: [
-				{ x: 150, y: 108 },
+				{ x: 150, y: 107 },
 				{ x: 150, y: 120 }
 			]
 		},
 		{
 			points: [
-				{ x: 210, y: 108 },
+				{ x: 210, y: 107 },
 				{ x: 210, y: 120 }
 			]
 		},
 		{
 			points: [
-				{ x: 150, y: 108 },
-				{ x: 210, y: 108 }
+				{ x: 150, y: 107 },
+				{ x: 210, y: 107 }
 			]
 		},
 		{
@@ -334,7 +329,19 @@ async function seedFirstFloor(pool: Pool, sectionDbId: string) {
 
 	const firstFloorCustom = [
 		{ type: 'text', text: 'гардероб', x: 165, y: 17, fontSize: 8 },
-		{ type: 'text', text: 'банкоматы', x: 106, y: 113, fontSize: 8 }
+		{ type: 'text', text: 'банкоматы', x: 106, y: 113, fontSize: 8 },
+		{ type: 'rect', x: 96, y: 92, width: 8, height: 14 },
+		{ type: 'rect', x: 108, y: 92, width: 8, height: 14 },
+		{ type: 'text', text: 'пост\nохраны', x: 260, y: 50, fontSize: 8 },
+		{ type: 'text', text: '3 турникета\nдля студентов', x: 195, y: 60, fontSize: 5 },
+		{
+			type: 'text',
+			text: '1 турникет\nдля сотрудников',
+			x: 236,
+			y: 95,
+			fontSize: 5,
+			rotation: -Math.PI / 2
+		}
 	];
 
 	for (const ce of firstFloorCustom) {
