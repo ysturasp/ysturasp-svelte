@@ -3,6 +3,18 @@ export interface Point {
 	y: number;
 }
 
+export interface CustomMapElement {
+	type: 'line' | 'rect' | 'text';
+	x?: number;
+	y?: number;
+	width?: number;
+	height?: number;
+	points?: Point[];
+	text?: string;
+	rotation?: number;
+	fontSize?: number;
+}
+
 export interface Auditorium {
 	id: string;
 	name: string;
@@ -14,6 +26,7 @@ export interface Auditorium {
 	capacity?: number;
 	currentOccupancy?: number;
 	scheduleLink?: string;
+	description?: string;
 }
 
 export interface Connection {
@@ -31,6 +44,7 @@ export interface Section {
 	height: number;
 	auditoriums: Auditorium[];
 	connections: Connection[];
+	customElements?: CustomMapElement[];
 }
 
 export interface BuildingMap {

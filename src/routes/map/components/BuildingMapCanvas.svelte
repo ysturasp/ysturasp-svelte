@@ -175,6 +175,8 @@
 		ctx.fill();
 		ctx.stroke();
 
+		drawCustomElements(section);
+
 		if (section.floor === 6 && section.id === 2) {
 			const secretSize = 14 * t.scale;
 			ctx.font = `700 ${secretSize}px 'Unbounded', 'Exo 2', 'Inter', sans-serif`;
@@ -186,6 +188,70 @@
 				screenPos.x + screenWidth / 2,
 				screenPos.y + screenHeight / 2
 			);
+		}
+	}
+
+	function drawCustomElements(section: any) {
+		if (!ctx || !section.customElements) return;
+
+		const t = getTransform();
+		ctx.lineWidth = 1.5 * t.scale;
+
+		for (const el of section.customElements) {
+			if (el.type === 'line' && el.points && el.points.length >= 2) {
+				ctx.strokeStyle = 'rgba(148, 163, 184, 0.65)';
+				ctx.beginPath();
+				const startPos = worldToScreen(
+					section.position.x + el.points[0].x,
+					section.position.y + el.points[0].y
+				);
+				ctx.moveTo(startPos.x, startPos.y);
+				for (let i = 1; i < el.points.length; i++) {
+					const pt = worldToScreen(
+						section.position.x + el.points[i].x,
+						section.position.y + el.points[i].y
+					);
+					ctx.lineTo(pt.x, pt.y);
+				}
+				ctx.stroke();
+			} else if (el.type === 'rect') {
+				ctx.strokeStyle = 'rgba(148, 163, 184, 0.65)';
+				ctx.fillStyle = 'rgba(15, 23, 42, 0.18)';
+				const screenPos = worldToScreen(
+					section.position.x + (el.x || 0),
+					section.position.y + (el.y || 0)
+				);
+				const screenW = (el.width || 0) * t.scale;
+				const screenH = (el.height || 0) * t.scale;
+				ctx.beginPath();
+				ctx.rect(screenPos.x, screenPos.y, screenW, screenH);
+				ctx.fill();
+				ctx.stroke();
+			} else if (el.type === 'text' && el.text) {
+				ctx.fillStyle = 'rgba(226, 232, 240, 0.9)';
+				const fontSize = (el.fontSize || 9) * t.scale;
+				ctx.font = `600 ${fontSize}px 'Exo 2', 'Inter', sans-serif`;
+				ctx.textAlign = 'center';
+				ctx.textBaseline = 'middle';
+
+				const screenPos = worldToScreen(
+					section.position.x + (el.x || 0),
+					section.position.y + (el.y || 0)
+				);
+
+				ctx.save();
+				ctx.translate(screenPos.x, screenPos.y);
+				if (el.rotation) {
+					ctx.rotate(el.rotation);
+				}
+				const lines = el.text.split('\n');
+				const lineHeight = fontSize * 1.2;
+				const startY = -((lines.length - 1) * lineHeight) / 2;
+				for (let i = 0; i < lines.length; i++) {
+					ctx.fillText(lines[i], 0, startY + i * lineHeight);
+				}
+				ctx.restore();
+			}
 		}
 	}
 
@@ -205,15 +271,16 @@
 		const screenWidth = auditorium.width * t.scale;
 		const screenHeight = auditorium.height * t.scale;
 
+		const isCustomLayout = auditorium.floor === 1 && auditorium.section === 1;
 		let fillColor = 'rgba(0, 0, 0, 0)';
-		let strokeColor = 'rgba(148, 163, 184, 0.65)';
+		let strokeColor = isCustomLayout ? 'rgba(0, 0, 0, 0)' : 'rgba(148, 163, 184, 0.65)';
 
 		if (isSelected) {
 			fillColor = 'rgba(59, 130, 246, 0.18)';
 			strokeColor = 'rgba(96, 165, 250, 0.95)';
 		} else if (isHovered) {
 			fillColor = 'rgba(148, 163, 184, 0.10)';
-			strokeColor = 'rgba(226, 232, 240, 0.85)';
+			strokeColor = isCustomLayout ? 'rgba(0, 0, 0, 0)' : 'rgba(226, 232, 240, 0.85)';
 		} else if (auditorium === routeStart) {
 			fillColor = 'rgba(16, 185, 129, 0.16)';
 			strokeColor = 'rgba(52, 211, 153, 0.95)';
@@ -233,21 +300,27 @@
 
 			if (actualStatus === true) {
 				fillColor = 'rgba(16, 185, 129, 0.08)';
-				strokeColor = 'rgba(52, 211, 153, 0.4)';
+				strokeColor = isCustomLayout ? 'rgba(0, 0, 0, 0)' : 'rgba(52, 211, 153, 0.4)';
 			} else if (actualStatus === false) {
 				fillColor = 'rgba(239, 68, 68, 0.25)';
-				strokeColor = 'rgba(239, 68, 68, 0.9)';
+				strokeColor = isCustomLayout ? 'rgba(0, 0, 0, 0)' : 'rgba(239, 68, 68, 0.9)';
 			}
 		}
 
 		ctx.fillStyle = fillColor;
 		ctx.strokeStyle = strokeColor;
 		ctx.lineWidth = 1.25 * t.scale;
-		const r = Math.min(8 * t.scale, screenWidth / 3, screenHeight / 3);
-		ctx.beginPath();
-		(ctx as any).roundRect(screenPos.x, screenPos.y, screenWidth, screenHeight, r);
-		ctx.fill();
-		ctx.stroke();
+		const r = isCustomLayout ? 0 : Math.min(8 * t.scale, screenWidth / 3, screenHeight / 3);
+		if (strokeColor !== 'rgba(0, 0, 0, 0)' || fillColor !== 'rgba(0, 0, 0, 0)') {
+			ctx.beginPath();
+			if (r === 0) {
+				ctx.rect(screenPos.x, screenPos.y, screenWidth, screenHeight);
+			} else {
+				(ctx as any).roundRect(screenPos.x, screenPos.y, screenWidth, screenHeight, r);
+			}
+			ctx.fill();
+			if (strokeColor !== 'rgba(0, 0, 0, 0)') ctx.stroke();
+		}
 
 		const fontSize = 9 * t.scale;
 		ctx.font = `600 ${fontSize}px 'Exo 2', 'Inter', sans-serif`;

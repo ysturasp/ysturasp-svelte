@@ -1,4 +1,11 @@
-import type { BuildingMap, Auditorium, Section, Connection, Point } from './types';
+import type {
+	BuildingMap,
+	Auditorium,
+	Section,
+	Connection,
+	Point,
+	CustomMapElement
+} from './types';
 
 function createSection(
 	id: number,
@@ -97,6 +104,191 @@ export function createBuildingMap(): BuildingMap {
 		return auditoriums;
 	}
 
+	function createFirstFloorFirstSectionElements(): {
+		auditoriums: Omit<Auditorium, 'floor' | 'section'>[];
+		customElements: CustomMapElement[];
+	} {
+		const auditoriums: Omit<Auditorium, 'floor' | 'section'>[] = [
+			{
+				id: '102',
+				name: '102',
+				position: { x: 0, y: 0 },
+				width: 40,
+				height: 35,
+				capacity: 25,
+				description: 'Центр карьеры'
+			},
+			{
+				id: '104',
+				name: '104',
+				position: { x: 40, y: 0 },
+				width: 55,
+				height: 35,
+				capacity: 30,
+				description: 'Приём и выдача заявок'
+			},
+			{
+				id: '105',
+				name: '105',
+				position: { x: 95, y: 0 },
+				width: 40,
+				height: 35,
+				capacity: 25,
+				description: 'Копировальный центр'
+			},
+			{
+				id: '103',
+				name: '103',
+				position: { x: 0, y: 45 },
+				width: 75,
+				height: 25,
+				capacity: 30,
+				description: 'Приём и выдача заявок'
+			},
+			{
+				id: 'вход',
+				name: 'вход',
+				position: { x: 150, y: 108 },
+				width: 60,
+				height: 12,
+				capacity: 0,
+				description:
+					'Главный вход в корпус Г. Проход через турникеты для студентов и сотрудников.'
+			}
+		];
+
+		const customElements: CustomMapElement[] = [
+			{
+				type: 'line',
+				points: [
+					{ x: 0, y: 35 },
+					{ x: 195, y: 35 }
+				]
+			},
+			{
+				type: 'line',
+				points: [
+					{ x: 40, y: 0 },
+					{ x: 40, y: 35 }
+				]
+			},
+			{
+				type: 'line',
+				points: [
+					{ x: 95, y: 0 },
+					{ x: 95, y: 35 }
+				]
+			},
+			{
+				type: 'line',
+				points: [
+					{ x: 135, y: 0 },
+					{ x: 135, y: 50 }
+				]
+			},
+			{
+				type: 'line',
+				points: [
+					{ x: 135, y: 50 },
+					{ x: 240, y: 50 }
+				]
+			},
+			{
+				type: 'line',
+				points: [
+					{ x: 195, y: 0 },
+					{ x: 195, y: 35 }
+				]
+			},
+			{ type: 'text', text: 'гардероб', x: 165, y: 17, fontSize: 8 },
+			{
+				type: 'line',
+				points: [
+					{ x: 0, y: 45 },
+					{ x: 75, y: 45 }
+				]
+			},
+			{
+				type: 'line',
+				points: [
+					{ x: 75, y: 45 },
+					{ x: 75, y: 70 }
+				]
+			},
+			{
+				type: 'line',
+				points: [
+					{ x: 0, y: 70 },
+					{ x: 75, y: 70 }
+				]
+			},
+			{ type: 'rect', x: 92, y: 90, width: 12, height: 18 },
+			{ type: 'rect', x: 108, y: 90, width: 12, height: 18 },
+			{ type: 'text', text: 'банкоматы', x: 106, y: 113, fontSize: 8 },
+			{
+				type: 'line',
+				points: [
+					{ x: 150, y: 108 },
+					{ x: 150, y: 120 }
+				]
+			},
+			{
+				type: 'line',
+				points: [
+					{ x: 210, y: 108 },
+					{ x: 210, y: 120 }
+				]
+			},
+			{
+				type: 'line',
+				points: [
+					{ x: 150, y: 108 },
+					{ x: 210, y: 108 }
+				]
+			},
+			{
+				type: 'line',
+				points: [
+					{ x: 240, y: 30 },
+					{ x: 280, y: 30 }
+				]
+			},
+			{
+				type: 'line',
+				points: [
+					{ x: 240, y: 30 },
+					{ x: 240, y: 70 }
+				]
+			},
+			{
+				type: 'line',
+				points: [
+					{ x: 240, y: 70 },
+					{ x: 280, y: 70 }
+				]
+			},
+			{ type: 'text', text: 'пост\nохраны', x: 260, y: 50, fontSize: 8 },
+			{
+				type: 'line',
+				points: [
+					{ x: 245, y: 70 },
+					{ x: 245, y: 120 }
+				]
+			},
+			{ type: 'text', text: '3 турникета\nдля студентов', x: 205, y: 60, fontSize: 5 },
+			{
+				type: 'text',
+				text: '1 турникет\nдля сотрудников',
+				x: 236,
+				y: 95,
+				fontSize: 5,
+				rotation: -Math.PI / 2
+			}
+		];
+
+		return { auditoriums, customElements };
+	}
+
 	const TOTAL_FLOORS = 9;
 	for (let floor = 1; floor <= TOTAL_FLOORS; floor++) {
 		for (let sectionId = 1; sectionId <= 3; sectionId++) {
@@ -105,10 +297,18 @@ export function createBuildingMap(): BuildingMap {
 				(TOTAL_FLOORS - floor) * (SECTION_HEIGHT + FLOOR_SPACING) +
 				(sectionId - 1) * SECTION_STEP;
 
-			const auditoriums =
-				floor === 6 && sectionId === 2
-					? []
-					: createAuditoriumsForSection(sectionId, floor, sectionX, sectionY);
+			let auditoriums: Omit<Auditorium, 'floor' | 'section'>[];
+			let customElements: CustomMapElement[] | undefined = undefined;
+
+			if (floor === 6 && sectionId === 2) {
+				auditoriums = [];
+			} else if (floor === 1 && sectionId === 1) {
+				const firstFloorElements = createFirstFloorFirstSectionElements();
+				auditoriums = firstFloorElements.auditoriums;
+				customElements = firstFloorElements.customElements;
+			} else {
+				auditoriums = createAuditoriumsForSection(sectionId, floor, sectionX, sectionY);
+			}
 
 			const section = createSection(
 				sectionId,
@@ -119,6 +319,9 @@ export function createBuildingMap(): BuildingMap {
 				SECTION_HEIGHT,
 				auditoriums
 			);
+			if (customElements) {
+				section.customElements = customElements;
+			}
 
 			sections.push(section);
 		}

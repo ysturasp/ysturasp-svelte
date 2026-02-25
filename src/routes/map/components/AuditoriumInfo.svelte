@@ -109,7 +109,9 @@
 				: ''}"
 		>
 			<div class="mb-3 flex items-center justify-between gap-3">
-				<h3 class="text-lg font-semibold text-white">Аудитория {auditorium.name}</h3>
+				<h3 class="text-lg font-semibold text-white">
+					{auditorium.description ? auditorium.name : `Аудитория ${auditorium.name}`}
+				</h3>
 				<button
 					on:click={closePanel}
 					class="text-gray-400 transition-colors hover:text-white"
@@ -127,21 +129,29 @@
 			</div>
 
 			<div class="space-y-3">
-				<div>
-					<span class="text-sm text-gray-400">Этаж:</span>
-					<span class="ml-2 text-white">{auditorium.floor}</span>
-				</div>
-
-				<div>
-					<span class="text-sm text-gray-400">Секция:</span>
-					<span class="ml-2 text-white">{auditorium.section}</span>
-				</div>
-
-				{#if auditorium.capacity}
-					<div>
-						<span class="text-sm text-gray-400">Вместимость:</span>
-						<span class="ml-2 text-white">{auditorium.capacity} мест</span>
+				{#if auditorium.description}
+					<div
+						class="rounded-xl bg-slate-800/60 px-3 py-2 text-sm leading-relaxed text-gray-200"
+					>
+						{auditorium.description}
 					</div>
+				{:else}
+					<div>
+						<span class="text-sm text-gray-400">Этаж:</span>
+						<span class="ml-2 text-white">{auditorium.floor}</span>
+					</div>
+
+					<div>
+						<span class="text-sm text-gray-400">Секция:</span>
+						<span class="ml-2 text-white">{auditorium.section}</span>
+					</div>
+
+					{#if auditorium.capacity}
+						<div>
+							<span class="text-sm text-gray-400">Вместимость:</span>
+							<span class="ml-2 text-white">{auditorium.capacity} мест</span>
+						</div>
+					{/if}
 				{/if}
 
 				{#if status}
@@ -213,22 +223,29 @@
 					</button>
 				</div>
 
-				<div>
-					<a
-						href={getScheduleLink(auditorium)}
-						class="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-blue-500/15 px-3 py-2 text-sm font-medium text-blue-300 transition-all hover:bg-blue-500/25 hover:text-blue-50"
-					>
-						<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-							></path>
-						</svg>
-						<span>Расписание</span>
-					</a>
-				</div>
+				{#if auditorium.id !== 'вход'}
+					<div>
+						<a
+							href={getScheduleLink(auditorium)}
+							class="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-blue-500/15 px-3 py-2 text-sm font-medium text-blue-300 transition-all hover:bg-blue-500/25 hover:text-blue-50"
+						>
+							<svg
+								class="h-4 w-4"
+								fill="none"
+								stroke="currentColor"
+								viewBox="0 0 24 24"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+								></path>
+							</svg>
+							<span>Расписание</span>
+						</a>
+					</div>
+				{/if}
 			</div>
 		</div>
 	</div>
