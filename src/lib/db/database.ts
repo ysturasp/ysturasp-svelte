@@ -1,5 +1,6 @@
 import { Pool, type Pool as PoolType } from 'pg';
 import { env } from '$env/dynamic/private';
+import { checkAndSeedMap } from './map-seeder';
 
 let mainPool: PoolType | null = null;
 let botPool: PoolType | null = null;
@@ -932,7 +933,66 @@ export async function initDatabase(isTelegram: boolean = false) {
 			CREATE INDEX IF NOT EXISTS idx_security_events_created_at ON security_events(created_at);
 			CREATE INDEX IF NOT EXISTS idx_blocked_ips_blocked_until ON blocked_ips(blocked_until);
 		`);
+		await pool.query(`
+			CREATE TABLE IF NOT EXISTS map_sections (
+				id TEXT PRIMARY KEY,
+				floor INTEGER NOT NULL,
+				section_id INTEGER NOT NULL,
+				x DOUBLE PRECISION NOT NULL,
+				y DOUBLE PRECISION NOT NULL,
+				width DOUBLE PRECISION NOT NULL,
+				height DOUBLE PRECISION NOT NULL,
+				UNIQUE(floor, section_id)
+			);
+
+			CREATE TABLE IF NOT EXISTS map_auditoriums (
+				id TEXT PRIMARY KEY,
+				section_db_id TEXT NOT NULL REFERENCES map_sections(id) ON DELETE CASCADE,
+				name TEXT NOT NULL,
+				x DOUBLE PRECISION NOT NULL,
+				y DOUBLE PRECISION NOT NULL,
+				width DOUBLE PRECISION NOT NULL,
+				height DOUBLE PRECISION NOT NULL,
+				capacity INTEGER DEFAULT 0,
+				description TEXT,
+				floor INTEGER NOT NULL,
+				section_id INTEGER NOT NULL
+			);
+
+			CREATE TABLE IF NOT EXISTS map_connections (
+				id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+				"from" TEXT NOT NULL,
+				"to" TEXT NOT NULL,
+				type TEXT NOT NULL,
+				points JSONB NOT NULL
+			);
+
+			CREATE TABLE IF NOT EXISTS map_custom_elements (
+				id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+				section_db_id TEXT NOT NULL REFERENCES map_sections(id) ON DELETE CASCADE,
+				type TEXT NOT NULL,
+				payload JSONB NOT NULL
+			);
+
+			CREATE TABLE IF NOT EXISTS map_stairs_blocks (
+				id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+				floor INTEGER NOT NULL,
+				x DOUBLE PRECISION NOT NULL,
+				y DOUBLE PRECISION NOT NULL,
+				width DOUBLE PRECISION NOT NULL,
+				height DOUBLE PRECISION NOT NULL
+			);
+
+			CREATE INDEX IF NOT EXISTS idx_map_auditoriums_section ON map_auditoriums(section_db_id);
+			CREATE INDEX IF NOT EXISTS idx_map_custom_elements_section ON map_custom_elements(section_db_id);
+			CREATE INDEX IF NOT EXISTS idx_map_sections_floor ON map_sections(floor);
+		`);
+		console.log('Таблицы карты созданы/проверены');
+
 		console.log('Индексы созданы/проверены');
+
+		await checkAndSeedMap(pool);
+
 		console.log('Инициализация БД завершена успешно');
 	} catch (error) {
 		console.error('Ошибка при создании таблиц:', error);

@@ -1,3 +1,4 @@
+- introduce custom map elements and auditorium descriptions, enhancing map visualization and information display with conditional rendering and styling (ysturasp, 2026-02-25) [6 files changed, 352 insertions(+), 43 deletions(-)]
 - enhance accessibility features in various components by adding role and aria attributes, and improve event handling for keyboard interactions (ysturasp, 2026-02-25) [7 files changed, 19 insertions(+), 3 deletions(-)]
 - refactor auditorium status management to include detailed lesson information, enhancing the accuracy and richness of auditorium availability data (ysturasp, 2026-02-25) [7 files changed, 98 insertions(+), 52 deletions(-)]
 - refactor auditorium status checking logic to utilize lesson start and end times, improving accuracy in determining auditorium occupancy (ysturasp, 2026-02-24) [4 files changed, 23 insertions(+), 25 deletions(-)]

@@ -5,12 +5,13 @@
 	import BuildingMapCanvas from './components/BuildingMapCanvas.svelte';
 	import MapBottomPanel from './components/MapBottomPanel.svelte';
 	import AuditoriumInfo from './components/AuditoriumInfo.svelte';
-	import { createBuildingMap, getAllAuditoriums } from './data';
+	import { fetchBuildingMap, getAllAuditoriums } from './data';
 	import { findRoute } from './route-finder';
-	import type { Auditorium, Route, AuditoriumStatus } from './types';
+	import type { Auditorium, Route, AuditoriumStatus, BuildingMap } from './types';
 
-	let buildingMap = createBuildingMap();
-	let auditoriums = getAllAuditoriums(buildingMap);
+	let buildingMap: BuildingMap | null = null;
+	let auditoriums: Auditorium[] = [];
+	let loading = true;
 	let selectedAuditorium: Auditorium | null = null;
 	let routeStart: Auditorium | null = null;
 	let routeEnd: Auditorium | null = null;
@@ -69,7 +70,7 @@
 	}
 
 	function calculateRoute() {
-		if (!routeStart || !routeEnd) {
+		if (!routeStart || !routeEnd || !buildingMap) {
 			currentRoute = null;
 			return;
 		}
@@ -99,7 +100,19 @@
 		}
 	}
 
+	async function initMap() {
+		try {
+			const data = await fetchBuildingMap();
+			buildingMap = data;
+			auditoriums = getAllAuditoriums(buildingMap);
+			loading = false;
+		} catch (error) {
+			console.error('Error loading map data:', error);
+		}
+	}
+
 	onMount(() => {
+		initMap();
 		loadAuditoriumStatuses();
 		const interval = setInterval(loadAuditoriumStatuses, 60000);
 		const scrollY = typeof window !== 'undefined' ? window.scrollY : 0;
@@ -155,18 +168,33 @@
 	<div
 		class="relative h-[100svh] w-screen overflow-hidden bg-slate-900 supports-[height:100dvh]:h-[100dvh]"
 	>
-		<div class="absolute inset-0">
-			<BuildingMapCanvas
-				{buildingMap}
-				{selectedAuditorium}
-				{routeStart}
-				{routeEnd}
-				{currentRoute}
-				{auditoriumStatuses}
-				onAuditoriumClick={handleAuditoriumClick}
-				onAuditoriumHover={handleAuditoriumHover}
-			/>
-		</div>
+		{#if loading}
+			<div class="absolute inset-0 z-50 flex items-center justify-center bg-slate-900">
+				<div class="flex flex-col items-center gap-4">
+					<div
+						class="h-12 w-12 animate-spin rounded-full border-4 border-blue-500/30 border-t-blue-500"
+					></div>
+					<div class="animate-pulse text-sm font-medium text-blue-300">
+						Загрузка карты корпуса...
+					</div>
+				</div>
+			</div>
+		{/if}
+
+		{#if buildingMap}
+			<div class="absolute inset-0">
+				<BuildingMapCanvas
+					{buildingMap}
+					{selectedAuditorium}
+					{routeStart}
+					{routeEnd}
+					{currentRoute}
+					{auditoriumStatuses}
+					onAuditoriumClick={handleAuditoriumClick}
+					onAuditoriumHover={handleAuditoriumHover}
+				/>
+			</div>
+		{/if}
 
 		<Header />
 

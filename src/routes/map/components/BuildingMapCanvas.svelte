@@ -271,53 +271,87 @@
 		const screenWidth = auditorium.width * t.scale;
 		const screenHeight = auditorium.height * t.scale;
 
-		const isCustomLayout = auditorium.floor === 1 && auditorium.section === 1;
-		let fillColor = 'rgba(0, 0, 0, 0)';
-		let strokeColor = isCustomLayout ? 'rgba(0, 0, 0, 0)' : 'rgba(148, 163, 184, 0.65)';
+		let baseColor = { r: 148, g: 163, b: 184, a: 0 };
+		let strokeAlpha = 0;
+
+		const rawStatus = (() => {
+			const b = auditorium.name;
+			const g = `Г-${b}`;
+			const w = b.replace(/^Г-/, '');
+			return auditoriumStatuses[b] ?? auditoriumStatuses[g] ?? auditoriumStatuses[w];
+		})();
+		const isFree = rawStatus?.isFree;
 
 		if (isSelected) {
-			fillColor = 'rgba(59, 130, 246, 0.18)';
-			strokeColor = 'rgba(96, 165, 250, 0.95)';
-		} else if (isHovered) {
-			fillColor = 'rgba(148, 163, 184, 0.10)';
-			strokeColor = isCustomLayout ? 'rgba(0, 0, 0, 0)' : 'rgba(226, 232, 240, 0.85)';
+			baseColor = { r: 59, g: 130, b: 246, a: 0.18 };
+			strokeAlpha = 0.95;
 		} else if (auditorium === routeStart) {
-			fillColor = 'rgba(16, 185, 129, 0.16)';
-			strokeColor = 'rgba(52, 211, 153, 0.95)';
+			baseColor = { r: 16, g: 185, b: 129, a: 0.16 };
+			strokeAlpha = 0.95;
 		} else if (auditorium === routeEnd) {
-			fillColor = 'rgba(245, 158, 11, 0.16)';
-			strokeColor = 'rgba(251, 191, 36, 0.95)';
+			baseColor = { r: 245, g: 158, b: 11, a: 0.16 };
+			strokeAlpha = 0.95;
+		} else if (isFree === true) {
+			baseColor = { r: 16, g: 185, b: 129, a: 0.2 };
+			strokeAlpha = 0.5;
+		} else if (isFree === false) {
+			baseColor = { r: 239, g: 68, b: 68, a: 0.25 };
+			strokeAlpha = 0.7;
 		} else {
-			const baseName = auditorium.name;
-			const gName = `Г-${baseName}`;
-			const withoutPrefix = baseName.replace(/^Г-/, '');
+			baseColor = { r: 148, g: 163, b: 184, a: 0 };
+			strokeAlpha = 0;
+		}
 
-			const rawStatus =
-				auditoriumStatuses[baseName] ??
-				auditoriumStatuses[gName] ??
-				auditoriumStatuses[withoutPrefix];
-			const actualStatus = rawStatus?.isFree;
+		let fillColor = 'rgba(0, 0, 0, 0)';
+		let strokeColor = 'rgba(0, 0, 0, 0)';
 
-			if (actualStatus === true) {
-				fillColor = 'rgba(16, 185, 129, 0.08)';
-				strokeColor = isCustomLayout ? 'rgba(0, 0, 0, 0)' : 'rgba(52, 211, 153, 0.4)';
-			} else if (actualStatus === false) {
-				fillColor = 'rgba(239, 68, 68, 0.25)';
-				strokeColor = isCustomLayout ? 'rgba(0, 0, 0, 0)' : 'rgba(239, 68, 68, 0.9)';
+		if (isHovered) {
+			const hoverAlpha = Math.max(baseColor.a, 0.1) + 0.15;
+			const hoverStrokeAlpha = Math.max(strokeAlpha, 0.4) + 0.3;
+
+			if (baseColor.a === 0) {
+				fillColor = 'rgba(226, 232, 240, 0.15)';
+				strokeColor = 'rgba(226, 232, 240, 0.7)';
+			} else {
+				fillColor = `rgba(${baseColor.r}, ${baseColor.g}, ${baseColor.b}, ${hoverAlpha})`;
+				strokeColor = `rgba(${baseColor.r}, ${baseColor.g}, ${baseColor.b}, ${hoverStrokeAlpha})`;
 			}
+		} else {
+			fillColor = `rgba(${baseColor.r}, ${baseColor.g}, ${baseColor.b}, ${baseColor.a})`;
+			strokeColor =
+				strokeAlpha > 0
+					? `rgba(${baseColor.r}, ${baseColor.g}, ${baseColor.b}, ${strokeAlpha})`
+					: 'rgba(0,0,0,0)';
 		}
 
 		ctx.fillStyle = fillColor;
 		ctx.strokeStyle = strokeColor;
 		ctx.lineWidth = 1.25 * t.scale;
-		const r = isCustomLayout ? 0 : Math.min(8 * t.scale, screenWidth / 3, screenHeight / 3);
+
+		const sectionRadius = 10 * t.scale;
+		const radii = [0, 0, 0, 0];
+		const EPS = 0.5;
+
+		if (auditorium.position.x < EPS && auditorium.position.y < EPS) radii[0] = sectionRadius;
+		if (
+			Math.abs(auditorium.position.x + auditorium.width - section.width) < EPS &&
+			auditorium.position.y < EPS
+		)
+			radii[1] = sectionRadius;
+		if (
+			Math.abs(auditorium.position.x + auditorium.width - section.width) < EPS &&
+			Math.abs(auditorium.position.y + auditorium.height - section.height) < EPS
+		)
+			radii[2] = sectionRadius;
+		if (
+			auditorium.position.x < EPS &&
+			Math.abs(auditorium.position.y + auditorium.height - section.height) < EPS
+		)
+			radii[3] = sectionRadius;
+
 		if (strokeColor !== 'rgba(0, 0, 0, 0)' || fillColor !== 'rgba(0, 0, 0, 0)') {
 			ctx.beginPath();
-			if (r === 0) {
-				ctx.rect(screenPos.x, screenPos.y, screenWidth, screenHeight);
-			} else {
-				(ctx as any).roundRect(screenPos.x, screenPos.y, screenWidth, screenHeight, r);
-			}
+			(ctx as any).roundRect(screenPos.x, screenPos.y, screenWidth, screenHeight, radii);
 			ctx.fill();
 			if (strokeColor !== 'rgba(0, 0, 0, 0)') ctx.stroke();
 		}
