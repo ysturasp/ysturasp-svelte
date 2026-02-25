@@ -7,7 +7,7 @@
 	import AuditoriumInfo from './components/AuditoriumInfo.svelte';
 	import { createBuildingMap, getAllAuditoriums } from './data';
 	import { findRoute } from './route-finder';
-	import type { Auditorium, Route } from './types';
+	import type { Auditorium, Route, AuditoriumStatus } from './types';
 
 	let buildingMap = createBuildingMap();
 	let auditoriums = getAllAuditoriums(buildingMap);
@@ -16,7 +16,7 @@
 	let routeEnd: Auditorium | null = null;
 	let currentRoute: Route | null = null;
 	let hoveredAuditorium: Auditorium | null = null;
-	let auditoriumStatuses: Record<string, boolean> = {};
+	let auditoriumStatuses: Record<string, AuditoriumStatus> = {};
 
 	function handleAuditoriumClick(auditorium: Auditorium) {
 		selectedAuditorium = auditorium;
@@ -56,7 +56,7 @@
 		}
 	}
 
-	function getAuditoriumStatus(aud: Auditorium | null): boolean | null {
+	function getAuditoriumStatus(aud: Auditorium | null): AuditoriumStatus | null {
 		if (!aud) return null;
 		const baseName = aud.name;
 		const gName = `Г-${baseName}`;

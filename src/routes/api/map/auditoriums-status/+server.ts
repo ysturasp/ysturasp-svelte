@@ -13,19 +13,25 @@ function normalizeAuditoriumName(name: string): string {
 	return name.replace(/^Г-/, '').replace(/\s+/g, '').trim();
 }
 
-function isAuditoriumOccupiedNow(lessons: AudienceLesson[]): boolean {
+function getCurrentLessonNow(lessons: AudienceLesson[]): AudienceLesson | null {
 	const now = new Date();
 	const nowTs = now.getTime();
 
 	for (const lesson of lessons) {
 		const anyLesson = lesson as any;
+
 		if (anyLesson.startAt && anyLesson.endAt) {
 			const start = new Date(anyLesson.startAt);
 			const end = new Date(anyLesson.endAt);
 			const startTs = start.getTime();
 			const endTs = end.getTime();
-			if (!Number.isNaN(startTs) && !Number.isNaN(endTs) && nowTs >= startTs && nowTs <= endTs) {
-				return true;
+			if (
+				!Number.isNaN(startTs) &&
+				!Number.isNaN(endTs) &&
+				nowTs >= startTs &&
+				nowTs <= endTs
+			) {
+				return lesson;
 			}
 			continue;
 		}
@@ -50,11 +56,11 @@ function isAuditoriumOccupiedNow(lessons: AudienceLesson[]): boolean {
 		const lessonEnd = endHour * 60 + endMin;
 
 		if (currentMinutes >= lessonStart && currentMinutes <= lessonEnd) {
-			return true;
+			return lesson;
 		}
 	}
 
-	return false;
+	return null;
 }
 
 const API_BASE = 'https://gg-api.ystuty.ru/s/schedule/v1/schedule';
@@ -63,7 +69,16 @@ const CACHE_TTL = 3600;
 export async function GET(_event: RequestEvent) {
 	try {
 		const redis = getRedisClient();
-		const statuses: Record<string, boolean> = {};
+		const statuses: Record<
+			string,
+			{
+				isFree: boolean;
+				lessonName?: string;
+				teacherName?: string;
+				groups?: string[];
+				timeRange?: string;
+			}
+		> = {};
 
 		const listKey = getAudiencesListKey();
 		let cachedList = await redis.get(listKey);
@@ -107,7 +122,7 @@ export async function GET(_event: RequestEvent) {
 				const cachedSchedule = await redis.get(scheduleKey);
 
 				if (!cachedSchedule) {
-					statuses[originalName] = true;
+					statuses[originalName] = { isFree: true };
 					continue;
 				}
 
@@ -122,11 +137,29 @@ export async function GET(_event: RequestEvent) {
 					}
 				}
 
-				const occupied = isAuditoriumOccupiedNow(allLessons);
-				statuses[originalName] = !occupied;
+				const currentLesson = getCurrentLessonNow(allLessons);
+				const anyLesson = currentLesson as any;
+
+				statuses[originalName] = {
+					isFree: !currentLesson,
+					lessonName: currentLesson?.lessonName,
+					teacherName: currentLesson?.teacherName,
+					groups: currentLesson?.groups ?? [],
+					timeRange:
+						anyLesson?.timeRange ??
+						(anyLesson?.startAt && anyLesson?.endAt
+							? `${new Date(anyLesson.startAt).toLocaleTimeString('ru-RU', {
+									hour: '2-digit',
+									minute: '2-digit'
+								})}-${new Date(anyLesson.endAt).toLocaleTimeString('ru-RU', {
+									hour: '2-digit',
+									minute: '2-digit'
+								})}`
+							: undefined)
+				};
 			} catch (err) {
 				console.error(`Error processing audience ${aud.id} (${aud.name}):`, err);
-				statuses[originalName] = true;
+				statuses[originalName] = { isFree: true };
 			}
 		}
 

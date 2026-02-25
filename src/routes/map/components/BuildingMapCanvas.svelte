@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import type { BuildingMap, Auditorium, Point, Route } from '../types';
+	import type { BuildingMap, Auditorium, Point, Route, AuditoriumStatus } from '../types';
 	import { getAllAuditoriums } from '../data';
 
 	export let buildingMap: BuildingMap;
@@ -8,7 +8,7 @@
 	export let routeStart: Auditorium | null = null;
 	export let routeEnd: Auditorium | null = null;
 	export let currentRoute: Route | null = null;
-	export let auditoriumStatuses: Record<string, boolean> = {};
+	export let auditoriumStatuses: Record<string, AuditoriumStatus> = {};
 	export let onAuditoriumClick: (auditorium: Auditorium) => void = () => {};
 	export let onAuditoriumHover: (auditorium: Auditorium | null) => void = () => {};
 
@@ -226,10 +226,11 @@
 			const gName = `Г-${baseName}`;
 			const withoutPrefix = baseName.replace(/^Г-/, '');
 
-			const actualStatus =
+			const rawStatus =
 				auditoriumStatuses[baseName] ??
 				auditoriumStatuses[gName] ??
 				auditoriumStatuses[withoutPrefix];
+			const actualStatus = rawStatus?.isFree;
 
 			if (actualStatus === true) {
 				fillColor = 'rgba(16, 185, 129, 0.08)';

@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
 	import { browser } from '$app/environment';
-	import type { Auditorium } from '../types';
+	import type { Auditorium, AuditoriumStatus } from '../types';
 
 	export let auditorium: Auditorium | null = null;
 	export let onClose: () => void = () => {};
-	export let status: boolean | null = null;
+	export let status: AuditoriumStatus | null = null;
 	export let onSelectAsStart: (auditorium: Auditorium | null) => void = () => {};
 	export let onSelectAsEnd: (auditorium: Auditorium | null) => void = () => {};
 	export let isStartSelected = false;
@@ -144,46 +144,48 @@
 					</div>
 				{/if}
 
-				{#if status !== null}
-					<div
-						class="flex items-center justify-between rounded-xl bg-slate-800/80 px-3 py-2"
-					>
-						<div>
+				{#if status}
+					<div class="space-y-2 rounded-xl bg-slate-800/80 px-3 py-2">
+						<div class="flex items-center justify-between gap-3">
 							<div class="text-sm text-gray-400">Занятость</div>
-							<div class="text-sm font-medium text-white">
-								{#if status}
-									Свободна
-								{:else}
-									Скорее всего занята
-								{/if}
+							<div
+								class={`flex items-center gap-2 rounded-full px-3 py-1 text-xs font-medium ${
+									status.isFree ? 'bg-emerald-500/15' : 'bg-rose-500/15'
+								}`}
+							>
+								<div
+									class={`h-2.5 w-2.5 rounded-full ${
+										status.isFree ? 'bg-emerald-400' : 'bg-rose-400'
+									}`}
+								></div>
+								<span class={status.isFree ? 'text-emerald-300' : 'text-rose-300'}>
+									{status.isFree ? 'Свободно' : 'Занято'}
+								</span>
 							</div>
 						</div>
-						<div
-							class={`flex items-center gap-2 rounded-full px-3 py-1 text-xs font-medium ${
-								status === true
-									? 'bg-emerald-500/15'
-									: status === false
-										? 'bg-rose-500/15'
-										: ''
-							}`}
-						>
-							<div
-								class={`h-2.5 w-2.5 rounded-full ${
-									status === true
-										? 'bg-emerald-400'
-										: status === false
-											? 'bg-rose-400'
-											: ''
-								}`}
-							></div>
-							<span class={status === false ? 'text-rose-300' : 'text-emerald-300'}>
-								{status ? 'Свободно' : 'Занято'}
-							</span>
-						</div>
+
+						{#if status.isFree}
+							<div class="text-sm text-emerald-300">Сейчас пар нет</div>
+						{:else if status.lessonName || status.teacherName || (status.groups && status.groups.length) || status.timeRange}
+							<div class="space-y-1 text-xs text-gray-300">
+								{#if status.lessonName}
+									<div>{status.lessonName}</div>
+								{/if}
+								{#if status.teacherName}
+									<div>{status.teacherName}</div>
+								{/if}
+								{#if status.groups && status.groups.length}
+									<div>{status.groups.join(', ')}</div>
+								{/if}
+								{#if status.timeRange}
+									<div>{status.timeRange}</div>
+								{/if}
+							</div>
+						{/if}
 					</div>
 				{/if}
 
-				<div class="grid grid-cols-2 gap-2 pt-1">
+				<div class="grid grid-cols-2 gap-2">
 					<button
 						type="button"
 						on:click={handleSelectStart}
@@ -211,7 +213,7 @@
 					</button>
 				</div>
 
-				<div class="pt-3">
+				<div>
 					<a
 						href={getScheduleLink(auditorium)}
 						class="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-blue-500/15 px-3 py-2 text-sm font-medium text-blue-300 transition-all hover:bg-blue-500/25 hover:text-blue-50"

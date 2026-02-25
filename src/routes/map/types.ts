@@ -45,3 +45,11 @@ export interface Route {
 	totalDistance: number;
 	instructions: string[];
 }
+
+export interface AuditoriumStatus {
+	isFree: boolean;
+	lessonName?: string;
+	teacherName?: string;
+	groups?: string[];
+	timeRange?: string;
+}
