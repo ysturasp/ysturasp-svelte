@@ -48,7 +48,6 @@
 
 	const MIN_SCALE = 0.2;
 	const MAX_SCALE = 4;
-	const SCALE_STEP = 0.08;
 
 	function getTransform() {
 		return { x: offsetX, y: offsetY, scale };

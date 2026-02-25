@@ -1,3 +1,4 @@
+- refactor auditorium status management to include detailed lesson information, enhancing the accuracy and richness of auditorium availability data (ysturasp, 2026-02-25) [7 files changed, 98 insertions(+), 52 deletions(-)]
 - refactor auditorium status checking logic to utilize lesson start and end times, improving accuracy in determining auditorium occupancy (ysturasp, 2026-02-24) [4 files changed, 23 insertions(+), 25 deletions(-)]
 - refactor auditorium selection and status display in map components, improving user interaction and visual feedback for auditorium availability (ysturasp, 2026-02-24) [5 files changed, 333 insertions(+), 87 deletions(-)]
 - adjust line width in BuildingMapCanvas for improved visual consistency, changing from 2.25 to 1.25 times scale (ysturasp, 2026-02-23) [3 files changed, 3 insertions(+), 1 deletion(-)]

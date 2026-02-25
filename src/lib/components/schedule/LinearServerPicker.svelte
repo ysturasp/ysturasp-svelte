@@ -57,6 +57,7 @@
 			class="w-full max-w-sm rounded-2xl bg-slate-900 p-4 shadow-xl ring-1 ring-blue-500/50"
 			transition:scale={{ duration: 200, easing: quintOut }}
 			on:click|stopPropagation={() => {}}
+			on:keydown|stopPropagation={() => {}}
 			role="dialog"
 			aria-modal="true"
 			aria-label="Выбор сервера API"

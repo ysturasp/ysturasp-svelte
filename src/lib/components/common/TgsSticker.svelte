@@ -141,6 +141,8 @@
 	class="tgs-wrapper"
 	style="width: {width}; height: {height};"
 	bind:this={tgsElement}
+	role="presentation"
+	aria-hidden="true"
 	onmouseenter={handleMouseEnter}
 >
 	<!-- svelte-ignore a11y-unknown-element -->

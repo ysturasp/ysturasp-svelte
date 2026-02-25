@@ -4,7 +4,6 @@
 	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
 	import { settings } from '$lib/stores/settings';
-	import type { Settings } from '$lib/stores/settings';
 	import '$lib/styles/global.css';
 
 	let { status = $bindable('denied' as WriteAccessStatus), isChecking = $bindable(true) } =
