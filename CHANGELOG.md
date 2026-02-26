@@ -1,3 +1,4 @@
+- improve map and migrate endpoint for remove duplicate code (ysturasp, 2026-02-25) [4 files changed, 138 insertions(+), 523 deletions(-)]
 - improve ux adapt on pc and phone, focus effect with blackout other sections (ysturasp, 2026-02-25) [5 files changed, 78 insertions(+), 13 deletions(-)]
 - implement server-side api for map data and migration, replacing client-side map generation with data fetching (ysturasp, 2026-02-25) [9 files changed, 1111 insertions(+), 467 deletions(-)]
 - introduce custom map elements and auditorium descriptions, enhancing map visualization and information display with conditional rendering and styling (ysturasp, 2026-02-25) [6 files changed, 352 insertions(+), 43 deletions(-)]

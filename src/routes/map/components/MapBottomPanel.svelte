@@ -65,13 +65,12 @@
 	}
 
 	function handleSwap() {
-		const temp = routeStart;
-		onStartChange(routeEnd);
-		onEndChange(temp);
-		const tempSearch = startSearch;
-		startSearch = endSearch;
-		endSearch = tempSearch;
 		onSwap();
+
+		startFiltered = [];
+		endFiltered = [];
+		startDropdownOpen = false;
+		endDropdownOpen = false;
 	}
 
 	$: startSearch = routeStart ? routeStart.name : '';
@@ -79,7 +78,9 @@
 </script>
 
 <div class="fixed bottom-4 left-1/2 z-50 w-full max-w-4xl -translate-x-1/2 px-4">
-	<div class="rounded-2xl bg-slate-900/95 p-3 shadow-lg ring-1 ring-blue-500/30 backdrop-blur-sm">
+	<div
+		class="rounded-3xl bg-slate-900/95 px-2.5 py-2 shadow-lg ring-1 ring-blue-500/30 backdrop-blur-sm"
+	>
 		{#if currentRoute}
 			<div class="mb-3 flex items-center justify-between rounded-lg bg-blue-500/10 px-3 py-2">
 				<div class="flex items-center gap-4">

@@ -631,7 +631,7 @@
 
 		ctx.stroke();
 
-		if (screenPts.length >= 2 && !isRouteDisappearing) {
+		if (screenPts.length >= 2 && !isRouteDisappearing && routeAnimProgress >= 1) {
 			const endPoint = screenPts[screenPts.length - 1];
 			const prevPoint = screenPts[screenPts.length - 2];
 
@@ -1225,40 +1225,15 @@
 			}
 		}
 	} else {
-		if (lastRoute && prevRouteId !== null) {
-			isRouteDisappearing = true;
-			routeAnimStartMs = performance.now();
-			const startProgress = routeAnimProgress;
-
-			if (routeAnimRaf !== null) cancelAnimationFrame(routeAnimRaf);
-			const tick = (now: number) => {
-				const elapsed = now - routeAnimStartMs;
-				const p = Math.max(0, 1 - elapsed / ROUTE_DISAPPEAR_MS);
-				routeAnimProgress = startProgress * p;
-				draw();
-				if (p > 0) {
-					routeAnimRaf = requestAnimationFrame(tick);
-				} else {
-					routeAnimRaf = null;
-					routeAnimProgress = 0;
-					lastRoute = null;
-					prevRouteId = null;
-					isRouteDisappearing = false;
-					draw();
-				}
-			};
-			routeAnimRaf = requestAnimationFrame(tick);
-		} else {
-			prevRouteId = null;
-			lastRoute = null;
-			isRouteDisappearing = false;
-			if (routeAnimRaf !== null) {
-				cancelAnimationFrame(routeAnimRaf);
-				routeAnimRaf = null;
-			}
-			routeAnimProgress = 0;
-			draw();
+		prevRouteId = null;
+		lastRoute = null;
+		isRouteDisappearing = false;
+		if (routeAnimRaf !== null) {
+			cancelAnimationFrame(routeAnimRaf);
+			routeAnimRaf = null;
 		}
+		routeAnimProgress = 0;
+		draw();
 	}
 </script>
 
