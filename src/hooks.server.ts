@@ -245,11 +245,12 @@ const suppressBotErrorsHandle: Handle = async ({ event, resolve }) => {
 	const userAgent = event.request.headers.get('user-agent');
 	const referer = event.request.headers.get('referer');
 
+	const cfConnectingIp = event.request.headers.get('cf-connecting-ip');
 	const clientAddressHeader = event.request.headers.get('x-forwarded-for');
 	const forwardedIp = clientAddressHeader?.split(',')[0]?.trim() || null;
 	const clientAddress =
 		typeof event.getClientAddress === 'function' ? event.getClientAddress() : null;
-	const ipAddress = forwardedIp || clientAddress;
+	const ipAddress = cfConnectingIp || forwardedIp || clientAddress;
 
 	const isDevelopment = process.env.NODE_ENV === 'development' || import.meta.env?.DEV;
 	if (await isIpBlocked(ipAddress)) {

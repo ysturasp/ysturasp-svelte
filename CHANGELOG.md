@@ -1,3 +1,4 @@
+- update header component styles for improved responsiveness and consistency in padding and layout (ysturasp, 2026-02-27) [3 files changed, 3 insertions(+), 1 deletion(-)]
 - refactor route animation logic in BuildingMapCanvas and improve dropdown handling in MapBottomPanel for better performance and user experience (ysturasp, 2026-02-26) [4 files changed, 19 insertions(+), 41 deletions(-)]
 - improve map and migrate endpoint for remove duplicate code (ysturasp, 2026-02-25) [4 files changed, 138 insertions(+), 523 deletions(-)]
 - improve ux adapt on pc and phone, focus effect with blackout other sections (ysturasp, 2026-02-25) [5 files changed, 78 insertions(+), 13 deletions(-)]
