@@ -223,11 +223,13 @@
 		return days[dayIndex];
 	}
 
-	function isToday(dayIndex: number): boolean {
+	function isTodayDate(dateString: string | undefined): boolean {
+		if (!dateString) return false;
+		const date = new Date(dateString);
 		const today = new Date();
-		const currentDay = today.getDay();
-		const normalizedCurrentDay = currentDay === 0 ? 6 : currentDay - 1;
-		return normalizedCurrentDay === dayIndex;
+		date.setHours(0, 0, 0, 0);
+		today.setHours(0, 0, 0, 0);
+		return date.getTime() === today.getTime();
 	}
 
 	$: filteredWeek = scheduleData?.items?.find((week: any) => {
@@ -441,7 +443,7 @@
 													class="day-button flex flex-col items-center rounded-lg p-2 transition-all {dayIndex ===
 													selectedDay
 														? 'bg-blue-600'
-														: 'bg-gray-700'} {isToday(dayIndex)
+														: 'bg-gray-700'} {isTodayDate(dayData?.date)
 														? 'border-2 border-blue-300'
 														: ''}"
 													on:click={() => {
