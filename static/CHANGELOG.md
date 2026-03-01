@@ -1,3 +1,4 @@
+- refactor date comparison logic in raspaudience and raspprep components to improve accuracy in determining if a date is today (ysturasp, 2026-02-28) [4 files changed, 16 insertions(+), 10 deletions(-)]
 - update ip address handling in suppressBotErrorsHandle to prioritize cf-connecting-ip for improved accuracy in client identification (ysturasp, 2026-02-27) [3 files changed, 4 insertions(+), 1 deletion(-)]
 - update header component styles for improved responsiveness and consistency in padding and layout (ysturasp, 2026-02-27) [3 files changed, 3 insertions(+), 1 deletion(-)]
 - refactor route animation logic in BuildingMapCanvas and improve dropdown handling in MapBottomPanel for better performance and user experience (ysturasp, 2026-02-26) [4 files changed, 19 insertions(+), 41 deletions(-)]

@@ -70,7 +70,7 @@
 <header class="sticky top-4 z-100 container mx-auto px-3 md:px-0">
 	<div
 		style="background-color: #1e293bad; backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);"
-		class="flex items-center justify-between rounded-2xl px-3 py-2 shadow-xl ring-1 ring-blue-500/50 transition-all md:px-3 md:py-3"
+		class="flex items-center justify-between rounded-2xl px-2 py-2 shadow-xl ring-1 ring-blue-500/50 transition-all md:px-3 md:py-3"
 	>
 		<nav class="hidden gap-x-2 lg:flex">
 			<slot name="links-desktop" />
