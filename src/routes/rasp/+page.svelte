@@ -453,6 +453,33 @@
 	$: hiddenSubjectsForGroup = $hiddenSubjects[selectedGroup] || [];
 	$: hasHiddenSubjects = hiddenSubjectsForGroup.length > 0;
 
+	function renderAds() {
+		if (typeof window === 'undefined') return;
+
+		const w = window as typeof window & {
+			yaContextCb?: Array<() => void>;
+			Ya?: any;
+		};
+
+		try {
+			const blocks = document.querySelectorAll<HTMLElement>('[data-ya-rtb="R-A-18844551-1"]');
+
+			console.log('[Yandex RTB] found blocks:', blocks.length);
+			console.log('[Yandex RTB] Ya loaded:', !!w.Ya?.Context?.AdvManager);
+
+			blocks.forEach((el) => {
+				if (!el.id) return;
+
+				w.Ya?.Context?.AdvManager?.render?.({
+					blockId: 'R-A-18844551-1',
+					renderTo: el.id
+				});
+			});
+		} catch (e) {
+			console.error('Yandex RTB render error', e);
+		}
+	}
+
 	onMount(() => {
 		if (typeof window === 'undefined') return;
 
@@ -461,26 +488,17 @@
 			Ya?: any;
 		};
 
-		w.yaContextCb = w.yaContextCb || [];
-		w.yaContextCb.push(() => {
-			try {
-				const blocks = document.querySelectorAll<HTMLElement>(
-					'[data-ya-rtb="R-A-18844551-1"]'
-				);
-
-				blocks.forEach((el) => {
-					if (!el.id) return;
-
-					w.Ya?.Context?.AdvManager?.render?.({
-						blockId: 'R-A-18844551-1',
-						renderTo: el.id
-					});
-				});
-			} catch (e) {
-				console.error('Yandex RTB render error', e);
-			}
-		});
+		if (w.Ya?.Context?.AdvManager?.render) {
+			renderAds();
+		} else {
+			w.yaContextCb = w.yaContextCb || [];
+			w.yaContextCb.push(renderAds);
+		}
 	});
+
+	$: if (scheduleData && selectedGroup && filteredDays.length > 0) {
+		renderAds();
+	}
 </script>
 
 <svelte:head>
