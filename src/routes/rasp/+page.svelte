@@ -452,6 +452,35 @@
 
 	$: hiddenSubjectsForGroup = $hiddenSubjects[selectedGroup] || [];
 	$: hasHiddenSubjects = hiddenSubjectsForGroup.length > 0;
+
+	onMount(() => {
+		if (typeof window === 'undefined') return;
+
+		const w = window as typeof window & {
+			yaContextCb?: Array<() => void>;
+			Ya?: any;
+		};
+
+		w.yaContextCb = w.yaContextCb || [];
+		w.yaContextCb.push(() => {
+			try {
+				const blocks = document.querySelectorAll<HTMLElement>(
+					'[data-ya-rtb="R-A-18844551-1"]'
+				);
+
+				blocks.forEach((el) => {
+					if (!el.id) return;
+
+					w.Ya?.Context?.AdvManager?.render?.({
+						blockId: 'R-A-18844551-1',
+						renderTo: el.id
+					});
+				});
+			} catch (e) {
+				console.error('Yandex RTB render error', e);
+			}
+		});
+	});
 </script>
 
 <svelte:head>
@@ -474,6 +503,12 @@
 			selectedInstitute ? `${selectedInstitute}, ` : ''
 		}расписание занятий ЯГТУ, ЯГТУ расписание, расписание пар ЯГТУ, расписание для студентов ЯГТУ, ЯГТУ расписание по группам, ЯГТУ расписание занятий, расписание лекций ЯГТУ`}
 	/>
+
+	<!-- Yandex.RTB -->
+	<script>
+		window.yaContextCb = window.yaContextCb || [];
+	</script>
+	<script src="https://yandex.ru/ads/system/context.js" async></script>
 
 	<meta
 		property="og:title"
@@ -684,7 +719,7 @@
 									in:fade={{ duration: 500, easing: quintOut }}
 									out:fade={{ duration: 500, easing: quintOut }}
 								>
-									{#each filteredDays as day}
+									{#each filteredDays as day, index}
 										{#if day.lessons && day.lessons.length > 0}
 											<YSTUScheduleDay
 												date={day.info.date}
@@ -694,13 +729,23 @@
 												teacherSubgroups={currentTeacherSubgroups}
 												onLessonClick={handleLinearModalOpen}
 											/>
+
+											{#if index === 0 && filteredDays.length > 1}
+												<div class="mt-4">
+													<div
+														id={`yandex_rtb_R-A-18844551-1_${day.info.date}_${index}_mobile`}
+														data-ya-rtb="R-A-18844551-1"
+														class="h-[90px] w-full rounded-2xl bg-slate-900/60"
+													></div>
+												</div>
+											{/if}
 										{/if}
 									{/each}
 								</div>
 							{/if}
 						</div>
 					{:else}
-						{#each filteredDays as day}
+						{#each filteredDays as day, index}
 							{#if day.lessons && day.lessons.length > 0}
 								<YSTUScheduleDay
 									date={day.info.date}
@@ -710,6 +755,16 @@
 									teacherSubgroups={currentTeacherSubgroups}
 									onLessonClick={handleLinearModalOpen}
 								/>
+
+								{#if index === 0 && filteredDays.length > 1}
+									<div class="mt-4">
+										<div
+											id={`yandex_rtb_R-A-18844551-1_${day.info.date}_${index}_desktop`}
+											data-ya-rtb="R-A-18844551-1"
+											class="h-[90px] w-full rounded-2xl bg-slate-900/60"
+										></div>
+									</div>
+								{/if}
 							{/if}
 						{/each}
 					{/if}
@@ -726,6 +781,16 @@
 			{/if}
 
 			<HiddenSubjects {selectedGroup} />
+
+			{#if $isMobile && scheduleData && selectedGroup}
+				<div class="mt-4">
+					<div
+						id={`yandex_rtb_R-A-18844551-1_${selectedGroup}_mobile`}
+						data-ya-rtb="R-A-18844551-1"
+						class="h-[90px] w-full rounded-2xl bg-slate-900/60"
+					></div>
+				</div>
+			{/if}
 		</section>
 
 		<FormatDocumentPromo />
