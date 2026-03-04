@@ -3,9 +3,10 @@ import type { RequestEvent } from '@sveltejs/kit';
 import { getRedisClient } from '$lib/config/redis';
 import { getTeacherScheduleKey } from '$lib/utils/redis-keys';
 import { trackEventAuto } from '$lib/server/analyticsContext';
+import { env } from '$env/dynamic/private';
 
 const API_BASE = 'https://gg-api.ystuty.ru/s/schedule/v1/schedule';
-const CACHE_TTL = 3600;
+const CACHE_TTL = Number(env.CACHE_TTL || '604800');
 
 export async function GET(event: RequestEvent) {
 	const { params, locals } = event;

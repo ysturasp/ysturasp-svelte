@@ -1,3 +1,4 @@
+- refactor ad rendering logic in rasp component to improve integration with yandex rtb and enhance ad visibility (ysturasp, 2026-03-03) [3 files changed, 37 insertions(+), 17 deletions(-)]
 - implement yandex rtb integration in schedule component for enhanced ad rendering and visibility (ysturasp, 2026-03-03) [3 files changed, 69 insertions(+), 2 deletions(-)]
 - adjust header component padding for improved layout consistency (ysturasp, 2026-03-01) [3 files changed, 3 insertions(+), 1 deletion(-)]
 - refactor date comparison logic in raspaudience and raspprep components to improve accuracy in determining if a date is today (ysturasp, 2026-02-28) [4 files changed, 16 insertions(+), 10 deletions(-)]
