@@ -26,6 +26,8 @@ services:
             - YSTU_OAUTH_CLIENT_SECRET=${YSTU_OAUTH_CLIENT_SECRET}
             - YSTU_OAUTH_REDIRECT_URI=${YSTU_OAUTH_REDIRECT_URI}
             - BODY_SIZE_LIMIT=${BODY_SIZE_LIMIT:-50M}
+            - CACHE_TTL=${CACHE_TTL}
+            - CACHE_FRESH_MINUTES=${CACHE_FRESH_MINUTES}
         restart: unless-stopped
         networks:
             - ysturasp-db
