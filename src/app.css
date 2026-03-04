@@ -498,7 +498,6 @@ a {
 	letter-spacing: 0.02em;
 }
 
-/* Subgroups Statistics Styles */
 .rounded-2xl h3.text-2xl {
 	font-family: var(--font-family-heading, 'Unbounded'), cursive;
 	font-weight: 600;
@@ -536,7 +535,8 @@ a {
 
 .text-blue-400,
 .text-yellow-400,
-.text-green-400 {
+.text-green-400,
+.text-slate-500 {
 	font-family: var(--font-family-base, 'Exo 2'), sans-serif;
 	font-weight: 500;
 	letter-spacing: 0.02em;
@@ -547,7 +547,6 @@ a {
 	letter-spacing: 0.02em;
 }
 
-/* Carousel Styles */
 .carousel-root {
 	font-family: var(--font-family-base, 'Exo 2'), sans-serif;
 }

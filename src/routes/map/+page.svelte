@@ -5,6 +5,7 @@
 	import BuildingMapCanvas from './components/BuildingMapCanvas.svelte';
 	import MapBottomPanel from './components/MapBottomPanel.svelte';
 	import AuditoriumInfo from './components/AuditoriumInfo.svelte';
+	import TimePicker from './components/TimePicker.svelte';
 	import { fetchBuildingMap, getAllAuditoriums } from './data';
 	import { findRoute } from './route-finder';
 	import type { Auditorium, Route, AuditoriumStatus, BuildingMap } from './types';
@@ -18,6 +19,9 @@
 	let currentRoute: Route | null = null;
 	let hoveredAuditorium: Auditorium | null = null;
 	let auditoriumStatuses: Record<string, AuditoriumStatus> = {};
+	let selectedTime = new Date();
+	let showAvailability = true;
+	let statusLoadTimeout: any;
 
 	function handleAuditoriumClick(auditorium: Auditorium) {
 		selectedAuditorium = auditorium;
@@ -89,14 +93,34 @@
 
 	async function loadAuditoriumStatuses() {
 		try {
-			const response = await fetch('/api/map/auditoriums-status');
+			const url = new URL('/api/map/auditoriums-status', window.location.origin);
+			url.searchParams.set('time', selectedTime.toISOString());
+			const response = await fetch(url);
 			if (response.ok) {
 				const data = await response.json();
-				console.log('Loaded auditorium statuses:', data);
+				console.log('Loaded auditorium statuses for:', selectedTime, data);
 				auditoriumStatuses = data;
 			}
 		} catch (error) {
 			console.error('Error loading auditorium statuses:', error);
+		}
+	}
+
+	function handleTimeChange(event: CustomEvent<{ date: Date }>) {
+		selectedTime = event.detail.date;
+		clearTimeout(statusLoadTimeout);
+		if (showAvailability) {
+			statusLoadTimeout = setTimeout(loadAuditoriumStatuses, 500);
+		}
+	}
+
+	function handleVisibilityChange(event: CustomEvent<{ visible: boolean }>) {
+		showAvailability = event.detail.visible;
+		localStorage.setItem('map_show_availability', JSON.stringify(showAvailability));
+		if (showAvailability) {
+			loadAuditoriumStatuses();
+		} else {
+			auditoriumStatuses = {};
 		}
 	}
 
@@ -112,8 +136,15 @@
 	}
 
 	onMount(() => {
+		const storedValue = localStorage.getItem('map_show_availability');
+		if (storedValue !== null) {
+			showAvailability = JSON.parse(storedValue);
+		}
+
 		initMap();
-		loadAuditoriumStatuses();
+		if (showAvailability) {
+			loadAuditoriumStatuses();
+		}
 		const interval = setInterval(loadAuditoriumStatuses, 60000);
 		const scrollY = typeof window !== 'undefined' ? window.scrollY : 0;
 		const body = typeof document !== 'undefined' ? document.body : null;
@@ -190,6 +221,7 @@
 					{routeEnd}
 					{currentRoute}
 					{auditoriumStatuses}
+					showAuditoriumStatus={showAvailability}
 					onAuditoriumClick={handleAuditoriumClick}
 					onAuditoriumHover={handleAuditoriumHover}
 				/>
@@ -220,6 +252,13 @@
 			isEndSelected={Boolean(
 				selectedAuditorium && routeEnd && selectedAuditorium.id === routeEnd.id
 			)}
+		/>
+
+		<TimePicker
+			value={selectedTime}
+			{showAvailability}
+			on:change={handleTimeChange}
+			on:visibilityChange={handleVisibilityChange}
 		/>
 	</div>
 </PageLayout>

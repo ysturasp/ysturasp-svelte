@@ -11,6 +11,7 @@
 	export let routeEnd: Auditorium | null = null;
 	export let currentRoute: Route | null = null;
 	export let auditoriumStatuses: Record<string, AuditoriumStatus> = {};
+	export let showAuditoriumStatus = true;
 	export let onAuditoriumClick: (auditorium: Auditorium) => void = () => {};
 	export let onAuditoriumHover: (auditorium: Auditorium | null) => void = () => {};
 
@@ -104,6 +105,64 @@
 			}
 		}
 		return null;
+	}
+
+	function drawGrid() {
+		if (!ctx || !canvas) return;
+		const t = getTransform();
+
+		const topLeft = screenToWorld(0, 0);
+		const bottomRight = screenToWorld(canvas.width, canvas.height);
+
+		const drawLine = (
+			x1: number,
+			y1: number,
+			x2: number,
+			y2: number,
+			color: string,
+			width: number
+		) => {
+			const c = ctx!;
+			c.strokeStyle = color;
+			c.lineWidth = width;
+			const p1 = worldToScreen(x1, y1);
+			const p2 = worldToScreen(x2, y2);
+			c.beginPath();
+			c.moveTo(p1.x, p1.y);
+			c.lineTo(p2.x, p2.y);
+			c.stroke();
+		};
+
+		const minorGap = 5;
+		const majorGap = 25;
+
+		const startX = Math.floor(topLeft.x / minorGap) * minorGap;
+		const endX = Math.ceil(bottomRight.x / minorGap) * minorGap;
+		const startY = Math.floor(topLeft.y / minorGap) * minorGap;
+		const endY = Math.ceil(bottomRight.y / minorGap) * minorGap;
+
+		ctx.save();
+		for (let x = startX; x <= endX; x += minorGap) {
+			if (x % majorGap === 0) continue;
+			drawLine(x, startY, x, endY, 'rgba(255, 255, 255, 0.01)', 0.2);
+		}
+		for (let y = startY; y <= endY; y += minorGap) {
+			if (y % majorGap === 0) continue;
+			drawLine(startX, y, endX, y, 'rgba(255, 255, 255, 0.01)', 0.2);
+		}
+
+		const majorStartX = Math.floor(topLeft.x / majorGap) * majorGap;
+		const majorEndX = Math.ceil(bottomRight.x / majorGap) * majorGap;
+		const majorStartY = Math.floor(topLeft.y / majorGap) * majorGap;
+		const majorEndY = Math.ceil(bottomRight.y / majorGap) * majorGap;
+
+		for (let x = majorStartX; x <= majorEndX; x += majorGap) {
+			drawLine(x, startY, x, endY, 'rgba(255, 255, 255, 0.025)', 0.5);
+		}
+		for (let y = majorStartY; y <= majorEndY; y += majorGap) {
+			drawLine(startX, y, endX, y, 'rgba(255, 255, 255, 0.025)', 0.5);
+		}
+		ctx.restore();
 	}
 
 	function drawStairsBlocks() {
@@ -323,12 +382,14 @@
 		let baseColor = { r: 148, g: 163, b: 184, a: 0 };
 		let strokeAlpha = 0;
 
-		const rawStatus = (() => {
-			const b = auditorium.name;
-			const g = `Г-${b}`;
-			const w = b.replace(/^Г-/, '');
-			return auditoriumStatuses[b] ?? auditoriumStatuses[g] ?? auditoriumStatuses[w];
-		})();
+		const rawStatus = showAuditoriumStatus
+			? (() => {
+					const b = auditorium.name;
+					const g = `Г-${b}`;
+					const w = b.replace(/^Г-/, '');
+					return auditoriumStatuses[b] ?? auditoriumStatuses[g] ?? auditoriumStatuses[w];
+				})()
+			: null;
 		const isFree = rawStatus?.isFree;
 
 		if (isSelected) {
@@ -681,6 +742,7 @@
 		ctx.fillStyle = '#0f172a';
 		ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+		drawGrid();
 		drawStairsBlocks();
 
 		for (const section of buildingMap.sections) {

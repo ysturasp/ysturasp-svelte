@@ -13,50 +13,55 @@ function normalizeAuditoriumName(name: string): string {
 	return name.replace(/^Г-/, '').replace(/\s+/g, '').trim();
 }
 
-function getCurrentLessonNow(lessons: AudienceLesson[]): AudienceLesson | null {
-	const now = new Date();
-	const nowTs = now.getTime();
+function getDayString(date: Date | null | string): string | null {
+	if (!date) return null;
+	const d = new Date(date);
+	if (Number.isNaN(d.getTime())) return null;
+	const shifted = new Date(d.getTime() + 3 * 60 * 60 * 1000);
+	return shifted.toISOString().split('T')[0];
+}
 
-	for (const lesson of lessons) {
-		const anyLesson = lesson as any;
+function getLessonAtTime(schedule: AudienceScheduleData, targetDate: Date): AudienceLesson | null {
+	const targetTs = targetDate.getTime();
+	const targetDayStr = getDayString(targetDate);
+	const targetMinutes = (targetDate.getUTCHours() + 3) * 60 + targetDate.getUTCMinutes();
 
-		if (anyLesson.startAt && anyLesson.endAt) {
-			const start = new Date(anyLesson.startAt);
-			const end = new Date(anyLesson.endAt);
-			const startTs = start.getTime();
-			const endTs = end.getTime();
-			if (
-				!Number.isNaN(startTs) &&
-				!Number.isNaN(endTs) &&
-				nowTs >= startTs &&
-				nowTs <= endTs
-			) {
-				return lesson;
+	const debugInfo: any[] = [];
+
+	for (const week of schedule.items ?? []) {
+		for (const dayInfo of week.days ?? []) {
+			const dayStr = getDayString(dayInfo.info?.date);
+			const isSameDay = dayStr === targetDayStr;
+
+			for (const lesson of dayInfo.lessons ?? []) {
+				const anyLesson = lesson as any;
+
+				if (anyLesson.startAt && anyLesson.endAt) {
+					const startTs = new Date(anyLesson.startAt).getTime();
+					const endTs = new Date(anyLesson.endAt).getTime();
+
+					if (targetTs >= startTs && targetTs <= endTs) {
+						return lesson;
+					}
+				}
+
+				if (!isSameDay || !lesson.timeRange) continue;
+
+				const [startStr, endStr] = lesson.timeRange.split('-').map((s) => s.trim());
+				if (!startStr || !endStr) continue;
+
+				const [startHour, startMin] = startStr.split(':').map(Number);
+				const [endHour, endMin] = endStr.split(':').map(Number);
+
+				const lessonStart = startHour * 60 + startMin;
+				const lessonEnd = endHour * 60 + endMin;
+
+				const normalizedMinutes = targetMinutes % (24 * 60);
+
+				if (normalizedMinutes >= lessonStart && normalizedMinutes <= lessonEnd) {
+					return lesson;
+				}
 			}
-			continue;
-		}
-
-		if (!lesson.timeRange) continue;
-		const [startStr, endStr] = lesson.timeRange.split('-').map((s) => s.trim());
-		if (!startStr || !endStr) continue;
-
-		const [startHour, startMin] = startStr.split(':').map(Number);
-		const [endHour, endMin] = endStr.split(':').map(Number);
-		if (
-			Number.isNaN(startHour) ||
-			Number.isNaN(startMin) ||
-			Number.isNaN(endHour) ||
-			Number.isNaN(endMin)
-		) {
-			continue;
-		}
-
-		const currentMinutes = now.getHours() * 60 + now.getMinutes();
-		const lessonStart = startHour * 60 + startMin;
-		const lessonEnd = endHour * 60 + endMin;
-
-		if (currentMinutes >= lessonStart && currentMinutes <= lessonEnd) {
-			return lesson;
 		}
 	}
 
@@ -66,7 +71,7 @@ function getCurrentLessonNow(lessons: AudienceLesson[]): AudienceLesson | null {
 const API_BASE = 'https://gg-api.ystuty.ru/s/schedule/v1/schedule';
 const CACHE_TTL = 3600;
 
-export async function GET(_event: RequestEvent) {
+export async function GET(event: RequestEvent) {
 	try {
 		const redis = getRedisClient();
 		const statuses: Record<
@@ -79,6 +84,13 @@ export async function GET(_event: RequestEvent) {
 				timeRange?: string;
 			}
 		> = {};
+
+		const timeParam = event.url.searchParams.get('time');
+		const targetDate = timeParam ? new Date(timeParam) : new Date();
+
+		if (Number.isNaN(targetDate.getTime())) {
+			return json({ error: 'Invalid time parameter' }, { status: 400 });
+		}
 
 		const listKey = getAudiencesListKey();
 		let cachedList = await redis.get(listKey);
@@ -99,6 +111,7 @@ export async function GET(_event: RequestEvent) {
 		}
 
 		if (!cachedList) {
+			console.warn('[MapStatus] No cached audiences list found');
 			return json(statuses);
 		}
 
@@ -110,12 +123,15 @@ export async function GET(_event: RequestEvent) {
 				: [];
 
 		if (!audiences.length) {
+			console.warn('[MapStatus] Audiences list is empty');
 			return json(statuses);
 		}
 
+		let processedCount = 0;
+		let busyCount = 0;
+
 		for (const aud of audiences) {
 			const originalName = aud.name;
-			const normalizedName = normalizeAuditoriumName(originalName);
 
 			try {
 				const scheduleKey = getAudienceScheduleKey(String(aud.id));
@@ -127,17 +143,7 @@ export async function GET(_event: RequestEvent) {
 				}
 
 				const schedule: AudienceScheduleData = JSON.parse(cachedSchedule);
-				const allLessons: AudienceLesson[] = [];
-
-				for (const week of schedule.items ?? []) {
-					for (const dayInfo of week.days ?? []) {
-						for (const lesson of dayInfo.lessons ?? []) {
-							allLessons.push(lesson);
-						}
-					}
-				}
-
-				const currentLesson = getCurrentLessonNow(allLessons);
+				const currentLesson = getLessonAtTime(schedule, targetDate);
 				const anyLesson = currentLesson as any;
 
 				statuses[originalName] = {
@@ -157,6 +163,9 @@ export async function GET(_event: RequestEvent) {
 								})}`
 							: undefined)
 				};
+
+				processedCount++;
+				if (currentLesson) busyCount++;
 			} catch (err) {
 				console.error(`Error processing audience ${aud.id} (${aud.name}):`, err);
 				statuses[originalName] = { isFree: true };
