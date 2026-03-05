@@ -2,6 +2,7 @@
 	import Header from '$lib/components/layout/Header.svelte';
 	import Footer from '$lib/components/layout/Footer.svelte';
 	import PageLayout from '$lib/components/layout/PageLayout.svelte';
+	import IntelligentMapPromo from './components/IntelligentMapPromo.svelte';
 	import { onMount } from 'svelte';
 	import mapboxgl from 'mapbox-gl';
 
@@ -9,8 +10,12 @@
 	let mapContainer: HTMLDivElement;
 
 	onMount(() => {
-		mapboxgl.accessToken =
-			'pk.eyJ1IjoieXN0dXJhc3AiLCJhIjoiY202djhha2pmMDdiNDJpczg0bXY4bHByZiJ9.Y2vkDoOU5roo3ADdrEWJyQ';
+		const token = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN;
+		if (!token) {
+			console.error('VITE_MAPBOX_ACCESS_TOKEN is not set');
+			return;
+		}
+		mapboxgl.accessToken = token;
 
 		map = new mapboxgl.Map({
 			container: mapContainer,
@@ -147,6 +152,7 @@
 				</div>
 			</div>
 		</section>
+		<IntelligentMapPromo />
 	</main>
 	<Footer />
 </PageLayout>

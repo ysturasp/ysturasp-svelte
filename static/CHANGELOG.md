@@ -1,3 +1,5 @@
+- add IntelligentMapPromo component to campus page for enhanced user engagement (ysturasp, 2026-03-05) [4 files changed, 56 insertions(+)]
+- implement collapsible route instructions with svelte slide transition and refine bottom panel ui (ysturasp, 2026-03-05) [3 files changed, 66 insertions(+), 23 deletions(-)]
 - add time picker to map for viewing auditorium availability at specific times and introduce an availability display toggle (ysturasp, 2026-03-05) [7 files changed, 599 insertions(+), 66 deletions(-)]
 - add CACHE_TTL and CACHE_FRESH_MINUTES to .env.example for improved cache configuration (ysturasp, 2026-03-04) [5 files changed, 12 insertions(+), 1 deletion(-)]
 - refactor cache handling in schedule api routes to utilize environment variables for CACHE_TTL and CACHE_FRESH_MINUTES, enhancing flexibility and performance (ysturasp, 2026-03-04) [5 files changed, 111 insertions(+), 32 deletions(-)]
