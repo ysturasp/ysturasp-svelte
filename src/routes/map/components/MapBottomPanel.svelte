@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { Auditorium, Route } from '../types';
+	import { slide } from 'svelte/transition';
 
 	export let routeStart: Auditorium | null = null;
 	export let routeEnd: Auditorium | null = null;
@@ -15,6 +16,7 @@
 	let endFiltered: Auditorium[] = [];
 	let startDropdownOpen = false;
 	let endDropdownOpen = false;
+	let showInstructions = false;
 
 	function filterAuditoriums(query: string): Auditorium[] {
 		if (!query.trim()) return [];
@@ -79,38 +81,77 @@
 
 <div class="fixed bottom-4 left-1/2 z-50 w-full max-w-4xl -translate-x-1/2 px-4">
 	<div
-		class="rounded-3xl bg-slate-900/95 px-2.5 py-2 shadow-lg ring-1 ring-blue-500/30 backdrop-blur-sm"
+		class="rounded-3xl bg-slate-900/95 px-2 py-2 shadow-lg ring-1 ring-blue-500/30 backdrop-blur-sm"
 	>
 		{#if currentRoute}
-			<div class="mb-3 flex items-center justify-between rounded-lg bg-blue-500/10 px-3 py-2">
-				<div class="flex items-center gap-4">
-					<span class="text-sm text-white">
-						Маршрут: <span class="font-semibold"
-							>{Math.max(1, currentRoute.instructions.length)}</span
-						> шагов
-					</span>
-					{#if currentRoute.totalDistance > 0}
-						<span class="text-xs text-gray-400">
-							~{Math.round(currentRoute.totalDistance)} м
+			<div class="mb-2 flex flex-col overflow-hidden px-1">
+				<div class="flex items-center justify-between px-2 py-1">
+					<button
+						on:click={() => (showInstructions = !showInstructions)}
+						class="flex items-center gap-1.5 text-[10px] font-black tracking-widest text-blue-400 uppercase transition-all hover:text-blue-300"
+					>
+						<span
+							class="flex h-4 w-4 items-center justify-center rounded-full bg-blue-500/10"
+						>
+							{#if showInstructions}
+								<svg
+									class="h-2.5 w-2.5"
+									fill="none"
+									stroke="currentColor"
+									viewBox="0 0 24 24"
+								>
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="3"
+										d="M19 9l-7 7-7-7"
+									/>
+								</svg>
+							{:else}
+								<svg
+									class="h-2.5 w-2.5"
+									fill="none"
+									stroke="currentColor"
+									viewBox="0 0 24 24"
+								>
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="3"
+										d="M9 5l7 7-7 7"
+									/>
+								</svg>
+							{/if}
 						</span>
-					{/if}
+						Маршрут
+					</button>
 				</div>
-				{#if currentRoute.instructions.length > 0}
-					<details class="text-xs text-blue-400">
-						<summary class="cursor-pointer hover:text-blue-300">Инструкции</summary>
-						<ul class="mt-2 space-y-1 text-gray-300">
-							{#each currentRoute.instructions as instruction}
-								<li>• {instruction}</li>
+
+				{#if showInstructions && currentRoute.instructions.length > 0}
+					<div
+						transition:slide={{ duration: 300 }}
+						class="mt-2 max-h-40 overflow-y-auto rounded-2xl bg-slate-800/40 p-3 ring-1 ring-white/5"
+					>
+						<ul class="space-y-2.5">
+							{#each currentRoute.instructions as instruction, i}
+								<li
+									class="flex items-start gap-2.5 text-[11px] leading-relaxed text-gray-300"
+								>
+									<span
+										class="mt-1 flex h-1.5 w-1.5 shrink-0 rounded-full bg-blue-500/50"
+									></span>
+									{instruction}
+								</li>
 							{/each}
 						</ul>
-					</details>
+					</div>
 				{/if}
 			</div>
 		{/if}
 
-		<div class="flex items-center gap-2">
+		<div class="flex items-center gap-1.5">
 			<div class="relative min-w-0 flex-1">
-				<div class="flex items-center gap-2 rounded-xl bg-slate-800 px-3 py-2">
+				<div class="flex items-center gap-2 rounded-2xl bg-slate-800 px-3 py-2">
 					<div class="h-3 w-3 rounded-full bg-green-500"></div>
 					<input
 						type="text"
@@ -168,7 +209,7 @@
 
 			<button
 				on:click={handleSwap}
-				class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-800 text-gray-400 transition-all hover:bg-slate-700 hover:text-white"
+				class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-800 text-gray-400 transition-all hover:bg-slate-700 hover:text-white"
 				aria-label="Поменять местами"
 			>
 				<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -182,7 +223,7 @@
 			</button>
 
 			<div class="relative min-w-0 flex-1">
-				<div class="flex items-center gap-2 rounded-xl bg-slate-800 px-3 py-2">
+				<div class="flex items-center gap-2 rounded-2xl bg-slate-800 px-3 py-2">
 					<div class="h-3 w-3 rounded-full bg-amber-500"></div>
 					<input
 						type="text"
