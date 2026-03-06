@@ -1,7 +1,88 @@
 import { generateSubgroupDistribution } from '../src/routes/rasp/stores/subgroups';
 import type { TeacherSubgroups } from '../src/routes/rasp/stores/subgroups';
+import Redis from 'ioredis';
+import {
+	getActualGroupsKey,
+	getGroupScheduleKey,
+	getInstitutesListKey
+} from '../src/lib/utils/redis-keys';
 
-const API_BASE = 'https://api-ochre-eta-11.vercel.app/s/schedule/v1/schedule';
+type RedisClient = Redis;
+type SourceMode = 'redis' | 'hybrid' | 'api';
+
+const API_ORIGIN = process.env.TEST_SCHEDULE_API_ORIGIN || 'http://localhost:5173';
+
+function parseArgs(argv: string[]) {
+	let source: SourceMode = 'redis';
+	let ttlSeconds = 604800;
+	let maxRetries429 = 5;
+	let retryBaseDelayMs = 750;
+	let delayMs = 0;
+	let writeCache = true;
+
+	const positional: string[] = [];
+
+	for (const arg of argv) {
+		if (!arg.startsWith('-')) {
+			positional.push(arg);
+			continue;
+		}
+
+		if (arg === '--use-cache' || arg === '--cache' || arg === '--source=redis') {
+			source = 'redis';
+			continue;
+		}
+		if (arg === '--hybrid' || arg === '--source=hybrid') {
+			source = 'hybrid';
+			continue;
+		}
+		if (
+			arg === '--refresh' ||
+			arg === '--api' ||
+			arg === '--source=api' ||
+			arg === '--source=refresh'
+		) {
+			source = 'api';
+			continue;
+		}
+		if (arg === '--no-write-cache') {
+			writeCache = false;
+			continue;
+		}
+		if (arg.startsWith('--ttl=')) {
+			const v = Number(arg.slice('--ttl='.length));
+			if (Number.isFinite(v) && v > 0) ttlSeconds = v;
+			continue;
+		}
+		if (arg.startsWith('--delay-ms=')) {
+			const v = Number(arg.slice('--delay-ms='.length));
+			if (Number.isFinite(v) && v >= 0) delayMs = v;
+			continue;
+		}
+		if (arg.startsWith('--retries-429=')) {
+			const v = Number(arg.slice('--retries-429='.length));
+			if (Number.isFinite(v) && v >= 0) maxRetries429 = v;
+			continue;
+		}
+		if (arg.startsWith('--retry-base-ms=')) {
+			const v = Number(arg.slice('--retry-base-ms='.length));
+			if (Number.isFinite(v) && v > 0) retryBaseDelayMs = v;
+			continue;
+		}
+	}
+
+	const targetGroup = positional[0];
+
+	return {
+		source,
+		targetGroup,
+		ttlSeconds,
+		maxRetries429,
+		retryBaseDelayMs,
+		delayMs,
+		writeCache
+	};
+}
 
 interface Institute {
 	name: string;
@@ -56,6 +137,60 @@ function isSubgroupType(type: number): boolean {
 	return SUBGROUP_TYPES.has(type);
 }
 
+function createRedisClient(): RedisClient {
+	const url = process.env.REDIS_URL;
+	if (url) {
+		return new Redis(url, {
+			maxRetriesPerRequest: 3,
+			enableReadyCheck: true
+		});
+	}
+
+	return new Redis({
+		host: process.env.REDIS_HOST || 'localhost',
+		port: parseInt(process.env.REDIS_PORT || '6379'),
+		password: process.env.REDIS_PASSWORD || undefined,
+		maxRetriesPerRequest: 3,
+		enableReadyCheck: true
+	});
+}
+
+async function sleep(ms: number) {
+	if (ms <= 0) return;
+	return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function fetchJsonWithRetry(
+	url: string,
+	{
+		maxRetries429,
+		retryBaseDelayMs
+	}: {
+		maxRetries429: number;
+		retryBaseDelayMs: number;
+	}
+) {
+	if (typeof fetch !== 'function') {
+		throw new Error('Global fetch is not available in this environment');
+	}
+
+	let attempt = 0;
+	while (true) {
+		const response = await fetch(url);
+		if (response.ok) return response.json();
+
+		if (response.status === 429 && attempt < maxRetries429) {
+			const delay = Math.min(10000, retryBaseDelayMs * Math.pow(2, attempt));
+			attempt++;
+			await sleep(delay);
+			continue;
+		}
+
+		const text = await response.text().catch(() => '');
+		throw new Error(`HTTP ${response.status} ${response.statusText} for ${url}. ${text}`);
+	}
+}
+
 function getCurrentSemester(): SemesterInfo {
 	const now = new Date();
 	const month = now.getMonth();
@@ -94,15 +229,152 @@ function getWeekNumberByDate(date: Date, semester: SemesterInfo): number {
 	return Math.max(1, Math.min(18, weeksSinceStart + 1));
 }
 
-async function getInstitutes(): Promise<Institute[]> {
-	const response = await fetch(`${API_BASE}/actual_groups`);
-	const data = await response.json();
+async function getInstitutes(redis: RedisClient): Promise<Institute[]> {
+	const candidates = [getInstitutesListKey(), getActualGroupsKey()];
+	for (const key of candidates) {
+		const raw = await redis.get(key);
+		if (!raw) continue;
+		try {
+			const parsed = JSON.parse(raw);
+			const items = parsed?.items;
+			if (Array.isArray(items)) return items as Institute[];
+		} catch {}
+	}
+
+	throw new Error(
+		`Не найден список институтов/групп в Redis (ключи: ${candidates.join(
+			', '
+		)}). Запусти с --hybrid или --refresh чтобы заполнить кеш.`
+	);
+}
+
+async function getScheduleFromRedis(
+	redis: RedisClient,
+	group: string
+): Promise<ScheduleData | null> {
+	const cacheKey = getGroupScheduleKey(group);
+	const raw = await redis.get(cacheKey);
+	if (!raw) return null;
+
+	const parsed = JSON.parse(raw);
+	if (parsed && typeof parsed === 'object' && 'timestamp' in parsed) {
+		// eslint-disable-next-line @typescript-eslint/no-dynamic-delete
+		delete (parsed as any).timestamp;
+	}
+
+	return parsed as ScheduleData;
+}
+
+async function getInstitutesFromRedis(redis: RedisClient): Promise<Institute[] | null> {
+	const candidates = [getInstitutesListKey(), getActualGroupsKey()];
+	for (const key of candidates) {
+		const raw = await redis.get(key);
+		if (!raw) continue;
+		try {
+			const parsed = JSON.parse(raw);
+			const items = parsed?.items;
+			if (Array.isArray(items)) return items as Institute[];
+		} catch {}
+	}
+	return null;
+}
+
+async function getInstitutesFromApi({
+	maxRetries429,
+	retryBaseDelayMs
+}: {
+	maxRetries429: number;
+	retryBaseDelayMs: number;
+}): Promise<{ items: Institute[] }> {
+	const url = `${API_ORIGIN}/api/schedule/institutes`;
+	return fetchJsonWithRetry(url, { maxRetries429, retryBaseDelayMs });
+}
+
+async function getInstitutesFlexible({
+	redis,
+	source,
+	writeCache,
+	maxRetries429,
+	retryBaseDelayMs,
+	ttlSeconds
+}: {
+	redis: RedisClient;
+	source: SourceMode;
+	writeCache: boolean;
+	maxRetries429: number;
+	retryBaseDelayMs: number;
+	ttlSeconds: number;
+}): Promise<Institute[]> {
+	if (source !== 'api') {
+		const cached = await getInstitutesFromRedis(redis);
+		if (cached) return cached;
+		if (source === 'redis') {
+			throw new Error(
+				`Не найден список институтов/групп в Redis (ключи: ${getInstitutesListKey()}, ${getActualGroupsKey()}). Запусти с --hybrid или --refresh чтобы заполнить кеш.`
+			);
+		}
+	}
+
+	const data = await getInstitutesFromApi({ maxRetries429, retryBaseDelayMs });
+	if (writeCache) {
+		const payload = JSON.stringify(data);
+		await Promise.allSettled([
+			redis.set(getInstitutesListKey(), payload, 'EX', Math.min(3600, ttlSeconds)),
+			redis.set(getActualGroupsKey(), payload, 'EX', Math.min(3600, ttlSeconds))
+		]);
+	}
 	return data.items || [];
 }
 
-async function getSchedule(group: string): Promise<ScheduleData> {
-	const response = await fetch(`${API_BASE}/group/${group}`);
-	return await response.json();
+async function getScheduleFromApi(
+	group: string,
+	{
+		maxRetries429,
+		retryBaseDelayMs
+	}: {
+		maxRetries429: number;
+		retryBaseDelayMs: number;
+	}
+): Promise<ScheduleData> {
+	const url = `${API_ORIGIN}/api/schedule/group/${encodeURIComponent(group)}`;
+	return fetchJsonWithRetry(url, { maxRetries429, retryBaseDelayMs });
+}
+
+async function getScheduleFlexible({
+	redis,
+	group,
+	source,
+	writeCache,
+	ttlSeconds,
+	maxRetries429,
+	retryBaseDelayMs,
+	delayMs
+}: {
+	redis: RedisClient;
+	group: string;
+	source: SourceMode;
+	writeCache: boolean;
+	ttlSeconds: number;
+	maxRetries429: number;
+	retryBaseDelayMs: number;
+	delayMs: number;
+}): Promise<ScheduleData | null> {
+	if (source !== 'api') {
+		const cached = await getScheduleFromRedis(redis, group);
+		if (cached) return cached;
+		if (source === 'redis') return null;
+	}
+
+	await sleep(delayMs);
+	const schedule = await getScheduleFromApi(group, { maxRetries429, retryBaseDelayMs });
+
+	if (writeCache) {
+		const cacheKey = getGroupScheduleKey(group);
+		const cachePayload = JSON.stringify({ ...schedule, timestamp: Date.now() });
+		await redis.set(cacheKey, cachePayload, 'EX', ttlSeconds);
+	}
+
+	return schedule;
 }
 
 function validateSubgroupDistribution(
@@ -196,18 +468,43 @@ function validateSubgroupDistribution(
 	return errors;
 }
 
-async function testGroup(group: string, institute: string): Promise<TestResult> {
+async function testGroup(
+	redis: RedisClient,
+	group: string,
+	institute: string,
+	opts: {
+		source: SourceMode;
+		writeCache: boolean;
+		ttlSeconds: number;
+		maxRetries429: number;
+		retryBaseDelayMs: number;
+		delayMs: number;
+	}
+): Promise<TestResult> {
 	const errors: string[] = [];
 
 	try {
-		const scheduleData = await getSchedule(group);
+		const scheduleData = await getScheduleFlexible({
+			redis,
+			group,
+			source: opts.source,
+			writeCache: opts.writeCache,
+			ttlSeconds: opts.ttlSeconds,
+			maxRetries429: opts.maxRetries429,
+			retryBaseDelayMs: opts.retryBaseDelayMs,
+			delayMs: opts.delayMs
+		});
 
 		if (!scheduleData?.items?.length) {
 			return {
 				group,
 				institute,
 				passed: true,
-				errors: ['Нет данных расписания']
+				errors: [
+					opts.source === 'redis'
+						? 'Нет данных расписания (в Redis)'
+						: 'Нет данных расписания'
+				]
 			};
 		}
 
@@ -259,14 +556,27 @@ async function testGroup(group: string, institute: string): Promise<TestResult> 
 	};
 }
 
-async function sleep(ms: number) {
-	return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-async function testSingleGroup(group: string) {
+async function testSingleGroup(
+	redis: RedisClient,
+	group: string,
+	opts: {
+		source: SourceMode;
+		writeCache: boolean;
+		ttlSeconds: number;
+		maxRetries429: number;
+		retryBaseDelayMs: number;
+		delayMs: number;
+	}
+): Promise<boolean> {
 	try {
-		console.log(`Загрузка расписания для ${group}...`);
-		const result = await testGroup(group, 'Точечная проверка');
+		const label =
+			opts.source === 'redis'
+				? 'из Redis'
+				: opts.source === 'hybrid'
+					? 'Redis → API (если нужно)'
+					: 'из API (refresh)';
+		console.log(`Загрузка расписания (${label}) для ${group}...`);
+		const result = await testGroup(redis, group, 'Точечная проверка', opts);
 
 		console.log('\n' + '='.repeat(80));
 		if (
@@ -284,33 +594,52 @@ async function testSingleGroup(group: string) {
 		}
 		console.log('='.repeat(80));
 
-		process.exit(result.passed ? 0 : 1);
+		return result.passed;
 	} catch (error) {
 		console.error('❌ Ошибка:', error);
-		process.exit(1);
+		return false;
 	}
 }
 
 async function runTests() {
-	const targetGroup = process.argv[2];
-
-	if (targetGroup) {
-		console.log(`🎯 Тестирование группы: ${targetGroup}\n`);
-		await testSingleGroup(targetGroup);
-		return;
-	}
-
-	console.log('🚀 Тестирование распределения подгрупп\n');
-
-	let totalGroups = 0;
-	let passedGroups = 0;
-	let failedGroups = 0;
-	let skippedGroups = 0;
-	let requestCount = 0;
-	const failedResults: TestResult[] = [];
-
+	const args = parseArgs(process.argv.slice(2));
+	const redis = createRedisClient();
+	let exitCode = 0;
 	try {
-		const institutes = await getInstitutes();
+		await redis.ping();
+
+		const opts = {
+			source: args.source,
+			writeCache: args.writeCache,
+			ttlSeconds: args.ttlSeconds,
+			maxRetries429: args.maxRetries429,
+			retryBaseDelayMs: args.retryBaseDelayMs,
+			delayMs: args.delayMs
+		};
+
+		if (args.targetGroup) {
+			console.log(`🎯 Тестирование группы: ${args.targetGroup}\n`);
+			const passed = await testSingleGroup(redis, args.targetGroup, opts);
+			exitCode = passed ? 0 : 1;
+			return;
+		}
+
+		console.log('🚀 Тестирование распределения подгрупп\n');
+
+		let totalGroups = 0;
+		let passedGroups = 0;
+		let failedGroups = 0;
+		let skippedGroups = 0;
+		const failedResults: TestResult[] = [];
+
+		const institutes = await getInstitutesFlexible({
+			redis,
+			source: args.source,
+			writeCache: args.writeCache,
+			maxRetries429: args.maxRetries429,
+			retryBaseDelayMs: args.retryBaseDelayMs,
+			ttlSeconds: args.ttlSeconds
+		});
 		console.log(`📚 Институтов: ${institutes.length}\n`);
 
 		for (const institute of institutes) {
@@ -334,14 +663,8 @@ async function runTests() {
 
 			for (const group of institute.groups) {
 				totalGroups++;
-				requestCount++;
 
-				if (requestCount % 5 === 0) {
-					console.log(` [⏸️ пауза 15с после ${requestCount} запросов]`);
-					await sleep(15000);
-				}
-
-				const result = await testGroup(group, institute.name);
+				const result = await testGroup(redis, group, institute.name, opts);
 
 				if (
 					result.errors.length === 1 &&
@@ -399,10 +722,18 @@ async function runTests() {
 			});
 		}
 
-		process.exit(failedGroups > 0 ? 1 : 0);
-	} catch (error) {
-		console.error('\n❌ Ошибка:', error);
-		process.exit(1);
+		exitCode = failedGroups > 0 ? 1 : 0;
+	} catch (e) {
+		console.error(
+			'❌ Ошибка. Если это подключение к Redis — проверь REDIS_URL или REDIS_HOST/REDIS_PORT/REDIS_PASSWORD.',
+			e
+		);
+		exitCode = 1;
+	} finally {
+		try {
+			await redis.quit();
+		} catch {}
+		process.exitCode = exitCode;
 	}
 }
 

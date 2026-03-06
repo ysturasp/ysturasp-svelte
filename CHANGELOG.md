@@ -1,3 +1,4 @@
+- add VITE_MAPBOX_ACCESS_TOKEN to Dockerfile and docker-compose for mapbox integration (ysturasp, 2026-03-05) [4 files changed, 6 insertions(+), 4 deletions(-)]
 - add IntelligentMapPromo component to campus page for enhanced user engagement (ysturasp, 2026-03-05) [5 files changed, 66 insertions(+), 3 deletions(-)]
 - implement collapsible route instructions with svelte slide transition and refine bottom panel ui (ysturasp, 2026-03-05) [3 files changed, 66 insertions(+), 23 deletions(-)]
 - add time picker to map for viewing auditorium availability at specific times and introduce an availability display toggle (ysturasp, 2026-03-05) [7 files changed, 599 insertions(+), 66 deletions(-)]
