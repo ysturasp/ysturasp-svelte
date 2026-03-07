@@ -1,6 +1,6 @@
 import { json } from '@sveltejs/kit';
 import { getRedisClient } from '$lib/config/redis';
-import { getInstitutesListKey } from '$lib/utils/redis-keys';
+import { getActualGroupsKey, getInstitutesListKey } from '$lib/utils/redis-keys';
 import { fetchWithTimeout } from '$lib/server/fetchWithTimeout';
 
 const API_BASE = 'https://gg-api.ystuty.ru/s/schedule/v1/schedule';
@@ -8,18 +8,25 @@ const CACHE_TTL = 3600;
 
 export async function GET() {
 	try {
-		const cacheKey = getInstitutesListKey();
 		const redis = getRedisClient();
 
 		let cachedData: any | null = null;
 
 		try {
-			const cachedRaw = await redis.get(cacheKey);
-			if (cachedRaw) {
-				const parsed = JSON.parse(cachedRaw);
-				cachedData = parsed;
-				const { timestamp: _t, ...data } = parsed;
-				return json(data);
+			const candidates = [getInstitutesListKey(), getActualGroupsKey()];
+
+			for (const key of candidates) {
+				const cachedRaw = await redis.get(key);
+				if (!cachedRaw) continue;
+
+				try {
+					const parsed = JSON.parse(cachedRaw);
+					cachedData = parsed;
+					const { timestamp: _t, ...data } = parsed;
+					return json(data);
+				} catch (parseError) {
+					console.error(`Failed to parse institutes cache for key ${key}:`, parseError);
+				}
 			}
 		} catch (redisError) {
 			console.error('Redis error (reading cache):', redisError);
@@ -45,7 +52,10 @@ export async function GET() {
 			const cachePayload = { ...data, timestamp: Date.now() };
 
 			try {
-				await redis.setex(cacheKey, CACHE_TTL, JSON.stringify(cachePayload));
+				await Promise.all([
+					redis.setex(getInstitutesListKey(), CACHE_TTL, JSON.stringify(cachePayload)),
+					redis.setex(getActualGroupsKey(), CACHE_TTL, JSON.stringify(cachePayload))
+				]);
 			} catch (redisError) {
 				console.error('Redis error (writing cache):', redisError);
 			}
