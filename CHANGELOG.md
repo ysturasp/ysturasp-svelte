@@ -1,3 +1,4 @@
+- implement flexible institute and schedule retrieval with redis caching and api fallback, enhancing data access and performance (ysturasp, 2026-03-06) [3 files changed, 381 insertions(+), 48 deletions(-)]
 - add VITE_MAPBOX_ACCESS_TOKEN to Dockerfile and docker-compose for mapbox integration (ysturasp, 2026-03-05) [4 files changed, 6 insertions(+), 4 deletions(-)]
 - add IntelligentMapPromo component to campus page for enhanced user engagement (ysturasp, 2026-03-05) [5 files changed, 66 insertions(+), 3 deletions(-)]
 - implement collapsible route instructions with svelte slide transition and refine bottom panel ui (ysturasp, 2026-03-05) [3 files changed, 66 insertions(+), 23 deletions(-)]

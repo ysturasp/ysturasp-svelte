@@ -3,13 +3,14 @@ import type { RequestEvent } from '@sveltejs/kit';
 import { getRedisClient } from '$lib/config/redis';
 import { getTeacherScheduleKey } from '$lib/utils/redis-keys';
 import { trackEventAuto } from '$lib/server/analyticsContext';
+import { fetchWithTimeout } from '$lib/server/fetchWithTimeout';
 import { env } from '$env/dynamic/private';
 
 const API_BASE = 'https://gg-api.ystuty.ru/s/schedule/v1/schedule';
 const CACHE_TTL = Number(env.CACHE_TTL || '604800');
 
 export async function GET(event: RequestEvent) {
-	const { params, locals } = event;
+	const { params, locals, fetch } = event;
 	try {
 		const teacherId = params.teacherId as string;
 		if (!teacherId) {
@@ -34,7 +35,7 @@ export async function GET(event: RequestEvent) {
 			console.error('Redis error (reading cache):', redisError);
 		}
 
-		const response = await fetch(`${API_BASE}/teacher/${teacherId}`);
+		const response = await fetchWithTimeout(fetch, `${API_BASE}/teacher/${teacherId}`);
 		if (!response.ok) {
 			if (response.status === 429) {
 				return json({ error: 'Too Many Requests' }, { status: 429 });

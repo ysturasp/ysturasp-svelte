@@ -3,6 +3,7 @@ import type { RequestEvent } from '@sveltejs/kit';
 import { getRedisClient } from '$lib/config/redis';
 import { getGroupScheduleKey } from '$lib/utils/redis-keys';
 import { trackEventAuto } from '$lib/server/analyticsContext';
+import { fetchWithTimeout } from '$lib/server/fetchWithTimeout';
 import { env } from '$env/dynamic/private';
 
 const API_BASE = 'https://gg-api.ystuty.ru/s/schedule/v1/schedule';
@@ -56,7 +57,7 @@ export async function GET(event: RequestEvent) {
 
 		try {
 			const url = `${API_BASE}/group/${encodeURIComponent(group)}`;
-			const response = await fetch(url);
+			const response = await fetchWithTimeout(fetch, url);
 
 			if (!response.ok) {
 				if (cachedData) {
@@ -104,12 +105,6 @@ export async function GET(event: RequestEvent) {
 			return json(data);
 		} catch (error) {
 			if (cachedData) {
-				const ageMinutes = (Date.now() - cachedTimestamp) / 1000 / 60;
-				console.warn(
-					`Schedule API unavailable for ${group}, using stale cache (age: ${ageMinutes.toFixed(
-						1
-					)} min)`
-				);
 				const { timestamp, ...data } = cachedData;
 
 				trackEventAuto(event, locals.user?.id, null, 'schedule:view', {
@@ -122,7 +117,6 @@ export async function GET(event: RequestEvent) {
 				return json(data);
 			}
 
-			console.error('Error fetching schedule:', error);
 			return json(
 				{
 					error: 'Internal server error',
@@ -132,7 +126,7 @@ export async function GET(event: RequestEvent) {
 			);
 		}
 	} catch (error) {
-		console.error('Error in schedule route:', error);
+		console.warn('Schedule route:', error instanceof Error ? error.message : String(error));
 		return json(
 			{
 				error: 'Internal server error',
